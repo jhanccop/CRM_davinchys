@@ -1,0 +1,102 @@
+{% extends "home/base-reporte.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Cuenta {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-12">
+
+    <div class="row align-items-center">
+      <div class="col-lg-6 col-md-3">
+        <h5 class="mb-0">{{cuenta.selectedAccount.accountName}} </h5>
+        <p class="text-sm mb-0 text-info font-weight-bold">
+          {{cuenta.selectedAccount.accountBalance}} {{movimientos.selectedAccount.get_currency_display}} /
+          {{movimientos.selectedAccount.modified|date:'Y-m-d H:i'}}
+        </p>
+      </div>
+      <div class="col-lg-6 col-md-9">
+        <form method="GET" class="">{% csrf_token %}
+          <div class="d-flex align-items-center">
+
+            <div class="input-group input-group-outline is-valid">
+
+              <select class="form-control" name="AccountKword" id="AccountKword">
+                {% for i in cuenta.listAccount %}
+                {% if i.id == cuenta.selectedAccount.id %}
+                <option value="{{i.id}}" selected>{{i}}</option>
+                {% else %}
+                <option value="{{i.id}}">{{i}}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+
+            </div>
+            &emsp;
+            <div class="input-group input-group-outline">
+              <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
+                placeholder="today" id="dateKword" name="dateKword">
+            </div>
+            &emsp;
+            <div class="pt-3 pb-0">
+              <button class="btn bg-gradient-dark" type="submit"> Buscar </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+
+
+
+  </div>
+</div>
+
+<!-- ================ HEAD WIDGETS ================= -->
+<div class="row align-items-center">
+
+  <div class="col-lg-3 col-6 text-center">
+    <div class="border border-info border-4 border-radius-md py-1">
+      <span class="text-sm mb-0 text-dark">Monto inicial</span>
+      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.AmountDocs.last.created | date:'d-m-Y'}}</p>
+      <h5 class="font-weight-bolder mb-0" id="saldoInicial">{{cuenta.AmountDocs.last.liquidBalance}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6 text-center">
+    <div class="border border-success border-1 border-radius-md py-3">
+      <p class="font-weight-bolder mb-0 text-success">Ingresos</p>
+      <h5 class="text-dark font-weight-bolder mb-0">+ {{cuenta.AmountDocs.TotalIngresos.amount__sum}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-primary border-1 border-radius-md py-3">
+      <p class="font-weight-bolder mb-0 text-primary">Egresos</p>
+      <h5 class="text-dark font-weight-bolder mb-0">- {{cuenta.AmountDocs.TotalEgresos.amount__sum}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-dark border-4 border-radius-md py-1">
+      <span class="text-sm mb-0 text-dark">Monto final</span>
+      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.AmountDocs.first.created | date:'d-m-Y'}}</p>
+      <h5 class="font-weight-bolder mb-0">{{cuenta.AmountDocs.first.liquidBalance}}</h5>
+    </div>
+  </div>
+
+</div>
+
+{{cuenta}}
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

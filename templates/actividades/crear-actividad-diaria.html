@@ -1,0 +1,167 @@
+{% extends "actividades/base-actividades.html" %}
+
+{% load  static %}
+{% block title %} Actividades {% endblock title %}
+{% block main %} Actividades {% endblock main %}
+{% block appName %} Actividades diarias {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-primary shadow-primary border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> INGRESAR NUEVA ACTIVIDAD </h6>
+        </div>
+      </div>
+      <div class="card-body pb-0">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+
+              <div class="row" hidden>
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline ">
+                    <label for="exampleFormControlInput1" class="form-label">user</label>
+                    {{ form.user }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Fecha</label>
+                    {{ form.date }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-8 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo de actividad</label>
+                    {{ form.type }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Actividades</label>
+                    {{ form.activity }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-6 col-sm-4" id="startTime" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Hora de inicio</label>
+                    {{ form.startTime }}
+                  </div>
+                </div>
+                
+                <div class="col-6 col-sm-4 mt-sm-0" id="endTime" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Hora de termino</label>
+                    {{ form.endTime }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+              <h6> Información adicional</h6>
+
+              <div class="row">
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Transformadores</label>
+                    {{ form.trafoOrder }}
+                  </div>
+                </div>
+                
+                <div class="col-6 col-sm-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Proyecto</label>
+                    {{ form.projects }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Comisión</label>
+                    {{ form.commissions }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3  mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tarea</label>
+                    {{ form.assignedTasks }}
+                  </div>
+                </div>
+              </div>
+
+              
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'activities_app:mi-actividad-diaria-lista' %}"> REGRESAR </a>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">AGREGAR ACTIVIDAD</button>
+              </div>
+
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+-- {{object.id}}
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  function toggleDiv() {
+    let selected = document.getElementById("id_type").value;
+    let startTime = document.getElementById("startTime");
+    let endTime = document.getElementById("endTime");
+
+    startTime.style.display = "none";
+    endTime.style.display = "none";
+    
+    switch(Number(selected)){
+      case 1:
+        startTime.style.display = "inline-block";
+        endTime.style.display = "inline-block";
+        break;
+    }
+  }
+
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+  if("{{object}}"){
+    document.getElementById("id_user").value = "{{object.user.id}}";
+  }else{
+    document.getElementById("id_user").value = "{{user.id}}";
+  }
+</script>
+{% endblock JSscripts %}

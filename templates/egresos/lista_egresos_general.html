@@ -1,0 +1,668 @@
+{% extends "movimientos/base-egresos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Egresos {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+    <div class="col-xl-3 col-sm-2 mb-xl-0 mb-6">
+        <div class="col-xl-4 col-sm-4">
+            <p class="text-sm"> <span class="text-lg font-weight-bold text-dark">EGRESOS
+                </span>
+            </p>
+        </div>
+    </div>
+    <div class="col-xl-9 col-sm-10 mb-xl-0 mb-6">
+        <form method="GET">{% csrf_token %}
+            <div class="row">
+                <div class="col-xl-6 col-sm-8 mb-4">
+                    <div class="input-group input-group-outline">
+                        <input class="form-control datetimepicker text-center" value="{{object_list.intervalDate}}"
+                            type="text" placeholder="today" id="dateKword" name="dateKword" />
+                    </div>
+                </div>
+                <div class="col-xl-6 col-sm-4">
+                    <button class="btn bg-gradient-primary" type="submit"> Search </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <!-- PLANILLA -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-uppercase">Planilla</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-remuneraciones" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-remuneraciones-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-remuneraciones">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Personal</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.Remunerations %}
+                            <tr>
+                                <td class="text-sm">{{ r.paymentDate|date:'Y-m-d' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.idWorker }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-remuneraciones-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-remuneraciones-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROVEEDORES -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-uppercase">Pago a proveedores</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-proveedores" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-proveedor-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-proveedores">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.Supplier %}
+                            <tr>
+                                <td class="text-sm">{{ r.paymentDate|date:'Y-m-d' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.idClient }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-proveedor-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-proveedor-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- SERVICIOS -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-uppercase">Servicios</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-servicios" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-servicio-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-servicios">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.Services %}
+                            <tr>
+                                <td class="text-sm">{{ r.paymentDate|date:'Y-m-d' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.idClient }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-servicio-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-servicio-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMISIONES -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-uppercase">Gastos en comisiones</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-comisiones" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-comision-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-comisiones">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razon social</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.WorkCommission %}
+                            <tr>
+                                <td class="text-sm">{{ r.created_at|date:'Y-m-d H:i' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.tradeName }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-comision-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-comision-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- COMPRAS -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-uppercase">Compras</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-compras" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-compra-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-compras">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.Purchases %}
+                            <tr>
+                                <td class="text-sm">{{ r.created_at|date:'Y-m-d H:i' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.idClient }}</span>
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-compra-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-compra-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPUESTOS -->
+    <div class="col-lg-6 col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="d-flex align-items-center bg-gradient-primary shadow-primary border-radius-lg pt-2 pb-1 p-3">
+                    <h6 class="text-white text-capitalize">Impuestos</h6>
+                    <div class=" ms-auto mb-1 js-btn-next">
+
+                        <a class="export-impuestos" data-type="csv" type="button">
+                            <i class="fas fa-cloud-download-alt text-lg text-white"></i>
+                        </a>
+                        &ensp;
+                        <a href="{% url 'egresos_app:egresos-impuesto-add' %}">
+                            <i class="fas fa-plus text-lg text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 px-2 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-impuestos">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                                <th class="text-start text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Concepto</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in egresos.Taxes %}
+                            <tr>
+                                <td class="text-sm">{{ r.created_at|date:'Y-m-d H:i' }}</td>
+                                <td class="text-end text-sm">{{ r.amount }}</td>
+                                <td class="text-start text-sm">{{ r.idAccount.get_currency_display }}</td>
+                                <td class="align-middle">
+                                    <span class="text-secondary text-sm font-weight-bold">{{ r.TaxName }}</span>
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'egresos_app:egresos-impuesto-editar' r.id %}">
+                                        <i class="fas fa-edit text-info text-lg"></i>
+                                    </a>
+                                    &ensp;
+                                    <a href="{% url 'egresos_app:egresos-impuesto-eliminar' r.id %}">
+                                        <i class="fas fa-trash text-danger text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+    /* REMUNERACIONES */
+    const dataTableremuneraciones = new simpleDatatables.DataTable("#datatable-remuneraciones", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-remuneraciones").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "remuneraciones {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableremuneraciones.export(data);
+        });
+    });
+
+    /* PROVEEDORES */
+    const dataTableproveedores = new simpleDatatables.DataTable("#datatable-proveedores", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-proveedores").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "proveedores {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableproveedores.export(data);
+        });
+    });
+
+    /* SERVICIOS */
+    const dataTableservicios = new simpleDatatables.DataTable("#datatable-servicios", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-servicios").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "servicios {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableservicios.export(data);
+        });
+    });
+
+    /* COMISIONES */
+    const dataTablecomisiones = new simpleDatatables.DataTable("#datatable-comisiones", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-comisiones").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "comisiones {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTablecomisiones.export(data);
+        });
+    });
+
+    /* COMPRAS */
+    const dataTablecompras = new simpleDatatables.DataTable("#datatable-compras", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-compras").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "compras {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTablecompras.export(data);
+        });
+    });
+
+    /* IMPUESTOS */
+    const dataTableimpuestos = new simpleDatatables.DataTable("#datatable-impuestos", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export-impuestos").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "impuestos {{egresos.intervalDate}}" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableimpuestos.export(data);
+        });
+    });
+
+</script>
+
+<script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+
+<script>
+
+    var ctx1 = document.getElementById("chart-categories").getContext("2d");
+
+    const labelsS = ["Planilla", "Proveedores", "Servicios", "Comisiones", "Compras", "Impuestos"];
+    const data = {
+        labels: labelsS,
+        datasets: [
+            {
+                label: 'Soles',
+                data: [
+                    "{{egresos.TotalRemunerationsSoles.amount__sum}}",
+                    "{{egresos.TotalSupplierSoles.amount__sum}}",
+                    "{{egresos.TotalServicesSoles.amount__sum}}",
+                    "{{egresos.TotalCommissionSoles.amount__sum}}",
+                    "{{egresos.TotalPurchasesSoles.amount__sum}}",
+                    "{{egresos.TotalTaxesSoles.amount__sum}}",
+                ],
+                borderColor: "red",
+                backgroundColor: 'rgba(236, 64, 122 , .2)',
+                borderWidth: 1,
+                borderRadius: 5,
+                borderSkipped: false,
+            },
+            {
+                label: 'Dolares',
+                data: [
+                    "{{egresos.TotalRemunerationsDolares.amount__sum}}",
+                    "{{egresos.TotalSupplierDolares.amount__sum}}",
+                    "{{egresos.TotalServicesDolares.amount__sum}}",
+                    "{{egresos.TotalCommissionDolares.amount__sum}}",
+                    "{{egresos.TotalPurchasesDolares.amount__sum}}",
+                    "{{egresos.TotalTaxesDolares.amount__sum}}",
+                ],
+                borderColor: "green",
+                backgroundColor: 'rgba(46, 204, 113, .2)',
+                borderWidth: 1,
+                borderRadius: 5,
+                borderSkipped: false,
+            }
+        ]
+    };
+
+    new Chart(ctx1, {
+        type: "bar",
+        data: data,
+        options: {
+            //indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            scales: {
+                y: {
+                    grid: {
+                        drawBorder: false,
+                        display: true,
+                        drawOnChartArea: true,
+                        drawTicks: false,
+                        borderDash: [5, 5],
+                        color: 'rgba(0, 0, 255, .2)'
+                    },
+                    ticks: {
+                        display: true,
+                        //color: 'rgba(0, 0, 255, .2)',
+                        padding: 10,
+                        font: {
+                            size: 12,
+                            weight: 300,
+                            family: "Roboto",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                    }
+                },
+                x: {
+                    grid: {
+                        drawBorder: false,
+                        display: false,
+                        drawOnChartArea: false,
+                        drawTicks: false,
+                        borderDash: [5, 5]
+                    },
+                    ticks: {
+                        display: true,
+                        //color: 'rgba(0, 0, 255, .2)',
+                        padding: 5,
+                        font: {
+                            size: 12,
+                            weight: 300,
+                            family: "Roboto",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                    }
+                },
+            },
+        },
+
+    });
+
+    const labelsD = ["Planilla", "Proveedores", "Servicios", "Comisiones", "Compras", "Impuestos"];
+    var ctx2 = document.getElementById("chart-accounts").getContext("2d");
+
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+{% endblock JSscripts %}

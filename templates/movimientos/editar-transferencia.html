@@ -1,0 +1,95 @@
+{% extends "movimientos/base-transferencias.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Transferencias {% endblock appName %}
+{% block Type %} Editar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+        
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-4 pb-3">
+                    <h5 class="text-center text-white"> EDITAR TRANSFERENCIA </h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="" method="POST" >{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white"
+                        data-animation="FadeIn">
+                        
+                        <div class="multisteps-form__content">
+                          <h6 class="font-weight-bolder">Informacion de transferencia</h6>
+                            <div class="row">
+                                <div class="col-12 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Cuenta de origen</label>
+                                        {{ form.idSourceAcount }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Monto de origen</label>
+                                        {{ form.SourceAmount }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                  <div class="input-group input-group-outline focused is-focused">
+                                      <label for="exampleFormControlInput1" class="form-label">Num Operación</label>
+                                      {{ form.opNumber }}
+                                  </div>
+                              </div>
+                                
+                            </div>
+                            <br>
+                            <div class="row">
+                              
+                              <div class="col-12 col-sm-4">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Cuenta de destino</label>
+                                  {{ form.idDestinationAcount }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-6">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Monto de destino</label>
+                                  {{ form.DestinationAmount }}
+                                  
+                                </div>
+                                <p class="text-secondary text-sm"> De ser necesario actualizar según tipo de cambio </p>
+                              </div>
+                              
+                            </div>
+                            <div class="button-row d-flex mt-4">
+                              <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-transferencias' %}"> REGRESAR </a>
+                              
+                              <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                              title="Next">ACTUALIZAR TRANSFERENCIA</button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  id_SourceAmount.oninput = function() {
+    //id_DestinationAmount.innerHTML = id_SourceAmount.value;
+    document.getElementById("id_DestinationAmount").value = id_SourceAmount.value;
+  };
+</script>
+
+{% endblock JSscripts %}

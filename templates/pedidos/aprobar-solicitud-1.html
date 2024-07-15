@@ -1,0 +1,200 @@
+{% extends "pedidos/base-mis-solicitudes.html" %}
+
+{% load  static %}
+
+{% block title %} Ordenes {% endblock title %}
+{% block main %} Ordenes {% endblock main %}
+{% block appName %} Requerimientos {% endblock appName %}
+{% block Type %} Aprobar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-info shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> APROBAR O DENEGAR REQUERIMIENTO </h6>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+              <h6 class="font-weight-bolder">Informacion de solicitud</h6>
+
+              <ul>
+                <li>Descripción: <span class="font-weight-bold">{{object.requirementName}}</span></li>
+                <li>Monto: <span class="font-weight-bold">{{object.amountRequested|floatformat:"2g"}} {{object.get_currencyType_display}} </span></li>
+                <li>Proveedor: <span class="font-weight-bold">{{object.idProvider}}</span></li>
+                <li>Solicitante: <span class="font-weight-bold">{{object.idPetitioner}}</span></li>
+              </ul>
+
+              <br>
+
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Observaciones</label>
+                    {{ form.observations }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="row">
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto aprobado</label>
+                    {{ form.amountAssigned }}
+                  </div>
+                </div>
+
+                {% if user.position == "5" %} <!-- adquisiciones -->
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">T. Requerimiento</label>
+                    {{ form.typeRequest }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">adquisiciones</label>
+                      {{ form.tag1 }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">contabilidad</label>
+                      {{ form.tag2 }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">finanza</label>
+                      {{ form.tag3 }}
+                  </div>
+                </div>
+
+                {% elif user.position == "1" %} <!-- contabilidad -->
+                <div class="col-6 col-sm-3" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">T. Requerimiento</label>
+                    {{ form.typeRequest }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">contabilidad</label>
+                      {{ form.tag2 }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">finanza</label>
+                      {{ form.tag3 }}
+                  </div>
+                </div>
+
+                {% elif user.position == "6" %} <!-- finanzas -->
+                <div class="col-6 col-sm-3" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">T. Requerimiento</label>
+                    {{ form.typeRequest }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">finanzas</label>
+                      {{ form.tag3 }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">tesoreria</label>
+                      {{ form.tag4 }}
+                  </div>
+                </div>
+                {% elif user.position == "7" %} <!-- tesoreria -->
+                <div class="col-6 col-sm-3" hidden>
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">T. Requerimiento</label>
+                    {{ form.typeRequest }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline is-valid focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">tesoreria</label>
+                      {{ form.tag4 }}
+                  </div>
+                </div>
+                {% endif %}
+                
+
+              </div>
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'pedidos_app:solicitudes-por-aprobar' %}"> REGRESAR </a>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ACTUALIZAR
+                  REQUERIMIENTO</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+
+  function toggleDiv0() {
+    let tipo = document.getElementById("id_typeRequest").value;
+    let tag1 = document.getElementById("id_tag1").value;
+    console.log(tipo,tag1);
+    //document.getElementById("id_tag3").value = "1";
+    if (tipo == "0" && tag1 == "1") {
+      document.getElementById("id_tag3").value = "0"; // en espera finanzas
+    }else{
+      document.getElementById("id_tag2").value = "0";  // en espera contabilidad
+    }
+  }
+
+  function toggleDiv2() {
+    let selected = document.getElementById("id_tag2").value;
+    console.log(selected);
+    if (selected == "1") {
+      document.getElementById("id_tag3").value = "0";
+    }
+  }
+  function toggleDiv3() {
+    let selected = document.getElementById("id_tag3").value;
+    console.log("---",selected);
+    if (selected == "1") {
+      document.getElementById("id_tag4").value = "0";
+    }
+  }
+  document.getElementById("id_amountAssigned").value = "{{object.amountRequested}}";
+
+</script>
+
+{% endblock JSscripts %}

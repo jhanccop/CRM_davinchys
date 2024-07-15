@@ -1,0 +1,137 @@
+{% extends "pedidos/base-pedidos.html" %}
+
+{% load  static %}
+{% block title %} Ordenes {% endblock title %}
+{% block main %} Ordenes {% endblock main %}
+{% block appName %} Pedidos {% endblock appName %}
+{% block Type %} Seguimiento / Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
+          <h5 class="text-center text-white"> Seguimiento de pedido {{ OrderName.idOrder }} - {{ OrderName.idClient }} </h5>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="table-responsive p-0">
+          <table class="table align-items-center mb-0" id="datatable-track">
+            <thead>
+              <tr>
+                <th class="text-dark">Estado</th>
+                <th class="text-dark"> Fecha y hora</th>
+                <th class="text-dark">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for track in traking %}
+              <tr>
+                <td class="text-xs font-weight-normal">
+                  <div class="d-flex align-items-center">
+                    {% if track.orderState == "0" %}
+                    <a
+                      class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                      <i class="fas fa-marker text-sm"></i>
+                    </a>
+                    <span>Creado</span>
+
+                    {% elif track.orderState == "1" %}
+                    <a
+                      class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                      <i class="fas fa-vote-yea text-sm"></i>
+                    </a>
+                    <span>Fabricado</span>
+                    {% elif track.orderState == "2" %}
+                    <a
+                      class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                      <i class="fas fa-truck text-sm"></i>
+                    </a>
+                    <span>Enviado</span>
+                    {% elif track.orderState == "3" %}
+                    <a
+                      class="btn btn-icon-only btn-rounded btn-outline-success mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                      <i class="fas fa-check text-sm"></i>
+                    </a>
+                    <span>Completado</span>
+                    {% elif track.orderState == "4" %}
+                    <a
+                      class="btn btn-icon-only btn-rounded btn-outline-danger mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                      <i class="fas fa-times text-sm"></i>
+                    </a>
+                    <span>Cancelado</span>
+
+                    {% endif %}
+
+                  </div>
+                </td>
+
+                <td class="font-weight-normal">
+                  <span class="my-2 text-xs">{{ track.dateChange|date:'Y-m-d h:i' }}</span>
+                </td>
+
+                <td class="align-middle text-center">
+                  <div class="d-flex">
+                    <div class="icon icon-sm border-radius-md bg-gradient-info text-center mr-2 d-flex align-items-center justify-content-center me-1">
+                      <a href="{% url 'pedidos_app:pedidos-eliminar-seguimiento' track.id %}"><i class="fas fa-edit text-white text-md"></i></a>
+                    </div>
+                    <div class="icon icon-sm border-radius-md bg-gradient-primary text-center mr-2 d-flex align-items-center justify-content-center me-1">
+                      <a href="{% url 'pedidos_app:pedidos-eliminar-seguimiento' track.id %}"><i class="fas fa-trash text-white text-md"></i></a>
+                    </div>
+                    
+                  </div>
+                </td>
+                
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <a href="{% url 'pedidos_app:pedidos-agregar-seguimiento' OrderName.id %}" class="btn btn-icon bg-gradient-info">
+          Agregar de evento
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<!--Table-->
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+
+    const dataTableOrders = new simpleDatatables.DataTable("#datatable-track", {
+        searchable: false,
+        fixedHeight: false,
+        perPage: 5
+    });
+
+    document.querySelectorAll(".export").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "wells_export_" + type,
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableOrders.export(data);
+        });
+    });
+
+</script>
+
+{% endblock JSscripts %}

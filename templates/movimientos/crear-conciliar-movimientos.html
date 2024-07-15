@@ -1,0 +1,258 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Conciliar {% endblock Type %}
+
+{% block panel-content %}
+<div class="row mt-4">
+  <div class="col-lg-9 col-12 mx-auto position-relative">
+    <div class="card">
+      <div class="card-header p-3 pt-2">
+        <div
+          class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+          <i class="material-icons opacity-10">event</i>
+        </div>
+        <h6 class="mb-0">{{mov}} / {{mov.amount}}</h6>
+      </div>
+      <div class="card-body pt-2 pb-0">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+
+              <div class="row" hidden>
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline ">
+                    <label for="exampleFormControlInput1" class="form-label">user</label>
+                    {{ form.user }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">doc</label>
+                    {{ form.idBankMovements }}
+                  </div>
+                </div>
+
+              </div>
+
+              <h6 class="font-weight-bolder">Informacion de general</h6>
+
+              <div class="row">
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline ">
+                    <label for="exampleFormControlInput1" class="form-label">Fecha de emisión</label>
+                    {{ form.date }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">T comprobante</label>
+                    {{ form.typeInvoice }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline">
+                    <label for="exampleFormControlInput1" class="form-label">Id Comprobante</label>
+                    {{ form.idInvoice }}
+                  </div>
+                </div>
+                
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Anotación</label>
+                    {{ form.annotation }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="row">
+                <div class="col-6 col-sm-8">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cliente</label>
+                    {{ form.idClient }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
+                    {{ form.amountReconcilied }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="row">
+                <div class="col-12 col-sm-6">
+                  <div class="input-group input-group-outline">
+                    <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                    {{ form.description }}
+                  </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                  <div class="input-group input-group-outline">
+                    {{ form.pdf_file }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <h6 class="font-weight-bolder">Actividad relacionada</h6>
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Actividad</label>
+                    {{ form.ActivitiesCategory }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="trafo" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Orden Transformador</label>
+                    {{ form.idTrafoOrder }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="comision" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Comisión</label>
+                    {{ form.idCommission }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="proyecto" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Proyecto</label>
+                    {{ form.idProject }}
+                  </div>
+                </div>
+
+              </div>
+
+              <br>
+
+              <h6 class="font-weight-bolder">Categoria de gasto</h6>
+
+              <div class="row">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Categoría</label>
+                    {{ form.expensesCategory }}
+                  </div>
+                </div>
+                
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="planilla" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cat Planilla</label>
+                    {{ form.subCategoryPallRoy }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="cajachica" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cat Caja chica</label>
+                    {{ form.subCategoryCashBox }}
+                  </div>
+                </div>
+
+              </div>
+              <br>
+
+              <h6 class="font-weight-bolder">Categoria de contabilidad</h6>
+
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cat Contabilidad</label>
+                    {{ form.contabilidad }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
+
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">AGREGAR REGISTRO</button>
+              </div>
+
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  function toggleDiv() {
+    let selected = document.getElementById("id_expensesCategory").value;
+    let planilla = document.getElementById("planilla");
+    let cajachica = document.getElementById("cajachica");
+
+    planilla.style.display = "none";
+    cajachica.style.display = "none";
+    
+    switch(Number(selected)){
+      case 4:
+        cajachica.style.display = "inline-block";
+        break;
+      case 7:
+        planilla.style.display = "inline-block";
+        break;
+    }
+  }
+
+  function toggleDivActivities() {
+    let selected = document.getElementById("id_ActivitiesCategory").value;
+    let trafo = document.getElementById("trafo");
+    let comision = document.getElementById("comision");
+    let proyecto = document.getElementById("proyecto");
+
+    trafo.style.display = "none";
+    comision.style.display = "none";
+    proyecto.style.display = "none";
+    
+    switch(Number(selected)){
+      case 0:
+        trafo.style.display = "inline-block";
+        break;
+      case 1:
+        comision.style.display = "inline-block";
+        break;
+      case 2:
+        proyecto.style.display = "inline-block";
+        break;
+    }
+  }
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+  document.getElementById("id_user").value = "{{user.id}}";
+  document.getElementById("id_idBankMovements").value = "{{mov.id}}";
+</script>
+
+{% endblock JSscripts %}

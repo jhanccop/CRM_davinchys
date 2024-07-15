@@ -1,0 +1,191 @@
+{% extends "actividades/base-pedidos-transformadores.html" %}
+
+{% load  static %}
+{% block title %} Ordenes {% endblock title %}
+{% block main %} Ordenes {% endblock main %}
+{% block appName %} Pedidos {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+    <div class="col-lg-6 col-md-3">
+        
+    </div>
+    <div class="col-lg-6 col-md-9">
+        <form method="GET" class="">{% csrf_token %}
+            <div class="d-flex align-items-center">
+                <div class="input-group input-group-outline">
+                    <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
+                        placeholder="today" id="dateKword" name="dateKword">
+                </div>
+                &emsp;
+                <div class="pt-3 pb-0">
+                    <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-header p-3 pb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-uppercase">Lista de pedidos</h6>
+                    <span class="d-flex align-items-center">
+                        <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center" data-type="csv" type="button">
+                            <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
+                            <span class="btn-inner--text">Descargar</span>
+                        </a>
+                        <a class="btn btn-primary btn-sm  mb-0 ms-2 align-items-center justify-content-center" href="{% url 'activities_app:pedidos-transformadores-nuevo' %}">
+                            <span class="btn-inner--icon"><i class="fas fa-plus text-md"></i></span>
+                            <span class="btn-inner--text">NUEVO</span>
+                        </a>
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-orders">
+                        <thead>
+                            <tr>
+                                <th data-sortable="" style="width: 10%;">Id Pedido</th>
+                                <th data-sortable="" style="width: 15%;">Fecha Pedido</th>
+                                <th data-sortable="" style="width: 15%;">Estado</th>
+                                <th data-sortable="" style="width: 15%;">Cliente</th>
+                                <th data-sortable="" style="width: 20%;">Transformador</th>
+                                <th data-sortable="" style="width: 15%;">Atencion</th>
+                                <th data-sortable="" style="width: 10%;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pedido in pedidos.ordenes %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center text-center">
+                                        <a href="{% url 'activities_app:pedidos-transformadores-detalle' pedido.id %}" >
+                                            <i class="fas fa-info-circle text-info text-md"></i>
+                                            <span class="text-xs font-weight-normal ms-2 mb-0 text-center text-info">
+                                                {{ pedido.idOrder }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="font-weight-normal">
+                                    <span class="my-2 text-xs">{{ pedido.dateOrder|date:'Y-m-d' }}</span>
+                                </td>
+
+                                <td class="text-xs font-weight-normal">
+                                    <div class="d-flex align-items-center">
+                                        {% if pedido.IdOrderState == "0" %}
+                                        <a class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-marker text-sm"></i>
+                                        </a>
+                                        <span>Creado</span>
+                                        
+                                        {% elif pedido.IdOrderState == "1" %}
+                                        <a class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-vote-yea text-sm"></i>
+                                        </a>
+                                        <span>Fabricado</span>
+                                        {% elif pedido.IdOrderState == "2" %}
+                                        <a class="btn btn-icon-only btn-rounded btn-outline-secondary mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-truck text-sm"></i>
+                                        </a>
+                                        <span>Enviado</span>
+                                        {% elif pedido.IdOrderState == "3" %}
+                                        <a class="btn btn-icon-only btn-rounded btn-outline-success mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-check text-sm"></i>
+                                        </a>
+                                        <span>Completado</span>
+                                        {% elif pedido.IdOrderState == "4" %}
+                                        <a class="btn btn-icon-only btn-rounded btn-outline-danger mb-0 me-2 btn-sm d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-times text-sm"></i>
+                                        </a>
+                                        <span>Cancelado</span>
+                                        
+                                        {% endif %}
+                                        
+                                    </div>
+                                </td>
+    
+                                <td>
+                                    <p class="text-xs font-weight-bold mb-0">{{ pedido.idClient }}</p>
+                                    <p class="text-xs text-secondary mb-0">{{ pedido.idClient.country }} </p>
+                                </td>
+
+                                <td>
+                                    <p class="text-xs font-weight-bold mb-0">{{ pedido.idTransformer }}</p>
+                                    <p class="text-xs text-secondary mb-0">
+                                        {{ pedido.idTransformer.get_power_display }} kVA
+                                        {{ pedido.idTransformer.get_phase_display }}
+                                        {{ pedido.idTransformer.get_voltage_display }} V</p>
+                                </td>
+
+                                <td class="font-weight-normal">
+                                    <span class="my-2 text-xs">{{ pedido.idAttendant }}</span>
+                                </td>
+
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'activities_app:pedidos-transformadores-editar' pedido.id %}" ><i class="fas fa-edit text-dark text-md"></i></a> 
+                                    &ensp;
+                                    <a href="{% url 'activities_app:pedidos-transformadores-eliminar' pedido.id %}"><i class="fas fa-tasks text-dark text-md"></i></a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<!--Table-->
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+
+    const dataTableOrders = new simpleDatatables.DataTable("#datatable-orders", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 10
+    });
+
+    document.querySelectorAll(".export").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+
+            var data = {
+                type: type,
+                filename: "pedidos"
+            };
+
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+
+            dataTableOrders.export(data);
+        });
+    });
+
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+{% endblock JSscripts %}

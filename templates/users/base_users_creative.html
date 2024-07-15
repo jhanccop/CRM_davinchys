@@ -1,0 +1,497 @@
+{% load  static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/crm.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/crm.png' %}">
+    <title>
+        CRM - {% block title %} {% endblock title %}
+    </title>
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css"
+        href="{% static 'assets/css/css.css' %}" />
+    <!-- Nucleo Icons -->
+    <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <script src="{% static 'assets/js/plugins/awesone.js' %}" crossorigin="anonymous"></script>
+    <script src="{% static 'assets/js/jquery-1.12.4.js' %}" crossorigin="anonymous"></script>
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+    <!-- Material Icons -->
+    <link href="{% static 'assets/css/icon.css' %}" rel="stylesheet">
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{% static 'assets/css/material-dashboard.css' %}" rel="stylesheet" />
+</head>
+
+<body class="g-sidenav-show  bg-gray-200">
+
+    <aside
+        class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 bg-gradient-dark"
+        id="sidenav-main">
+        <div class="sidenav-header">
+            <a class="navbar-brand m-0" href="{% url 'home_app:index' %}">
+                <img src="{% static 'assets/img/logo-ct.png' %}" class="navbar-brand-img h-100" alt="main_logo">
+                <span class="ms-1 font-weight-bold text-white"> </span>
+            </a>
+        </div>
+        <hr class="horizontal light mt-0 mb-2">
+        <div class="w-auto" id="sidenav-collapse-main">
+            <ul class="navbar-nav">
+
+                <li class="nav-item ">
+                    <a class="nav-link text-white " data-bs-toggle="collapse" aria-expanded="false" href="#movimientos">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-exchange-alt opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal  ms-2  ps-1"> Movimientos <b class="caret"></b></span>
+                    </a>
+                    <div class="collapse " id="movimientos">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-principal' %}">
+                                    <span class="sidenav-mini-icon"> R </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Reportes </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'egresos_app:egresos-lista-caja-chica' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Caja chica </span>
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'ingresos_app:ingresos-lista-general' %}">
+                                    <span class="sidenav-mini-icon"> I </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Ingresos </span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'egresos_app:egresos-lista-general' %}">
+                                    <span class="sidenav-mini-icon"> E </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Egresos </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'movimientos_app:lista-transferencias' %}">
+                                    <span class="sidenav-mini-icon"> T </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Transferencias </span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'cuentas_app:cuentas-lista' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Cuentas </span>
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a class="nav-link text-white " data-bs-toggle="collapse" aria-expanded="false" href="#ordenes">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            
+                            <i class="fas fa-tasks  opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal  ms-2  ps-1"> Ordenes <b class="caret"></b></span>
+                    </a>
+                    <div class="collapse " id="ordenes">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'pedidos_app:pedidos-lista' %}">
+                                    <span class="sidenav-mini-icon"> P </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Pedidos </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'pedidos_app:lista-ordenes-compra' %}">
+                                    <span class="sidenav-mini-icon"> OC </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Solicitudes de compra </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'pedidos_app:lista-ordenes-servicio' %}">
+                                    <span class="sidenav-mini-icon"> OS </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Solicitudes de servicio </span>
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a class="nav-link text-white " data-bs-toggle="collapse" aria-expanded="false" href="#almacen">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-dolly-flatbed opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal  ms-2  ps-1"> Almacen <b class="caret"></b></span>
+                    </a>
+                    <div class="collapse " id="almacen">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'producto_app:transformador-lista' %}">
+                                    <span class="sidenav-mini-icon"> T </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Cat Transformadores </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'producto_app:inventario-lista' %}">
+                                    <span class="sidenav-mini-icon"> I </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Inventario </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a class="nav-link text-white " data-bs-toggle="collapse" aria-expanded="false" href="#actividades">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-people-carry opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal  ms-2  ps-1"> Actividades <b class="caret"></b></span>
+                    </a>
+                    <div class="collapse" id="actividades">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'activities_app:comision-lista' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Comisiones </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{% url 'activities_app:proyecto-lista' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Proyectos</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a class="nav-link text-white " data-bs-toggle="collapse" aria-expanded="false" href="#personal">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-user-friends opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal  ms-2  ps-1"> Personas <b class="caret"></b></span>
+                    </a>
+                    <div class="collapse show" id="personal">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'clients_app:cliente-lista' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Clientes </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{% url 'workers_app:personal-lista' %}">
+                                    <span class="sidenav-mini-icon"> C </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Trabajadores</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white  active bg-gradient-primary" href="{% url 'users_app:user-lista' %}">
+                                    <span class="sidenav-mini-icon"> U </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Usuarios de sistema </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <!--  
+                <li class="nav-item">
+                    <a class="nav-link text-white " href="#"> 
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-bell opacity-10 text-lg"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Notifications</span>
+                    </a>
+                </li>
+
+                -->
+                
+            </ul>
+        </div>
+
+    </aside>
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+        <!-- Navbar -->
+        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
+            data-scroll="true">
+            <div class="container-fluid py-1 px-3">
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                        <li class="breadcrumb-item text-sm">
+                            <a class="text-dark" href="{% url 'home_app:index' %}">
+                                <i class="fas fa-home text-md"></i>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item text-sm "><a class="text-dark" href="{% url 'home_app:index' %}">Principal</a></li>
+                        <li class="breadcrumb-item text-sm" aria-current="page">{% block main %} {% endblock main %}</li>
+                        <li class="breadcrumb-item text-sm" aria-current="page">{% block appName %} {% endblock appName %}</li>
+                        <li class="breadcrumb-item text-sm" aria-current="page">{% block Type %} {% endblock Type %}</li>
+                    </ol>
+                </nav>
+                <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+                    <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+                        <i class="fas fa-user-alt me-sm-1"></i>
+                        &ensp;
+                        {{user}}
+                        &ensp;
+                        [<b>{{user.get_position_display}}</b>]
+                        
+                    </div>
+
+
+                    <ul class="navbar-nav  justify-content-end">
+
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="{% url 'users_app:user-logout' %}" class="nav-link text-body font-weight-bold px-0">
+                                <i class="fas fa-sign-out-alt me-sm-1 text-primary text-lg"></i>
+                                <span class="d-sm-inline d-none text-primary">SALIR</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item px-3 d-flex align-items-center">
+                            <a href="javascript:;" class="nav-link text-body p-0">
+                                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+                            </a>
+                        </li>
+
+                        <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+                            <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                                <div class="sidenav-toggler-inner">
+                                    <i class="sidenav-toggler-line"></i>
+                                    <i class="sidenav-toggler-line"></i>
+                                    <i class="sidenav-toggler-line"></i>
+                                </div>
+                            </a>
+                        </li>
+
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+
+        <div class="container-fluid">
+
+            {% block panel-content %}
+
+
+            {% endblock panel-content %}
+
+        </div>
+
+        {% include 'footer.html' %}
+
+        <!-- Settings -->
+        <div class="fixed-plugin">
+            <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
+                <i class="material-icons py-2">settings</i>
+            </a>
+            <div class="card shadow-lg">
+                <div class="card-header pb-0 pt-3">
+                    <div class="float-start">
+                        <h5 class="mt-3 mb-0">Dashboard customize</h5>
+                        <p>See our dashboard options.</p>
+                    </div>
+                    <div class="float-end mt-4">
+                        <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
+                            <i class="material-icons">clear</i>
+                        </button>
+                    </div>
+                    <!-- End Toggle Button -->
+                </div>
+                <hr class="horizontal dark my-1">
+                <div class="card-body pt-sm-3 pt-0">
+                    <!-- Sidebar Backgrounds -->
+                    <div>
+                        <h6 class="mb-0">Sidebar Colors</h6>
+                    </div>
+                    <a href="javascript:void(0)" class="switch-trigger background-color">
+                        <div class="badge-colors my-2 text-start">
+                            <span class="badge filter bg-gradient-primary active" data-color="primary"
+                                onclick="sidebarColor(this)"></span>
+                            <span class="badge filter bg-gradient-dark" data-color="dark"
+                                onclick="sidebarColor(this)"></span>
+                            <span class="badge filter bg-gradient-info" data-color="info"
+                                onclick="sidebarColor(this)"></span>
+                            <span class="badge filter bg-gradient-success" data-color="success"
+                                onclick="sidebarColor(this)"></span>
+                            <span class="badge filter bg-gradient-warning" data-color="warning"
+                                onclick="sidebarColor(this)"></span>
+                            <span class="badge filter bg-gradient-danger" data-color="danger"
+                                onclick="sidebarColor(this)"></span>
+                        </div>
+                    </a>
+                    <!-- Sidenav Type -->
+                    <div class="mt-3">
+                        <h6 class="mb-0">Sidenav Type</h6>
+                        <p class="text-sm">Choose between 2 different sidenav types.</p>
+                    </div>
+                    <div class="d-flex">
+                        <button class="btn bg-gradient-dark px-3 mb-2 active" data-class="bg-gradient-dark"
+                            onclick="sidebarType(this)">Dark</button>
+                        <button class="btn bg-gradient-dark px-3 mb-2 ms-2" data-class="bg-transparent"
+                            onclick="sidebarType(this)">Transparent</button>
+                        <button class="btn bg-gradient-dark px-3 mb-2 ms-2" data-class="bg-white"
+                            onclick="sidebarType(this)">White</button>
+                    </div>
+                    <p class="text-sm d-xl-none d-block mt-2">You can change the sidenav type just on desktop view.</p>
+                    <!-- Navbar Fixed -->
+                    <div class="mt-3 d-flex">
+                        <h6 class="mb-0">Navbar Fixed</h6>
+                        <div class="form-check form-switch ps-0 ms-auto my-auto">
+                            <input class="form-check-input mt-1 ms-auto" type="checkbox" id="navbarFixed"
+                                onclick="navbarFixed(this)">
+                        </div>
+                    </div>
+                    <hr class="horizontal dark my-3">
+                    <div class="mt-2 d-flex">
+                        <h6 class="mb-0">Light / Dark</h6>
+                        <div class="form-check form-switch ps-0 ms-auto my-auto">
+                            <input class="form-check-input mt-1 ms-auto" type="checkbox" id="dark-version"
+                                onclick="darkMode(this)">
+                        </div>
+                    </div>
+                    <hr class="horizontal dark my-sm-4">
+
+                </div>
+            </div>
+        </div>
+        <!-- End Settings -->
+
+        {% block JSscripts %}
+
+        {% endblock JSscripts %}
+    </main>
+
+    <!--   Core JS Files   -->
+    <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+
+    <script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/dragula/dragula.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/countup.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/round-slider.min.js' %}"></script>
+
+    <script>
+        // Rounded slider
+        const setValue = function (value, active) {
+            document.querySelectorAll("round-slider").forEach(function (el) {
+                if (el.value === undefined) return;
+                el.value = value;
+            });
+            const span = document.querySelector("#value");
+            span.innerHTML = value;
+            if (active)
+                span.style.color = 'red';
+            else
+                span.style.color = 'black';
+        }
+
+        document.querySelectorAll("round-slider").forEach(function (el) {
+            el.addEventListener('value-changed', function (ev) {
+                if (ev.detail.value !== undefined)
+                    setValue(ev.detail.value, false);
+                else if (ev.detail.low !== undefined)
+                    setLow(ev.detail.low, false);
+                else if (ev.detail.high !== undefined)
+                    setHigh(ev.detail.high, false);
+            });
+
+            el.addEventListener('value-changing', function (ev) {
+                if (ev.detail.value !== undefined)
+                    setValue(ev.detail.value, true);
+                else if (ev.detail.low !== undefined)
+                    setLow(ev.detail.low, true);
+                else if (ev.detail.high !== undefined)
+                    setHigh(ev.detail.high, true);
+            });
+        });
+
+        // Count To
+        if (document.getElementById('status1')) {
+            const countUp = new CountUp('status1', document.getElementById("status1").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+        if (document.getElementById('status2')) {
+            const countUp = new CountUp('status2', document.getElementById("status2").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+        if (document.getElementById('status3')) {
+            const countUp = new CountUp('status3', document.getElementById("status3").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+        if (document.getElementById('status4')) {
+            const countUp = new CountUp('status4', document.getElementById("status4").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+        if (document.getElementById('status5')) {
+            const countUp = new CountUp('status5', document.getElementById("status5").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+        if (document.getElementById('status6')) {
+            const countUp = new CountUp('status6', document.getElementById("status6").getAttribute("countTo"));
+            if (!countUp.error) {
+                countUp.start();
+            } else {
+                console.error(countUp.error);
+            }
+        }
+
+    </script>
+
+    <script>
+        var win = navigator.platform.indexOf('Win') > -1;
+        if (win && document.querySelector('#sidenav-scrollbar')) {
+            var options = {
+                damping: '0.5'
+            }
+            Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+        }
+    </script>
+
+    <!-- Github buttons -->
+    <script async defer src="{% static 'assets/js/buttons.js' %}"></script>
+    <script src="{% static 'assets/js/material-dashboard.min.js' %}"></script>
+</body>
+
+</html>

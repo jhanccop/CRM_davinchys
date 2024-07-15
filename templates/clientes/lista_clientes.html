@@ -1,0 +1,109 @@
+{% extends "clientes/base-clientes.html" %}
+
+{% load  static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Clientes {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row my-2">
+  <div class="col-12">
+    <div class="card my-4">
+
+      <div class="card-header p-3 pb-0">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 text-uppercase">Lista de clientes</h6>
+          <span class="d-flex align-items-center">
+            <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center"
+              data-type="csv" type="button">
+              <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
+              <span class="btn-inner--text">Descargar</span>
+            </a>
+            <a class="btn btn-primary btn-sm  mb-0 ms-2 align-items-center justify-content-center"
+              href="{% url 'clients_app:cliente-add' %}">
+              <span class="btn-inner--icon"><i class="fas fa-plus text-md"></i></span>
+              <span class="btn-inner--text">NUEVO</span>
+            </a>
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body pt-0 px-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table align-items-canter mb-0" id="datatable-clientes">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">RUC/ID</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Marca</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Pais</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Estado</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Numero</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Correo</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in clientes %}
+              <tr>
+                <td class="text-sm">{{ t.tradeName }}</td>
+                <td class="text-start text-sm">{{ t.ruc }}</td>
+                <td class="text-start text-sm">{{ t.brandName }}</td>
+                <td class="text-start text-sm ">{{ t.country }}</td>
+                <td class="text-start text-sm">{{ t.state }}</td>
+                <td class="text-start text-sm">{{ t.phoneNumber }}</td>
+                <td class="text-start text-sm">{{ t.email }}</td>
+                <td>
+                  <a href="{% url 'clients_app:cliente-editar' t.id %}">
+                    <i class="fas fa-edit text-info text-lg"></i>
+                  </a>
+                  &emsp;
+                  <a href="{% url 'clients_app:cliente-eliminar' t.id %}">
+                    <i class="fas fa-trash text-danger text-lg"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* CLIENTES */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-clientes", {
+    searchable: true,
+    fixedHeight: true,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "clientes",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+{% endblock JSscripts %}

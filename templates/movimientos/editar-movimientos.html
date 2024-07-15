@@ -1,0 +1,94 @@
+{% extends "movimientos/base-reportes.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Editar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> AGREGAR MOVIMIENTO </h6>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+              <h6 class="font-weight-bolder">Informacion de movimiento</h6>
+              <div class="row">
+                <div class="col-12 col-sm-6">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cuenta</label>
+                    {{ form.idAccount }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Fecha</label>
+                    {{ form.date }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-8 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Descripción EEC</label>
+                    {{ form.description }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
+                    {{ form.amount }}
+                  </div>
+                </div>
+                
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Num Operación</label>
+                    {{ form.opNumber }}
+                  </div>
+                </div>
+
+              </div>
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
+
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ACTUALIZAR MOVIMIENTO</button>
+              </div>
+
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+{% endblock JSscripts %}

@@ -1,0 +1,120 @@
+{% extends "clientes/base-clientes.html" %}
+
+{% load  static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Clientes {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+        
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-3 pb-2">
+                    <h6 class="text-center text-white"> AGREGAR NUEVO CLIENTE O PROVEEDOR </h6>
+                </div>
+            </div>
+            <div class="card-body pb-0">
+                <form class="" method="POST" >{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white"
+                        data-animation="FadeIn">
+                        
+                        <div class="multisteps-form__content">
+                          <h5 class="font-weight-bolder">Informacion de cliente</h5>
+                            <div class="row">
+                                <div class="col-12 col-sm-4">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Razón social</label>
+                                        {{ form.tradeName }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">RUC/ID</label>
+                                        {{ form.ruc }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                  <div class="input-group input-group-outline">
+                                      <label for="exampleFormControlInput1" class="form-label">Marca</label>
+                                      {{ form.brandName }}
+                                  </div>
+                              </div>
+                            </div>
+                            <br>
+                            <h5 class="font-weight-bolder">Localización</h5>
+                            <div class="row">
+                              <div class="col-12 col-sm-4">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Pais</label>
+                                  {{ form.country }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Estado/Provincia</label>
+                                  {{ form.state }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Ayuntamiento/Distrito</label>
+                                  {{ form.county }}
+                                </div>
+                              </div>
+                            </div>
+                            <br>
+                            <h5 class="font-weight-bolder">Contacto</h5>
+                            <div class="row">
+                              <div class="col-12 col-sm-4">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Número de contacto</label>
+                                  {{ form.phoneNumber }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Página web</label>
+                                  {{ form.webPage }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline">
+                                  <label for="exampleFormControlInput1" class="form-label">Correo</label>
+                                  {{ form.email }}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="row mt-3">
+                              <div class="col-12 col-sm-4">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Número de contacto</label>
+                                  {{ form.contact }}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                              <a class="btn bg-gradient-dark" href="{% url 'clients_app:cliente-lista' %}"> REGRESAR </a>
+                              <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                              title="Next">AGREGAR CLIENTE</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

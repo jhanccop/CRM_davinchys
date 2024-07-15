@@ -1,0 +1,263 @@
+{% extends "movimientos/base-reportes.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Movimientos / Transferencias {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-lg-6 col-md-3">
+    <div class="d-flex">
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-compra' %}">
+        <span>Compras por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">4</span> </span>
+      </a>
+      &emsp;
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-servicio' %}">
+        <span>Ordenes por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">0</span> </span>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-6 col-md-3 mb-xl-0">
+    <form method="GET">{% csrf_token %}
+      <div class="row">
+        <div class="col-lg-6 col-md-9 mb-4">
+          <div class="input-group input-group-outline">
+            <input class="form-control datetimepicker text-center" value="{{object_list.intervalDate}}" type="text"
+              placeholder="today" id="dateKword" name="dateKword" />
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-3">
+          <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="nav-wrapper position-relative end-0">
+  <ul class="nav nav-pills nav-fill p-1">
+    
+    <li class="nav-item " role="presentation">
+      <a class="nav-link mb-0 px-0 py-1 " href="{% url 'movimientos_app:reporte-principal' %}">
+        <i class="fas fa-project-diagram text-md position-relative"></i>
+        <span class="ms-1">Movimientos</span>
+      </a>
+    </li>
+    <li class="nav-item bg-gradient-secondary  border-radius-lg" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'movimientos_app:reporte-cuentas' %}">
+        <i class="fas fa-chart-bar text-md position-relative"></i>
+        <span class="ms-1">Cuentas</span>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1"  href="{% url 'movimientos_app:reporte-cajaChica' %}">
+        <i class="fas fa-chart-bar text-md position-relative"></i>
+        <span class="ms-1">Caja Chica</span>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-transferencias' %}">
+        <i class="fas fa-chart-line text-md position-relative"></i>
+        <span class="ms-1">Transferencias</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- ================ BODY ================= -->
+
+<div class="row mt-4">
+  <div class="col-lg-6 col-md-6 mt-4 mb-4">
+    <div class="card z-index-2 ">
+      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+        <div class="bg-gradient-dark shadow-dark border-radius-lg">
+          <div class="chart">
+            <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pb-0">
+        <h6 class="">MOVIMIENTOS EN DOLARES</h6>
+        <div class="row bg-gradient-light border-radius-lg">
+          <div class="col-md-6">
+            <h6 class="mb-0 text-dark font-weight-bold">24/05/2024</h6>
+          </div>
+          <div class="col-md-6 d-flex justify-content-end align-items-center text-info font-weight-bold">
+            <a data-bs-toggle="collapse" aria-expanded="false" href="#uno">
+              <span class="text-danger">$ -20 000</span> | <span class="text-success">$ +59 861 </span>
+              <i class="fas fa-arrows-alt-v me-2 text-lg"></i>
+            </a>
+          </div>
+        </div>
+        <div class="table-responsive" id="uno">
+          <table class="table text-right">
+            <tbody>
+              <tr>
+                <td class="ps-0 text-start align-middle">
+                  <p class="text-xs mb-0">Proveedores</p>
+                  <p class="text-md font-weight-bold mb-0 text-dark">FASETRON</p>
+                  
+                </td>
+                <td class="ps-4 align-middle text-end">
+                  <p class="text-xs text-dark mb-0">SOLES_RUC10</p>
+                  <p class="text-md font-weight-bold mb-0 text-danger">$ -1500</p>
+                </td>
+
+                <tr>
+                  <td class="ps-0 text-start align-middle">
+                    <p class="text-xs mb-0">Servicios</p>
+                    <p class="text-sm font-weight-bold mb-0 text-dark">JOEL JAFET HANCCO PACCORI</p>
+                  </td>
+                  
+                  <td class="ps-0 align-middle text-end">
+                    <p class="text-xs text-dark mb-0">SOLES_RUC10</p>
+                    <p class="text-md font-weight-bold mb-0 text-danger">$ -1500</p>
+                    
+                  </td>
+  
+                </tr>
+
+              </tr>
+              
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6 col-md-6 mt-4 mb-4">
+    <div class="card z-index-2  ">
+      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+        <div class="bg-gradient-success shadow-success border-radius-lg py-3 pe-1">
+          <div class="chart">
+            <canvas id="chart-line" class="chart-canvas" height="170"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h6 class="mb-0 "> Daily Sales </h6>
+        <p class="text-sm "> (<span class="font-weight-bolder">+15%</span>) increase in today sales. </p>
+        <hr class="dark horizontal">
+        <div class="d-flex ">
+          <i class="material-icons text-sm my-auto me-1">schedule</i>
+          <p class="mb-0 text-sm"> updated 4 min ago </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% for i in reportePrincipal.PEN %}
+<li>{{i.idAccount.accountName}} / {{ i.dateTime}} - {{i.balance}} / {{ i.get_category_display}} - {{i.transactionName}} - {{i.clientName}}</li>
+{% endfor %}
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+<script>
+  var ctx2 = document.getElementById("chart-bars").getContext("2d");
+
+  new Chart(ctx2, {
+    type: "line",
+    data: {
+      labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      datasets: [{
+        label: "Mobile apps",
+        tension: 0,
+        borderWidth: 0,
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(255, 255, 255, .8)",
+        pointBorderColor: "transparent",
+        borderColor: "rgba(255, 255, 255, .8)",
+        borderColor: "rgba(255, 255, 255, .8)",
+        borderWidth: 4,
+        backgroundColor: "transparent",
+        fill: true,
+        data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+        maxBarThickness: 6
+
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+            color: 'rgba(255, 255, 255, .2)'
+          },
+          ticks: {
+            display: true,
+            color: '#f8f9fa',
+            padding: 10,
+            font: {
+              size: 14,
+              weight: 300,
+              family: "Roboto",
+              style: 'normal',
+              lineHeight: 2
+            },
+          }
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5]
+          },
+          ticks: {
+            display: true,
+            color: '#f8f9fa',
+            padding: 10,
+            font: {
+              size: 14,
+              weight: 300,
+              family: "Roboto",
+              style: 'normal',
+              lineHeight: 2
+            },
+          }
+        },
+      },
+    },
+  });
+</script>
+
+{% endblock JSscripts %}

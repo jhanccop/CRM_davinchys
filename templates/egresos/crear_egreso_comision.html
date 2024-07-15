@@ -1,0 +1,154 @@
+{% extends "movimientos/base-egresos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Egresos {% endblock appName %}
+{% block Type %} Comision de trabajo / Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                    <h6 class="text-center text-white"> REGISTRAR GASTO DE COMISION DE TRABAJO </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="" method="POST" >{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white"
+                        data-animation="FadeIn">
+                        <div class="multisteps-form__content">
+
+                            <h5 class="font-weight-bolder">Informacion de gasto</h5>
+                            <div class="row mt-3">
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Comisión</label>
+                                        {{ form.idCommissions }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4 " hidden>
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">User</label>
+                                        {{ form.user }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Usuario</label>
+                                        {{ form.idWorker }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Sub categoría</label>
+                                        {{ form.subcategory }}
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <h5 class="font-weight-bolder">Informacion comercial</h5>
+
+                            <div class="row">
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Razón social</label>
+                                        {{ form.tradeName }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Número de id</label>
+                                        {{ form.idNumber }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Fecha de pago</label>
+                                        {{ form.paymentDate }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Cuenta</label>
+                                        {{ form.idAccount }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Monto</label>
+                                        {{ form.amount }}
+                                    </div>
+                                    {% for error in form.amount.errors %}
+                                    <p class="cell" style="color: red;">
+                                        <b>{{ error|escape }}</b>
+                                    </p>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label"># Operacion</label>
+                                        {{ form.opNumber }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Comprobante</label>
+                                        {{ form.invoiceType }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Tipo de pago</label>
+                                        {{ form.paymentType }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                                        {{ form.description }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                                <a class="btn bg-gradient-dark" href="{% url 'egresos_app:egresos-lista-general' %}"> REGRESAR </a>
+                            
+                                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">REGISTRAR PAGO</button>
+                            </div>
+
+                            
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+    document.getElementById("id_user").value = "{{user.id}}";
+</script>
+
+{% endblock JSscripts %}

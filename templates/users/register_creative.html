@@ -1,0 +1,129 @@
+{% extends "users/base_users_creative.html" %}
+
+{% load  static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Usuarios del sistema {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-12">
+    <div class="multisteps-form mb-9">
+
+      <div class="row">
+        <div class="col-12 col-lg-8 mx-auto my-5">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-lg-8 m-auto">
+          <div class="card">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                <div class="multisteps-form__progress text-center">
+                  <h5 class="text-white">Actualizar informacion de usuario</h5>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form class="multisteps-form__form" style="height: 250px;" method="POST">{% csrf_token %}
+
+                <div class="multisteps-form__panel border-radius-xl bg-white js-active" data-animation="FadeIn">
+                  
+                  <div class="multisteps-form__content">
+
+                    <div class="row mt-3">
+                      <div class="col-12 col-sm-6">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Nombres</label>
+                          {{form.full_name}}
+                        </div>
+                      </div>
+                      <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Apellidos</label>
+                          {{form.last_name}}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mt-3">
+                      <div class="col-12 col-sm-6">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Email Address</label>
+                          {{form.email}}
+                        </div>
+                        {% for error in form.email.errors %}
+                          <p class="cell" style="color: red;">
+                            {{ error|escape }}
+                          </p>
+                        {% endfor %}
+                      </div>
+                      <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Tipo de ususario</label>
+                          {{form.position}}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mt-3">
+                      <div class="col-6 col-sm-6 d-flex">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Contraseña</label>
+                          {{form.password1}}
+                        </div>
+                        {% for error in form.password1.errors %}
+                        <p class="cell" style="color: red;">
+                          {{ error|escape }}
+                        </p>
+                      {% endfor %}
+                      </div>
+                      <div class="col-6 col-sm-6 d-flex">
+                        <div class="input-group input-group-outline focused is-focused">
+                          <label class="form-label">Repetir</label>
+                          {{form.password2}}
+                        </div>
+                        {% for error in form.password2.errors %}
+                        <p class="cell" style="color: red;">
+                          {{ error|escape }}
+                        </p>
+                      {% endfor %}
+                      </div>
+                    </div>
+
+                    <div class="row mt-3">
+                      <div class="col-6 col-sm-3 d-flex">
+                        <p class="font-weight-bold">Habilitado</p>
+                        <div class="form-check form-switch ms-auto is-filled">
+                          {{form.is_active}}&emsp; 
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="button-row d-flex mt-4">
+                      <a class="btn bg-gradient-dark" href="{% url 'users_app:user-lista' %}"> REGRESAR </a>
+                      
+                      <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                      title="Next">CREAR</button>
+                    </div>
+                    
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

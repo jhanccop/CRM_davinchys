@@ -1,0 +1,68 @@
+{% extends "cuentas/base-cuentas.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Banco / Actualizar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+      <div class="card">
+          <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+              <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-4 pb-3">
+                  <h6 class="text-center text-white text-uppercase"> {{account}}</h6>
+              </div>
+          </div>
+          <div class="card-body">
+              <form class="" method="POST" >{% csrf_token %}
+
+                  <div class=" border-radius-xl bg-white"
+                      data-animation="FadeIn">
+                      
+                      <div class="multisteps-form__content">
+                        <h6 class="font-weight-bolder">Ingresar el saldo segun la información de la aplicación bancaria</h6>
+                          <div class="row">
+                            <div class="col-12 col-sm-4" hidden>
+                              <div class="input-group input-group-outline" >
+                                <label for="exampleFormControlInput1" class="form-label">Cuenta</label>
+                                {{ form.idAcount }}
+                              </div>
+                            </div>
+                            <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline">
+                                <label for="exampleFormControlInput1" class="form-label">Saldo actual</label>
+                                {{ form.realBalance }}
+                              </div>
+                            </div>
+                          </div>
+                          <br>
+
+                          <div class="button-row d-flex mt-4">
+                            <a class="btn bg-gradient-dark" href="{% url 'cuentas_app:cuentas-lista' %}"> REGRESAR </a>
+                            
+                            <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                            title="Next">ACTUALIZAR MONTO</button>
+                          </div>
+                          
+                      </div>
+                  </div>
+              </form>
+              
+          </div>
+      </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  document.getElementById("id_idAcount").value = "{{account.id}}";
+</script>
+
+{% endblock JSscripts %}

@@ -1,0 +1,96 @@
+{% extends "movimientos/base-reportes.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Caja Chica {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-lg-6 col-md-3">
+    <div class="d-flex">
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-compra' %}">
+        <span>Compras por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuentas.comprasPendientes.IdOrderState__count}}</span> </span>
+      </a>
+      &emsp;
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-servicio' %}">
+        <span>Servicios por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuentas.ServiciosPendientes.IdOrderState__count}}</span> </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="nav-wrapper position-relative end-0 ">
+  <ul class="nav nav-pills nav-fill p-1">
+   
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-principal' %}" aria-selected="false">
+        <span class="ms-1">Movimientos</span>
+      </a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-cuentas' %}" aria-selected="false">
+        <span class="ms-1">Cuentas</span>
+      </a>
+    </li>
+
+    <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1 active text-white" href="{% url 'movimientos_app:reporte-cajaChica' %}" aria-selected="true">
+        <span class="ms-1">Caja Chica</span>
+      </a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:lista-transferencias' %}">
+        <span class="ms-1">Transferencias</span>
+      </a>
+    </li>
+
+  </ul>
+
+</div>
+
+<!-- ================ BODY ================= -->
+
+<div class="row pt-2">
+
+  {% for cuenta in cuentas.cuenta %}
+  <div class="col-md-3 col-6 pt-4">
+    <div class="card">
+      <div class="card-header mx-4 p-3 text-center">
+        <a href="{% url 'movimientos_app:reporte-cajaChica-detalle' cuenta.id %}">
+          {% if cuenta.currency == "0" %}
+          <div class="icon icon-shape icon-lg bg-gradient-secondary shadow-dark text-center border-radius-lg">
+            <i class="fab fa-stripe-s"></i>
+          </div>
+          {% else %}
+          <div class="icon icon-shape icon-lg bg-gradient-success shadow-dark text-center border-radius-lg">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          {% endif %}
+        </a>
+      </div>
+      <div class="card-body pt-0 p-3 text-center">
+        <h6 class="text-center mb-0">{{cuenta.bankName}}</h6>
+        <span class="text-md">{{cuenta.accountName}}</span>
+        <hr class="horizontal dark my-3">
+        <h5 class="mb-0"><a href=""> {{cuenta.accountBalance}} </a>  </h5>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+{% endblock JSscripts %}

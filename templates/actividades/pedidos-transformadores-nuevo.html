@@ -1,0 +1,110 @@
+{% extends "actividades/base-pedidos-transformadores.html" %}
+
+{% load  static %}
+{% block title %} Ordenes {% endblock title %}
+{% block appName %} Ordenes {% endblock appName %}
+{% block main %} Pedidos {% endblock main %}
+{% block Type %} Crear {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+        
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-primary shadow-primary border-radius-lg pt-3 pb-2">
+                    <h6 class="text-center text-white"> ORDEN DE TRANSFORMADOR </h6>
+                </div>
+            </div>
+            <div class="card-body pb-0">
+                <form class="" method="POST" >{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white"
+                        data-animation="FadeIn">
+                        <h5 class="font-weight-bolder">Informacion de pedido</h5>
+                        <div class="multisteps-form__content">
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-6">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Numero de pedido</label>
+                                        {{ form.idOrder }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Cliente</label>
+                                        {{ form.idClient }}
+                                    </div>
+                                </div>
+                                
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-6">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Transformador</label>
+                                        {{ form.idTransformer }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Persona a cargo</label>
+                                        {{ form.idAttendant }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Cantidad</label>
+                                        {{ form.numberUnits }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">Monto total</label>
+                                        {{ form.amount }}
+                                    </div>
+                                </div>
+                                
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-6">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">F. pedido</label>
+                                        {{ form.dateOrder }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">F. entrega</label>
+                                        {{ form.deadline }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                                <a class="btn bg-gradient-dark" href="{% url 'activities_app:pedidos-transformadores' %}"> REGRESAR </a>
+                                
+                                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                                title="Next">CREAR PEDIDO</button>
+                              </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

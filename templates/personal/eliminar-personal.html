@@ -1,0 +1,47 @@
+{% extends "users/base-trabajadores.html" %}
+
+{% load  static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Trabajadores {% endblock appName %}
+{% block Type %} Eliminar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-4 pb-3">
+          <h5 class="text-center text-white"> ELIMINAR TRABAJADOR </h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <h6 class="mb-3">¿Esta seguro de eliminar trabajador?</h6>
+        <ul>
+          <li>Nombre: <span class="font-weight-bold">{{object.full_name}} {{object.last_name}}</span></li>
+          <li>Cargo: <span class="font-weight-bold">{{object.get_area_display}}</span></li>
+          <li>Condición actual: <span class="font-weight-bold">{{object.get_condition_display}}</span></li>
+        </ul>
+        <div class="d-flex">
+          <a href="{% url 'workers_app:personal-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
+              class="fas fa-undo-alt"></i> Volver</a>
+        
+          <form class="cell medium-5 ms-auto" action="{% url 'workers_app:personal-eliminar' object.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar Cliente</button>
+          </form>
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

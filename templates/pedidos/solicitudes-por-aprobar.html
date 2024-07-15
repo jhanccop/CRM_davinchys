@@ -1,0 +1,152 @@
+{% extends "pedidos/base-mis-solicitudes.html" %}
+
+{% load static %}
+{% block title %} Ordenes {% endblock title %}
+{% block main %} Ordenes {% endblock main %}
+{% block appName %} Requerimientos {% endblock appName %}
+{% block Type %} Por aprobar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-lg-6 col-12 d-flex ms-auto ">
+    <a class="export btn btn-icon btn-outline-info ms-auto" data-type="csv" type="button">
+      Export CSV
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+
+      <div class="card-header pb-0 bg-gradient-light">
+        <div class="row">
+          <div class="col-lg-6 col-md-3">
+            <h5 class="mb-0">Lista de requerimientos por aprobar</h5>
+            <p class="text-sm mb-0 text-info font-weight-bold">
+              {{user.full_name}} {{user.last_name}}
+            </p>
+          </div>
+          <div class="col-lg-6 col-md-9">
+            <form method="GET" class="">{% csrf_token %}
+              <div class="d-flex align-items-center">
+
+                <div class="input-group input-group-outline my-3 focused is-focused">
+                  <label class="form-label">Persona</label>
+                  <select class="form-control" name="UserKword" id="UserKword">
+                    <option value="" selected>todos</option>
+                    {% for i in solicitudes.users %}
+                      {% if i.id == solicitudes.user_selected.id %}
+                        <option value="{{i.id}}" selected>{{i.full_name}}</option>
+                      {% else %}
+                        <option value="{{i.id}}">{{i.full_name}}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                &emsp;
+                
+                <div class="input-group input-group-outline focused is-focused">
+                  <label class="form-label">Fecha</label>
+                  <input class="form-control datetimepicker text-center" value="{{object_list.intervalDate}}"
+                    placeholder="today" id="dateKword" name="dateKword">
+                </div>
+                &emsp;
+                <div class="pt-3 pb-0">
+                  <button class="btn bg-gradient-info" type="submit"> Buscar </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body pt-0 px-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table align-items-center mb-0" id="datatable-orders">
+            <thead>
+              <tr>
+                <th class="text-uppercase text-center text-dark text-xs font-weight-bolder opacity-7 ps-2">Fecha</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Solicitante</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">[CANT.] Descripción</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Proveedor</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Doc</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pedido in solicitudes.ordenes %}
+              <tr>
+                <td class="text-sm mb-0"> {{ pedido.created|date:'d-m-Y' }} </td>
+                <td class="text-sm mb-0 font-weight-bold"> {{ pedido.idPetitioner.full_name}} </td>
+                <td class="text-sm mb-0"> <span class="font-weight-bold text-dark"> [ {{ pedido.quantity }} ]</span> {{ pedido.requirementName }} </td>
+                <td class="text-sm text-end text-dark mb-0"> {{ pedido.amountRequested|floatformat:"2g" }} {{ pedido.get_currencyType_display }}</td>
+                <td class="text-sm mb-0"> {{ pedido.idProvider.tradeName }}</td>
+                <td>
+                  {% if pedido.pdf_file %}
+                  <a href="/media/{{ pedido.pdf_file }}">
+                    <i class="far fa-file-pdf text-info text-lg"></i>
+                  </a>
+                  {% endif %}
+                </td>             
+                <td class="align-middle text-center">
+                  <a href="{% url 'pedidos_app:aprobar-solicitud-1' pedido.id %}">
+                    <i class="fas fa-file-signature text-dark text-lg"></i>
+                  </a>
+                </td>
+                
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<!--Table-->
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTableOrders = new simpleDatatables.DataTable("#datatable-orders", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "solicitudes",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+      dataTableOrders.export(data);
+    });
+  });
+
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', {
+      allowInput: true,
+      mode: "range"
+    }); // flatpickr
+  }
+</script>
+
+{% endblock JSscripts %}

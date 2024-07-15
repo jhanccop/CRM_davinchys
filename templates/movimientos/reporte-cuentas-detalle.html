@@ -1,0 +1,484 @@
+{% extends "movimientos/base-reportes.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Cuentas / Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-lg-6 col-md-3">
+    <div class="d-flex">
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-compra' %}">
+        <span>Compras por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuenta.comprasPendientes.IdOrderState__count}}</span> </span>
+      </a>
+      &emsp;
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-servicio' %}">
+        <span>Servicios por autorizar</span>
+        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuenta.ServiciosPendientes.IdOrderState__count}}</span> </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="nav-wrapper position-relative end-0">
+  <ul class="nav nav-pills nav-fill p-1">
+   
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1 " href="{% url 'movimientos_app:reporte-principal' %}" aria-selected="true">
+        <span class="ms-1">Movimientos</span>
+      </a>
+    </li>
+
+    <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1 active text-white" href="{% url 'movimientos_app:reporte-cuentas' %}" aria-selected="true">
+        <span class="ms-1">Cuentas</span>
+      </a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-cajaChica' %}">
+        <span class="ms-1">Caja Chica</span>
+      </a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:lista-transferencias' %}">
+        <span class="ms-1">Transferencias</span>
+      </a>
+    </li>
+
+  </ul>
+
+</div>
+
+<div class="row pt-2">
+  <div class="col-lg-6 col-md-3">
+    <h5 class="mb-0">{{cuenta.datos.Cuenta}}</h5>
+    <p class="text-md mb-0 font-weight-bolder text-secondary">
+      {{cuenta.datos.Cuenta.get_currency_display}} - {{cuenta.datos.Cuenta.bankName}}
+    </p>
+  </div>
+  <div class="col-lg-6 col-md-9">
+    <form method="GET" class="">{% csrf_token %}
+      <div class="d-flex align-items-center">
+        <div class="input-group input-group-outline">
+          <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
+            placeholder="today" id="dateKword" name="dateKword">
+        </div>
+        &emsp; 
+        <div class="pt-3 pb-0">
+          <button class="btn bg-gradient-secondary" type="submit"> Buscar </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<!-- ================ BODY ================= -->
+
+<div class="row align-items-center">
+
+  <div class="col-lg-2 col-6 text-center">
+    <div class="border border-info border-4 border-radius-md py-1">
+      <span class="text-sm mb-0 text-dark">Monto inicial</span>
+      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.saldoFinalDiario.last.dateTime | date:'d-m-Y'}}</p>
+      <h5 class="font-weight-bolder mb-0" id="saldoInicial">{{cuenta.datos.saldoFinalDiario.last.balance}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-2 col-6 text-center">
+    <div class="border border-success border-1 border-radius-md py-3">
+      <p class="font-weight-bolder mb-0 text-success">Ingresos</p>
+      <h5 class="text-dark font-weight-bolder mb-0">+ {{cuenta.datos.TotalIngresos.amount__sum}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-primary border-1 border-radius-md py-3">
+      <p class="font-weight-bolder mb-0 text-primary">Egresos</p>
+      <h5 class="text-dark font-weight-bolder mb-0">- {{cuenta.datos.TotalEgresos.amount__sum}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-dark border-4 border-radius-md py-1">
+      <span class="text-sm mb-0 text-dark">Monto CRM</span>
+      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.saldoFinalDiario.first.dateTime | date:'d-m-Y'}}</p>
+      <h5 class="font-weight-bolder mb-0">{{cuenta.datos.saldoFinalDiario.first.balance}}</h5>
+    </div>
+  </div>
+
+  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-dark border-4 border-radius-md py-1">
+      <span class="text-sm mb-0 text-dark">
+        <a href="{% url 'cuentas_app:cuentas-manual-agregar' cuenta.datos.Cuenta.id %}"><i class="fas fa-edit"></i>
+        En cuenta
+        </a>
+      </span>
+      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.Cuenta.lastUpdateReal | date:'d-m-Y' }}</p>
+      <a href="{% url 'cuentas_app:cuentas-manual-agregar' cuenta.datos.Cuenta.id %}">
+        <h5 class="font-weight-bolder mb-0">{{cuenta.datos.Cuenta.realBalance}}</h5>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
+    <div class="border border-warning border-4 border-radius-md py-3">
+      <p class="font-weight-bolder mb-0 text-dark">Diferencia</p>
+      <h5 class="text-dark font-weight-bolder mb-0" id="diferencia"></h5>
+    </div>
+  </div>
+
+</div>
+
+<div class="row mt-4">
+  <!-- Tabla y grafico -->
+  <div class="col-lg-8 col-md-12 mt-4 mb-4">
+    <div class="card z-index-2 ">
+      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+        <div class="bg-gradient-dark shadow-dark border-radius-lg">
+          <div class="chart">
+            <canvas id="chart-{{cuenta.datos.Cuenta.id}}" class="chart-canvas" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body pb-0">
+
+        <div class="nav-wrapper position-relative end-0 pb-0">
+          <ul class="nav nav-pills nav-fill p-1" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#detalle-{{cuenta.datos.Cuenta.id}}" role="tab" aria-controls="preview"
+                aria-selected="true">
+                Detalle
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#resumen-{{cuenta.datos.Cuenta.id}}" role="tab" aria-controls="code"
+                aria-selected="false">
+                Saldo
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="tab-content border-radius-lg" id="v-pills-tabContent">
+          <!-- detalle -->
+          <div class="tab-pane position-relative active show " id="detalle-{{cuenta.datos.Cuenta.id}}" role="tabpanel"
+            aria-labelledby="detalle-{{cuenta.datos.Cuenta.id}}" loading="lazy">
+            <div class="table-responsive p-0">
+              <table class="table text-right" id="table-{{cuenta.datos.Cuenta.id}}">
+                <thead>
+                  <tr>
+                    <th class="text-sm font-weight-bold">Fecha</th>
+                    <th class="text-sm font-weight-bold">Razón Social</th>
+                    <th class="text-sm font-weight-bold">Categoria</th>
+                    <th class="text-sm font-weight-bold">Monto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for j in cuenta.datos.ListaTransaciones%}
+                  <tr>
+                    <td class="ps-0 text-start align-middle">{{j.dateTime|date:'d-m-Y h:i'}}</td>
+                    <td class="ps-0 text-start align-middle font-weight-bold">{{j.clientName}}</td>
+                    <td class="ps-0 text-start align-middle">{{j.get_category_display}}</td>
+                    
+                    <td class="ps-4 align-middle text-end">
+                      {% if j.transactionType == "0" %}
+                      <p class="text-md font-weight-bold mb-0 text-primary"> - {{ j.amount }}</p>
+                      {% else %}
+                      <p class="text-md font-weight-bold mb-0 text-success"> + {{ j.amount }}</p>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+          </div>
+
+          <div class="tab-pane position-relative border-radius-lg" id="resumen-{{cuenta.datos.Cuenta.id}}" role="tabpanel"
+            aria-labelledby="resumen-{{cuenta.datos.Cuenta.id}}" loading="lazy">
+            <table class="table text-right">
+              <tbody>
+                {% for j in cuenta.datos.saldoFinalDiario%}
+                <tr>
+                  <td class="ps-0 text-start align-middle">
+                    {{j.dateTime|date:'d-m-Y'}}
+                  </td>
+  
+                  <td class="ps-0 text-end align-middle">
+                    <p class="text-xs mb-0">{{j.idAccount.get_currency_display}}</p>
+                    <p class="text-md font-weight-bold mb-0 text-dark">{{j.balance}}</p>
+                  </td>
+
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla y estadisticas de consumo -->
+  <div class="col-lg-4 col-md-12 mt-4 mb-4">
+    <div class="card z-index-2 ">
+
+      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+        <div class="bg-gradient-white shadow-dark border-radius-lg">
+          <div class="chart">
+            <canvas id="chart-categoria" class="chart-canvas" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body pb-0">
+        <table class="table text-right" id="table-categoria">
+          <thead>
+            <tr>
+              <th class="text-sm font-weight-bold text-uppercase">Categoria</th>
+              <th class="text-sm font-weight-bold text-end text-uppercase">Egreso</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for j in cuenta.datos.PorCategoria %}
+            <tr>
+              <td>
+                <div class="d-flex px-2 py-0">
+                  {% if j.category == "0" %}
+                  <span class="badge bg-gradient-primary me-3"> </span>
+                  <span class="text-dark">Planilla</span>
+                  {% elif j.category == "1" %}
+                  <span class="badge bg-gradient-info me-3"> </span>
+                  <span class="text-dark">Proveedores</span>
+                  {% elif j.category == "2" %}
+                  <span class="badge bg-gradient-success me-3"> </span>
+                  <span class="text-dark">Servicios</span>
+                  {% elif j.category == "3" %}
+                  <span class="badge bg-gradient-danger me-3"> </span>
+                  <span class="text-dark">Comisiones de trabajo</span>
+                  {% elif j.category == "4" %}
+                  <span class="badge bg-gradient-secondary me-3"> </span>
+                  <span class="text-dark">Compras</span>
+                  {% elif j.category == "5" %}
+                  <span class="badge bg-gradient-light me-3"> </span>
+                  <span class="text-dark">Impuestos</span>
+                  {% elif j.category == "6" %}
+                  <span class="badge bg-gradient-warning me-3"> </span>
+                  <span class="text-dark">Caja Chica</span>
+                  {% elif j.category == "7" %}
+                  <span class="badge bg-gradient-dark me-3"> </span>
+                  <span class="text-dark">Transferencias internas</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td class="ps-0 text-start align-middle font-weight-bold text-end">{{j.acumulate}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+<script>
+
+  var ctx = document.getElementById("chart-{{cuenta.datos.Cuenta.id}}").getContext("2d");
+  var Labels = [];
+  var Data = [];
+
+  {% for j in cuenta.datos.saldoFinalDiario %}
+  Labels.push("{{j.dateTime|date:'d/m'}}")
+  Data.push("{{j.balance}}")
+  //console.log("{{j.dateTime|date:'d-m-Y'}}")
+  //console.log("{{j.balance}}");
+  {% endfor %}
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: Labels.reverse(),
+      datasets: [{
+        label: "Saldo",
+        tension: 0,
+        borderWidth: 0,
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(255, 255, 255, .8)",
+        pointBorderColor: "transparent",
+        borderColor: "rgba(255, 255, 255, .8)",
+        borderColor: "rgba(255, 255, 255, .8)",
+        borderWidth: 4,
+        backgroundColor: "transparent",
+        fill: true,
+        data: Data.reverse(),
+        maxBarThickness: 6
+
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+            color: 'rgba(255, 255, 255, .2)'
+          },
+          ticks: {
+            display: true,
+            color: '#f8f9fa',
+            padding: 10,
+            font: {
+              size: 14,
+              weight: 300,
+              family: "Roboto",
+              style: 'normal',
+              lineHeight: 2
+            },
+          }
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5]
+          },
+          ticks: {
+            display: true,
+            color: '#f8f9fa',
+            padding: 10,
+            font: {
+              size: 14,
+              weight: 300,
+              family: "Roboto",
+              style: 'normal',
+              lineHeight: 2
+            },
+          }
+        },
+      },
+    },
+  });
+
+</script>
+
+<script>
+  var ctx2 = document.getElementById("chart-categoria").getContext("2d");
+  var Labels = [];
+  var Data = [];
+  var barColors = [];
+
+  var Colors = [
+    "#e91e63", // primary
+    "#03a9f4", // info
+    "#4caf50", // success
+    "#f44335", // danger
+    "#7b809a", // secondary
+    "#e9ecef", // light
+    "#fb8c00", // warning
+    "#343a40", // dark
+  ];
+
+  var lab = ["Planilla", "Proveedor", "Servicio", "Comision","Compra","Impuestos","Caja chica", "Transferencias internas"];
+
+  {% for j in cuenta.datos.PorCategoria %}
+  Labels.push(lab[Number("{{j.category}}")])
+  barColors.push(Colors[Number("{{j.category}}")])
+  Data.push("{{j.acumulate}}")
+  {% endfor %}
+
+
+  new Chart(ctx2, {
+    //type: "doughnut",
+    type: "pie",
+    data: {
+      labels: Labels,
+      datasets: [{
+        backgroundColor: barColors,
+        data: Data
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+    }
+  });
+
+</script>
+
+<script>
+  let crm_amount = Number("{{cuenta.datos.saldoFinalDiario.first.balance}}");
+  let real_amount = Number("{{cuenta.datos.Cuenta.realBalance}}");
+  let dif = real_amount - crm_amount;
+  $("#diferencia").html(dif.toFixed(2));
+
+  let inicialamount = Number("{{cuenta.datos.ListaTransaciones.last.balance}}");
+  let gasto = Number("{{cuenta.datos.ListaTransaciones.last.amount}}");
+  console.log(inicialamount,gasto);
+  let initial = inicialamount + gasto;
+  $("#saldoInicial").html(initial.toFixed(2));
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* CUENTAS */
+  var datatable = new simpleDatatables.DataTable("#table-{{cuenta.datos.Cuenta.id}}", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 5
+  });
+
+</script>
+
+{% endblock JSscripts %}

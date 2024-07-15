@@ -1,0 +1,87 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Subir archivo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-10 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-info shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white">SUBIR ARCHIVO EXCEL</h6>
+        </div>
+      </div>
+      <div class="card-body p-0 pt-2">
+        <form class="" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="row ps-3 pe-md-3">
+              <div class="col-12 col-sm-12">
+                <div class="input-group input-group-outline focused is-focused">
+                  {{ form.as_p }}
+                </div>
+                {% for message in messages %}
+                    <p class="text-dark">{{ message }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="button-row d-flex mt-2 ps-3 pe-md-3">
+              <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}" > Ir a movimientos </a>
+              <button class="btn bg-gradient-success ms-auto js-btn-next font-weight-bold" type="submit"
+                title="Next">Importar datos</button>
+            </div>
+
+            <div class="card-body pt-0 px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-uppercase text-center text-secondary text-xs font-weight-bolder opacity-7 ps-2">Fecha</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cuenta</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Archivo</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Observaciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in docs %}
+                    <tr>
+                      <td class="text-sm">
+                        {{ t.created|date:'d-m-Y H:i' }}
+                      </td>
+                      <td class="text-sm text-dark">
+                        {{ t.idAccount }}
+                      </td>
+                      <td class="text-sm text-start">
+                        {{ t.fileName }}
+                      </td>
+                      <td class="text-sm text-end">
+                        {{ t.observations }}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}
+    

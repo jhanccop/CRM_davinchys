@@ -1,0 +1,217 @@
+{% extends "movimientos/base-reportes.html" %}
+
+{% load  static %}
+{% block title %} Documentación {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Documentacion {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<!-- ================ BODY ================= -->
+
+<div class="row">
+  <div class="col-lg-6 col-12 d-flex ms-auto ">
+   
+    <a class="export btn btn-icon btn-outline-primary ms-auto" data-type="csv" type="button">
+      Export CSV
+    </a>
+    
+  </div>
+</div>
+
+<div class="card-header pb-0 ">
+  <div class="row">
+    <div class="col-lg-3 col-md-3">
+      
+    </div>
+    <div class="col-lg-9 col-md-9">
+      <form method="GET" class="">{% csrf_token %}
+        <div class="d-flex align-items-center">
+
+          <div class="input-group input-group-outline is-valid">
+
+            <select class="form-control" name="UserKword" id="UserKword">
+              {% for i in actividadesDiarias.users %}
+                {% if i.id == actividadesDiarias.user_selected.id %}
+                  <option value="{{i.id}}" selected>{{i.full_name}}</option>
+                {% else %}
+                  <option value="{{i.id}}">{{i.full_name}}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+
+          </div>
+          &emsp;
+
+          <div class="input-group input-group-outline is-valid">
+
+            <select class="form-control" name="TypeKword" id="TypeKword">
+              <option value="0">jornada diaria</option>
+              <option value="1">horas extra</option>
+              <option value="2">otro</option>
+              <option value="3">todo</option>
+            </select>
+
+          </div>
+          &emsp;
+          <div class="input-group input-group-outline">
+            <input class="form-control datetimepicker text-center text-dark"
+              value="{{actividadesDiarias.intervalDate}}" placeholder="today" id="dateKword" name="dateKword">
+          </div>
+          &emsp;
+          <div class="pt-3 pb-0">
+            <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-3 col-md-6 col-12 mb-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-4">
+            <div class="icon icon-lg icon-shape bg-gradient-primary shadow text-center border-radius-md">
+              <i class="fas fa-calendar-check opacity-10"></i>
+            </div>
+          </div>
+          <div class="col-8 my-auto text-end">
+            <p class="text-sm mb-0 opacity-7 text-dark">Dias laborados</p>
+            <h5 class="font-weight-bolder mb-0">
+              {{actividadesDiarias.dias.dias}}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-md-6 col-12 mb-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-4">
+            <div class="icon icon-lg icon-shape bg-gradient-primary shadow text-center border-radius-md">
+              <i class="fas fa-clock opacity-10"></i>
+            </div>
+          </div>
+          <div class="col-8 my-auto text-end">
+            <p class="text-sm mb-0 opacity-7 text-dark">Horas extra</p>
+            <h5 class="font-weight-bolder mb-0">
+              {{actividadesDiarias.acc.acc}}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body pt-0 px-0 pb-0">
+        <div class="table-responsive p-0">
+          <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+            <thead class="thead-light">
+              <tr>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Fecha </th>
+
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                {% if actividadesDiarias.selected == "1" %}
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Inicio</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Final</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Horas</th>
+                {% else %}
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in actividadesDiarias.actividades %}
+              <tr>
+                <td class="text-sm font-weight-bold">
+                  {{ t.date|date:'d-m-Y' }}
+                </td>
+                <td class="text-sm text-dark">
+                  {{ t.activity }}
+                </td>
+                {% if actividadesDiarias.selected == "1" %}
+                <td class="text-sm">
+                  {{ t.startTime }}
+                </td>
+                <td class="text-sm">
+                  {{ t.endTime }}
+                </td>
+                <td class="text-sm">
+                  {{ t.delta }}
+                </td>
+                {% else %}
+                <td class="text-sm">
+                  {{ t.get_type_display }}
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* PROYECTOS */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "actividades" + "{{actividadesDiarias.selcted}}",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+<script>
+  console.log("{{actividadesDiarias.user_selected.id}}");
+  document.getElementById("TypeKword").selectedIndex = "{{actividadesDiarias.selected}}";
+</script>
+
+{% endblock JSscripts %}

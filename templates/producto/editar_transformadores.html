@@ -1,0 +1,190 @@
+{% extends "producto/base-transformadores.html" %}
+
+{% load  static %}
+
+{% block title %} Producto {% endblock title %}
+
+{% block main %} Producto {% endblock main %}
+{% block appName %} Cat TRansformadores {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+      
+      <div class="card">
+          <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                  <h5 class="text-center text-white"> AGREGAR TRANSFORMADOR A CATALOGO </h5>
+              </div>
+          </div>
+          <div class="card-body">
+              <form class="" method="POST" >{% csrf_token %}
+
+                  <div class=" border-radius-xl bg-white"
+                      data-animation="FadeIn">
+                      
+                      <div class="multisteps-form__content">
+                        <h5 class="font-weight-bolder">Características generales</h5>
+                          <div class="row mt-3">
+                              <div class="col-6 col-sm-4">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Identificador</label>
+                                  {{ form.barcode }}
+                                </div>
+                              </div>
+
+                              <div class="col-6 col-sm-4">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Provedor</label>
+                                  {{ form.provider }}
+                                </div>
+                              </div>
+
+                              <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Modelo</label>
+                                  {{ form.model_name }}
+                                </div>
+                              </div>
+                          </div>
+
+                          <br>
+                          <h5 class="font-weight-bolder">Características técnicas</h5>
+
+                          <div class="row mt-3">
+
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">Capacidad</label>
+                                {{ form.KVA }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">HV TAP</label>
+                                {{ form.HVTAP }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">K Tap HV</label>
+                                {{ form.KTapHV }}
+                              </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">FIX HV</label>
+                                {{ form.FIXHV }}
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="row mt-3">
+
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">LV</label>
+                                {{ form.LV }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">HZ</label>
+                                {{ form.HZ }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">TYPE</label>
+                                {{ form.TYPE }}
+                              </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">MOUNTING TYPE</label>
+                                {{ form.MOUNTING }}
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="row mt-3">
+
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">COOLING</label>
+                                {{ form.COOLING }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">WINDING</label>
+                                {{ form.WINDING }}
+                              </div>
+                            </div>
+                          
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">INSULAT CLASS</label>
+                                {{ form.INSULAT }}
+                              </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">CONNECTION</label>
+                                {{ form.CONNECTION }}
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="row mt-3">
+
+                            <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">CONNECTION</label>
+                                {{ form.CONNECTION }}
+                              </div>
+                            </div>
+
+                            <div class="col-6 col-sm-4">
+                              <div class="input-group input-group-outline focused is-focused">
+                                <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                                {{ form.description }}
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="button-row d-flex mt-4">
+                            <a class="btn bg-gradient-dark" href="{% url 'producto_app:transformador-lista' %}"> REGRESAR </a>
+                            
+                            <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                            title="Next">ACTUALIZAR TRABAJO</button>
+                          </div>
+                          
+                      </div>
+                  </div>
+
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+{% endblock JSscripts %}

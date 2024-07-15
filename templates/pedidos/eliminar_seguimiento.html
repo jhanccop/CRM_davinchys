@@ -1,0 +1,101 @@
+{% extends "pedidos/base-pedidos.html" %}
+
+{% load  static %}
+{% block title %} Ordenes {% endblock title %}
+{% block appName %} Ordenes {% endblock appName %}
+{% block main %} Pedidos {% endblock main %}
+{% block Type %} Seguimiento / Eliminar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+     
+      <div class="card">
+          <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+              <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
+                  <h5 class="text-center text-white"> ELIMINAR SEGUIMIENTO </h5>
+              </div>
+          </div>
+          <div class="card-body">
+
+            <h6 class="mb-3 text-dark">¿Esta seguro de eliminar este evento?</h6>
+
+            <div class="timeline timeline-one-side">
+
+
+              <div class="timeline-block mb-3">
+                  {% if object.orderState == "0" %}
+                  <span class="timeline-step">
+                      <i class="fas fa-bell text-sm text-dark text-lg"></i>
+                  </span>
+                  <div class="timeline-content">
+                      <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Creado</h6>
+                      <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{object.dateChange|date:'d-m-Y h:i'}}
+                      </p>
+                  </div>
+                  {% elif object.orderState == "1" %}
+                  <span class="timeline-step">
+                      <i class="fas fa-vote-yea text-sm text-dark text-lg"></i>
+                  </span>
+                  <div class="timeline-content">
+                      <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido fabricado</h6>
+                      <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{object.dateChange|date:'d-m-Y h:i' }}
+                      </p>
+                  </div>
+                  {% elif object.orderState == "2" %}
+                  <span class="timeline-step">
+                      <i class="fas fa-truck text-sm text-dark text-lg"></i>
+                  </span>
+                  <div class="timeline-content">
+                      <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Enviado</h6>
+                      <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{object.dateChange|date:'d-m-Y' }}
+                      </p>
+                  </div>
+                  {% elif object.orderState == "3" %}
+                  <span class="timeline-step">
+                      <i class="fas fa-check text-sm text-success text-lg"></i>
+                  </span>
+                  <div class="timeline-content">
+                      <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Completado</h6>
+                      <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{object.dateChange|date:'d-m-Y' }}
+                      </p>
+                  </div>
+                  {% elif object.orderState == "4" %}
+                  <span class="timeline-step">
+                      <i class="fas fa-times text-sm text-danger text-lg"></i>
+                  </span>
+                  <div class="timeline-content">
+                      <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Cancelado</h6>
+                      <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{object.dateChange|date:'d-m-Y' }}
+                      </p>
+                  </div>
+                  {% endif %}
+              </div>
+              
+          </div>
+
+            <form class="cell medium-9 grid-x grid-margin-x align-center"
+              action="{% url 'pedidos_app:pedidos-eliminar-seguimiento' object.id %}" method="POST">{% csrf_token %}
+            
+              <div class="cell medium-6 text-end">
+                <button type="submit" class="alert button text-primary"> <i class="fas fa-trash"></i> Eliminar</button>
+                <a href="{% url 'pedidos_app:pedidos-lista' %}" class="primary button clear"> <i class="fas fa-undo-alt"></i> Volver</a>
+              </div>
+            </form>
+
+          </div>
+      </div>
+  </div>
+</div>
+
+{% for i in OrderTrack %}
+{{ i.idOrder }}
+{% endfor %}
+{{OrderTrack.0.idOrder}}
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}
