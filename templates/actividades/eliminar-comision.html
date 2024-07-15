@@ -14,15 +14,15 @@
 
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-light shadow-dark border-radius-lg pt-4 pb-3">
-          <h5 class="text-center text-dark"> ELIMINAR COMISION DE TRABAJO </h5>
+        <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> ELIMINAR COMISION DE TRABAJO </h6>
         </div>
       </div>
       <div class="card-body">
-        <h6 class="mb-3">¿Esta seguro de eliminar comision de trabajo?</h6>
+        <h6 class="mb-3">¿Esta seguro de eliminar esta comisión de trabajo?</h6>
         <ul>
           <li>Proyecto: <span class="font-weight-bold">{{object.commissionName}}</span></li>
-          <li>Cargo: {% for i in object.workers.all %} <span class="font-weight-bold"> {{i.full_name}}, </span> {% endfor %} </li>
+          <li>Personal involucrado: {% for i in object.workers.all %} <span class="font-weight-bold"> {{i.full_name}}, </span> {% endfor %} </li>
           <li>Condición actual: <span class="font-weight-bold">{{object.get_status_display}}</span></li>
         </ul>
         <div class="d-flex">

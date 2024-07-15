@@ -140,7 +140,7 @@ class Commissions(TimeStampedModel):
         'Fecha de finalizacion',
     )
 
-    workers = models.ManyToManyField(Workers)
+    workers = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     status = models.CharField(
         'Estado',
@@ -194,7 +194,7 @@ class Projects(TimeStampedModel):
         'Fecha de finalizacion',
     )
 
-    workers = models.ManyToManyField(Workers)
+    workers = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     status = models.CharField(
         'Estado',

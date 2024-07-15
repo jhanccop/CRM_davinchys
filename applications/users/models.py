@@ -27,15 +27,52 @@ class User(AbstractBaseUser, PermissionsMixin):
         (TESORERIA, 'Tesoreria'),
     ]
 
+    # GENEROS
+    VARON = 'M'
+    MUJER = 'F'
+
+    GENDER_CHOICES = [
+        (VARON, 'Masculino'),
+        (MUJER, 'Femenino'),
+    ]
+
+    # CONDICIONES
+    ACTIVO = "0"
+    CESADO = "1"
+    LICENCIA = "2"
+    VACACIONES = "3"
+
+    CONDITIONS_CHOICES = [
+        (ACTIVO, 'Activo'),
+        (CESADO, 'Cesado'),
+        (LICENCIA, 'Licencia'),
+        (VACACIONES, 'Vacaciones'),
+    ]
+
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique = True)
     full_name = models.CharField('Nombres', max_length=100)
     last_name = models.CharField('Apellidos', max_length=100, blank=True, null=True)
+    phoneNumber = models.CharField('Telefono',blank = True, null=True)
 
     position = models.CharField(
         'Tipo de usuario',
         max_length=1, 
         choices=ROLES_CHOICES, 
+        blank=True
+    )
+
+    gender = models.CharField(
+        'Género',
+        max_length=1, 
+        choices=GENDER_CHOICES, 
+        blank=True
+    )
+
+    condition = models.CharField(
+        'Condicion',
+        max_length=1, 
+        choices=CONDITIONS_CHOICES, 
         blank=True
     )
 

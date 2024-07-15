@@ -1,4 +1,4 @@
-{% extends "movimientos/base-reportes.html" %}
+{% extends "actividades/base-actividades.html" %}
 
 {% load  static %}
 {% block title %} Actividades {% endblock title %}
@@ -13,8 +13,8 @@
 
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-light shadow-dark border-radius-lg pt-4 pb-3">
-          <h5 class="text-center text-dark"> ELIMINAR ACTIVIDAD DIARIA </h5>
+        <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> ELIMINAR ACTIVIDAD DIARIA </h6>
         </div>
       </div>
       <div class="card-body">
@@ -25,7 +25,7 @@
           <li>Tipo: <span class="font-weight-bold">{{object.get_type_display}}</span></li>
         </ul>
         <div class="d-flex">
-          <a href="{% url 'activities_app:actividad-diaria-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
+          <a href="{% url 'activities_app:mi-actividad-diaria-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
               class="fas fa-undo-alt"></i> Volver</a>
         
           <form class="cell medium-5 ms-auto" action="{% url 'activities_app:actividad-diaria-eliminar' object.id %}" method="POST">
