@@ -12,6 +12,7 @@ from django.views.generic import (
 )
 
 from applications.users.mixins import AdminPermisoMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import TrafoOrder, Projects, Commissions, DailyTasks
 from applications.users.models import User
@@ -19,7 +20,7 @@ from applications.users.models import User
 from .forms import PedidoForm, ProjectsForm, CommissionsForm, DailyTaskForm
 
 # ======================= PROYECTOS ===========================
-class ProjectsListView(ListView):
+class ProjectsListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-proyectos.html"
     context_object_name = 'proyecto'
     model = Projects
@@ -30,42 +31,42 @@ class ProjectsCreateView(AdminPermisoMixin, CreateView):
     form_class = ProjectsForm
     success_url = reverse_lazy('activities_app:proyecto-lista')
 
-class ProjectsDeleteView(DeleteView):
+class ProjectsDeleteView(AdminPermisoMixin,DeleteView):
     template_name = "actividades/eliminar-proyecto.html"
     model = Projects
     success_url = reverse_lazy('activities_app:proyecto-lista')
 
-class ProjectsUpdateView(UpdateView):
+class ProjectsUpdateView(AdminPermisoMixin,UpdateView):
     template_name = "actividades/editar-proyecto.html"
     model = Projects
     form_class = ProjectsForm
     success_url = reverse_lazy('activities_app:proyecto-lista')
 
 # ======================= COMISIONES ===========================
-class CommissionsListView(ListView):
+class CommissionsListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-comision.html"
     context_object_name = 'comision'
     model = Commissions
 
-class CommissionsCreateView(CreateView):
+class CommissionsCreateView(AdminPermisoMixin,CreateView):
     template_name = "actividades/crear-comision.html"
     model = Commissions
     form_class = CommissionsForm
     success_url = reverse_lazy('activities_app:comision-lista')
 
-class CommissionsDeleteView(DeleteView):
+class CommissionsDeleteView(AdminPermisoMixin,DeleteView):
     template_name = "actividades/eliminar-comision.html"
     model = Commissions
     success_url = reverse_lazy('activities_app:comision-lista')
 
-class CommissionsUpdateView(UpdateView):
+class CommissionsUpdateView(AdminPermisoMixin,UpdateView):
     template_name = "actividades/editar-comision.html"
     model = Commissions
     form_class = CommissionsForm
     success_url = reverse_lazy('activities_app:comision-lista')
 
 # ======================= ACTIVIDAD DIARIA ===========================
-class MyDailyTaskListView(ListView):
+class MyDailyTaskListView(LoginRequiredMixin,ListView):
     template_name = "actividades/mi-lista-actividades-diarias.html"
     context_object_name = 'actividadesDiarias'
 
@@ -89,24 +90,24 @@ class MyDailyTaskListView(ListView):
             payload["actividades"] = DailyTasks.objects.MiListarPorIntervalo(user=self.request.user,interval=intervalDate,type=selected)
         return payload
 
-class DailyTaskCreateView(CreateView):
+class DailyTaskCreateView(LoginRequiredMixin,CreateView):
     template_name = "actividades/crear-actividad-diaria.html"
     model = DailyTasks
     form_class = DailyTaskForm
     success_url = reverse_lazy('activities_app:mi-actividad-diaria-lista')
 
-class DailyTaskDeleteView(DeleteView):
+class DailyTaskDeleteView(LoginRequiredMixin,DeleteView):
     template_name = "actividades/eliminar-actividad-diaria.html"
     model = DailyTasks
     success_url = reverse_lazy('activities_app:mi-actividad-diaria-lista')
 
-class DailyTaskUpdateView(UpdateView):
+class DailyTaskUpdateView(LoginRequiredMixin,UpdateView):
     template_name = "actividades/editar-actividad-diaria.html"
     model = DailyTasks
     form_class = DailyTaskForm
     success_url = reverse_lazy('activities_app:mi-actividad-diaria-lista')
 
-class DailyTaskReportView(ListView):
+class DailyTaskReportView(AdminPermisoMixin,ListView):
     template_name = "actividades/reporte-actividades-diarias.html"
     context_object_name = 'actividadesDiarias'
     model = DailyTasks
@@ -141,7 +142,7 @@ class DailyTaskReportView(ListView):
         return payload
     
 # ======================= PEDIDOS TRANSFORMADORES ===========================
-class OrdersListView(ListView):
+class OrdersListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-pedidos-transformadores.html"
     context_object_name = 'pedidos'
     
@@ -157,23 +158,23 @@ class OrdersListView(ListView):
             
         return payload
 
-class OrdersCreateView(CreateView):
+class OrdersCreateView(AdminPermisoMixin,CreateView):
     template_name = "actividades/pedidos-transformadores-nuevo.html"
     form_class = PedidoForm
     success_url = reverse_lazy('activities_app:pedidos-transformadores')
 
-class OrderEditView(UpdateView):
+class OrderEditView(AdminPermisoMixin,UpdateView):
     template_name = "actividades/pedidos-transformadores-editar.html"
     model = TrafoOrder
     form_class = PedidoForm
      
     success_url = reverse_lazy('activities_app:pedidos-transformadores')
 
-class OrderDeleteView(DeleteView):
+class OrderDeleteView(AdminPermisoMixin,DeleteView):
     model = TrafoOrder
     success_url = reverse_lazy('activities_app:pedidos-transformadores')
 
-class OrderDetailView(DetailView):
+class OrderDetailView(LoginRequiredMixin,DetailView):
     template_name = "actividades/pedidos-transformadores-detalle.html"
     context_object_name = 'pedido'
 

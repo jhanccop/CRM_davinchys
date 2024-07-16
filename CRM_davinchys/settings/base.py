@@ -44,6 +44,7 @@ LOCAL_APPS = (
     'applications.movimientos',
 
     'multiselectfield',
+    'import_export',
 )
 
 THIRD_PARTY_APPS = (

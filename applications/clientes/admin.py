@@ -1,8 +1,9 @@
 from django.contrib import admin
+from import_export.admin import ImportExportMixin
 
 from .models import Contacto, Cliente #, Provider
 
-class ClientAdmin(admin.ModelAdmin):
+class ClientAdmin(ImportExportMixin,admin.ModelAdmin):
     list_display = (
         'tradeName',
         'ruc',
