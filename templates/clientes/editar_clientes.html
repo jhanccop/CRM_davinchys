@@ -1,4 +1,4 @@
-{% extends "users/base-clientes.html" %}
+{% extends "clientes/base-clientes.html" %}
 
 {% load  static %}
 {% block title %} Personas {% endblock title %}
@@ -12,11 +12,11 @@
   <div class="col-lg-8 col-md-10 col-12 m-auto">
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
+        <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
           <h5 class="text-center text-white"> CLIENTE </h5>
         </div>
       </div>
-      <div class="card-body">
+      <div class="card-body pb-0">
         <form class="" method="POST">{% csrf_token %}
 
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
@@ -47,27 +47,6 @@
               <div class="row mt-3">
                 <div class="col-12 col-sm-4">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Pais</label>
-                    {{ form.country }}
-                  </div>
-                </div>
-                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Estado/Provincia</label>
-                    {{ form.state }}
-                  </div>
-                </div>
-                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Ayuntamiento/Distrito</label>
-                    {{ form.county }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="row mt-3">
-                <div class="col-12 col-sm-4">
-                  <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Número de contacto</label>
                     {{ form.phoneNumber }}
                   </div>
@@ -91,6 +70,18 @@
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Número de contacto</label>
                     {{ form.contact }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Ubicación</label>
+                    {{ form.locationClient }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo</label>
+                    {{ form.typeClient }}
                   </div>
                 </div>
               </div>

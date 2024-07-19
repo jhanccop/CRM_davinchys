@@ -106,7 +106,7 @@ class BankMovements(TimeStampedModel):
         verbose_name_plural = 'Movimientos bancarios'
 
     def __str__(self):
-        return str(self.description) 
+        return str(self.idAccount) + " / " + str(self.amount) + " / " + str(self.opNumber) + " / " + str(self.description) 
 
 class BankReconciliation(TimeStampedModel):
 
@@ -309,19 +309,21 @@ class BankReconciliation(TimeStampedModel):
 
     expensesCategory = models.CharField(
         'Categoria de egresos',
-        max_length=20, 
+        max_length=2, 
         choices=EXPENSES_CATEGORY_CHOISES, 
-        blank=True
+        blank=True,
+        null=True
     )
     incomeCategory = models.CharField(
         'Categoria de ingresos',
-        max_length=20, 
+        max_length=1, 
         choices=INCOME_CATEGORY_CHOISES, 
-        blank=True
+        blank=True,
+        null=True
     )
     subCategoryPallRoy = models.CharField(
         'Sub Categoria planilla',
-        max_length=20, 
+        max_length=1, 
         choices=SUB_CATEGORY_PAYROLL_CHOISES,
         null=True,
         blank=True
@@ -362,9 +364,13 @@ class BankReconciliation(TimeStampedModel):
         default=0
     )
 
-    pdf_file = models.FileField(upload_to='pdfs/',null=True)
+    pdf_file = models.FileField(upload_to='conciliaciones_pdfs/',null=True,blank=True)
 
     objects = BankReconciliationManager()
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(BankReconciliation, self).delete(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Conciliación'

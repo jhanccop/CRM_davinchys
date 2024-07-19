@@ -53,7 +53,7 @@
                       <td class="text-sm">{{ t.barcode }}</td>
                       <td class="text-center text-sm">{{ t.provider }}</td>
                       <td class="text-center text-sm">{{ t.get_KVA_display }}</td>
-                      <td class="text-center text-sm ">{{ t.HVTAP }}</td>
+                      <td class="text-center text-sm ">{{ t.get_HVTAP_display }}</td>
                       <td class="text-center text-sm">{{ t.get_LV_display }}</td>
                       <td class="text-center text-sm">{{ t.get_HZ_display }}</td>
                       <td class="text-center text-sm">{{ t.get_TYPE_display }}</td>
@@ -61,11 +61,11 @@
 
                       <td class="text-start d-flex">
                         <a href="{% url 'producto_app:transformador-editar' t.id %}">
-                          <i class="fas fa-edit text-info text-lg"></i>
+                          <i class="far fa-edit text-dark text-lg"></i>
                         </a>
                         &emsp;
                         <a href="{% url 'producto_app:transformador-eliminar' t.id %}">
-                          <i class="fas fa-trash text-danger text-lg"></i>
+                          <i class="far fa-trash-alt text-primary text-lg"></i>
                         </a>
                       </td>
                     </tr>

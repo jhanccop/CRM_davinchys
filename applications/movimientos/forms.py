@@ -131,120 +131,290 @@ class BankReconciliationForm(forms.ModelForm):
             
         ]
         widgets = {
+            'date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'typeInvoice': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idInvoice': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'annotation': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'idClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'amountReconcilied': forms.NumberInput(
+                attrs = {
+                    'class': 'input-group-field form-control text-center',
+                }
+            ),
+            # =======================
+            'description': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'ActivitiesCategory': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDivActivities()"
+                }
+            ),
 
-                'date': forms.DateInput(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
-                    }
-                ),
-                'typeInvoice': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                'idInvoice': forms.TextInput(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                'annotation': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                # =======================
-                'idClient': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                'amountReconcilied': forms.NumberInput(
-                    attrs = {
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                # =======================
-                'description': forms.TextInput(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                # =======================
-                'ActivitiesCategory': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDivActivities()"
-                    }
-                ),
+            'idTrafoOrder': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'idCommission': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'idProject': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
 
-                'idTrafoOrder': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
-                    }
-                ),
-                'idCommission': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
-                    }
-                ),
-                'idProject': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
-                    }
-                ),
-
-                # =======================
-                'expensesCategory': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
-                    }
-                ),
-                
-                'subCategoryCashBox': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                'subCategoryPallRoy': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                    }
-                ),
-                # =======================
-                'contabilidad': forms.Select(
-                    attrs = {
-                        'placeholder': '',
-                        'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
-                    }
-                ),
-                            
-                'pdf_file': forms.ClearableFileInput(
-                    attrs = {
-                        'type': 'file',
-                        'id':"formFile",
-                        'class': 'form-control bg-gradient-secondary text-dark',
-                    }
-                ),
-            }
+            # =======================
+            'expensesCategory': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            
+            'subCategoryCashBox': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'subCategoryPallRoy': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'contabilidad': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                }
+            ),
+        }
         
+    def clean_amountReconcilied(self):
+        amountReconcilied = self.cleaned_data['amountReconcilied']
+        if not amountReconcilied > 0:
+            raise forms.ValidationError('Ingrese un monto mayor a cero')
+        return amountReconcilied
+
+class DocReconciliationUpdateForm(forms.ModelForm):
+    class Meta:
+        model = BankReconciliation
+        fields = [
+            # oculto
+            'user',
+            'idBankMovements',
+
+            # generales
+            'incomeCategory',
+            'expensesCategory',
+
+            'date',
+            'typeInvoice',
+            'idInvoice',
+            'annotation',
+
+            'idClient',
+            'amountReconcilied',
+
+            'description',
+            
+            'ActivitiesCategory',
+            'idTrafoOrder',
+            'idCommission',
+            'idProject',
+            
+            'subCategoryPallRoy',
+            'subCategoryCashBox',
+            
+            'contabilidad',
+            'pdf_file'
+            
+        ]
+        widgets = {
+
+            'idBankMovements': forms.SelectMultiple(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control w-100',
+                    #'disabled': True
+                }
+            ),
+            'date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'type': 'date',
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'typeInvoice': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idInvoice': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'annotation': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'idClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'amountReconcilied': forms.NumberInput(
+                attrs = {
+                    'class': 'input-group-field form-control text-center',
+                }
+            ),
+            # =======================
+            'description': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'ActivitiesCategory': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDivActivities()"
+                }
+            ),
+
+            'idTrafoOrder': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'idCommission': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'idProject': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+
+            # =======================
+            'expensesCategory': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            
+            'subCategoryCashBox': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'subCategoryPallRoy': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            # =======================
+            'contabilidad': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange':"toggleDiv()"
+                }
+            ),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                }
+            ),
+        }
+    
+    def clean_amountReconcilied(self):
+        amountReconcilied = self.cleaned_data['amountReconcilied']
+        if not amountReconcilied > 0:
+            raise forms.ValidationError('Ingrese un monto mayor a cero')
+        return amountReconcilied
+  
 class UploadFileForm(forms.Form):
     file = forms.FileField(
         label="Sellecionar archivo:",

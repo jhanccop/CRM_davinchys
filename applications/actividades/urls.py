@@ -81,29 +81,29 @@ urlpatterns = [
 
     # ============== FABRICACION DE TRANSFORMADORES ===============
     path(
-        'actividades/pedidos-transformadores/', 
-        views.OrdersListView.as_view(),
-        name='pedidos-transformadores',
+        'actividades/cotizaciones-transformadores/', 
+        views.QuotesListView.as_view(),
+        name='cotizaciones-transformadores',
     ),
     path(
-        'actividades/pedidos-transformadores-nuevo/',
-        views.OrdersCreateView.as_view(),
-        name='pedidos-transformadores-nuevo',
+        'actividades/cotizaciones-transformadores-nuevo/',
+        views.QuotesCreateView.as_view(),
+        name='cotizaciones-transformadores-nuevo',
     ),
     path(
-        'actividades/pedidos-transformadores-editar/<pk>/', 
-        views.OrderEditView.as_view(),
-        name='pedidos-transformadores-editar',
+        'actividades/cotizaciones-transformadores-editar/<pk>/', 
+        views.QuotesEditView.as_view(),
+        name='cotizaciones-transformadores-editar',
     ),
     path(
-        'actividades/pedidos-transformadores-eliminar/<pk>/', 
-        views.OrderDeleteView.as_view(),
-        name='pedidos-transformadores-eliminar',
+        'actividades/cotizaciones-transformadores-eliminar/<pk>/', 
+        views.QuotesDeleteView.as_view(),
+        name='cotizaciones-transformadores-eliminar',
     ),
     path(
-        'actividades/pedidos-transformadores-detalle/<pk>/', 
-        views.OrderDetailView.as_view(),
-        name='pedidos-transformadores-detalle',
+        'actividades/cotizaciones-transformadores-detalle/<pk>/', 
+        views.QuotesDetailView.as_view(),
+        name='cotizaciones-transformadores-detalle',
     ),
 ]
 

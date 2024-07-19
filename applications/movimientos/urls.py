@@ -44,7 +44,7 @@ urlpatterns = [
         name='lista-documentacion',
     ),
     path(
-        'documentacion/agregar/', 
+        'documentacion/nuevo/', 
         views.DocumentacionCreateView.as_view(),
         name='documentacion-nuevo',
     ),
@@ -70,6 +70,11 @@ urlpatterns = [
         views.MovimientosEditView.as_view(),
         name='movimientos-editar',
     ),
+    path(
+        'movimientos/detalle/<pk>/', 
+        views.MovimientosDetailView.as_view(),
+        name='movimientos-detalle',
+    ),
     # ============== UPLOAD EXCEL FILE MOVIMIENTOS =================
     path(
         'movimientos/subir-excel/', 
@@ -77,11 +82,24 @@ urlpatterns = [
         name='movimientos-subir-excel',
     ),
 
+    # ============== CONCILIAR =================
+
     path(
         'movimientos/conciliar/<pk>/', 
         views.MovimientosConciliarCreateView.as_view(),
         name='movimientos-conciliar',
     ),
+    path(
+        'movimientos/editar-conciliar/<pk>/', 
+        views.MovimientosConciliarUpdateView.as_view(),
+        name='movimientos-conciliar-editar',
+    ),
+    path(
+        'movimientos/eliminar-conciliacion/<pk>/', 
+        views.MovimientosConciliarDeleteView.as_view(),
+        name='movimientos-conciliacion-eliminar',
+    ),
+
     # ============== TRANSFERENCIAS =================
     path(
         'movimientos/transferencias/', 

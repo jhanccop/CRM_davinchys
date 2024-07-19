@@ -171,3 +171,13 @@ class DailyTasksManager(models.Manager):
 
         return result
     
+class TrafoQuoteManager(models.Manager):
+    def CotizacionPorId(self,id):
+        return self.get(id=id)
+    
+    def ListarPorIntervalo(self):
+        return self.all()
+    
+class TrafosManager(models.Manager):
+    def TrafoPorId(self,id):
+        return self.get(id=id)

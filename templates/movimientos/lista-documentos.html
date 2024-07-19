@@ -1,4 +1,4 @@
-{% extends "movimientos/base-reportes.html" %}
+{% extends "movimientos/base-movimientos.html" %}
 
 {% load  static %}
 {% block title %} Documentación {% endblock title %}
@@ -35,7 +35,7 @@
       Export CSV
     </a>
     <div class="dropleft ms-3">
-      <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:movimientos-nuevo' %}">
+      <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:documentacion-nuevo' %}">
         INGRESAR DOCUMENTOS
       </a>
       
@@ -48,12 +48,10 @@
   <div class="col-12">
       <div class="card">
           <div class="card-header pb-0 ">
-            <div class="row">
+            <div class="row align-middle align-items-center">
               <div class="col-lg-6 col-md-3">
                 <h5 class="mb-0">Documentacion</h5>
-                <p class="text-sm mb-0 text-info font-weight-bold">
-                  {{movimientos.selectedAccount.accountName}} / [{{movimientos.selectedAccount.accountBalance}}]
-                </p>
+                <p class="pt-0">Ingresada</p>
               </div>
               <div class="col-lg-6 col-md-9">
                 <form method="GET" class="">{% csrf_token %}
@@ -87,23 +85,19 @@
                   </div>
                 </form>
               </div>
-
             </div>
-            
-            
           </div>
           <div class="card-body pt-0 px-0 pb-2">
               <div class="table-responsive p-0">
                 <table class="table table-flush mb-0 align-items-center" id="datatable-move">
                   <thead class="thead-light">
                     <tr>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Fecha </th>
+                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Conciliación</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Categoria</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Cont</th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                     </tr>
@@ -120,7 +114,7 @@
                       
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{t.get_typeInvoice_display}} - {{t.idInvoice}}</h6>
+                          <h6 class="mb-0 text-sm">{{t.get_typeInvoice_display}} | {{t.idInvoice}}</h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
                         </div>
                       </td>
@@ -149,11 +143,12 @@
                       </td>
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idBankMovements.all %} <p class="text-sm font-weight-normal text-secondary mb-0"> nOp: {{i.opNumber}} / {{i.idAccount}} / <span class="font-weight-bold"> {{i.amount}} </span></p> {%endfor%}
+                          {% for i in t.idBankMovements.all %}
+                          <p class="text-sm font-weight-normal text-secondary mb-0">
+                            {{i.idAccount}} | {{i.opNumber}} | <span class="font-weight-bold text-dark"> {{i.idAccount.get_currency_display}} {{i.amount}} </span>
+                          </p>
+                          {%endfor%}
                         </div>
-                      </td>
-                      <td class="text-sm">
-                        {{ t.get_expensesCategory_display }}
                       </td>
                       <td class="text-sm">
                         {{ t.get_contabilidad_display }}
@@ -165,8 +160,8 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="javascript:;">Ver detalle</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Agregar Conciliacion</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar documento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Agregar movimiento</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar movimiento</a></li>
                         </ul>
                       </td>

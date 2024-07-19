@@ -4,7 +4,6 @@ from django import forms
 from .models import Transformer
 
 class TransformerForm(forms.ModelForm):
-    
     class Meta:
         model = Transformer
         fields = (
@@ -117,7 +116,7 @@ class TransformerForm(forms.ModelForm):
             'description': forms.Textarea(
                 attrs = {
                     'placeholder': '',
-                    'rows': '3',
+                    'rows': '2',
                     'class': 'input-group-field form-control',
                 }
             )

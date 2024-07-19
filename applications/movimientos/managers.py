@@ -35,26 +35,30 @@ class DocumentsUploadedManager(models.Manager):
 class BankMovementsManager(models.Manager):
     def BusquedaRegistros(self,idAccount,balance,opNumber):
        result = self.filter(idAccount=idAccount).filter(balance=balance).filter(opNumber=opNumber)
-       return result.exists() 
-      
+       return result.exists()
+    
+    def MovimientosPorId(self,id):
+       return self.get(id = id)
+    
     def ListaMovimientosPorCuenta(self,intervalo,cuenta):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
         # =========== Creacion de rango de fechas ===========
         rangeDate = [intervals[0] - timedelta(days = 1),None]
-        
         if len(intervals) == 1:
             rangeDate[1] = intervals[0] + timedelta(days = 1)
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
-
         result = self.filter(
             date__range = rangeDate,
             idAccount__id = cuenta
         ).order_by("-id")
-
         return result
+    
+    def ObtenerSaldo(self,cuenta):
+       result = self.filter(idAccount__id=cuenta).values("balance").last()
+       return result
     
     def ListaMovimientosPorTipo(self,documentation):
         ids = self.filter(
@@ -67,11 +71,10 @@ class BankMovementsManager(models.Manager):
             doc =  ArrayAgg('description'),
             amount = ArrayAgg('amountReconcilied'),
         )
-                
         return result
     
 class  BankReconciliationManager(models.Manager):
-   def ListaDocumentosPorTipo(self,intervalo,tipo):
+    def ListaDocumentosPorTipo(self,intervalo,tipo):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -88,27 +91,40 @@ class  BankReconciliationManager(models.Manager):
                 date__range = rangeDate,
             ).order_by("date")
         else:
-           result = self.filter(
+            result = self.filter(
                 date__range = rangeDate,
                 typeInvoice = str(tipo)
             ).order_by("date")
 
         return result
-   
-   def ListaConciliacionPorCuenta(self,movimientos):
 
-      ids = self.filter(
-         idBankMovements__id__in = movimientos
-      )
-      result = ids.values('idBankMovements__id').annotate(
-         accumulate = Sum("amountReconcilied"),
-         per = Abs(Sum("amountReconcilied")*100/F('idBankMovements__amount')),
-         tin =  ArrayAgg('idClient__ruc'),
-         doc =  ArrayAgg('description'),
-         amount = ArrayAgg('amountReconcilied'),
-      )
-            
-      return result
+    def ListaConciliacionPorCuenta(self,movimientos):
+        ids = self.filter(
+            idBankMovements__id__in = movimientos
+        )
+        result = ids.values('idBankMovements__id').annotate(
+            accumulate = Sum("amountReconcilied"),
+            per = Abs(Sum("amountReconcilied")*100/F('idBankMovements__amount')),
+            amount = ArrayAgg('amountReconcilied'),
+            tin = ArrayAgg('idClient__tradeName'),
+            doc =  ArrayAgg('description'),
+            pdf =  ArrayAgg('pdf_file'),
+        )
+        return result
+    
+    def ListaConciliacionPorIdMovimiento(self,movimiento):
+        result = self.filter(
+            idBankMovements__id = movimiento
+        ).order_by("date")
+        return result
+    
+    def ListaConciliacionSumaPorIdMovimiento(self,movimiento):
+        result = self.filter(
+            idBankMovements__id = movimiento
+        ).values(
+           "amountReconcilied"
+        ).aggregate(tot = Sum("amountReconcilied"))
+        return result
 
 
 class TransactionsManager(models.Manager):

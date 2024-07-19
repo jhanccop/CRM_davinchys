@@ -1,7 +1,7 @@
 # django
 from django import forms
 # local
-from .models import TrafoOrder, Projects, Commissions, DailyTasks
+from .models import TrafoQuote, Projects, Commissions, DailyTasks
 
 class ProjectsForm(forms.ModelForm):
     
@@ -200,22 +200,21 @@ class DailyTaskForm (forms.ModelForm):
             ),
         }
 
-class PedidoForm(forms.ModelForm):
+class QuoteTrafoForm(forms.ModelForm):
     class Meta:
-        model = TrafoOrder
+        model = TrafoQuote
         fields = (
-            'idOrder',
+            'idQuote',
             'idClient',
-            'idTransformer',
-            'numberUnits',
-            'amount',
+            'userClient',
             'dateOrder',
             'deadline',
             'idAttendant',
+            'description'
         )
         
         widgets = {
-            'idOrder': forms.TextInput(
+            'idQuote': forms.TextInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -223,23 +222,11 @@ class PedidoForm(forms.ModelForm):
             ),
             'idClient': forms.Select(
                 attrs = {
-                    'placeholder': 'Cliente',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'idTransformer': forms.Select(
-                attrs = {
-                    'placeholder': 'Transformador',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'numberUnits': forms.NumberInput(
-                attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
                 }
             ),
-            'amount': forms.NumberInput(
+            'userClient': forms.TextInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -260,6 +247,12 @@ class PedidoForm(forms.ModelForm):
                 }
             ),
             'idAttendant': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'description': forms.Textarea(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

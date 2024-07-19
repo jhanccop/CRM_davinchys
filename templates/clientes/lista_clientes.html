@@ -38,8 +38,6 @@
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">RUC/ID</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Marca</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Pais</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Estado</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Numero</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Correo</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
@@ -47,21 +45,19 @@
             </thead>
             <tbody>
               {% for t in clientes %}
-              <tr>
+              <tr class="mb-0 pb-0">
                 <td class="text-sm">{{ t.tradeName }}</td>
                 <td class="text-start text-sm">{{ t.ruc }}</td>
                 <td class="text-start text-sm">{{ t.brandName }}</td>
-                <td class="text-start text-sm ">{{ t.country }}</td>
-                <td class="text-start text-sm">{{ t.state }}</td>
                 <td class="text-start text-sm">{{ t.phoneNumber }}</td>
                 <td class="text-start text-sm">{{ t.email }}</td>
                 <td>
                   <a href="{% url 'clients_app:cliente-editar' t.id %}">
-                    <i class="fas fa-edit text-info text-lg"></i>
+                    <i class="far fa-edit text-dark text-lg"></i>
                   </a>
                   &emsp;
                   <a href="{% url 'clients_app:cliente-eliminar' t.id %}">
-                    <i class="fas fa-trash text-danger text-lg"></i>
+                    <i class="far fa-trash-alt text-primary text-lg"></i>
                   </a>
                 </td>
               </tr>

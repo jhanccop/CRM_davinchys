@@ -1,11 +1,10 @@
-{% extends "users/base_users_creative.html" %}
+{% extends "users/base-usuarios.html" %}
 
 {% load  static %}
-
-{% block company %} Pedidos {% endblock company %}
-{% block companyMenu %} {{ CompanyName }} {% endblock companyMenu %}
-{% block appName %} Nuevo {% endblock appName %}
-{% block Type %} Transformadores {% endblock Type %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Usuarios del sistema {% endblock appName %}
+{% block Type %} Eliminar {% endblock Type %}
 
 {% block panel-content %}
 
@@ -14,7 +13,7 @@
 
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-secondary shadow-secondary border-radius-lg pt-4 pb-3">
+        <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
           <h5 class="text-center text-white"> ELIMINAR USUARIO </h5>
         </div>
       </div>
@@ -30,7 +29,7 @@
         
           <form class="cell medium-5 ms-auto" action="{% url 'users_app:user-delete' object.id %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar usuario</button>
+            <button type="submit" class="btn bg-gradient-primary ms-auto mb-0 js-btn-next">Eliminar usuario</button>
           </form>
           
         </div>

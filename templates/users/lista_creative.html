@@ -32,9 +32,9 @@
             <thead>
               <tr>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Nombres y apellidos</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Correo</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Permisos</th>
-                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Última conexión</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Area</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Teléfono</th>
+                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Condición</th>
                 <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
               </tr>
             </thead>
@@ -42,24 +42,32 @@
               {% for usuario in usuarios %}
               <tr>
                 <td>
+                  <div class="d-flex px-2 py-1">
+                    <div>
+                      {% if usuario.gender == "M" %}
+                      <img src="{% static 'assets/img/homen.png' %}" class="avatar avatar-sm me-3 border-radius-lg" alt="user1">
+                      {% else %} 
+                      <img src="{% static 'assets/img/women.png' %}" class="avatar avatar-sm me-3 border-radius-lg" alt="user1">
+                      {% endif %}
+                    </div>
                     <div class="d-flex flex-column justify-content-center">
                       <h6 class="mb-0 text-sm">{{ usuario.full_name }} {{ usuario.last_name }}</h6>
+                      <p class="text-xs text-secondary mb-0">{{ usuario.email }}</p>
+                    </div>
                   </div>
                 </td>
-                <td class="text-start text-sm">{{ usuario.email }}</td>
-                <td class="text-start text-sm">{{ usuario.get_position_display }}</td>
                 
-                <td class="align-middle text-center">
-                  <span class="text-secondary text-xs font-weight-bold">{{ usuario.last_login }}</span>
-                </td>
+                <td class="text-start text-sm">{{ usuario.get_position_display }}</td>
+                <td class="text-start text-sm">{{ usuario.phoneNumber }}</td>
+                <td class="text-start text-sm">{{ usuario.get_condition_display }}</td>
 
                 <td class="text-center">
                   <a href="{% url 'users_app:user-update' usuario.pk %}">
-                    <i class="fas fa-edit text-info text-lg"></i>
+                    <i class="far fa-edit text-dark text-lg"></i>
                   </a>
                   &emsp;
                   <a href="{% url 'users_app:user-delete' usuario.id %}">
-                    <i class="fas fa-trash text-danger text-lg"></i>
+                    <i class="far fa-trash-alt text-primary text-lg"></i>
                   </a>
                 </td>
 

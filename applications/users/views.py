@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from applications.users.mixins import AdminPermisoMixin
 from django.http import HttpResponseRedirect
 
 from django.views.generic import (
@@ -27,7 +28,7 @@ from .forms import (
 from .models import User
 # 
 
-class UserRegisterView(FormView):
+class UserRegisterView(AdminPermisoMixin,FormView):
     template_name = 'users/register_creative.html'
     form_class = UserRegisterForm
     success_url = reverse_lazy('users_app:user-lista')
@@ -69,13 +70,13 @@ class LogoutView(View):
             )
         )
 
-class UserUpdateView(UpdateView):
+class UserUpdateView(AdminPermisoMixin,UpdateView):
     template_name = "users/update_creative.html"
     model = User
     form_class = UserUpdateForm
     success_url = reverse_lazy('users_app:user-lista')
 
-class UserDeleteView(DeleteView):
+class UserDeleteView(AdminPermisoMixin,DeleteView):
     template_name = "users/delete_creative.html"
     model = User
     success_url = reverse_lazy('users_app:user-lista')
@@ -101,7 +102,7 @@ class UpdatePasswordView(LoginRequiredMixin, FormView):
         logout(self.request)
         return super(UpdatePasswordView, self).form_valid(form)
 
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin,ListView):
     template_name = "users/lista_creative.html"
     context_object_name = 'usuarios'
 

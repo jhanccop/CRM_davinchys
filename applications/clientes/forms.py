@@ -14,7 +14,9 @@ class ClientForm(forms.ModelForm):
             'phoneNumber',
             'contact',
             'webPage',
-            'email'
+            'email',
+            'typeClient',
+            'locationClient'
         )
         widgets = {
             'tradeName': forms.TextInput(
@@ -35,7 +37,7 @@ class ClientForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'country': forms.TextInput(
+            'locationClient': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -47,7 +49,7 @@ class ClientForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'county': forms.TextInput(
+            'typeClient': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

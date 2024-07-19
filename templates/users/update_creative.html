@@ -1,4 +1,4 @@
-{% extends "users/base_users_creative.html" %}
+{% extends "users/base-usuarios.html" %}
 
 {% load  static %}
 {% block title %} Personas {% endblock title %}
@@ -21,13 +21,13 @@
         <div class="col-12 col-lg-8 m-auto">
           <div class="card">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+              <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
                 <div class="multisteps-form__progress text-center">
-                  <h5 class="text-white">Actualizar informacion de usuario</h5>
+                  <h6 class="text-white">Actualizar informacion de usuario</h6>
                 </div>
               </div>
             </div>
-            <div class="card-body">
+            <div class="card-body pb-0">
               <form class="multisteps-form__form" style="height: 250px;" method="POST">{% csrf_token %}
 
                 <div class="multisteps-form__panel border-radius-xl bg-white js-active" data-animation="FadeIn">

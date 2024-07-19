@@ -100,7 +100,6 @@
                     <div class="form-group">
                       {{ form.pdf_file }}
                     </div>
-              
                   </div>
                   <p class="text-sm mb-0">Tamaño menor a 1 MB.</p>
                   {% for error in form.pdf_file.errors %}
@@ -176,14 +175,11 @@
 </script>
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
-
 <script type="text/javascript">
-  
   if (document.getElementById('id_idProvider')) {
     var element = document.getElementById('id_idProvider');
     const example = new Choices(element, {});
   }
-  
 </script>
 
 {% endblock JSscripts %}

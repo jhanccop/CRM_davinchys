@@ -1,4 +1,4 @@
-{% extends "users/base_users_creative.html" %}
+{% extends "producto/base-transformadores.html" %}
 
 {% load  static %}
 
@@ -14,7 +14,7 @@
 
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+        <div class="bg-gradient-dark shadow-dark border-radius-lg pt-3 pb-2">
           <h6 class="text-center text-white"> ELIMINAR TRANSFORMADOR DE CATALOGO </h6>
         </div>
       </div>
@@ -24,7 +24,7 @@
           <li>Transformador: <span class="font-weight-bold">{{object.barcode}}</span></li>
           <li>Modelo: <span class="font-weight-bold"> {{object.model_name}}</span> </li>
           <li>Proveedor: <span class="font-weight-bold">{{object.provider}}</span></li>
-          <li>Características: <span class="font-weight-bold">{{object.get_power_display}} kVA - {{object.get_voltage_display}} V - {{object.get_phase_display}}</span></li>
+          <li>Características: <span class="font-weight-bold">{{object.get_KVA_display}} kVA - {{object.get_LV_display}} - {{object.get_TYPE_display}}</span></li>
         </ul>
         <div class="d-flex">
           <a href="{% url 'producto_app:transformador-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
@@ -32,7 +32,7 @@
         
           <form class="cell medium-5 ms-auto" action="{% url 'producto_app:transformador-eliminar' object.id %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar transformador</button>
+            <button type="submit" class="btn bg-gradient-primary ms-auto mb-0 js-btn-next">Eliminar transformador</button>
           </form>
           
         </div>

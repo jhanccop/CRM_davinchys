@@ -14,10 +14,10 @@ from django.views.generic import (
 from applications.users.mixins import AdminPermisoMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import TrafoOrder, Projects, Commissions, DailyTasks
+from .models import TrafoQuote, Projects, Commissions, DailyTasks
 from applications.users.models import User
 
-from .forms import PedidoForm, ProjectsForm, CommissionsForm, DailyTaskForm
+from .forms import QuoteTrafoForm, ProjectsForm, CommissionsForm, DailyTaskForm
 
 # ======================= PROYECTOS ===========================
 class ProjectsListView(LoginRequiredMixin,ListView):
@@ -142,9 +142,9 @@ class DailyTaskReportView(AdminPermisoMixin,ListView):
         return payload
     
 # ======================= PEDIDOS TRANSFORMADORES ===========================
-class OrdersListView(LoginRequiredMixin,ListView):
-    template_name = "actividades/lista-pedidos-transformadores.html"
-    context_object_name = 'pedidos'
+class QuotesListView(LoginRequiredMixin,ListView):
+    template_name = "actividades/lista-cotizaciones-transformadores.html"
+    context_object_name = 'cotizaciones'
     
     def get_queryset(self):
         intervalDate = self.request.GET.get("dateKword", '')
@@ -154,34 +154,34 @@ class OrdersListView(LoginRequiredMixin,ListView):
         
         payload = {}
         payload["intervalDate"] = intervalDate
-        payload["ordenes"] = TrafoOrder.objects.ListarPorIntervalo(intervalDate)
+        payload["ordenes"] = TrafoQuote.objects.ListarPorIntervalo(intervalDate)
             
         return payload
 
-class OrdersCreateView(AdminPermisoMixin,CreateView):
-    template_name = "actividades/pedidos-transformadores-nuevo.html"
-    form_class = PedidoForm
-    success_url = reverse_lazy('activities_app:pedidos-transformadores')
+class QuotesCreateView(AdminPermisoMixin,CreateView):
+    template_name = "actividades/cotizaciones-transformadores-nuevo.html"
+    form_class = QuoteTrafoForm
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class OrderEditView(AdminPermisoMixin,UpdateView):
-    template_name = "actividades/pedidos-transformadores-editar.html"
-    model = TrafoOrder
-    form_class = PedidoForm
+class QuotesEditView(AdminPermisoMixin,UpdateView):
+    template_name = "actividades/cotizaciones-transformadores-editar.html"
+    model = TrafoQuote
+    form_class = QuoteTrafoForm
      
-    success_url = reverse_lazy('activities_app:pedidos-transformadores')
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class OrderDeleteView(AdminPermisoMixin,DeleteView):
-    model = TrafoOrder
-    success_url = reverse_lazy('activities_app:pedidos-transformadores')
+class QuotesDeleteView(AdminPermisoMixin,DeleteView):
+    model = TrafoQuote
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class OrderDetailView(LoginRequiredMixin,DetailView):
-    template_name = "actividades/pedidos-transformadores-detalle.html"
-    context_object_name = 'pedido'
+class QuotesDetailView(LoginRequiredMixin,DetailView):
+    template_name = "actividades/cotizaciones-transformadores-detalle.html"
+    context_object_name = 'cotizacion'
 
-    model = TrafoOrder
+    model = TrafoQuote
     
     def get_context_data(self, **kwargs):
-        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context = super(QuotesDetailView, self).get_context_data(**kwargs)
         pk = context["pedido"]
 
         #orderTrack =OrderTracking.objects.obtenerTrack(pk)

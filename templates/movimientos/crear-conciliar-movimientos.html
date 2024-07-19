@@ -7,18 +7,27 @@
 {% block Type %} Conciliar {% endblock Type %}
 
 {% block panel-content %}
-<div class="row mt-4">
-  <div class="col-lg-9 col-12 mx-auto position-relative">
+<div class="row">
+  <div class="col-lg-10 col-12 mx-auto position-relative">
     <div class="card">
-      <div class="card-header p-3 pt-2">
-        <div
-          class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-          <i class="material-icons opacity-10">event</i>
+      <div class="card-header p-3 pt-2 pb-0">
+        <div class="icon icon-lg icon-shape bg-gradient-secondary shadow text-center border-radius-xl mt-n4 float-start">
+          <i class="fas fa-file-invoice opacity-10"></i>
         </div>
-        <h6 class="mb-0">{{mov}} / {{mov.amount}}</h6>
+        <div class="row">
+          <div class="col-md-8 col-8">
+            <p class="mb-0 pb-0">{{mov.idAccount}} / {{mov.idAccount.accountName}}</p>
+            <h6 class="mt-sm-0 pt-0 "> {{mov.date|date:"Y-m-d"}} | nOp: {{mov.opNumber}} | {{mov.description}} </h6>
+          </div>
+          <div class="col-md-4 col4 text-end justify-content-end align-items-center align-middle">
+            <small>{{mov.idAccount.get_currency_display}} {{mov.amount|floatformat:"2g"}}</small>
+            <p class="mt-sm-0 pt-0 text-dark font-weight-bold"> Conciliado: {{sum.tot|floatformat:"2g"}}</p>
+          </div>
+        </div>
       </div>
-      <div class="card-body pt-2 pb-0">
-        <form class="" method="POST">{% csrf_token %}
+
+      <div class="card-body pt-0 pb-0">
+        <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
 
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
 
@@ -46,12 +55,12 @@
               <div class="row">
                 <div class="col-6 col-sm-3">
                   <div class="input-group input-group-outline ">
-                    <label for="exampleFormControlInput1" class="form-label">Fecha de emisión</label>
+                    <label for="exampleFormControlInput1" class="form-label">F. emisión</label>
                     {{ form.date }}
                   </div>
                 </div>
 
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                <div class="col-6 col-sm-3 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">T comprobante</label>
                     {{ form.typeInvoice }}
@@ -76,17 +85,10 @@
               <br>
 
               <div class="row">
-                <div class="col-6 col-sm-8">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Cliente</label>
+                <div class="col-12 col-sm-8">
+                  <p class="mb-0">Proveedor</p>
+                  <div class="input-group input-group-outline">
                     {{ form.idClient }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
-                    {{ form.amountReconcilied }}
                   </div>
                 </div>
               </div>
@@ -94,17 +96,35 @@
               <br>
 
               <div class="row">
-                <div class="col-12 col-sm-6">
+                <div class="col-12 col-sm-4 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
+                    {{ form.amountReconcilied }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-8 mt-3 mt-sm-0">
                   <div class="input-group input-group-outline">
                     <label for="exampleFormControlInput1" class="form-label">Descripción</label>
                     {{ form.description }}
                   </div>
                 </div>
+              </div>
 
-                <div class="col-12 col-sm-6">
+              <br>
+
+              <div class="row">
+                <div class="col-12 col-sm-12 mt-sm-0">
                   <div class="input-group input-group-outline">
-                    {{ form.pdf_file }}
+                    <div class="form-group w-100">
+                      {{ form.pdf_file }}
+                    </div>
                   </div>
+                  <p class="text-sm mb-0">Tamaño menor a 1 MB.</p>
+                  {% for error in form.pdf_file.errors %}
+                  <p class="text-sm text-primary font-weight-bolder mb-0">
+                    {{ error|escape }}
+                  </p>
+                  {% endfor %}
                 </div>
               </div>
 
@@ -142,7 +162,7 @@
 
               <br>
 
-              <h6 class="font-weight-bolder">Categoria de gasto</h6>
+              <h6 class="font-weight-bolder">Categoria de desembolso</h6>
 
               <div class="row">
                 <div class="col-6 col-sm-4">
@@ -253,6 +273,14 @@
 <script>
   document.getElementById("id_user").value = "{{user.id}}";
   document.getElementById("id_idBankMovements").value = "{{mov.id}}";
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+  if (document.getElementById('id_idClient')) {
+    var element = document.getElementById('id_idClient');
+    const example = new Choices(element, {});
+  }
 </script>
 
 {% endblock JSscripts %}
