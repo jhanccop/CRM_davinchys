@@ -105,6 +105,27 @@ urlpatterns = [
         views.QuotesDetailView.as_view(),
         name='cotizaciones-transformadores-detalle',
     ),
+    path(
+        'actividades/crear-transformador/<pk>/', 
+        views.TrafoCreateView.as_view(),
+        name='crear-transformador',
+    ),
+    path(
+        'actividades/editar-transformador/<pk>/', 
+        views.TrafoUpdateView.as_view(),
+        name='editar-transformador',
+    ),
+    path(
+        'actividades/eliminar-transformador/<pk>/', 
+        views.TrafoDeleteView.as_view(),
+        name='eliminar-transformador',
+    ),
+
+    path(
+        'actividades/cotizaciones-enviar-correo/',
+        views.InitialEmailCreateView.as_view(),
+        name='cotizaciones-enviar-correo',
+    ),
 ]
 
 if settings.DEBUG:

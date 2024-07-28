@@ -1,7 +1,7 @@
 from datetime import date, datetime,timedelta
 
 from django.db.models import OuterRef, Subquery, Count, F, Sum
-
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 
 class TrafoTrackingManager(models.Manager):
@@ -175,9 +175,30 @@ class TrafoQuoteManager(models.Manager):
     def CotizacionPorId(self,id):
         return self.get(id=id)
     
-    def ListarPorIntervalo(self):
-        return self.all()
+    def ListarPorIntervalo(self,interval):
+        Intervals = interval.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        if len(intervals) == 1:
+            lista = self.filter(
+                created__gte = intervals[0] - timedelta(days = 1),
+            ).order_by('-created')
+            return lista
+        else:
+            lista = self.filter(
+                created__range=(intervals[0],intervals[1]+timedelta(days=1)),
+            ).order_by('-created')
+            return lista
     
 class TrafosManager(models.Manager):
     def TrafoPorId(self,id):
         return self.get(id=id)
+    
+    def ListaPorCotizaciones(self,quote):
+        ids = self.filter(
+            idQuote__id = quote
+        )
+        #result = ids.values('idQuote').annotate(
+        #    provider =  ArrayAgg('provider'),
+        #)
+        return ids

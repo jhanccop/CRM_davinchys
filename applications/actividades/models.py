@@ -336,20 +336,26 @@ class DailyTasks(TimeStampedModel):
 # ================= COTIZACIONES ================
 class TrafoQuote(TimeStampedModel):
 
+    CONDITION_CHOICES = (
+        ('0', 'recibida'),
+        ('1', 'enviada'),
+        ('2', 'aprobada'),
+    )
+
     # ESTADO DE COTIZACION
-    RECIBIDO = '0'
-    REVISION = '1'
-    RESPONDIDO = '2'
-    CANCELADO = '3'
-    ESPERA = '4'
+    ESPERA = '0'
+    COMPLETADO = '1'
+    CANCELADO = '2'
+    OBSERVADO = '3'
+    CREADO = '4'
 
     #
     STATUS_CHOICES = [
-        (RECIBIDO, 'recibido'),
-        (REVISION, 'revision'),
-        (RESPONDIDO, 'respondido'),
-        (CANCELADO, 'cancelado'),
+        (CREADO, 'creado'),
         (ESPERA, 'espera'),
+        (COMPLETADO, 'completado'),
+        (OBSERVADO, 'observado'),
+        (CANCELADO, 'cancelado'),
     ]
 
     # ESTADO DE PO
@@ -381,24 +387,48 @@ class TrafoQuote(TimeStampedModel):
         (ENTREGADO, 'entregado'),
     ]
 
-    idQuote = models.CharField('RFQ Number',max_length=100,unique=True,null=True,blank=True)
-    idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True, related_name="cliente")
+    idQuote = models.CharField('RFQ Number',max_length=100,unique=True)
+    idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="cliente")
     userClient = models.CharField("Cliente",max_length=20,null=True,blank=True)
     dateOrder = models.DateField(
         'Fecha de pedido',
     )
     deadline = models.DateField(
         'Fecha de entrega',
-    )
-    idAttendant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    quoteStatus = models.CharField(
-        'Estado cotizacion',
-        max_length=1,
-        default="0",
-        choices=STATUS_CHOICES,
         null=True,
         blank=True
     )
+    idAttendant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    
+    q1 = models.CharField(
+        'Recibido',
+        max_length=1,
+        default="0",
+        choices=STATUS_CHOICES,
+    )
+    q2 = models.CharField(
+        'Cotizacion',
+        max_length=1,
+        default="4",
+        choices=STATUS_CHOICES,
+    )
+    q3 = models.CharField(
+        'Respuesta de cliente',
+        max_length=1,
+        default="4",
+        choices=STATUS_CHOICES,
+    )
+    q4 = models.CharField(
+        'Atendido',
+        max_length=1,
+        default="4",
+        choices=STATUS_CHOICES,
+    )
+
+    dt1 = models.DateTimeField("dt1",null=True,blank=True)
+    dt2 = models.DateTimeField("dt2",null=True,blank=True)
+    dt3 = models.DateTimeField("dt3",null=True,blank=True)
+    dt4 = models.DateTimeField("dt4",null=True,blank=True)
 
     poStatus = models.CharField(
         'Estado PO',
@@ -420,6 +450,15 @@ class TrafoQuote(TimeStampedModel):
 
     description = models.TextField("Description",null=True,blank=True)
 
+    condition = models.CharField(
+        'Condicion',
+        max_length=1,
+        default="0",
+        choices=CONDITION_CHOICES,
+        blank=True, 
+        null=True
+    )
+
     objects = TrafoQuoteManager()
 
     def __str__(self):
@@ -430,7 +469,6 @@ class Trafos(TimeStampedModel):
     """
         Catalogo de Transformadores
     """
-
     KVA_CHOICES = (
         ('0', '15'),
         ('1', '30'),
@@ -655,19 +693,9 @@ class Trafos(TimeStampedModel):
     unitCost = models.DecimalField(
         'Costo unitario', 
         max_digits=10, 
-        decimal_places=2
-    )
-
-    quantityApproved = models.IntegerField(
-        'Cantidad aprobada',
+        decimal_places=2,
         blank=True,
         null=True,
-    )
-
-    unitCostApproved = models.DecimalField(
-        'Costo unitario aprobado', 
-        max_digits=10, 
-        decimal_places=2
     )
 
     objects = TrafosManager()
@@ -679,6 +707,29 @@ class Trafos(TimeStampedModel):
     def __str__(self):
         return str(self.KVA) + ' | ' + str(self.LV)
     
+class EmailSent(TimeStampedModel): 
 
+    Type_CHOICES = (
+        ('0', 'inicial'),
+        ('1', 'cotizacion'),
+        ('2', 'aprobación'),
+    )
 
+    typeMail = models.CharField(
+        'Tipo',
+        default="0",
+        max_length=1, 
+        choices=Type_CHOICES,
+        null=True,
+        blank=True
+    )
 
+    idQuote = models.ForeignKey(TrafoQuote,on_delete=models.CASCADE, null=True, blank=True)
+    sendFlag = models.BooleanField("Enviado", default=False)
+    subject = models.CharField("Subject", max_length=100)
+    body = models.TextField("Body")
+    sender = models.CharField("Emisor", max_length=100, default="jh")
+    recipients = models.CharField("Receptores", max_length=100)
+
+    def __str__(self):
+        return str(self.subject) + " - " + str(self.send)

@@ -8,189 +8,184 @@
 
 {% block panel-content %}
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card mb-4">
-                <div class="card-header p-3 pb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="w-50">
-                            <h5>Detalle de pedido</h5>
-
-                            <p class="text-sm mb-0"> Id de Pedido <b>{{ pedido.idOrder }}</b> </p>
-                            <p class="text-sm mb-0"> Fecha de pedido: <b>{{ pedido.dateOrder |date:'d-m-Y'}}</b> </p>
-                            <p class="text-sm"> Fecha de entrega: <b>{{ pedido.deadline |date:'d-m-Y'}}</b> </p>
-
-                        </div>
-                        <div class="w-50">
-                            <h6>Cliente: {{ pedido.idClient }} <span class="text-sm mb-3">({{ pedido.idClient.country }})</span></h6>
-                            <p class="text-sm mb-0">Modelo: <b>{{ pedido.idTransformer }}</b></p>
-                            <p class="text-sm mb-0">Fases <b>{{ pedido.idTransformer.get_phase_display }}</b></p>
-                            <p class="text-sm mb-0">Potencia. <b>{{ pedido.idTransformer.get_power_display }} kVA</b></p>
-                            <p class="text-sm mb-0">Voltaje. <b>{{ pedido.idTransformer.get_voltage_display }} V</b></p>
-                            <p class="text-sm mb-0">Tipo. <b>{{ pedido.idTransformer.get_type_display }}</b></p>
-                            <p class="text-md mb-0">Cantidad. <b>{{ pedido.numberUnits }} unidades</b></p>
-                        </div>
+<div class="row">
+    <div class="col-md-12 col-lg-10 col-sm-10 mx-auto">
+        <div class="card my-sm-5">
+            <div class="card-header text-center">
+                <div class="row justify-content-between">
+                    <div class="col-lg-9 col-md-9 text-start">
+                        <img class="mb-2 w-15 p-2" src="{% static 'assets/img/cotizacion.png' %}" alt="Logo">
+                        <h6 class="mb-0">
+                            {{data.quotation}}
+                        </h6>
+                        <p class="d-block text-dark mb-0">{{data.quotation.idClient}} </p>
+                        <p class="d-block text-dark mb-0">Atención: {{data.quotation.idAttendant}} </p>
+                        <p class="d-block text-dark mb-0">F. Solicitada: {{data.quotation.dateOrder|date:'d-m-Y'}} </p>
                     </div>
-                </div>
-                <div class="card-body p-3 pt-0">
-                    
-                    <hr class="horizontal dark mt-4 mb-4">
 
-                    <div class="row">
-                        <!-- SEGUIMIENTO -->
-                        <div class="col-lg-4 col-md-4 col-12">
-                            <h6 class="mb-3 text-info">Seguimiento</h6>
-                            <div class="timeline timeline-one-side">
-
-                                {% for id in orderTrack %}
-                                <div class="timeline-block mb-3">
-                                    {% if id.orderState == "0" %}
-                                    <span class="timeline-step">
-                                        <i class="fas fa-bell text-sm text-dark text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Creado</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{id.dateChange|date:'d-m-Y h:i'}}
-                                        </p>
-                                    </div>
-                                    {% elif id.orderState == "1" %}
-                                    <span class="timeline-step">
-                                        <i class="fas fa-vote-yea text-sm text-dark text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido fabricado</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{id.dateChange|date:'d-m-Y h:i' }}
-                                        </p>
-                                    </div>
-                                    {% elif id.orderState == "2" %}
-                                    <span class="timeline-step">
-                                        <i class="fas fa-truck text-sm text-dark text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Enviado</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{id.dateChange|date:'d-m-Y' }}
-                                        </p>
-                                    </div>
-                                    {% elif id.orderState == "3" %}
-                                    <span class="timeline-step">
-                                        <i class="fas fa-check text-sm text-success text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Completado</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{id.dateChange|date:'d-m-Y' }}
-                                        </p>
-                                    </div>
-                                    {% elif id.orderState == "4" %}
-                                    <span class="timeline-step">
-                                        <i class="fas fa-times text-sm text-danger text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">Pedido Cancelado</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{id.dateChange|date:'d-m-Y' }}
-                                        </p>
-                                    </div>
-                                    {% endif %}
+                    <div class="col-lg-3 col-md-3 text-md-end text-start">
+                       <h6>SEG. COTIZACION</h6>
+                        <div class="timeline timeline-one-side">
+                            {% if data.quotation.q1 == "0" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <a href=""><i class="far fa-calendar-check text-lg text-secondary"></i></i></a>
+                                </span>
+                                <div class="timeline-content">
+                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Recibido</span></h6></a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt1|date:'d-m-Y H:i' }}</p>
                                 </div>
-                                {% endfor %}
-                                
                             </div>
-                            <p class="text-sm mb-0">
-                                <a href="" >
-                                    <i class="far fa-calendar-plus text-lg"></i> Añadir seguimiento
-                                </a>
-                            </p>
-                            
-                            <p>
-                                <a href="" >
-                                    <i class="fas fa-list text-lg"></i> Detalles
-                                </a>
-                            </p>
-
-                            
-
-                        </div>
-
-                        <!-- PAGOS RECIBIDOS -->
-                        <div class="col-lg-4 col-md-4 col-12">
-                            <h6 class="mb-3 text-success">Abonos recibidos </h6>
-                            <div class="timeline timeline-one-side">
-
-                                {% for id in ordersRecived %}
-                                <div class="timeline-block mb-3">
-                                    <span class="timeline-step">
-                                        <i class="fas fa-money-check-alt text-sm text-dark text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0">{{ id.amount }} {{id.idAccount.get_currency_display }}</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">op: {{id.opNumber}} [<b> {{ id.paymentDate|date:'d-m-Y' }}</b>]
-                                        </p>
-                                    </div>
+                            {% elif data.quotation.q1 == "1" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <i class="far fa-calendar-check text-lg text-success"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-success text-sm font-weight-bold mb-0">Recibido</h6>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt1|date:'d-m-Y H:i'}}</p>
                                 </div>
-                                {% endfor %}
-                                
                             </div>
-                            <p class="mb-3">Total: {{ ordersRecived.sum }}</p>
-                        </div>
+                            {% endif %}
 
-                        <!-- GASTOS REALIZADOS -->
-                        <div class="col-lg-4 col-md-4 col-12">
-                            <h6 class="mb-3 text-primary">Gastos realizados </h6>
-                            <div class="timeline timeline-one-side">
-
-                                {% for id in Supplier %}
-                                <div class="timeline-block mb-3">
-                                    <span class="timeline-step">
-                                        <i class="fas fa-shopping-cart text-sm text-dark text-lg"></i>
-                                    </span>
-                                    <div class="timeline-content">
-                                        <h6 class="text-dark text-sm font-weight-bold mb-0"> {{ id.amount }} {{id.idAccount.get_currency_display }}</h6>
-                                        <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">op: {{id.opNumber}} [<b> {{ id.paymentDate|date:'d-m-Y' }}</b>]
-                                        </p>
-                                    </div>
+                            {% if data.quotation.q2 == "0" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <a href=""><i class="fas fa-file-invoice text-lg text-secondary"></i></a>
+                                </span>
+                                <div class="timeline-content">
+                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Cotizacion en proceso</span></h6></a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt2|date:'d-m-Y H:i' }}</p>
                                 </div>
-                                {% endfor %}
-                                
                             </div>
-                            <p class="mb-0">Total S/. {{ Supplier.sumSol }}</p>
-                            <p class="">Total $ {{ Supplier.sumDol }}</p>
+                            {% elif data.quotation.q2 == "1" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <i class="fas fa-file-invoice text-lg text-success"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-success text-sm font-weight-bold mb-0">Cot. enviada</h6>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt2|date:'d-m-Y H:i'}}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if data.quotation.q3 == "0" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <a href=""><i class="fas fa-user-clock text-lg text-secondary"></i></a>
+                                </span>
+                                <div class="timeline-content">
+                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Espera cliente</span></h6></a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i' }}</p>
+                                </div>
+                            </div>
+                            {% elif data.quotation.q3 == "1" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <i class="fas fa-user-clock text-lg text-success"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-success text-sm font-weight-bold mb-0">Aprobado</h6>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
+                                </div>
+                            </div>
+                            {% elif data.quotation.q3 == "3" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <i class="fas fa-user-clock text-lg text-warning"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-success text-sm font-weight-bold mb-0">Observado</h6>
+                                    <p class="text-warning font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if data.quotation.q4 == "0" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <a href=""><i class="fas fa-clipboard-check text-lg text-secondary"></i></a>
+                                </span>
+                                <div class="timeline-content">
+                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Atención</span></h6></a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt4|date:'d-m-Y H:i' }}</p>
+                                </div>
+                            </div>
+                            {% elif data.quotation.q4 == "1" %}
+                            <div class="timeline-block mb-2">
+                                <span class="timeline-step">
+                                    <i class="fas fa-clipboard-check text-lg text-success"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-success text-sm font-weight-bold mb-0">Atención finalizada</h6>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt4|date:'d-m-Y H:i'}}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
                         </div>
                     </div>
 
-                    <hr class="horizontal dark mb-4">
-
-                    <div class="row">
-                        <!-- SUMARIO -->
-                        <div class="col-lg-12 col-12 ms-auto">
-                            <h6 class="mb-3">Resumen de orden:</h6>
-
-                            <div class="d-flex justify-content-between">
-                                <span class="mb-2 text-sm">
-                                    Precio de pedido:
-                                </span>
-                                <span class="text-dark font-weight-bold ms-2">{{ pedido.amount }}</span>
-                            </div>
-
-                            <div class="d-flex justify-content-between">
-                                <span class="mb-2 text-sm">
-                                    Pagos recibidos:
-                                </span>
-                                <span class="text-dark ms-2 font-weight-bold">{{ ordersRecived.sum }}</span>
-                            </div>
-
-                            <div class="d-flex justify-content-between mt-4">
-                                <span class="mb-2 text-lg">
-                                    Pendiente:
-                                </span>
-                                <span class="text-dark text-lg ms-2 font-weight-bold">$105.95</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+            <div class="card-body pb-0">
+                <div class="d-flex align-items-center">
+                    <h6> Cotizacion {{data.quotation.get_condition_display}}</h6>
+                    <a class="btn bg-gradient-secondary btn-outline-secondary mb-0 ms-2 btn-sm d-flex align-items-center justify-content-center ms-auto" href="{% url 'activities_app:crear-transformador' data.quotation.id %}">Agregar Transformador</a>                    
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table text-right">
+                                <thead>
+                                    <tr>
+                                        <th class="pe-2 text-start ps-2">Id</th>
+                                        <th class="pe-2 text-start ps-2">Cant.</th>
+                                        <th class="pe-2 text-center">C. Unit.</th>
+                                        <th class="pe-2 text-start ps-2">KVA</th>
+                                        <th class="pe-2 text-start ps-2">LV</th>
+                                        <th class="pe-2">Enf.</th>
+                                        <th class="pe-2 text-center">Fases</th>
+                                        <th class="pe-2 text-start">Montaje</th>
+                                        <th class="pe-2 text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data.trafos %}
+                                    <tr class="">
+                                        <td class="text-start align-middle text-sm">{{ i.id }}</td>
+                                        <td class="text-center align-middle text-sm">{{ i.quantity }}</td>
+                                        <td class="text-end align-middle text-sm">{{ i.unitCost }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.get_KVA_display }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.get_LV_display }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.get_COOLING_display }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.get_TYPE_display }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.get_MOUNTING_display }}</td>
 
+                                        <td class="text-end align-middle">
+                                            <a href="{% url 'activities_app:editar-transformador' i.id %}">
+                                                <i class="far fa-edit text-dark text-lg"></i>
+                                            </a>
+                                            &nbsp;
+                                            <a href="{% url 'activities_app:eliminar-transformador' i.id %}">
+                                                <i class="far fa-trash-alt text-primary text-lg"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
 {% endblock panel-content %}

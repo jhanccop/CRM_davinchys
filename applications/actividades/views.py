@@ -14,11 +14,24 @@ from django.views.generic import (
 from applications.users.mixins import AdminPermisoMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import TrafoQuote, Projects, Commissions, DailyTasks
+from .models import (
+  TrafoQuote,
+  Trafos,
+  Projects,
+  Commissions,
+  DailyTasks,
+  EmailSent
+)
 from applications.users.models import User
 
-from .forms import QuoteTrafoForm, ProjectsForm, CommissionsForm, DailyTaskForm
-
+from .forms import (
+  TrafoForm,
+  QuoteTrafoForm,
+  ProjectsForm,
+  CommissionsForm,
+  DailyTaskForm,
+  EmailSentForm
+)
 # ======================= PROYECTOS ===========================
 class ProjectsListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-proyectos.html"
@@ -141,7 +154,7 @@ class DailyTaskReportView(AdminPermisoMixin,ListView):
         payload["acc"] = DailyTasks.objects.MiListarPorIntervaloHorasExtraAcc(user=int(userid),interval=intervalDate)
         return payload
     
-# ======================= PEDIDOS TRANSFORMADORES ===========================
+# ======================= COTIZACIONES TRANSFORMADORES ===========================
 class QuotesListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-cotizaciones-transformadores.html"
     context_object_name = 'cotizaciones'
@@ -150,11 +163,17 @@ class QuotesListView(LoginRequiredMixin,ListView):
         intervalDate = self.request.GET.get("dateKword", '')
         if intervalDate == "today" or intervalDate =="":
             intervalDate = str(date.today() - timedelta(days = 30)) + " to " + str(date.today())
-            print(intervalDate)
+        
+        quotes = TrafoQuote.objects.ListarPorIntervalo(interval=intervalDate)
+        #trafos = Trafos.objects.ListaPorCotizaciones(quotes=quotes)
+
+        dictResult = {}
+        for i in quotes:
+            dictResult[i] =  Trafos.objects.ListaPorCotizaciones(quote=i.id)
         
         payload = {}
         payload["intervalDate"] = intervalDate
-        payload["ordenes"] = TrafoQuote.objects.ListarPorIntervalo(intervalDate)
+        payload["data"] = dictResult
             
         return payload
 
@@ -171,32 +190,64 @@ class QuotesEditView(AdminPermisoMixin,UpdateView):
     success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
 class QuotesDeleteView(AdminPermisoMixin,DeleteView):
+    template_name = "actividades/cotizaciones-transformadores-eliminar.html"
     model = TrafoQuote
     success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class QuotesDetailView(LoginRequiredMixin,DetailView):
+class QuotesDetailView(ListView):
     template_name = "actividades/cotizaciones-transformadores-detalle.html"
-    context_object_name = 'cotizacion'
+    context_object_name = 'data'
 
-    model = TrafoQuote
-    
+    #model = TrafoQuote
+
+    def get_queryset(self,**kwargs):
+        pk = self.kwargs['pk']
+        payload = {}
+        quotation = TrafoQuote.objects.CotizacionPorId(id = int(pk))
+        trafos = Trafos.objects.ListaPorCotizaciones(quotation.id)
+        payload["quotation"] = quotation
+        payload["trafos"] = trafos
+        return payload
+
+class TrafoCreateView(CreateView):
+    template_name = "actividades/crear-transformador.html"
+    model = Trafos
+    form_class = TrafoForm
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
+
     def get_context_data(self, **kwargs):
-        context = super(QuotesDetailView, self).get_context_data(**kwargs)
-        pk = context["pedido"]
+        context = super(TrafoCreateView, self).get_context_data(**kwargs)
+        trafoQuote = TrafoQuote.objects.get(id = self.kwargs['pk'])
+        context['quotation'] = trafoQuote
+        return context
 
-        #orderTrack =OrderTracking.objects.obtenerTrack(pk)
-        #context["orderTrack"] = orderTrack
+class TrafoUpdateView(UpdateView):
+  template_name = "actividades/editar-transformador.html"
+  model = Trafos
+  form_class = TrafoForm
 
-        #ordersRecived =OrdersRecived.objects.obtenerPagosRecibidosPorId(pk)
-        #context["ordersRecived"] = ordersRecived
+  def get_success_url(self, *args, **kwargs):
+    #print(self.object.TrafoQuote)
+    pk = self.object.idQuote.id
+    return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
 
-        #context["Supplier"] = Supplier.objects.obtenerPagosPorId(pk)
-        
-        
-        #context["Services"] = Services.objects.obtenerPagosPorId(pk)
-        #context["WorkCommission"] = WorkCommission.objects.obtenerPagosPorId(pk)
-        #context["Purchases"] = Purchases.objects.obtenerPagosPorId(pk)
-        #context["Taxes"] = Taxes.objects.obtenerPagosPorId(pk)
+class TrafoDeleteView(AdminPermisoMixin,DeleteView):
+    template_name = "actividades/eliminar-transformador.html"
+    model = Trafos
+    def get_success_url(self, *args, **kwargs):
+        pk = self.object.idQuote.id
+        return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
 
+# ========================== EMAILS ==========================
+class InitialEmailCreateView(CreateView):
+    template_name = "actividades/initial-email.html"
+    model = EmailSent
+    form_class = EmailSentForm
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
+
+    def get_context_data(self, **kwargs):
+        context = super(InitialEmailCreateView, self).get_context_data(**kwargs)
+        trafoQuote = TrafoQuote.objects.get(id = self.kwargs['pk'])
+        context['quotation'] = trafoQuote
         return context
 

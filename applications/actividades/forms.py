@@ -1,7 +1,15 @@
 # django
 from django import forms
 # local
-from .models import TrafoQuote, Projects, Commissions, DailyTasks
+from .models import (
+  Trafos,
+  TrafoQuote,
+  Projects,
+  Commissions,
+  DailyTasks,
+  EmailSent
+)
+from applications.users.models import User
 
 class ProjectsForm(forms.ModelForm):
     
@@ -205,12 +213,15 @@ class QuoteTrafoForm(forms.ModelForm):
         model = TrafoQuote
         fields = (
             'idQuote',
-            'idClient',
-            'userClient',
             'dateOrder',
             'deadline',
+
+            'idClient',
+            'userClient',
+            
             'idAttendant',
-            'description'
+            'description',
+            'condition'
         )
         
         widgets = {
@@ -253,6 +264,185 @@ class QuoteTrafoForm(forms.ModelForm):
                 }
             ),
             'description': forms.Textarea(
+                attrs = {
+                    'rows':8,
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'condition': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(QuoteTrafoForm, self).__init__(*args, **kwargs)
+        self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
+
+class TrafoForm(forms.ModelForm):
+    
+    class Meta:
+        model = Trafos
+        fields = (
+            'idQuote',
+
+            'provider',
+            'quantity',
+
+            'KVA',
+            'HVTAP',
+            'KTapHV',
+            'FIXHV',
+
+            'LV',
+            'HZ',
+            'TYPE',
+            'MOUNTING',
+
+            'COOLING',
+            'WINDING',
+            'INSULAT',
+            'CONNECTION',
+
+            'STANDARD',
+        )
+        widgets = {
+            
+            'provider': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'quantity': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KVA': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HVTAP': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KTapHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'FIXHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'LV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HZ': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'TYPE': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'MOUNTING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'COOLING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'WINDING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'INSULAT': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'CONNECTION': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'STANDARD': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'description': forms.Textarea(
+                attrs = {
+                    'placeholder': '',
+                    'rows': '3',
+                    'class': 'input-group-field form-control',
+                }
+            )
+        }
+
+class EmailSentForm(forms.ModelForm):
+    class Meta:
+        model = EmailSent
+        fields = (
+            'idQuote',
+            'sender',
+            'recipients',
+            'subject',
+
+            'body',
+            'sendFlag'
+        )
+        
+        widgets = {
+            'idQuote': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'sender': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'recipients': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'subject': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            
+            'body': forms.Textarea(
+                attrs = {
+                    'rows':8,
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'sendFlag': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
