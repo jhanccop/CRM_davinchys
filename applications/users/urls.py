@@ -7,7 +7,7 @@ app_name = "users_app"
 
 urlpatterns = [
     path(
-        '', 
+        'user/login/', 
         views.LoginUser.as_view(),
         name='user-login',
     ),

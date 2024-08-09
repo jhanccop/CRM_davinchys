@@ -122,7 +122,7 @@ urlpatterns = [
     ),
 
     path(
-        'actividades/cotizaciones-enviar-correo/',
+        'actividades/cotizaciones-enviar-correo/<pk>/',
         views.InitialEmailCreateView.as_view(),
         name='cotizaciones-enviar-correo',
     ),

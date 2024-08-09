@@ -15,7 +15,7 @@
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
         <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
-          <h6 class="text-center text-white"> Enviar email {{}} </h6>
+          <h6 class="text-center text-white"> Enviar email {{object}} </h6>
         </div>
       </div>
       <div class="card-body pb-0">
@@ -28,19 +28,19 @@
 
               <div class="row">
                 <div class="col-12 col-sm-12" hidden>
-                  <div class="input-group input-group-outline">
+                  <div class="input-group input-group-outline  focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Cotizacion</label>
                     {{ form.idQuote }}
                   </div>
                 </div>
                 <div class="col-6 col-sm-6">
-                  <div class="input-group input-group-outline">
+                  <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Emisor</label>
                     {{ form.sender }}
                   </div>
                 </div>
                 <div class="col-6 col-sm-6">
-                  <div class="input-group input-group-outline">
+                  <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Receptor</label>
                     {{ form.recipients }}
                   </div>
@@ -51,7 +51,7 @@
 
               <div class="row">
                 <div class="col-12 col-sm-12" hidden>
-                  <div class="input-group input-group-outline">
+                  <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">SUbject</label>
                     {{ form.subject }}
                   </div>
@@ -62,8 +62,8 @@
               <div class="row">
                 <div class="col-12 col-sm-12">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Descripción</label>
-                    {{ form.description }}
+                    <label for="exampleFormControlInput1" class="form-label">Cuerpo</label>
+                    {{ form.body }}
                   </div>
                 </div>
               </div>
@@ -82,8 +82,7 @@
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'activities_app:comision-lista' %}"> REGRESAR </a>
 
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">AGREGAR COMISION
-                  DE TRABAJO</button>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">Enviar Correo</button>
               </div>
             </div>
           </div>

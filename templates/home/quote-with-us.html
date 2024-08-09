@@ -1,0 +1,225 @@
+{% extends 'home/base-home.html' %}
+{% load static %}
+
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+
+<main class="main-content mt-0">
+  <section>
+    <div class="page-header min-vh-100">
+      <div class="container">
+        <div class="row">
+          <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 start-0 text-center justify-content-center flex-column">
+            <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center" style="background-image: url('{% static 'assets/img/quote.jpg' %}'); background-size: cover;">
+            </div>
+          </div>
+          <div class="col-xl-6 col-lg-5 col-md-7 d-flex flex-column ms-auto me-auto ms-lg-auto me-lg-0">
+            <div class="card card-plain">
+              <div class="card-header pb-0">
+                <h6 class="font-weight-bolder mb-0">REQUEST A QUOTE</h6>
+              </div>
+              <div class="card-body pt-0 bg-white pb-0">
+                <form class="" method="POST">{% csrf_token %}
+        
+                  <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+        
+                    <div class="multisteps-form__content">
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-4">
+                          <div class="input-group input-group-outline">
+                            <label for="exampleFormControlInput1" class="form-label">Quantity</label>
+                            {{ form.quantity }}
+                          </div>
+                        </div>
+        
+                      </div>
+        
+                      <br>
+                      <h6 class="font-weight-bolder">Technical characteristics</h6>
+        
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Capacity</p>
+                          <div class="input-group input-group-outline is-focused">
+                            {{ form.KVA }}
+                          </div>
+                        </div>
+        
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">HV TAP</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.HVTAP }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">K Tap HV</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.KTapHV }}
+                          </div>
+                        </div>
+        
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">FIX HV</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.FIXHV }}
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">LV</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.LV }}
+                          </div>
+                        </div>
+        
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">HZ</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.HZ }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Phase</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.TYPE }}
+                          </div>
+                        </div>
+        
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Mounting</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.MOUNTING }}
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Cooling</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.COOLING }}
+                          </div>
+                        </div>
+
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Winding</p>
+                          <div class="input-group input-group-outline">
+                            {{ form.WINDING }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Insulat</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.INSULAT }}
+                          </div>
+                        </div>
+        
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Connection</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.CONNECTION }}
+                          </div>
+                        </div>
+        
+                      </div>
+        
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Standard</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            {{ form.STANDARD }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <br>
+                      <h6 class="font-weight-bolder">Contact info</h6>
+
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Company</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            <input type="text" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Country</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            <input type="text" class="form-control">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row mt-3">
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Email</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            <input type="email" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="col-6 col-sm-6">
+                          <p class="mb-0 text-sm">Phone</p>
+                          <div class="input-group input-group-outline focused is-focused">
+                            <input type="phone" class="form-control">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row mt-3">
+                        <p class="mb-0">Estimated price</p>
+                        <h5 >$ <span id="totalPrice">12,944.00</span> </h5>
+                      </div>
+        
+                      <div class="button-row d-flex mt-4 mb-0">
+                        <input class="btn bg-gradient-dark" type="button" onClick="multiplyBy()" Value="get price" />
+
+                        <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit">Get
+                          Quote</button>
+                      </div>
+        
+                    </div>
+                  </div>
+        
+                </form>
+                
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+{% block JSscripts %}
+
+<script>
+  function multiplyBy() {
+    n = document.getElementById("id_quantity").value;
+    kva = document.getElementById("id_KVA").value;
+    hv = document.getElementById("id_FIXHV").value;
+
+    // Set the inner HTML of the element with the id "result" to the product of the two numbers
+    document.getElementById("totalPrice").innerHTML = Number(kva) * Number(hv)*100 * n;
+  }
+</script>
+
+
+{% endblock JSscripts %}

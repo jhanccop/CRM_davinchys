@@ -37,6 +37,7 @@ class DailyTasksAdmin(admin.ModelAdmin):
 
 class TrafoQuoteAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'idQuote',
         'idClient',
         'userClient',
