@@ -86,7 +86,7 @@ urlpatterns = [
 
     path(
         'movimientos/conciliar/<pk>/', 
-        views.MovimientosConciliarCreateView.as_view(),
+        views.ConciliarUpdateView.as_view(),
         name='movimientos-conciliar',
     ),
     path(

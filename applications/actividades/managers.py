@@ -82,7 +82,7 @@ class DailyTasksManager(models.Manager):
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
 
-        if type == "3":
+        if type == "2":
             result = self.filter(
                 date__range = rangeDate,
                 user = user
@@ -91,7 +91,7 @@ class DailyTasksManager(models.Manager):
             result = self.filter(
                 date__range = rangeDate,
                 user = user,
-                type = type
+                is_overTime = False
             ).order_by("-date")
         return result
     
@@ -110,7 +110,7 @@ class DailyTasksManager(models.Manager):
         result = self.filter(
                 date__range = rangeDate,
                 user = user,
-                type = '1'
+                is_overTime = True
             ).values(
                 'date',
                 'endTime',
@@ -138,7 +138,7 @@ class DailyTasksManager(models.Manager):
         result = self.filter(
                 date__range = rangeDate,
                 user = user,
-                type = '1'
+                is_overTime = True
             ).values(
                 'endTime',
                 'startTime',
@@ -165,6 +165,7 @@ class DailyTasksManager(models.Manager):
         result = self.filter(
                 date__range = rangeDate,
                 user = user,
+                is_overTime = False
             ).values(
                 'date',
             ).distinct().aggregate(dias = Count("date"))

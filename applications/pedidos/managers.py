@@ -181,6 +181,8 @@ class PaymentRequestManager(models.Manager):
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
 
+        result = {}
+
         if user_selected == "all":
             if area == "5": # adquisiciones
                 result = self.filter(
@@ -226,6 +228,62 @@ class PaymentRequestManager(models.Manager):
                 result = self.filter(
                     idPetitioner = user_selected,
                     tag4 = "0",
+                    created__range = rangeDate,
+                ).order_by("-created")
+
+        return result
+    
+    def ListarHistoricoPorIntervalo(self,area,user_selected,interval):
+        Intervals = interval.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        result = {}
+
+        if user_selected == "all":
+            if area == "5": # adquisiciones
+                result = self.filter(
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "1": # contabilidad
+                result = self.filter(
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "6": # finanzas
+                result = self.filter(
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "7": # tesoreria
+                result = self.filter(
+                    created__range = rangeDate,
+                ).order_by("-created")
+
+        else:
+            if area == "5": # adquisiciones
+                result = self.filter(
+                    idPetitioner = user_selected,
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "1": # contabilidad
+                result = self.filter(
+                    idPetitioner = user_selected,
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "6": # finanzas
+                result = self.filter(
+                    idPetitioner = user_selected,
+                    created__range = rangeDate,
+                ).order_by("-created")
+            elif area == "7": # tesoreria
+                result = self.filter(
+                    idPetitioner = user_selected,
                     created__range = rangeDate,
                 ).order_by("-created")
 

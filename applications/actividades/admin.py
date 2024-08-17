@@ -28,12 +28,12 @@ class DailyTasksAdmin(admin.ModelAdmin):
         'user',
         'date',
         'activity',
-        'type',
+        'is_overTime',
         'startTime',
         'endTime',
     )
-    search_fields = ('type',)
-    list_filter = ('type',)
+    search_fields = ('is_overTime',)
+    list_filter = ('is_overTime',)
 
 class TrafoQuoteAdmin(admin.ModelAdmin):
     list_display = (

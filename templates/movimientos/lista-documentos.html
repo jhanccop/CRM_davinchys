@@ -14,12 +14,12 @@
       <ul class="nav nav-pills nav-fill p-1">
         <li class="nav-item " role="presentation">
           <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:lista-movimientos' %}">
-            <span class="ms-1">Conciliacion de movimientos</span>
+            <span class="ms-1">Movimientos</span>
           </a>
         </li>
         <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
           <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'movimientos_app:lista-documentacion' %}">
-            <span class="ms-1">Conciliacion documentaria</span>
+            <span class="ms-1">Documentos</span>
           </a>
         </li>
       </ul>
@@ -36,7 +36,7 @@
     </a>
     <div class="dropleft ms-3">
       <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:documentacion-nuevo' %}">
-        INGRESAR DOCUMENTOS
+        NUEVO DOCUMENTO
       </a>
       
     </div>
@@ -60,15 +60,12 @@
                     <div class="input-group input-group-outline is-valid">
                       
                       <select class="form-control" name="DocKword" id="DocKword">
-                        {% for i in movimientos.listAccount %}
-                          {% if i.id == movimientos.selectedAccount.id %}
-                            <option value="{{i.id}}" selected>{{i}}</option>
-                          {% else %}
-                            <option value="{{i.id}}">{{i}}</option>
-                          {% endif %}
-                        {% endfor %}
-
-                        <option value="5" selected>todos</option>
+                        <option value="0">Factura</option>
+                        <option value="1">RHE</option>
+                        <option value="2">PL</option>
+                        <option value="3">Comprobante Davinchy</option>
+                        <option value="4">NC</option>
+                        <option value="5" selected>Todo</option>
                       </select>
                       
                     </div>
@@ -96,7 +93,6 @@
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Conciliación</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Cont</th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
@@ -107,7 +103,7 @@
                     <tr>
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.date|date:'y-m' }}</h6>
+                          <h6 class="mb-0 text-sm">{{ t.year_dec }} - {{ t.month_dec }}</h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
                         </div>
                       </td>
@@ -130,26 +126,12 @@
                         <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied }}</span>
                       </td>
                       <td class="text-sm">
-                        <div class="w-100">
-                          <div class="d-flex align-items-center mb-2">
-                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied }}</span>
-                            <span class="ms-auto text-sm font-weight-normal">{{ d.per|floatformat:0 }}%</span>
-                          </div>
-                          <div>
-                            <div class="progress progress-md w-100">
-                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ d.per|floatformat:0 }}%;"></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idBankMovements.all %}
-                          <p class="text-sm font-weight-normal text-secondary mb-0">
-                            {{i.idAccount}} | {{i.opNumber}} | <span class="font-weight-bold text-dark"> {{i.idAccount.get_currency_display}} {{i.amount}} </span>
-                          </p>
-                          {%endfor%}
+                          {{d}}
+                          {% for i in t.docs.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}} </p> {%endfor%}
                         </div>
                       </td>
+
                       <td class="text-sm">
                         {{ t.get_contabilidad_display }}
                       </td>
@@ -159,10 +141,8 @@
                           <i class="fas fa-bars text-lg text-dark"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="javascript:;">Ver detalle</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar documento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Agregar movimiento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar movimiento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:documentacion-editar' t.id %}"> Editar documento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar documento</a></li>
                         </ul>
                       </td>
                     </tr>
@@ -215,6 +195,11 @@
     });
   });
 
+</script>
+
+<script>
+  const $select = document.querySelector('#DocKword');
+  $select.value = "{{documentos.selected}}";
 </script>
 
 {% endblock JSscripts %}

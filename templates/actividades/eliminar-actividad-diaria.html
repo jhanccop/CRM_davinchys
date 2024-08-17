@@ -22,7 +22,7 @@
         <ul>
           <li>Fecha: <span class="font-weight-bold">{{object.date}}</span></li>
           <li>Actividad: <span class="font-weight-bold"> {{object.activity}} </span> </li>
-          <li>Tipo: <span class="font-weight-bold">{{object.get_type_display}}</span></li>
+          <li>Horas extras: <span class="font-weight-bold">{{object.is_overTime}}</span></li>
         </ul>
         <div class="d-flex">
           <a href="{% url 'activities_app:mi-actividad-diaria-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
@@ -30,7 +30,7 @@
         
           <form class="cell medium-5 ms-auto" action="{% url 'activities_app:actividad-diaria-eliminar' object.id %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar actividad</button>
+            <button type="submit" class="btn bg-gradient-primary ms-auto mb-0 js-btn-next">Eliminar actividad</button>
           </form>
           
         </div>

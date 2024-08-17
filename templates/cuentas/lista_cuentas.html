@@ -32,8 +32,8 @@
                     <tr>
                       <th class="">Nombre de cuenta</th>
                       <th class="">Moneda</th>
-                      <th class="">Monto CRM</th>
-                      <th class="">Monto Banco</th>
+                      <th class="">Monto</th>
+                      <th class="">Razon social asociado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -47,17 +47,10 @@
                         <p class="text-xs text-secondary mb-0">{{ t.lastUpdateCRM | date:'d-m-Y h:i' }} </p>
                       </td>
 
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <a href="{% url 'cuentas_app:cuentas-manual-agregar' t.id %}" class="btn btn-icon-only btn-rounded btn-outline-info mb-0 me-3 p-3 btn-sm d-flex align-items-center justify-content-center">
-                            <i class="fas fa-edit text-info text-lg"></i>
-                          </a>
-                          <div class="d-flex flex-column">
-                            <h6 class="mb-1 text-dark text-xs pb-0">{{ t.realBalance }}</h6>
-                            <span class="text-xs">{{ t.lastUpdateReal | date:'d-m-Y h:i' }}M</span>
-                          </div>
-                        </div>
-                      </td>
+                      <td class="text-sm">{{ t.idTin }}</td>
+
+
+
                     </tr>
                     {% endfor %}
                   </tbody>

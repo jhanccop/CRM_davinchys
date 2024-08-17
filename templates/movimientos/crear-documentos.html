@@ -3,8 +3,8 @@
 {% load  static %}
 {% block title %} Movimientos {% endblock title %}
 {% block main %} Movimientos {% endblock main %}
-{% block appName %} Cuentas {% endblock appName %}
-{% block Type %} Conciliar - editar{% endblock Type %}
+{% block appName %} Documentacion {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
 
 {% block panel-content %}
 
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
+                  <div class="input-group input-group-outline">
                     <label for="exampleFormControlInput1" class="form-label">Id Comprobante</label>
                     {{ form.idInvoice }}
                   </div>
@@ -99,6 +99,22 @@
               <br>
 
               <div class="row">
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Mes Periodo</label>
+                    {{ form.month_dec }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-0">
+                  <div class="input-group input-group-outline">
+                    <label for="exampleFormControlInput1" class="form-label">Año Periodo</label>
+                    {{ form.year_dec }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
                 <div class="col-12 col-sm-8">
                   <p class="mb-0">Proveedor</p>
                   <div class="input-group input-group-outline">
@@ -110,7 +126,15 @@
               <br>
 
               <div class="row">
-                <div class="col-12 col-sm-4 mt-sm-0">
+
+                <div class="col-6 col-sm-2 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Moneda</label>
+                    {{ form.typeCurrency }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-2 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Monto</label>
                     {{ form.amountReconcilied }}
@@ -129,17 +153,6 @@
                   </div>
                 </div>
               </div>
-              <br>
-
-              <div class="row">
-                <div class="col-12 col-sm-12 mt-3 mt-sm-0">
-                  <h6 class="mb-0">Movimientos bancarios:</h6>
-                  <div class="input-group input-group-outline focused is-focused" >
-                    {{ form.idBankMovements }}
-                  </div>
-                </div>
-              </div>
-
               <br>
 
               <h6 class="font-weight-bolder">Actividad relacionada</h6>
@@ -214,7 +227,7 @@
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-documentacion'%}"> REGRESAR </a>
 
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="update">ACTUALIZAR REGISTRO</button>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="update">CREAR DOCUMENTO</button>
               </div>
 
             </div>
@@ -283,6 +296,8 @@
     if (document.querySelector('.datetimepicker')) {
         flatpickr('.datetimepicker', {
             allowInput: true,
+            //noCalendar: true,
+            maxDate: "today"
             //mode: "range"
         }); // flatpickr
     }
@@ -290,7 +305,7 @@
 
 <script>
   document.getElementById("id_user").value = "{{user.id}}";
-  document.getElementById("id_idBankMovements").value = "{{object.idBankMovements.all.0.id}}";
+  //document.getElementById("id_idBankMovements").value = "{{object.idBankMovements.all.0.id}}";
 </script>
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>

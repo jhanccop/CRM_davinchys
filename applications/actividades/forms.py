@@ -137,7 +137,7 @@ class DailyTaskForm (forms.ModelForm):
             'user',
             'date',
             'activity',
-            'type',
+            'is_overTime',
             'startTime',
             'endTime',
             'trafoOrder',
@@ -161,10 +161,11 @@ class DailyTaskForm (forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'type': forms.Select(
+            'is_overTime': forms.CheckboxInput(
                 attrs = {
                     'placeholder': '',
-                    'class': 'input-group-field form-control',
+                    'class': 'form-check-input',
+                    'type': 'checkbox',
                     'onchange':"toggleDiv()"
                 }
             ),

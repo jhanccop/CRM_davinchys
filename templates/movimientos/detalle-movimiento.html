@@ -50,7 +50,7 @@
                   <h6 class="text-secondary font-weight-normal mb-0">M. conciliado:</h6>
                 </div>
                 <div class="col-md-6">
-                  <h6 class="text-dark mb-0">{{mov.id.idAccount.get_currency_display }} {{mov.sum.tot|floatformat:"2g"}}</h6>
+                  <h6 class="text-dark mb-0">{{mov.id.idAccount.get_currency_display }} {{mov.sum|floatformat:"2g"}}</h6>
                 </div>
               </div>
               <div class="row text-md-end text-start">
@@ -72,6 +72,7 @@
                   <thead>
                     <tr>
                       <th scope="col" class="pe-2 text-start ps-2">Id Doc.</th>
+                      <th scope="col" class="pe-2 text-start ps-2">Periodo</th>
                       <th scope="col" class="pe-2 text-start ps-2">Fecha</th>
                       <th scope="col" class="pe-2">Cliente / Descripción</th>
                       <th scope="col" class="pe-2 text-end">Monto</th>
@@ -79,9 +80,10 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for i in mov.doc %}
+                    {% for i in mov.id.idDocs.all %}
                     <tr class="">
                       <td class="text-start align-middle text-sm">{{ i.idInvoice }}</td>
+                      <td class="text-start align-middle text-sm">{{ i.get_month_dec_display }} - {{i.year_dec}}</td>
                       <td class="text-start align-middle text-sm">{{ i.date|date:"d-m-Y" }}</td>
                       <td class="ps-4 align-middle">
                         <div class="text-start align-middle">
@@ -89,7 +91,7 @@
                           <h6 class="text-sm font-weight-normal mb-0">{{i.description}}</h6>
                         </div>
                       </td>
-                      <td class="ps-4 align-middle text-end text-sm text-dark">{{ i.amountReconcilied|floatformat:"2g"}}</td>
+                      <td class="ps-4 align-middle text-end text-sm text-dark">{{i.get_typeCurrency_display}} {{ i.amountReconcilied|floatformat:"2g"}}</td>
                       <td class="text-center align-middle">
                         {% if i.pdf_file %}
                         <a href="/media/{{i.pdf_file}}">
@@ -99,7 +101,7 @@
                         --
                         {% endif %}
                         &nbsp;
-                        <a href="{% url 'movimientos_app:movimientos-conciliar-editar' i.id %}">
+                        <a href="{% url 'movimientos_app:documentacion-editar' i.id %}">
                           <i class="far fa-edit text-dark text-lg"></i>
                         </a>
                         &nbsp;
@@ -114,8 +116,9 @@
                     <tr>
                       <th></th>
                       <th></th>
+                      <th></th>
                       <th class="h6 ps-4">Total</th>
-                      <th class="h6 ps-4 text-end">{{mov.sum.tot|floatformat:"2g"}}</th>
+                      <th class="h6 ps-4 text-end">{{mov.sum|floatformat:"2g"}}</th>
                       <th></th>
                     </tr>
                   </tfoot>
@@ -137,11 +140,11 @@
 {% block JSscripts %}
 <script>
   var dif = document.getElementById("diff");
-  var nDiff = Number("{{mov.id.amount}}") - Number("{{mov.sum.tot}}");
+  var nDiff = Number("{{mov.id.amount}}") - Number("{{mov.sum}}");
   dif.innerHTML =  nDiff.toFixed(2);
 
   var per = document.getElementById("per");
-  var nper = Number("{{mov.sum.tot}}")*100/Number("{{mov.id.amount}}");
+  var nper = Number("{{mov.sum}}")*100/Number("{{mov.id.amount}}");
   per.innerHTML =  nper.toFixed(2);
 
 </script>

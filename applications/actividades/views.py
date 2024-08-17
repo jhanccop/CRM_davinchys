@@ -90,7 +90,7 @@ class MyDailyTaskListView(LoginRequiredMixin,ListView):
             intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
         
         if selected =="" or selected == None:
-            selected = "3" # todo
+            selected = "2" # todo
 
         payload = {}
         payload["selected"] = selected
@@ -133,7 +133,7 @@ class DailyTaskReportView(AdminPermisoMixin,ListView):
             intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
         
         if selected =="" or selected == None:
-            selected = "3" # todo
+            selected = "2" # todo
         
         if userid =="" or userid == None:
             userid=self.request.user.id

@@ -49,8 +49,7 @@
                   <select class="form-control" name="TypeKword" id="TypeKword">
                     <option value="0">jornada diaria</option>
                     <option value="1">horas extra</option>
-                    <option value="2">otro</option>
-                    <option value="3">todo</option>
+                    <option value="2">todo</option>
                   </select>
 
                 </div>
@@ -82,7 +81,7 @@
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Final</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Horas</th>
                 {% else %}
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Horas extra</th>
                 {% endif %}
                 <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
               </tr>
@@ -108,7 +107,7 @@
                 </td>
                 {% else %}
                 <td class="text-sm">
-                  {{ t.get_type_display }}
+                  {{ t.is_overTime }}
                 </td>
                 {% endif %}
                 <td>

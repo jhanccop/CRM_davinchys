@@ -40,12 +40,14 @@
                     {{ form.date }}
                   </div>
                 </div>
-                <div class="col-6 col-sm-8 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Tipo de actividad</label>
-                    {{ form.type }}
+
+                <div class="col-6 col-sm-6 d-flex">
+                  <div class="form-check d-flex">
+                    {{form.is_overTime}}
+                    <label class="form-check-label">Horas extra</label>
                   </div>
                 </div>
+
               </div>
               <br>
               <div class="row">
@@ -130,18 +132,16 @@
 
 <script>
   function toggleDiv() {
-    let selected = document.getElementById("id_type").value;
+    let selected = document.getElementById("id_is_overTime");
     let startTime = document.getElementById("startTime");
     let endTime = document.getElementById("endTime");
 
     startTime.style.display = "none";
     endTime.style.display = "none";
-    
-    switch(Number(selected)){
-      case 1:
-        startTime.style.display = "inline-block";
-        endTime.style.display = "inline-block";
-        break;
+
+    if(selected.checked){
+      startTime.style.display = "inline-block";
+      endTime.style.display = "inline-block";
     }
   }
 
@@ -152,6 +152,7 @@
     if (document.querySelector('.datetimepicker')) {
         flatpickr('.datetimepicker', {
             allowInput: true,
+            maxDate: "today"
             //mode: "range"
         }); // flatpickr
     }

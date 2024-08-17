@@ -300,14 +300,16 @@ class DailyTasks(TimeStampedModel):
         null=False,
         blank=False,
     )
-    
-    type = models.CharField(
-        'Tipo de jornada',
-        max_length=1, 
-        choices=TYPE_CHOICES,
-        null=True,
-        blank=True
-    )
+
+    is_overTime = models.BooleanField('Horas extra',default=False)
+
+    #type = models.CharField(
+    #    'Tipo de jornada',
+    #    max_length=1, 
+    #    choices=TYPE_CHOICES,
+    #    null=True,
+    #    blank=True
+    #)
     startTime = models.TimeField(
         'Hora de inicio',
         null=True,

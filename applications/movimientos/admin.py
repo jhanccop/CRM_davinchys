@@ -4,7 +4,7 @@ from .models import (
   Transactions,
   InternalTransfers,
   BankMovements,
-  BankReconciliation,
+  Documents,
   DocumentsUploaded
 )
 
@@ -40,6 +40,7 @@ class BankMovementsAdmin(admin.ModelAdmin):
         'id',
         'idAccount',
         'date',
+        'get_docs',
         'description',
         'transactionType',
         'amount',
@@ -47,24 +48,24 @@ class BankMovementsAdmin(admin.ModelAdmin):
         'amountReconcilied',
         'opNumber',
     )
+    def get_docs(self, obj):
+        return "\n".join([str(p) for p in obj.idDocs.all()])
+
     search_fields = ('transactionType','idAccount')
     list_filter = ('transactionType','idAccount')
 
-class BankReconciliationAdmin(admin.ModelAdmin):
+class DocumentsAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'date',
-        'get_BankMovements',
         'idClient',
         'typeInvoice',
         'idInvoice',
         'description',
     )
-    def get_BankMovements(self, obj):
-        return "\n".join([str(p) for p in obj.idBankMovements.all()])
     
-    search_fields = ('idBankMovements','idClient')
-    list_filter = ('idBankMovements','idClient')
+    search_fields = ('idClient',)
+    list_filter = ('idClient',)
 
 class DocumentsUploadedAdmin(admin.ModelAdmin):
     list_display = (
@@ -75,7 +76,7 @@ class DocumentsUploadedAdmin(admin.ModelAdmin):
     )
     list_filter = ('idAccount',)
 
-admin.site.register(BankReconciliation, BankReconciliationAdmin)
+admin.site.register(Documents, DocumentsAdmin)
 admin.site.register(BankMovements, BankMovementsAdmin)
 admin.site.register(DocumentsUploaded, DocumentsUploadedAdmin)
 

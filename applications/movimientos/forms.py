@@ -4,7 +4,7 @@ from django import forms
 from .models import (
   InternalTransfers,
   BankMovements,
-  BankReconciliation
+  Documents
 )
 
 class InternalTransfersForm(forms.ModelForm):
@@ -51,6 +51,27 @@ class InternalTransfersForm(forms.ModelForm):
             
         }
 
+class ConciliationBankMovementsForm(forms.ModelForm):
+    class Meta:
+        model = BankMovements
+        fields = [
+            'idDocs'
+        ]
+        widgets = {
+                'idDocs': forms.SelectMultiple(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control w-100',
+                       #'disabled': True
+                    }
+                ),
+            }
+        
+    def __init__(self, *args, **kwargs):
+        super(ConciliationBankMovementsForm, self).__init__(*args, **kwargs)
+        self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
+    
+        
 class BankMovementsForm(forms.ModelForm):
     class Meta:
         model = BankMovements
@@ -96,13 +117,12 @@ class BankMovementsForm(forms.ModelForm):
                 
             }
         
-class BankReconciliationForm(forms.ModelForm):
+class DocumentsForm(forms.ModelForm):
     class Meta:
-        model = BankReconciliation
+        model = Documents
         fields = [
             # oculto
             'user',
-            'idBankMovements',
 
             # generales
             'incomeCategory',
@@ -113,7 +133,11 @@ class BankReconciliationForm(forms.ModelForm):
             'idInvoice',
             'annotation',
 
+            'month_dec',
+            'year_dec',
+
             'idClient',
+            'typeCurrency',
             'amountReconcilied',
 
             'description',
@@ -156,8 +180,26 @@ class BankReconciliationForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+            'month_dec': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'year_dec': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
             # =======================
             'idClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'typeCurrency': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -253,11 +295,11 @@ class BankReconciliationForm(forms.ModelForm):
 
 class DocReconciliationUpdateForm(forms.ModelForm):
     class Meta:
-        model = BankReconciliation
+        model = Documents
         fields = [
             # oculto
             'user',
-            'idBankMovements',
+            #'idBankMovements',
 
             # generales
             'incomeCategory',
@@ -287,13 +329,13 @@ class DocReconciliationUpdateForm(forms.ModelForm):
         ]
         widgets = {
 
-            'idBankMovements': forms.SelectMultiple(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control w-100',
+            #'idBankMovements': forms.SelectMultiple(
+            #    attrs = {
+            #        'placeholder': '',
+            #        'class': 'input-group-field form-control w-100',
                     #'disabled': True
-                }
-            ),
+            #    }
+            #),
             'date': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs = {

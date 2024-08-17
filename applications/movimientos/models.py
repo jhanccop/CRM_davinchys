@@ -12,7 +12,7 @@ from applications.actividades.models import Projects,Commissions,TrafoOrder
 from .managers import (
     DocumentsUploadedManager,
     BankMovementsManager,
-    BankReconciliationManager,
+    DocumentsManager,
     TransactionsManager,
     InternalTransfersManager,
 
@@ -47,68 +47,7 @@ class DocumentsUploaded(TimeStampedModel):
     def __str__(self):
         return str(self.id) 
 
-class BankMovements(TimeStampedModel):
-
-    EGRESO = "0"
-    INGRESO = "1"
-
-    TYPE_TRANSACTION_CHOISES = [
-            (EGRESO, "egreso"),
-            (INGRESO, "ingreso")
-        ]
-
-    idAccount = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
-    idDoc = models.ForeignKey(DocumentsUploaded, on_delete=models.CASCADE, null=True, blank=True)
-    date = models.DateField(
-        'Fecha y hora',
-    )
-    description = models.CharField(
-        'Descripción EEC',
-        max_length=100,
-        null=True,
-        blank=True,
-    )
-    transactionType = models.CharField(
-        'Tipo de movimiento',
-        max_length=1, 
-        choices=TYPE_TRANSACTION_CHOISES, 
-        blank=True
-    )
-    amount = models.DecimalField(
-        'Monto', 
-        max_digits=10, 
-        decimal_places=2
-    )
-    balance = models.DecimalField(
-        'saldo', 
-        max_digits=10, 
-        decimal_places=2,
-        null=True,
-        blank=True,
-    )
-    amountReconcilied = models.DecimalField(
-        'Monto conciliado', 
-        max_digits=10, 
-        decimal_places=2,
-        default=0
-    )
-    opNumber = models.CharField(
-        'Numero de operacion',
-        max_length=10,
-        null=True,
-        blank=True
-    )
-
-    objects = BankMovementsManager()
-
-    class Meta:
-        verbose_name = 'Movimiento bancario'
-        verbose_name_plural = 'Movimientos bancarios'
-
-    def __str__(self):
-        return str(self.idAccount) + " / " + str(self.amount) + " / " + str(self.opNumber) + " / " + str(self.description) 
-
-class BankReconciliation(TimeStampedModel):
+class Documents(TimeStampedModel):
 
     # CATEGORIES INOVICE TYPES
     FACTURA = '0'
@@ -124,7 +63,19 @@ class BankReconciliation(TimeStampedModel):
             (COMPROBANTE_DAVINCHYS, "Comprobante Davinchys"),
             (NC, "NC"),
         ]
-       
+    
+    # MONEDA
+
+    SOLES = '0'
+    DOLARES = '1'
+    EUROS = '2'
+
+    TYPE_CURRENCY_CHOISES = [
+        (SOLES, "S/."),
+        (DOLARES, "$"),
+        (EUROS, "€"),
+    ]
+
     # CATEGORIES EGRESOS
     COMPRA = '0'
     SERVICIO = '1'
@@ -272,18 +223,38 @@ class BankReconciliation(TimeStampedModel):
         blank=True
     )
 
+    month_dec = models.PositiveIntegerField(
+        "Mes de declaración",
+        choices=[(i, i) for i in range(1, 13)],
+        null=True,
+        blank=True
+    )
+
+    year_dec = models.PositiveIntegerField(
+        "Año de declaración",
+        null=True,
+        blank=True
+    )
+
     date = models.DateField(
         'Fecha de emisión',
         null=True,
         blank=True
     )
 
-    idBankMovements = models.ManyToManyField(BankMovements, blank=True)
+    
     idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
     typeInvoice = models.CharField(
         'Tipo de comprobante',
         max_length=1, 
         choices = TYPE_INVOICE_CHOISES,
+        null=True,
+        blank=True
+    )
+    typeCurrency = models.CharField(
+        'Tipo de moneda',
+        max_length=1, 
+        choices = TYPE_CURRENCY_CHOISES,
         null=True,
         blank=True
     )
@@ -366,19 +337,82 @@ class BankReconciliation(TimeStampedModel):
 
     pdf_file = models.FileField(upload_to='conciliaciones_pdfs/',null=True,blank=True)
 
-    objects = BankReconciliationManager()
+    objects = DocumentsManager()
 
     def delete(self, *args, **kwargs):
         self.pdf_file.delete()
-        super(BankReconciliation, self).delete(*args, **kwargs)
+        super(Documents, self).delete(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Conciliación'
-        verbose_name_plural = 'Concicliaciones Bancarias'
+        verbose_name = 'Documento'
+        verbose_name_plural = 'Documentos'
 
     def __str__(self):
-        return str(self.idInvoice)
-    
+        return f"{self.idInvoice} / {self.get_month_dec_display()}-{self.year_dec} / {self.get_typeCurrency_display()} {self.amountReconcilied} / {self.idClient}"
+        
+class BankMovements(TimeStampedModel):
+
+    EGRESO = "0"
+    INGRESO = "1"
+
+    TYPE_TRANSACTION_CHOISES = [
+            (EGRESO, "egreso"),
+            (INGRESO, "ingreso")
+        ]
+
+    idAccount = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
+    idDoc = models.ForeignKey(DocumentsUploaded, on_delete=models.CASCADE, null=True, blank=True)
+    date = models.DateField(
+        'Fecha y hora',
+    )
+    description = models.CharField(
+        'Descripción EEC',
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+    transactionType = models.CharField(
+        'Tipo de movimiento',
+        max_length=1, 
+        choices=TYPE_TRANSACTION_CHOISES, 
+        blank=True
+    )
+    amount = models.DecimalField(
+        'Monto', 
+        max_digits=10, 
+        decimal_places=2
+    )
+    balance = models.DecimalField(
+        'saldo', 
+        max_digits=10, 
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    amountReconcilied = models.DecimalField(
+        'Monto conciliado', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0
+    )
+    opNumber = models.CharField(
+        'Numero de operacion',
+        max_length=10,
+        null=True,
+        blank=True
+    )
+
+    idDocs = models.ManyToManyField(Documents, blank=True,related_name="docs")
+
+    objects = BankMovementsManager()
+
+    class Meta:
+        verbose_name = 'Movimiento bancario'
+        verbose_name_plural = 'Movimientos bancarios'
+
+    def __str__(self):
+        return str(self.idAccount) + " / " + str(self.amount) + " / " + str(self.opNumber) + " / " + str(self.description) 
+
 # ========================================================================================
 
 class Transactions(TimeStampedModel):

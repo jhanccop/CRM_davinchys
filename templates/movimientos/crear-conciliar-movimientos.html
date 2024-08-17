@@ -50,154 +50,19 @@
 
               </div>
 
-              <h6 class="font-weight-bolder">Informacion de general</h6>
-
-              <div class="row">
-                <div class="col-6 col-sm-3">
-                  <div class="input-group input-group-outline ">
-                    <label for="exampleFormControlInput1" class="form-label">F. emisión</label>
-                    {{ form.date }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">T comprobante</label>
-                    {{ form.typeInvoice }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline">
-                    <label for="exampleFormControlInput1" class="form-label">Id Comprobante</label>
-                    {{ form.idInvoice }}
-                  </div>
-                </div>
-                
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Anotación</label>
-                    {{ form.annotation }}
-                  </div>
-                </div>
-              </div>
-
-              <br>
+              <h6 class="font-weight-bolder">Seleccionar documentos</h6>
 
               <div class="row">
                 <div class="col-12 col-sm-8">
-                  <p class="mb-0">Proveedor</p>
                   <div class="input-group input-group-outline">
-                    {{ form.idClient }}
-                  </div>
-                </div>
-              </div>
-
-              <br>
-
-              <div class="row">
-                <div class="col-12 col-sm-4 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
-                    {{ form.amountReconcilied }}
-                  </div>
-                </div>
-                <div class="col-12 col-sm-8 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline">
-                    <label for="exampleFormControlInput1" class="form-label">Descripción</label>
-                    {{ form.description }}
-                  </div>
-                </div>
-              </div>
-
-              <br>
-
-              <div class="row">
-                <div class="col-12 col-sm-12 mt-sm-0">
-                  <div class="input-group input-group-outline">
-                    <div class="form-group w-100">
-                      {{ form.pdf_file }}
-                    </div>
-                  </div>
-                  <p class="text-sm mb-0">Tamaño menor a 1 MB.</p>
-                  {% for error in form.pdf_file.errors %}
-                  <p class="text-sm text-primary font-weight-bolder mb-0">
-                    {{ error|escape }}
-                  </p>
-                  {% endfor %}
-                </div>
-              </div>
-
-              <br>
-
-              <h6 class="font-weight-bolder">Actividad relacionada</h6>
-              <div class="row">
-                <div class="col-12 col-sm-4">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Actividad</label>
-                    {{ form.ActivitiesCategory }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="trafo" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Orden Transformador</label>
-                    {{ form.idTrafoOrder }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="comision" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Comisión</label>
-                    {{ form.idCommission }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="proyecto" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Proyecto</label>
-                    {{ form.idProject }}
+                    <label for="exampleFormControlInput1" class="form-label">Id Comprobante</label>
+                    {{ form.idDocs }}
                   </div>
                 </div>
 
               </div>
 
               <br>
-
-              <h6 class="font-weight-bolder">Categoria de desembolso</h6>
-
-              <div class="row">
-                <div class="col-6 col-sm-4">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Categoría</label>
-                    {{ form.expensesCategory }}
-                  </div>
-                </div>
-                
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="planilla" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Cat Planilla</label>
-                    {{ form.subCategoryPallRoy }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-4 mt-4 mt-sm-0" id="cajachica" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Cat Caja chica</label>
-                    {{ form.subCategoryCashBox }}
-                  </div>
-                </div>
-
-              </div>
-              <br>
-
-              <h6 class="font-weight-bolder">Categoria de contabilidad</h6>
-
-              <div class="row">
-                <div class="col-12 col-sm-4">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Cat Contabilidad</label>
-                    {{ form.contabilidad }}
-                  </div>
-                </div>
-              </div>
 
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
@@ -265,6 +130,7 @@
     if (document.querySelector('.datetimepicker')) {
         flatpickr('.datetimepicker', {
             allowInput: true,
+            maxDate: "today"
             //mode: "range"
         }); // flatpickr
     }
@@ -277,8 +143,8 @@
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
 <script type="text/javascript">
-  if (document.getElementById('id_idClient')) {
-    var element = document.getElementById('id_idClient');
+  if (document.getElementById('id_idDocs')) {
+    var element = document.getElementById('id_idDocs');
     const example = new Choices(element, {});
   }
 </script>

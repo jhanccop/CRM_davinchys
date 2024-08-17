@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from django.db.models import Sum, Max, DateField,F, Q
+from django.db.models import Sum, Max, DateField,F, Q, DecimalField
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models.functions import TruncDate,LastValue,Abs
@@ -37,9 +37,17 @@ class BankMovementsManager(models.Manager):
        result = self.filter(idAccount=idAccount).filter(balance=balance).filter(opNumber=opNumber)
        return result.exists()
     
+    def ListaMovimientosPorDocumentos(self,docs):
+       result = self.filter(idDocs__in = docs)
+       return result
+
     def MovimientosPorId(self,id):
        return self.get(id = id)
     
+    def SumaDocsPorId(self,id):
+       result = self.filter(id = id).annotate(sum = Sum("idDocs__amountReconcilied"))
+       return result
+
     def ListaMovimientosPorCuenta(self,intervalo,cuenta):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
@@ -53,6 +61,10 @@ class BankMovementsManager(models.Manager):
         result = self.filter(
             date__range = rangeDate,
             idAccount__id = cuenta
+        ).annotate(
+            sum = Sum("idDocs__amountReconcilied"),
+            per = (Sum("idDocs__amountReconcilied")/F("amount")) * 100,
+            #output_field = DecimalField()
         ).order_by("-id")
         return result
     
@@ -73,7 +85,7 @@ class BankMovementsManager(models.Manager):
         )
         return result
     
-class  BankReconciliationManager(models.Manager):
+class  DocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]

@@ -96,6 +96,7 @@ class RequirementsApproveListView(ListView):
         payload["user_selected"] = uselect
         payload["users"] = User.objects.usuarios_sistema_all()
         payload["ordenes"] = PaymentRequest.objects.ListarAprobarPorIntervalo(area=self.request.user.position,user_selected=user_selected,interval = intervalDate)
+        payload["historico"] = PaymentRequest.objects.ListarHistoricoPorIntervalo(area=self.request.user.position,user_selected=user_selected,interval = intervalDate)
         return payload
 
 class ApproveRequestUpdateView1(UpdateView):

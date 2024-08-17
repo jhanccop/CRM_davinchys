@@ -11,6 +11,24 @@ from .signals import (
   update_accounts,
 )
 
+class Tin(TimeStampedModel):
+    tin = models.CharField(
+        'RUC',
+        max_length=50,
+    )
+
+    tinName = models.CharField(
+        'Razón Social',
+        max_length=50,
+    )
+
+    class Meta:
+        verbose_name = 'Ruc'
+        verbose_name_plural = 'Rucs'
+
+    def __str__(self):
+        return f"{self.tin} / {self.tinName}"
+
 class Account(TimeStampedModel):
     """
         Cuentas Bancarias
@@ -44,24 +62,14 @@ class Account(TimeStampedModel):
         max_length=50,
     )
 
+    idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
+
     accountBalance = models.DecimalField(
         'Monto en sistema',
         max_digits=10, 
         decimal_places=2,
         blank=True,
         null=True
-    )
-
-    realBalance = models.DecimalField(
-        'Monto segun banco',
-        max_digits=10, 
-        decimal_places=2,
-        blank=True,
-        null=True
-    )
-
-    lastUpdateReal = models.DateTimeField(
-        'Actualización real',
     )
 
     lastUpdateCRM = models.DateTimeField(

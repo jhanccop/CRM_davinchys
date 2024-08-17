@@ -28,7 +28,7 @@ from django.views.generic import (
 from .models import (
   DocumentsUploaded,
   BankMovements,
-  BankReconciliation,
+  Documents,
 
   Transactions,
   InternalTransfers
@@ -40,8 +40,9 @@ from .forms import (
   InternalTransfersForm,
   BankMovementsForm,
   UploadFileForm,
+  ConciliationBankMovementsForm,
 
-  BankReconciliationForm,
+  DocumentsForm,
   DocReconciliationUpdateForm
 )
 
@@ -145,55 +146,67 @@ class DocumentacionListView(ListView):
 
   def get_queryset(self,**kwargs):
       selectedType = self.request.GET.get("DocKword", '')
-      
+
       intervalDate = self.request.GET.get("dateKword", '')
       if intervalDate == "today" or intervalDate =="":
         intervalDate = str(date.today() - timedelta(days = 30)) + " to " + str(date.today())
 
-      if selectedType == "todos" or selectedType == None or selectedType =="" :
-        selectedType = "5" # seleccionar por default la primera cuenta
-      
-      documentation = BankReconciliation.objects.ListaDocumentosPorTipo(intervalo = intervalDate, tipo = int(selectedType))
-      
-      """
-      bankMovements = BankMovements.objects.ListaMovimientosPorTipo(documentation)
-      
-      idDocs = [i["idBankMovements__id"] for i in documentation]
-      idMov = [i.id for i in bankMovements]
+      if selectedType == "Todo" or selectedType == None or selectedType =="" :
+        selectedType = 5
 
-      listFinal = [{}] * len(idMov)
-      for i in idDocs:
-        listFinal[idMov.index(i)] = documentation[idDocs.index(i)]
+      # -----
+      #bankMovements = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(selectedAccount))
+      #documentation = BankReconciliation.objects.ListaConciliacionPorCuenta(bankMovements)
 
-      conciliation = zip(bankMovements,listFinal)
-      """
+      #idDocs = [i["idBankMovements__id"] for i in documentation]
+      #idMov = [i.id for i in bankMovements]
+
+      #listFinal = [{}] * len(idMov)
+      #for i in idDocs:
+      #  listFinal[idMov.index(i)] = documentation[idDocs.index(i)]
+
+      #conciliation = zip(bankMovements,listFinal)
+      # -----
+
+      documentation = Documents.objects.ListaDocumentosPorTipo(intervalo = intervalDate, tipo = int(selectedType))
+      #bankMovements = BankMovements.objects.ListaMovimientosPorDocumentos(documentation)
+
+      #print("****",documentation,bankMovements)
+
+      #idDocs = [i.id for i in documentation]
+      #idMov = [i["idDocs"] for i in bankMovements]
+
+      #listFinal = [{}] * len(idDocs)
+      #for i in idMov:
+      #  listFinal[idDocs.index(i)] = documentation[idMov.index(i)]
+
+      #conciliation = zip(documentation,bankMovements)
+
+      
+
       payload = {}
       payload["intervalDate"] = intervalDate
-      #payload["selectedAccount"] = Account.objects.CuentasById(int(selectedAccount))
-      #payload["listAccount"] = Account.objects.listarcuentas()
+      payload["selected"] = selectedType
       payload["documentation"] = documentation
-      #payload["comprasPendientes"] = PurchaseOrders.objects.comprasPendientes()
-      #payload["ServiciosPendientes"] = ServiceOrders.objects.serviciosPendientes()
       
       return payload
 
 class DocumentacionCreateView(CreateView):
   template_name = "movimientos/crear-documentos.html"
-  model = BankReconciliation
-  form_class = BankReconciliationForm
+  model = Documents
+  form_class = DocumentsForm
   success_url = reverse_lazy('movimientos_app:lista-documentacion')
 
 class DocumentacionEditView(UpdateView):
   template_name = "movimientos/editar-documentos.html"
-  model = BankReconciliation
-  form_class = BankReconciliationForm
+  model = Documents
+  form_class = DocumentsForm
   success_url = reverse_lazy('movimientos_app:lista-documentacion')
 
 # ================= MOVIMIENTOS ========================
 class MovimientosListView(ListView):
   template_name = "movimientos/lista-movimientos.html"
   context_object_name = 'movimientos'
-  #model = Transactions
 
   def get_queryset(self,**kwargs):
       selectedAccount = self.request.GET.get("AccountKword", '')
@@ -206,22 +219,13 @@ class MovimientosListView(ListView):
         selectedAccount = idSelected.id # seleccionar por default la primera cuenta
 
       bankMovements = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(selectedAccount))
-      documentation = BankReconciliation.objects.ListaConciliacionPorCuenta(bankMovements)
-
-      idDocs = [i["idBankMovements__id"] for i in documentation]
-      idMov = [i.id for i in bankMovements]
-
-      listFinal = [{}] * len(idMov)
-      for i in idDocs:
-        listFinal[idMov.index(i)] = documentation[idDocs.index(i)]
-
-      conciliation = zip(bankMovements,listFinal)
       payload = {}
       payload["intervalDate"] = intervalDate
       payload["selectedAccount"] = Account.objects.CuentasById(int(selectedAccount))
       payload["listAccount"] = Account.objects.listarcuentas()
       payload["lastBalance"] = BankMovements.objects.ObtenerSaldo(cuenta=int(selectedAccount))
-      payload["conciliation"] = conciliation
+
+      payload["bankMovements"] = bankMovements
       return payload
 
 class MovimientosEditView(UpdateView):
@@ -236,23 +240,23 @@ class MovimientosCreateView(CreateView):
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
 
-class MovimientosConciliarCreateView(CreateView):
+class ConciliarUpdateView(UpdateView):
   template_name = "movimientos/crear-conciliar-movimientos.html"
-  model = BankReconciliation
-  form_class = BankReconciliationForm
+  model = BankMovements
+  form_class = ConciliationBankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
 
   def get_context_data(self, **kwargs):
-    context = super(MovimientosConciliarCreateView, self).get_context_data(**kwargs)
+    context = super(ConciliarUpdateView, self).get_context_data(**kwargs)
     bankMovement = BankMovements.objects.get(id = self.kwargs['pk'])
     context['mov'] = bankMovement
-    context['sum'] = BankReconciliation.objects.ListaConciliacionSumaPorIdMovimiento(bankMovement.id)
+    #context['sum'] = Documents.objects.ListaConciliacionSumaPorIdMovimiento(bankMovement.id)
     return context
   
 # ======================= UPDATE DOC ===============================
 class MovimientosConciliarUpdateView(UpdateView):
   template_name = "movimientos/editar-conciliar-movimientos.html"
-  model = BankReconciliation
+  model = Documents
   form_class = DocReconciliationUpdateForm
 
   def get_success_url(self, *args, **kwargs):
@@ -266,19 +270,18 @@ class MovimientosDetailView(ListView):
       pk = self.kwargs['pk']
       payload = {}
       bankMovement = BankMovements.objects.MovimientosPorId(id = int(pk))
-      documentation = BankReconciliation.objects.ListaConciliacionPorIdMovimiento(bankMovement.id)
-      suma = BankReconciliation.objects.ListaConciliacionSumaPorIdMovimiento(bankMovement.id)
+      #documentation = Documents.objects.ListaConciliacionPorIdMovimiento(bankMovement.id)
+      suma = BankMovements.objects.SumaDocsPorId(bankMovement.id)[0].sum
       payload["id"] = bankMovement
-      payload["doc"] = documentation
       payload["sum"] = suma
       return payload
 
 class MovimientosConciliarDeleteView(DeleteView):
   template_name = "movimientos/eliminar-conciliacion.html"
-  model = BankReconciliation
+  model = Documents
   def get_success_url(self, *args, **kwargs):
     pk = self.object.idBankMovements.all()[0].id
-    model = BankReconciliation.objects.get(id=self.kwargs["pk"])
+    model = Documents.objects.get(id=self.kwargs["pk"])
     model.delete()
     return reverse_lazy('movimientos_app:movimientos-detalle', kwargs={'pk':pk})
   #success_url = reverse_lazy('movimientos_app:lista-transferencias')
