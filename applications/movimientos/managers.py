@@ -64,6 +64,9 @@ class BankMovementsManager(models.Manager):
         ).annotate(
             sum = Sum("idDocs__amountReconcilied"),
             per = (Sum("idDocs__amountReconcilied")/F("amount")) * 100,
+
+            sum_mov = Sum("idMovement__amountReconcilied"),
+            per_mov = (Sum("idMovement__amountReconcilied")/F("amount")) * 100,
             #output_field = DecimalField()
         ).order_by("-id")
         return result

@@ -51,7 +51,7 @@ class InternalTransfersForm(forms.ModelForm):
             
         }
 
-class ConciliationBankMovementsForm(forms.ModelForm):
+class ConciliationDocumentsForm(forms.ModelForm):
     class Meta:
         model = BankMovements
         fields = [
@@ -68,10 +68,52 @@ class ConciliationBankMovementsForm(forms.ModelForm):
             }
         
     def __init__(self, *args, **kwargs):
-        super(ConciliationBankMovementsForm, self).__init__(*args, **kwargs)
+        super(ConciliationDocumentsForm, self).__init__(*args, **kwargs)
         self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
-    
+
+class ConciliationBankMovementsForm(forms.ModelForm):
+    class Meta:
+        model = BankMovements
+        fields = [
+            'idMovement',
+            'amountReconcilied',
+            'conciliationType'
+        ]
+        widgets = {
+                'idMovement': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control w-100',
+                       #'disabled': True
+                    }
+                ),
+                'amountReconcilied': forms.NumberInput(
+                    attrs = {
+                        'class': 'input-group-field form-control',
+                    }
+                ),
+                'conciliationType': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                    }
+                ),
+            }
         
+    def clean_amountReconcilied(self):
+        amountReconcilied = self.cleaned_data['amountReconcilied']
+        if not amountReconcilied > 0:
+            raise forms.ValidationError('Ingrese un monto mayor a cero')
+        return amountReconcilied
+    
+    def __init__(self, *args, **kwargs):
+        super(ConciliationBankMovementsForm, self).__init__(*args, **kwargs)
+        idAccount = kwargs['instance'].idAccount.id
+        print(idAccount)
+        #self.fields['idMovement'].queryset = BankMovements.objects.exclude(idDocs__isnull = False)
+        self.fields['idMovement'].queryset = BankMovements.objects.exclude(idAccount__id = idAccount)
+ 
+
 class BankMovementsForm(forms.ModelForm):
     class Meta:
         model = BankMovements
@@ -116,7 +158,7 @@ class BankMovementsForm(forms.ModelForm):
                             
                 
             }
-        
+
 class DocumentsForm(forms.ModelForm):
     class Meta:
         model = Documents
@@ -456,7 +498,7 @@ class DocReconciliationUpdateForm(forms.ModelForm):
         if not amountReconcilied > 0:
             raise forms.ValidationError('Ingrese un monto mayor a cero')
         return amountReconcilied
-  
+
 class UploadFileForm(forms.Form):
     file = forms.FileField(
         label="Sellecionar archivo:",

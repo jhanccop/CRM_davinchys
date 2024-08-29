@@ -83,7 +83,11 @@ urlpatterns = [
     ),
 
     # ============== CONCILIAR =================
-
+    path(
+        'movimientos/conciliar-mov/<pk>/', 
+        views.MovConciliarUpdateView.as_view(),
+        name='movimientos-conciliar-bancario',
+    ),
     path(
         'movimientos/conciliar/<pk>/', 
         views.ConciliarUpdateView.as_view(),

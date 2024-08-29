@@ -48,7 +48,7 @@ class DocumentsUploaded(TimeStampedModel):
         return str(self.id) 
 
 class Documents(TimeStampedModel):
-
+    
     # CATEGORIES INOVICE TYPES
     FACTURA = '0'
     RHE = '1'
@@ -65,7 +65,6 @@ class Documents(TimeStampedModel):
         ]
     
     # MONEDA
-
     SOLES = '0'
     DOLARES = '1'
     EUROS = '2'
@@ -241,9 +240,9 @@ class Documents(TimeStampedModel):
         null=True,
         blank=True
     )
-
-    
+   
     idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
+
     typeInvoice = models.CharField(
         'Tipo de comprobante',
         max_length=1, 
@@ -352,6 +351,7 @@ class Documents(TimeStampedModel):
         
 class BankMovements(TimeStampedModel):
 
+    # TYPE OF MOVEMENT
     EGRESO = "0"
     INGRESO = "1"
 
@@ -359,6 +359,17 @@ class BankMovements(TimeStampedModel):
             (EGRESO, "egreso"),
             (INGRESO, "ingreso")
         ]
+    
+    # TYPE OF CONCILIATION
+    DOCUMENTARIA = '0'
+    CAMBIOMONEDA = '1'
+    PRESTAMO = '2'
+
+    TYPE_CONCILIATION_CHOISES = [
+        (DOCUMENTARIA, "Documentaria"),
+        (CAMBIOMONEDA, "Cambio de moneda"),
+        (PRESTAMO, "Prestamo"),
+    ]
 
     idAccount = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
     idDoc = models.ForeignKey(DocumentsUploaded, on_delete=models.CASCADE, null=True, blank=True)
@@ -375,6 +386,14 @@ class BankMovements(TimeStampedModel):
         'Tipo de movimiento',
         max_length=1, 
         choices=TYPE_TRANSACTION_CHOISES, 
+        blank=True
+    )
+    conciliationType = models.CharField(
+        'Tipo de conciliacion',
+        max_length=1, 
+        choices = TYPE_CONCILIATION_CHOISES,
+        default="0",
+        null=True,
         blank=True
     )
     amount = models.DecimalField(
@@ -401,6 +420,8 @@ class BankMovements(TimeStampedModel):
         null=True,
         blank=True
     )
+
+    idMovement = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     idDocs = models.ManyToManyField(Documents, blank=True,related_name="docs")
 

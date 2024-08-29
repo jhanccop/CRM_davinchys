@@ -96,7 +96,7 @@
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción EEC</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Resumen</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Id / Per / Monto / Cliente / Concepto</th>
+                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Conciliación</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Doc</th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                     </tr>
@@ -123,6 +123,8 @@
                         <span class="me-2 text-sm font-weight-bold text-primary">-{{ t.amount|floatformat:"2g" }}</span>
                         {% endif %}
                       </td>
+
+                      {% if t.conciliationType == "0" %}
                       <td class="text-sm">
                         <div class="w-100">
                           <div class="d-flex align-items-center mb-2">
@@ -148,6 +150,34 @@
                         </div>
                       </td>
 
+                      {% else %}
+                      <td class="text-sm">
+                        <div class="w-100">
+                          <div class="d-flex align-items-center mb-2">
+                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.sum_mov|floatformat:"2g" }}</span>
+                            <span class="ms-auto text-sm font-weight-normal">{{ t.per_mov|floatformat:0 }}%</span>
+                          </div>
+                          <div>
+                            <div class="progress progress-md w-100">
+                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          {% for i in t.idMovement.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}} / {{i.description}}</p> {%endfor%}
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        
+                      </td>
+
+                      {% endif %}
+
+                      
+
                       <td>
                         <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
                           aria-expanded="false">
@@ -156,7 +186,8 @@
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-detalle' t.id %}">Ver detalle</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Agregar Conciliacion</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Conciliacion documentaria</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar-bancario' t.id %}"> Conciliacion bancaria</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar movimiento</a></li>
                         </ul>
                       </td>

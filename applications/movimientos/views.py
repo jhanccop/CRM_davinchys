@@ -40,10 +40,12 @@ from .forms import (
   InternalTransfersForm,
   BankMovementsForm,
   UploadFileForm,
+  ConciliationDocumentsForm,
   ConciliationBankMovementsForm,
-
+  
   DocumentsForm,
-  DocReconciliationUpdateForm
+  DocReconciliationUpdateForm,
+  #BankReconciliationUpdateForm
 )
 
 class MainReport(ContabilidadPermisoMixin,ListView):
@@ -243,7 +245,7 @@ class MovimientosCreateView(CreateView):
 class ConciliarUpdateView(UpdateView):
   template_name = "movimientos/crear-conciliar-movimientos.html"
   model = BankMovements
-  form_class = ConciliationBankMovementsForm
+  form_class = ConciliationDocumentsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
 
   def get_context_data(self, **kwargs):
@@ -253,6 +255,18 @@ class ConciliarUpdateView(UpdateView):
     #context['sum'] = Documents.objects.ListaConciliacionSumaPorIdMovimiento(bankMovement.id)
     return context
   
+class MovConciliarUpdateView(UpdateView):
+  template_name = "movimientos/conciliar-mov.html"
+  model = BankMovements
+  form_class = ConciliationBankMovementsForm
+  success_url = reverse_lazy('movimientos_app:lista-movimientos')
+
+  def get_context_data(self, **kwargs):
+    context = super(MovConciliarUpdateView, self).get_context_data(**kwargs)
+    bankMovement = BankMovements.objects.get(id = self.kwargs['pk'])
+    context['mov'] = bankMovement
+    #context['sum'] = Documents.objects.ListaConciliacionSumaPorIdMovimiento(bankMovement.id)
+    return context
 # ======================= UPDATE DOC ===============================
 class MovimientosConciliarUpdateView(UpdateView):
   template_name = "movimientos/editar-conciliar-movimientos.html"
