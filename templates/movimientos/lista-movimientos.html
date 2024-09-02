@@ -187,7 +187,7 @@
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Conciliacion documentaria</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar-bancario' t.id %}"> Conciliacion bancaria</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar movimiento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'movimientos_app:movimientos-eliminar' t.id %}">Eliminar movimiento</a></li>
                         </ul>
                       </td>
 

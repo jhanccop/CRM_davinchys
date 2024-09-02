@@ -242,6 +242,12 @@ class MovimientosCreateView(CreateView):
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
 
+class MovimientosDeleteView(DeleteView):
+  template_name = "movimientos/eliminar-movimientos.html"
+  model = BankMovements
+  success_url = reverse_lazy('movimientos_app:lista-movimientos')
+
+
 class ConciliarUpdateView(UpdateView):
   template_name = "movimientos/crear-conciliar-movimientos.html"
   model = BankMovements

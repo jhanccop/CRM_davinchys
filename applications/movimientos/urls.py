@@ -75,6 +75,11 @@ urlpatterns = [
         views.MovimientosDetailView.as_view(),
         name='movimientos-detalle',
     ),
+    path(
+        'movimientos/eliminar-movimientos/<pk>/', 
+        views.MovimientosDeleteView.as_view(),
+        name='movimientos-eliminar',
+    ),
     # ============== UPLOAD EXCEL FILE MOVIMIENTOS =================
     path(
         'movimientos/subir-excel/', 
