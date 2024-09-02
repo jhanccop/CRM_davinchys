@@ -63,6 +63,13 @@
                   </div>
                 </div>
 
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo de movimiento</label>
+                    {{ form.transactionType }}
+                  </div>
+                </div>
+
               </div>
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>

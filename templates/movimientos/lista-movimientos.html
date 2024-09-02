@@ -154,19 +154,19 @@
                       <td class="text-sm">
                         <div class="w-100">
                           <div class="d-flex align-items-center mb-2">
-                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.sum_mov|floatformat:"2g" }}</span>
+                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied|floatformat:"2g" }}</span>
                             <span class="ms-auto text-sm font-weight-normal">{{ t.per_mov|floatformat:0 }}%</span>
                           </div>
                           <div>
                             <div class="progress progress-md w-100">
-                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per_mov|floatformat:0 }}%;"></div>
                           </div>
                         </div>
                       </td>
 
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idMovement.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}} / {{i.description}}</p> {%endfor%}
+                          {% for i in t.idMovement.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}}</p> {% endfor %}
                         </div>
                       </td>
 
@@ -176,7 +176,6 @@
 
                       {% endif %}
 
-                      
 
                       <td>
                         <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"

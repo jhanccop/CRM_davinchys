@@ -1,4 +1,8 @@
 from applications.cuentas.models import Account
+#from .models import BankMovements
+
+#from django.db.models.signals import post_save, m2m_changed
+#from django.dispatch import receiver
 
 def update(instance, categoria):
     """ UPDATE DE MOVIMIENTOS """
@@ -106,3 +110,53 @@ def update_cuentas_transferencias(sender, instance, **kwargs):
     pass
 
   return instance
+
+#@receiver(post_save, sender=BankMovements)
+def update_movimientos_destino(sender, instance,**kwargs):
+  from .models import BankMovements
+
+  print("mmmmmmmmmmmmmmmmm")
+
+  print(instance.id)
+  print(instance.idAccount)
+  print(instance.date)
+  print(instance.description)
+  print(instance.transactionType)
+  print(instance.amount)
+  print(instance.amountReconcilied)
+  print(instance.idMovement.all())
+
+
+  if not kwargs["created"]:
+    print("id: ********** ",instance.id, instance.idMovement.all(), instance)
+
+    #if kwargs["created"]:
+      
+    bankMovement = BankMovements()
+    conciliationType = instance.conciliationType # colocar el mismo tipo de conciliacipon en destino
+    id_destination = instance.idMovement.all()[0].id
+
+    print("--------",id_destination)
+
+    # verificar si el monto reconciliado es igual al monto total
+    bankMovement.conciliationType = False
+    if instance.amount == instance.amountReconcilied:
+      bankMovement.conciliationType = True
+      
+    # buscar los montos reconciliados con el mov de destino
+    totalAmount = BankMovements.objects.SumaMovsPorId(id = id_destination)
+    print(totalAmount["sum"])
+
+    # obtener movimiento de destino para actualizar
+    movDestination = BankMovements.objects.filter(id = id_destination)
+    print(movDestination)
+    movDestination.update(amountReconcilied=totalAmount["sum"])
+  
+    #movDestination.amountReconcilied = totalAmount["sum"]
+    #movDestination.save()
+  #movDestination.idMovement.add(listIdMovements)
+
+  #movDestination.save()
+
+  #return instance
+  

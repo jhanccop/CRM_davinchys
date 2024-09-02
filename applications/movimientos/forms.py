@@ -77,10 +77,10 @@ class ConciliationBankMovementsForm(forms.ModelForm):
         fields = [
             'idMovement',
             'amountReconcilied',
-            'conciliationType'
+            'conciliationType',
         ]
         widgets = {
-                'idMovement': forms.Select(
+                'idMovement': forms.SelectMultiple(
                     attrs = {
                         'placeholder': '',
                         'class': 'input-group-field form-control w-100',
@@ -102,9 +102,16 @@ class ConciliationBankMovementsForm(forms.ModelForm):
         
     def clean_amountReconcilied(self):
         amountReconcilied = self.cleaned_data['amountReconcilied']
-        if not amountReconcilied > 0:
-            raise forms.ValidationError('Ingrese un monto mayor a cero')
+        if not amountReconcilied >= 0:
+            raise forms.ValidationError('Ingrese un monto mayor a cero.')
         return amountReconcilied
+
+    def clean_idMovement(self):
+        idMovement = self.cleaned_data['idMovement']
+        print(idMovement)
+        if len(idMovement) > 1:
+            raise forms.ValidationError('Ingrese solo un movimiento de destino.')
+        return idMovement
     
     def __init__(self, *args, **kwargs):
         super(ConciliationBankMovementsForm, self).__init__(*args, **kwargs)
@@ -112,7 +119,6 @@ class ConciliationBankMovementsForm(forms.ModelForm):
         print(idAccount)
         #self.fields['idMovement'].queryset = BankMovements.objects.exclude(idDocs__isnull = False)
         self.fields['idMovement'].queryset = BankMovements.objects.exclude(idAccount__id = idAccount)
- 
 
 class BankMovementsForm(forms.ModelForm):
     class Meta:
@@ -123,6 +129,7 @@ class BankMovementsForm(forms.ModelForm):
             'description',
             'amount',
             'opNumber',
+            'transactionType'
         ]
         widgets = {
                 'idAccount': forms.Select(
@@ -150,6 +157,12 @@ class BankMovementsForm(forms.ModelForm):
                     }
                 ),
                 'opNumber': forms.TextInput(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                    }
+                ),
+                'transactionType': forms.Select(
                     attrs = {
                         'placeholder': '',
                         'class': 'input-group-field form-control',

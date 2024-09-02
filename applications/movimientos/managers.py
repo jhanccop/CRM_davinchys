@@ -48,6 +48,10 @@ class BankMovementsManager(models.Manager):
        result = self.filter(id = id).annotate(sum = Sum("idDocs__amountReconcilied"))
        return result
 
+    def SumaMovsPorId(self,id):
+       result = self.filter(id = id).aggregate(sum = Sum("idMovement__amountReconcilied"))
+       return result
+
     def ListaMovimientosPorCuenta(self,intervalo,cuenta):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
@@ -66,7 +70,7 @@ class BankMovementsManager(models.Manager):
             per = (Sum("idDocs__amountReconcilied")/F("amount")) * 100,
 
             sum_mov = Sum("idMovement__amountReconcilied"),
-            per_mov = (Sum("idMovement__amountReconcilied")/F("amount")) * 100,
+            per_mov = (F("amountReconcilied")/F("amount")) * 100,
             #output_field = DecimalField()
         ).order_by("-id")
         return result
