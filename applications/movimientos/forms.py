@@ -67,9 +67,9 @@ class ConciliationDocumentsForm(forms.ModelForm):
                 ),
             }
         
-    def __init__(self, *args, **kwargs):
-        super(ConciliationDocumentsForm, self).__init__(*args, **kwargs)
-        self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
+    #def __init__(self, *args, **kwargs):
+    #    super(ConciliationDocumentsForm, self).__init__(*args, **kwargs)
+    #    self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
 
 class ConciliationBankMovementsForm(forms.ModelForm):
     class Meta:
