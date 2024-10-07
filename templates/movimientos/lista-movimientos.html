@@ -93,11 +93,18 @@
                   <thead class="thead-light">
                     <tr>
                       <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha </th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción EEC</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Resumen</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Conciliación</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Doc</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción, EEC</th>
+                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto, Avance</th>
+                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">
+                        
+                            Monto &nbsp;&nbsp;&nbsp;&nbsp;
+                          
+                            Id &nbsp;&nbsp;&nbsp;&nbsp;
+                          
+                            Detalle
+                          
+                        
+                      </th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                     </tr>
                   </thead>
@@ -106,7 +113,7 @@
                     <tr>
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.date|date:'y-m' }}</h6>
+                          <h6 class="mb-0 text-sm"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{ t.date|date:'y-m' }}</a></h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
                         </div>
                       </td>
@@ -116,66 +123,57 @@
                           <p class="text-sm font-weight-normal text-secondary mb-0"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">nOp: {{t.opNumber}}  </a></p>
                         </div>
                       </td>
-                      <td class="text-sm text-end">
-                        {% if t.transactionType == "1" %}
-                        <span class="me-2 text-sm font-weight-bold text-success">+{{ t.amount|floatformat:"2g" }}</span>
-                        {% else %}
-                        <span class="me-2 text-sm font-weight-bold text-primary">-{{ t.amount|floatformat:"2g" }}</span>
-                        {% endif %}
-                      </td>
-
-                      {% if t.conciliationType == "0" %}
                       <td class="text-sm">
                         <div class="w-100">
-                          <div class="d-flex align-items-center mb-2">
-                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.sum|floatformat:"2g" }}</span>
-                            <span class="ms-auto text-sm font-weight-normal">{{ t.per|floatformat:0 }}%</span>
+                          <div class="d-flex align-items-center mb-0">
+                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.per|floatformat:0 }} %</span>
+                            <span class="ms-auto text-sm font-weight-normal">{{ t.amountReconcilied|floatformat:"2g" }}</span>
                           </div>
                           <div>
                             <div class="progress progress-md w-100">
                               <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                            </div>
                           </div>
-                        </div>
+                          {% if t.transactionType == "1" %}
+                          <span class="me-2 text-md font-weight-bold text-success">+{{ t.amount|floatformat:"2g" }}</span>
+                          {% else %}
+                          <span class="me-2 text-md font-weight-bold text-primary">-{{ t.amount|floatformat:"2g" }}</span>
+                          {% endif %}
+                          
                       </td>
 
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idDocs.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}} / {{i.description}}</p> {%endfor%}
+
+                          {% for i in t.mov_origen.all %}
+                          
+                            {% if i.type == "0" %}
+                            <p class="text-sm font-weight-normal text-info mb-0">
+                              {% if i.idDoc.pdf_file %}
+                              <a href="/media/{{i.idDoc.pdf_file}}">
+                                <i class="far fa-file-pdf text-info text-lg"></i>
+                              </a>
+                              {% else %}
+                                --
+                              {% endif %}
+                            
+                              {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp;{{i.idDoc.idInvoice}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idDoc.idClient}}
+                            </p>
+                            {% else %}
+
+                            <p class="text-sm font-weight-normal text-dark mb-0">
+
+                              {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.idAccount}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.opNumber}} - {{i.idMovArrival.description}}
+                          </p>
+                            {% endif %}
+                          
+
+
+                          {% endfor %}
+
+
                         </div>
                       </td>
-
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idDocs.all %} {% if i.pdf_file %} <a href="/media/{{i.pdf_file}}"><i class="far fa-file-pdf"></i> </a> {% else %} <p class="text-sm font-weight-normal text-secondary mb-0">--</p> {% endif %} {%endfor%}
-                        </div>
-                      </td>
-
-                      {% else %}
-                      <td class="text-sm">
-                        <div class="w-100">
-                          <div class="d-flex align-items-center mb-2">
-                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied|floatformat:"2g" }}</span>
-                            <span class="ms-auto text-sm font-weight-normal">{{ t.per_mov|floatformat:0 }}%</span>
-                          </div>
-                          <div>
-                            <div class="progress progress-md w-100">
-                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per_mov|floatformat:0 }}%;"></div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          {% for i in t.idMovement.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}}</p> {% endfor %}
-                        </div>
-                      </td>
-
-                      <td class="text-sm">
-                        
-                      </td>
-
-                      {% endif %}
-
 
                       <td>
                         <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
@@ -185,8 +183,8 @@
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-detalle' t.id %}">Ver detalle</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar' t.id %}"> Conciliacion documentaria</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-conciliar-bancario' t.id %}"> Conciliacion bancaria</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:conciliar-movimiento-con-documento' t.id %}"> Conciliacion documentaria</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:conciliar-movimiento-con-movimiento' t.id %}"> Conciliacion bancaria</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'movimientos_app:movimientos-eliminar' t.id %}">Eliminar movimiento</a></li>
                         </ul>
                       </td>
@@ -200,6 +198,7 @@
       </div>
   </div>
 </div>
+
 
 {% endblock panel-content %}
 

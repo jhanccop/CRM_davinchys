@@ -25,6 +25,32 @@
     <link href="{% static 'assets/css/icon.css' %}" rel="stylesheet">
     <!-- CSS Files -->
     <link id="pagestyle" href="{% static 'assets/css/material-dashboard.css' %}" rel="stylesheet" />
+
+    <script src="{% static 'assets/js/plugins/frappe-gantt.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'assets/css/frappe-gantt.css' %}">
+    
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #db0303;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        /* custom class */
+        .gantt .bar-milestone .bar {
+            fill: rgba(255, 6, 6, 0.73);
+        }
+        
+        .heading {
+            text-align: center;
+        }
+        .gantt-target.dark {
+            background-color: #bab3b3;
+        }
+    </style>
+
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">

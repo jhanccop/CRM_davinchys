@@ -7,10 +7,9 @@
 {% block Type %} Detalle {% endblock Type %}
 
 {% block panel-content %}
-
 <div class="row">
     <div class="col-md-12 col-lg-10 col-sm-10 mx-auto">
-        <div class="card my-sm-5">
+        <div class="card">
             <div class="card-header text-center">
                 <div class="row justify-content-between">
                     <div class="col-lg-9 col-md-9 text-start">
@@ -24,7 +23,7 @@
                     </div>
 
                     <div class="col-lg-3 col-md-3 text-md-end text-start">
-                       <h6>SEG. COTIZACION</h6>
+                        <h6>SEG. COTIZACION</h6>
                         <div class="timeline timeline-one-side">
                             {% if data.quotation.q1 == "0" %}
                             <div class="timeline-block mb-2">
@@ -32,8 +31,12 @@
                                     <a href=""><i class="far fa-calendar-check text-lg text-secondary"></i></i></a>
                                 </span>
                                 <div class="timeline-content">
-                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Recibido</span></h6></a>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt1|date:'d-m-Y H:i' }}</p>
+                                    <a href="">
+                                        <h6 class="text-dark text-sm font-weight-bold mb-0"><span
+                                                class="badge badge-sm bg-gradient-secondary">Recibido</span></h6>
+                                    </a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt1|date:'d-m-Y H:i' }}</p>
                                 </div>
                             </div>
                             {% elif data.quotation.q1 == "1" %}
@@ -43,7 +46,8 @@
                                 </span>
                                 <div class="timeline-content">
                                     <h6 class="text-success text-sm font-weight-bold mb-0">Recibido</h6>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt1|date:'d-m-Y H:i'}}</p>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt1|date:'d-m-Y H:i'}}</p>
                                 </div>
                             </div>
                             {% endif %}
@@ -54,8 +58,13 @@
                                     <a href=""><i class="fas fa-file-invoice text-lg text-secondary"></i></a>
                                 </span>
                                 <div class="timeline-content">
-                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Cotizacion en proceso</span></h6></a>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt2|date:'d-m-Y H:i' }}</p>
+                                    <a href="">
+                                        <h6 class="text-dark text-sm font-weight-bold mb-0"><span
+                                                class="badge badge-sm bg-gradient-secondary">Cotizacion en
+                                                proceso</span></h6>
+                                    </a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt2|date:'d-m-Y H:i' }}</p>
                                 </div>
                             </div>
                             {% elif data.quotation.q2 == "1" %}
@@ -65,7 +74,8 @@
                                 </span>
                                 <div class="timeline-content">
                                     <h6 class="text-success text-sm font-weight-bold mb-0">Cot. enviada</h6>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt2|date:'d-m-Y H:i'}}</p>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt2|date:'d-m-Y H:i'}}</p>
                                 </div>
                             </div>
                             {% endif %}
@@ -76,8 +86,12 @@
                                     <a href=""><i class="fas fa-user-clock text-lg text-secondary"></i></a>
                                 </span>
                                 <div class="timeline-content">
-                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Espera cliente</span></h6></a>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i' }}</p>
+                                    <a href="">
+                                        <h6 class="text-dark text-sm font-weight-bold mb-0"><span
+                                                class="badge badge-sm bg-gradient-secondary">Espera cliente</span></h6>
+                                    </a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt3|date:'d-m-Y H:i' }}</p>
                                 </div>
                             </div>
                             {% elif data.quotation.q3 == "1" %}
@@ -87,7 +101,8 @@
                                 </span>
                                 <div class="timeline-content">
                                     <h6 class="text-success text-sm font-weight-bold mb-0">Aprobado</h6>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
                                 </div>
                             </div>
                             {% elif data.quotation.q3 == "3" %}
@@ -97,7 +112,8 @@
                                 </span>
                                 <div class="timeline-content">
                                     <h6 class="text-success text-sm font-weight-bold mb-0">Observado</h6>
-                                    <p class="text-warning font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
+                                    <p class="text-warning font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt3|date:'d-m-Y H:i'}}</p>
                                 </div>
                             </div>
                             {% endif %}
@@ -108,8 +124,12 @@
                                     <a href=""><i class="fas fa-clipboard-check text-lg text-secondary"></i></a>
                                 </span>
                                 <div class="timeline-content">
-                                    <a href=""><h6 class="text-dark text-sm font-weight-bold mb-0"><span class="badge badge-sm bg-gradient-secondary">Atención</span></h6></a>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt4|date:'d-m-Y H:i' }}</p>
+                                    <a href="">
+                                        <h6 class="text-dark text-sm font-weight-bold mb-0"><span
+                                                class="badge badge-sm bg-gradient-secondary">Atención</span></h6>
+                                    </a>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt4|date:'d-m-Y H:i' }}</p>
                                 </div>
                             </div>
                             {% elif data.quotation.q4 == "1" %}
@@ -119,7 +139,8 @@
                                 </span>
                                 <div class="timeline-content">
                                     <h6 class="text-success text-sm font-weight-bold mb-0">Atención finalizada</h6>
-                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{data.quotation.dt4|date:'d-m-Y H:i'}}</p>
+                                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">
+                                        {{data.quotation.dt4|date:'d-m-Y H:i'}}</p>
                                 </div>
                             </div>
                             {% endif %}
@@ -132,7 +153,9 @@
             <div class="card-body pb-0">
                 <div class="d-flex align-items-center">
                     <h6> Cotizacion {{data.quotation.get_condition_display}}</h6>
-                    <a class="btn bg-gradient-secondary btn-outline-secondary mb-0 ms-2 btn-sm d-flex align-items-center justify-content-center ms-auto" href="{% url 'activities_app:crear-transformador' data.quotation.id %}">Agregar Transformador</a>                    
+                    <a class="btn bg-gradient-secondary btn-outline-secondary mb-0 ms-2 btn-sm d-flex align-items-center justify-content-center ms-auto"
+                        href="{% url 'activities_app:crear-transformador' data.quotation.id %}">Agregar
+                        Transformador</a>
                 </div>
                 <div class="row">
                     <div class="col-12">
@@ -180,16 +203,150 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
 
         </div>
 
     </div>
+    
+
+    <div class="col-md-12 col-lg-10 col-sm-10 mx-auto mt-4">
+        
+        <div class="card">
+            
+            <div class="card-body pb-3">
+                <div class="d-flex align-items-center">
+                    <h5> Seguimiento</h5>
+                    <a class="btn bg-gradient-info btn-outline-info mb-0 ms-2 btn-sm d-flex align-items-center justify-content-center ms-auto"
+                        href="{% url 'activities_app:agregar-tareas-orden-transformador' data.quotation.id %}">Agregar
+                        Acitividad
+                    </a>
+                </div>
+
+
+                <br>
+
+                <div class="nav-wrapper position-relative end-0">
+                    <ul class="nav nav-pills nav-fill p-1" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#profile-tabs-simple" role="tab"
+                                aria-controls="profile" aria-selected="true">
+                                Gantt
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#dashboard-tabs-simple" role="tab"
+                                aria-controls="dashboard" aria-selected="false">
+                                Lista
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="myTabContent">
+                    <!-- Diagrama de gantt -->
+                    <div class="tab-pane fade show active" id="profile-tabs-simple" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="gantt-target">
+                            <svg id="gantt"></svg>
+                        </div>
+                    </div>
+                    <!-- Lista de actividades para editar -->
+                    <div class="tab-pane fade" id="dashboard-tabs-simple" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="table-responsive"></div>
+                            <table class="table text-right">
+                                <thead>
+                                    <tr>
+                                        <th class="pe-2 text-start ps-2">id</th>
+                                        <th class="pe-2 text-start ps-2">Tarea</th>
+                                        <th class="pe-2 text-start ps-2">Ubicación</th>
+                                        <th class="pe-2 text-center">F. de Inicio</th>
+                                        <th class="pe-2 text-start ps-2">F. de finalización</th>
+                                        <th class="pe-2 text-start ps-2">Progreso</th>
+                                        <th class="pe-2">Dep</th>
+                                        <th class="pe-2 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data.tasks %}
+                                    <tr class="">
+                                        <td class="text-start align-middle text-sm">{{ i.id }}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.nameTask }}</td>
+                                        <td class="text-center align-middle text-sm">{{ i.location }}</td>
+                                        <td class="text-end align-middle text-sm">{{ i.start_date|date:'Y-m-d'}}</td>
+                                        <td class="text-start align-middle text-sm">{{ i.end_date|date:'Y-m-d' }}</td>
+                                        <td class="text-center align-middle text-sm">{{ i.progress }} % </td>
+                                        <td class="text-center align-middle text-sm">{{ i.depend.id }}</td>
+
+                                        <td class="text-end align-middle">
+                                            <a href="{% url 'activities_app:editar-tareas-orden-transformador' i.id %}">
+                                                <i class="far fa-edit text-dark text-lg"></i>
+                                            </a>
+                                            &nbsp;
+                                            <a href="">
+                                                <i class="far fa-trash-alt text-primary text-lg"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
 
 {% endblock panel-content %}
 
 {% block JSscripts %}
+
+<script>
+
+    var tasks = [];
+
+    '{% for t in data.tasks %}'
+        var task = {
+            id: '{{ t.nameTask }}',
+            name:'{{t.nameTask}}  {{t.progress}}%',
+            start:"{{t.start_date|date:'Y-m-d'}}",
+            end:"{{t.end_date|date:'Y-m-d'}}",
+            progress:'{{t.progress}}',
+            dependencies:'{{t.depend.nameTask}}'
+        };
+        tasks.push(task);
+        
+    '{% endfor %}'
+
+    var gantt = new Gantt("#gantt", tasks, {
+        header_height: 50,
+        column_width: 30,
+        step: 24,
+        view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+        bar_height: 20,
+        bar_corner_radius: 3,
+        arrow_curve: 5,
+        padding: 18,
+        view_mode: 'Week',
+        date_format: 'YYYY-MM-DD',
+        language: 'es',
+        popup_trigger: 'click',
+        popup: true,
+        scroll_to: 'today',
+        view_mode_select: true,
+        dates_readonly: true,
+        today_button: true,
+        readonly: true,
+    });
+</script>
 
 {% endblock JSscripts %}

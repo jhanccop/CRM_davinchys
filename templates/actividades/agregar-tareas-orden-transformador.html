@@ -1,0 +1,123 @@
+{% extends "actividades/base-pedidos-transformadores.html" %}
+
+{% load  static %}
+{% block title %} Ordenes {% endblock title %}
+{% block appName %} Ordenes {% endblock appName %}
+{% block main %} Pedidos {% endblock main %}
+{% block Type %} Crear {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-primary shadow-primary border-radius-lg pt-3 pb-2">
+                    <h6 class="text-center text-white"> AGREGAR ACTIVIDAD A ORDEN {{quotation}}</h6>
+                </div>
+            </div>
+            <div class="card-body pb-0">
+                <form class="" method="POST">{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+                        <h6 class="font-weight-bolder">Informacion de pedido</h6>
+                        <div class="multisteps-form__content">
+
+                            <div class="row mt-3">
+                                <div class="col-6 col-sm-3" hidden>
+                                    <div class="input-group input-group-outline">
+                                        <label for="exampleFormControlInput1" class="form-label">RFQ number</label>
+                                        {{ form.idTrafoQuote }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-3">
+                                  <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">Tarea</label>
+                                    {{ form.nameTask }}
+                                  </div>
+                                </div>
+
+                                <div class="col-6 col-sm-3">
+                                  <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">Ubicación</label>
+                                    {{ form.location }}
+                                  </div>
+                                </div>
+
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">F. inicio</label>
+                                        {{ form.start_date }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">F. término</label>
+                                        {{ form.end_date }}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-8">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Dependencia</label>
+                                        {{ form.depend }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Avance</label>
+                                        {{ form.progress }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                                <a class="btn bg-gradient-dark"
+                                    href="{% url 'activities_app:cotizaciones-transformadores-detalle' quotation.id %}"> REGRESAR </a>
+
+                                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                                    title="Next">CREAR ACTIVIDAD</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+  document.getElementById("id_idTrafoQuote").value = "{{quotation.id}}";
+  document.getElementById("id_type").value = 0;
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+    if (document.getElementById('id_idTrafoQuote')) {
+        var element = document.getElementById('id_idClient');
+        const example = new Choices(element, {});
+    }
+</script>
+
+{% endblock JSscripts %}

@@ -27,14 +27,16 @@ def check_ocupation_user2(position, user_position, user_position2):
         return False
 
 def check_ocupation_user3(position, user_position, user_position2, user_position3):
-    #
-    
     if (position == User.ADMINISTRADOR or position == user_position or position == user_position2 or position == user_position3):
-        
         return True
     else:
         return False
 
+def check_ocupation_user4(position, user_position, user_position2, user_position3, user_position4):
+    if (position == User.ADMINISTRADOR or position == user_position or position == user_position2 or position == user_position3 or position == user_position4):
+        return True
+    else:
+        return False
 
 class AlmacenPermisoMixin(LoginRequiredMixin):
     login_url = reverse_lazy('users_app:user-login')
@@ -198,3 +200,18 @@ class TrabajadorComprasProducciónPermisoMixin(LoginRequiredMixin):
             )
         return super().dispatch(request, *args, **kwargs)
 
+class AdminClientsPermisoMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user4(request.user.position, User.ADQUISICIONES, User.FINANZAS, User.TESORERIA, User.CONTABILIDAD):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:index'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)

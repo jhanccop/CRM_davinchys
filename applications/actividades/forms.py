@@ -7,7 +7,8 @@ from .models import (
   Projects,
   Commissions,
   DailyTasks,
-  EmailSent
+  EmailSent,
+  TrafoTask
 )
 from applications.users.models import User
 
@@ -451,3 +452,72 @@ class EmailSentForm(forms.ModelForm):
             ),
         }
 
+class TrafoTaskForm(forms.ModelForm):
+    class Meta:
+        model = TrafoTask
+        fields = (
+            'idTrafoQuote',
+            'nameTask',
+            'location',
+
+            'start_date',
+            'end_date',
+            
+            'progress',
+            'depend',
+            'is_milestone'
+        )
+        
+        widgets = {
+            'idTrafoQuote': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'nameTask': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'location': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'start_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'type': 'date',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'end_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'type': 'date',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'progress': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'depend': forms.Select(
+                attrs = {
+                    'rows':8,
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'is_milestone': forms.CheckboxInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+        }

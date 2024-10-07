@@ -15,20 +15,7 @@
         <div class="icon icon-lg icon-shape bg-gradient-secondary shadow text-center border-radius-xl mt-n4 float-start">
           <i class="fas fa-file-invoice opacity-10"></i>
         </div>
-        <div class="row">
-          {% for i in object.idBankMovements.all %}
-          <div class="col-md-8 col-8">
-            <p class="mb-0 pb-0">{{i.idAccount}}  / {{i.idAccount.accountName}}</p>
-            <h6 class="mt-sm-0 pt-0 ">
-              {{i.date|date:"Y-m-d"}} | nOp: {{i.opNumber}} | {{i.description}}
-            </h6>
-          </div>
-          <div class="col-md-4 col4 text-end justify-content-end align-items-center align-middle">
-            <small>{{i.idAccount.get_currency_display}} {{i.amount|floatformat:"2g"}}</small>
-            <p class="mt-sm-0 pt-0 text-dark font-weight-bold"> Conciliado: {{sum.tot|floatformat:"2g"}}</p>
-          </div>
-          {% endfor %} 
-        </div>
+        
       </div>
       <div class="card-body pt-0 pb-0">
         <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
@@ -48,7 +35,7 @@
 
               <div class="row">
                 <div class="col-12 col-sm-12 mt-sm-0">
-                  <h6 class="mb-0">Documentos:</h6>
+                  <h6 class="mb-0">Documento:</h6>
                   <div class="input-group input-group-outline">
                     <div class="form-group w-100">
                       {{ form.pdf_file }}
@@ -99,21 +86,50 @@
               <br>
 
               <div class="row">
-                <div class="col-6 col-sm-3">
+                <div class="col-6 col-sm-3 mt-sm-0" id="detraction" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Detracción:</label>
+                    {{ form.detraction }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-0" id="shippingGuide" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Guía de remisión:</label>
+                    {{ form.shippingGuide }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-0" id="retention" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Retención:</label>
+                    {{ form.retention }}
+                  </div>
+                </div>
+
+              </div>
+
+              <br>
+
+              <div class="row">
+
+                <div class="col-6 col-sm-3" id="month_dec">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Mes Periodo</label>
                     {{ form.month_dec }}
                   </div>
                 </div>
 
-                <div class="col-6 col-sm-3 mt-sm-0">
+                <div class="col-6 col-sm-3 mt-sm-0" id="year_dec">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Año Periodo</label>
                     {{ form.year_dec }}
                   </div>
                 </div>
               </div>
+
               <br>
+
               <div class="row">
                 <div class="col-12 col-sm-8">
                   <p class="mb-0">Proveedor</p>
@@ -137,9 +153,9 @@
                 <div class="col-6 col-sm-2 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Monto</label>
-                    {{ form.amountReconcilied }}
+                    {{ form.amount }}
                   </div>
-                  {% for error in form.amountReconcilied.errors %}
+                  {% for error in form.amount.errors %}
                   <p class="text-xs text-primary font-weight-bolder mb-0">
                     {{ error|escape }}
                   </p>
@@ -250,21 +266,19 @@
 
 <script>
   function toggleDiv() {
-    let selected = document.getElementById("id_expensesCategory").value;
-    let planilla = document.getElementById("planilla");
-    let cajachica = document.getElementById("cajachica");
-
-    planilla.style.display = "none";
-    cajachica.style.display = "none";
     
-    switch(Number(selected)){
-      case 4:
-        cajachica.style.display = "inline-block";
-        break;
-      case 7:
-        planilla.style.display = "inline-block";
-        break;
+    let selected = document.getElementById("id_detraction").value;
+    let month_dec = document.getElementById("month_dec");
+    let year_dec = document.getElementById("year_dec");
+
+    month_dec.style.display = "inline-block";
+    year_dec.style.display = "inline-block";
+
+    if(Number(selected)== 1){
+      month_dec.style.display = "none";
+      year_dec.style.display = "none";
     }
+
   }
 
   function toggleDivActivities() {
@@ -276,6 +290,9 @@
     trafo.style.display = "none";
     comision.style.display = "none";
     proyecto.style.display = "none";
+
+    month_dec.style.display = "inline-block";
+    year_dec.style.display = "inline-block";
     
     switch(Number(selected)){
       case 0:
@@ -289,6 +306,29 @@
         break;
     }
   }
+
+  function toggleDivTypeInvoice() {
+    let selected = document.getElementById("id_typeInvoice").value;
+    let detraction = document.getElementById("detraction");
+    let shippingGuide = document.getElementById("shippingGuide");
+    let retention= document.getElementById("retention");
+
+    detraction.style.display = "none";
+    shippingGuide.style.display = "none";
+    retention.style.display = "none";
+
+    switch(Number(selected)){
+      case 0:
+        detraction.style.display = "inline-block";
+        shippingGuide.style.display = "inline-block";
+        break;
+      case 1:
+      retention.style.display = "inline-block";
+        break;
+    }
+  }
+
+
 </script>
 
 <script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>

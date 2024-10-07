@@ -203,3 +203,10 @@ class TrafosManager(models.Manager):
         #    provider =  ArrayAgg('provider'),
         #)
         return ids
+    
+class TrafoTaskManager(models.Manager):
+    def ListaTareasPorCotizacion(self,id):
+        result = self.filter(
+            idTrafoQuote = id
+        )
+        return result

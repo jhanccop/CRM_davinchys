@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from django.db.models import Sum, Max, DateField,F, Q, DecimalField
+from django.db.models import Sum, Max, DateField,F, Q, Count
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models.functions import TruncDate,LastValue,Abs
@@ -42,7 +42,7 @@ class BankMovementsManager(models.Manager):
        return result
 
     def MovimientosPorId(self,id):
-       return self.get(id = id)
+       return self.filter(id = id).annotate(per = F("amountReconcilied") * 100 / F("amount"),diff =  F("amount") - F("amountReconcilied"))[0]
     
     def SumaDocsPorId(self,id):
        result = self.filter(id = id).annotate(sum = Sum("idDocs__amountReconcilied"))
@@ -66,12 +66,8 @@ class BankMovementsManager(models.Manager):
             date__range = rangeDate,
             idAccount__id = cuenta
         ).annotate(
-            sum = Sum("idDocs__amountReconcilied"),
-            per = (Sum("idDocs__amountReconcilied")/F("amount")) * 100,
-
-            sum_mov = Sum("idMovement__amountReconcilied"),
-            per_mov = (F("amountReconcilied")/F("amount")) * 100,
-            #output_field = DecimalField()
+            per = (F("amountReconcilied")/F("amount")) * 100,
+            n = Count("mov_origen"),
         ).order_by("-id")
         return result
     
@@ -92,7 +88,7 @@ class BankMovementsManager(models.Manager):
         )
         return result
     
-class  DocumentsManager(models.Manager):
+class DocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
@@ -108,11 +104,15 @@ class  DocumentsManager(models.Manager):
         if tipo == 5:
             result = self.filter(
                 date__range = rangeDate,
+            ).annotate(
+                per = (F("amountReconcilied")/F("amount")) * 100,
             ).order_by("date")
         else:
             result = self.filter(
                 date__range = rangeDate,
                 typeInvoice = str(tipo)
+            ).annotate(
+                per = (F("amountReconcilied")/F("amount")) * 100,
             ).order_by("date")
 
         return result
@@ -144,7 +144,15 @@ class  DocumentsManager(models.Manager):
            "amountReconcilied"
         ).aggregate(tot = Sum("amountReconcilied"))
         return result
-
+    
+    def SumaConciliadaPorIdDocumento(self,id):
+        result = self.filter(
+            id = id 
+            ).aggregate(suma = Sum("amountReconcilied"))
+        return result
+    
+    def DocumentosPorId(self,id):
+       return self.filter(id = id).annotate(per = F("amountReconcilied") * 100 / F("amount"),diff =  F("amount") - F("amountReconcilied"))[0]
 
 class TransactionsManager(models.Manager):
   def SaldosGeneralPorIntervalo(self,intervalo):
@@ -356,3 +364,36 @@ class InternalTransfersManager(models.Manager):
             created_at__range=(intervals[0],intervals[1]+timedelta(days=1)),
         ).order_by('-created_at')
         return lista
+    
+class ConciliationManager(models.Manager):
+    def SumaMontosPorIdMov(self,idMovOrigin):
+        result = self.filter(
+            idMovOrigin = idMovOrigin
+        ).aggregate(
+           sum =Sum("amountReconcilied")
+        )
+        return result
+       
+    def SumaMontosConciliadosPorMovimientosOr(self,idMovOrigin):
+        result = self.filter(
+            idMovOrigin = idMovOrigin
+        ).aggregate(
+           sum =Sum("amountReconcilied")
+        )
+        return result
+    
+    def SumaMontosConciliadosPorMovimientosDest(self,idMovArrival):
+        result = self.filter(
+            idMovArrival = idMovArrival
+        ).aggregate(
+           sum =Sum("amountReconcilied")
+        )
+        return result
+    
+    def SumaMontosConciliadosPorDocumentos(self,idDoc):
+        result = self.filter(
+            idDoc = idDoc
+        ).aggregate(
+           sum =Sum("amountReconcilied")
+        )
+        return result

@@ -11,11 +11,6 @@ urlpatterns = [
         name='cuentas-lista',
     ),
     path(
-        'accounts/agregar-cuenta-manual/<pk>/', 
-        views.ManualAccountCreateView.as_view(),
-        name='cuentas-manual-agregar',
-    ),
-    path(
         'accounts/agregar_cuenta/', 
         views.AccountCreateView.as_view(),
         name='cuentas-add',

@@ -38,7 +38,7 @@
               <h6 class="font-weight-bolder mb-0 justify-content-end align-items-center"> {{mov.idAccount.get_currency_display}} {{mov.amount|floatformat:"2g"}} </h6>
             </div>
             <div class="col-md-6 d-flex justify-content-end align-items-center">
-              Conciliado: {{mov.amountReconcilied|floatformat:"2g"}}
+              Monto conciliado: {{sum.sum|floatformat:"2g"}}
             </div>
           </div>
 
@@ -49,11 +49,28 @@
               <div class="multisteps-form__content">
 
                 <br>
+
+                <h6 class="font-weight-bolder">Seleccionar cuenta destino</h6>
+  
+                <div class="row">
+                  <div class="col-12 col-sm-12">
+                    <div class="input-group input-group-outline">
+                      {{ form.idMovArrival }}
+                    </div>
+                    {% for error in form.idMovArrival.errors %}
+                    <p class="text-xs text-primary font-weight-bolder mb-0">
+                      {{ error|escape }}
+                    </p>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <br>
   
                 <div class="row">
                   <div class="col-6 col-sm-4">
                     <div class="input-group input-group-outline focused is-focused">
-                      <label for="exampleFormControlInput1" class="form-label">Monto a reconciliar </label>
+                      <label for="exampleFormControlInput1" class="form-label">Monto a conciliar </label>
                       {{ form.amountReconcilied }}
                     </div>
                     {% for error in form.amountReconcilied.errors %}
@@ -62,52 +79,43 @@
                     </p>
                     {% endfor %}
                   </div>
-  
-                  <div class="col-6 col-sm-4 mt-3 mt-sm-0">
-                    <div class="input-group input-group-outline focused is-focused">
-                      <label for="exampleFormControlInput1" class="form-label">Tipo</label>
-                      {{ form.conciliationType }}
-                    </div>
-                  </div>
-  
-                </div>
-  
-                <div class="row" hidden>
+
                   <div class="col-6 col-sm-3">
-                    <div class="input-group input-group-outline ">
-                      <label for="exampleFormControlInput1" class="form-label">user</label>
-                      {{ form.user }}
-                    </div>
-                  </div>
-  
-                  <div class="col-6 col-sm-3 mt-3 mt-sm-0">
                     <div class="input-group input-group-outline focused is-focused">
-                      <label for="exampleFormControlInput1" class="form-label">doc</label>
-                      {{ form.idBankMovements }}
+                      <label for="exampleFormControlInput1" class="form-label">Tipo de cambio </label>
+                      {{ form.exchangeRate }}
                     </div>
-                  </div>
-  
-                </div>
-
-                <hr class="horizontal dark mt-3 mb-2">
-
-                <br>
-  
-                <h6 class="font-weight-bolder">Seleccionar destino</h6>
-  
-                <div class="row">
-                  <div class="col-12 col-sm-12">
-                    <div class="input-group input-group-outline">
-                      {{ form.idMovement }}
-                    </div>
-                    {% for error in form.idMovement.errors %}
+                    <p>1: si son de la misma moneda</p>
+                    {% for error in form.exchangeRate.errors %}
                     <p class="text-xs text-primary font-weight-bolder mb-0">
                       {{ error|escape }}
                     </p>
                     {% endfor %}
                   </div>
-                </div>
   
+                  <div class="col-6 col-sm-4 mt-3 mt-sm-0" hidden>
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">Tipo</label>
+                      {{ form.type }}
+                    </div>
+                  </div>
+
+                  <div class="col-6 col-sm-3 mt-3 mt-sm-0" hidden>
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">mov</label>
+                      {{ form.idMovOrigin }}
+                    </div>
+                  </div>
+
+                  <div class="col-6 col-sm-3 mt-3 mt-sm-0" hidden>
+                    <div class="form-check">
+                      <label for="exampleFormControlInput1" class="form-label">status</label>
+                      {{ form.status }}
+                    </div>
+                  </div>
+  
+                </div>
+    
                 <div class="button-row d-flex mt-4">
                   <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
   
@@ -184,8 +192,8 @@
 </script>
 
 <script>
-  //document.getElementById("id_user").value = "{{user.id}}";
-  //document.getElementById("id_idMovement").value = "{{mov.id}}";
+  document.getElementById("id_idMovOrigin").value = "{{mov.id}}";
+  document.getElementById("id_type").value = 1;
 </script>
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>

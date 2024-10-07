@@ -126,6 +126,18 @@ urlpatterns = [
         views.InitialEmailCreateView.as_view(),
         name='cotizaciones-enviar-correo',
     ),
+
+    path(
+        'actividades/agregar-tareas-orden-transformador/<pk>/', 
+        views.TaskQuotesTrafoCreateView.as_view(),
+        name='agregar-tareas-orden-transformador',
+    ),
+
+    path(
+        'actividades/editar-tareas-orden-transformador/<pk>/', 
+        views.TaskQuotesTrafoUpdateView.as_view(),
+        name='editar-tareas-orden-transformador',
+    ),
 ]
 
 if settings.DEBUG:

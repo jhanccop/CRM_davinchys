@@ -14,7 +14,8 @@ from .managers import (
   DailyTasksManager,
 
   TrafoQuoteManager,
-  TrafosManager
+  TrafosManager,
+  TrafoTaskManager
 )
 
 class TrafoTracking(TimeStampedModel):
@@ -64,9 +65,6 @@ class TrafoTracking(TimeStampedModel):
 
 class TrafoOrder(TimeStampedModel):
     """ Modelo de ordenes """
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     idOrder = models.CharField('Id orden',max_length=100,unique=True,null=True,blank=True)
     idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
@@ -466,6 +464,26 @@ class TrafoQuote(TimeStampedModel):
     def __str__(self):
         return str(self.idQuote)
 
+class TrafoTask(TimeStampedModel):
+    idTrafoQuote = models.ForeignKey(TrafoQuote, on_delete=models.CASCADE)
+    nameTask = models.CharField("Tarea",max_length=100)
+    #workers = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    location = models.CharField("Ubicacion",max_length=100, blank=True, null=True)
+    start_date = models.DateField("Fecha de inicio", blank=True, null=True)
+    end_date = models.DateField("Fecha finalizacion", blank=True, null=True)
+    progress = models.IntegerField("Progreso",default=0)
+    depend = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    is_milestone = models.BooleanField(default=False) 
+
+    objects = TrafoTaskManager()
+
+    class Meta:
+        verbose_name = 'Tarea orden'
+        verbose_name_plural = 'Tareas ordenes'
+
+    def __str__(self):
+        return f"{self.idTrafoQuote} | {self.nameTask}"
+    
 # ======================== TRAFOS ======================
 class Trafos(TimeStampedModel):
     """

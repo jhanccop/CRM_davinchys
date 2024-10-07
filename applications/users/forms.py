@@ -141,7 +141,7 @@ class UserUpdateForm(forms.ModelForm):
             'email',
             'position',
 
-            #'area',
+            'cv_file',
             #'condition',
 
             #'date_entry',
@@ -175,6 +175,14 @@ class UserUpdateForm(forms.ModelForm):
                 attrs={
                     'placeholder': 'Permisos',
                     'class': 'form-control',
+                }
+            ),
+            'cv_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
                 }
             ),
             

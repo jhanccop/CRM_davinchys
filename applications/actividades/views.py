@@ -11,7 +11,7 @@ from django.views.generic import (
     DetailView
 )
 
-from applications.users.mixins import AdminPermisoMixin
+from applications.users.mixins import AdminPermisoMixin,ProduccionPermisoMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import (
@@ -20,7 +20,8 @@ from .models import (
   Projects,
   Commissions,
   DailyTasks,
-  EmailSent
+  EmailSent,
+  TrafoTask
 )
 from applications.users.models import User
 
@@ -30,7 +31,8 @@ from .forms import (
   ProjectsForm,
   CommissionsForm,
   DailyTaskForm,
-  EmailSentForm
+  EmailSentForm,
+  TrafoTaskForm
 )
 # ======================= PROYECTOS ===========================
 class ProjectsListView(LoginRequiredMixin,ListView):
@@ -177,24 +179,24 @@ class QuotesListView(LoginRequiredMixin,ListView):
             
         return payload
 
-class QuotesCreateView(AdminPermisoMixin,CreateView):
+class QuotesCreateView(ProduccionPermisoMixin,CreateView):
     template_name = "actividades/cotizaciones-transformadores-nuevo.html"
     form_class = QuoteTrafoForm
     success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class QuotesEditView(AdminPermisoMixin,UpdateView):
+class QuotesEditView(ProduccionPermisoMixin,UpdateView):
     template_name = "actividades/cotizaciones-transformadores-editar.html"
     model = TrafoQuote
     form_class = QuoteTrafoForm
      
     success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class QuotesDeleteView(AdminPermisoMixin,DeleteView):
+class QuotesDeleteView(ProduccionPermisoMixin,DeleteView):
     template_name = "actividades/cotizaciones-transformadores-eliminar.html"
     model = TrafoQuote
     success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
 
-class QuotesDetailView(ListView):
+class QuotesDetailView(LoginRequiredMixin,ListView):
     template_name = "actividades/cotizaciones-transformadores-detalle.html"
     context_object_name = 'data'
 
@@ -205,11 +207,13 @@ class QuotesDetailView(ListView):
         payload = {}
         quotation = TrafoQuote.objects.CotizacionPorId(id = int(pk))
         trafos = Trafos.objects.ListaPorCotizaciones(quotation.id)
+        tasks = TrafoTask.objects.ListaTareasPorCotizacion(quotation.id)
         payload["quotation"] = quotation
         payload["trafos"] = trafos
+        payload["tasks"] = tasks
         return payload
 
-class TrafoCreateView(CreateView):
+class TrafoCreateView(ProduccionPermisoMixin,CreateView):
     template_name = "actividades/crear-transformador.html"
     model = Trafos
     form_class = TrafoForm
@@ -221,25 +225,58 @@ class TrafoCreateView(CreateView):
         context['quotation'] = trafoQuote
         return context
 
-class TrafoUpdateView(UpdateView):
-  template_name = "actividades/editar-transformador.html"
-  model = Trafos
-  form_class = TrafoForm
+class TrafoUpdateView(ProduccionPermisoMixin,UpdateView):
+    template_name = "actividades/editar-transformador.html"
+    model = Trafos
+    form_class = TrafoForm
 
-  def get_success_url(self, *args, **kwargs):
-    #print(self.object.TrafoQuote)
-    pk = self.object.idQuote.id
-    return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
+    def get_success_url(self, *args, **kwargs):
+        #print(self.object.TrafoQuote)
+        pk = self.object.idQuote.id
+        return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
 
-class TrafoDeleteView(AdminPermisoMixin,DeleteView):
+class TrafoDeleteView(ProduccionPermisoMixin,DeleteView):
     template_name = "actividades/eliminar-transformador.html"
     model = Trafos
     def get_success_url(self, *args, **kwargs):
         pk = self.object.idQuote.id
         return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
 
+class TaskQuotesTrafoCreateView(ProduccionPermisoMixin,CreateView):
+    template_name = "actividades/agregar-tareas-orden-transformador.html"
+    model = TrafoTask
+    form_class = TrafoTaskForm
+    #success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
+
+    def get_success_url(self, *args, **kwargs):
+        print(self.object.idTrafoQuote)
+        pk = self.object.idTrafoQuote.id
+        return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
+
+    def get_context_data(self, **kwargs):
+        context = super(TaskQuotesTrafoCreateView, self).get_context_data(**kwargs)
+        trafoQuote = TrafoQuote.objects.get(id = self.kwargs['pk'])
+        context['quotation'] = trafoQuote
+        return context
+    
+class TaskQuotesTrafoUpdateView(ProduccionPermisoMixin,UpdateView):
+    template_name = "actividades/editar-tareas-orden-transformador.html"
+    model = TrafoTask
+    form_class = TrafoTaskForm
+    success_url = reverse_lazy('activities_app:cotizaciones-transformadores')
+
+    def get_success_url(self, *args, **kwargs):
+        pk = self.object.idTrafoQuote.id
+        return reverse_lazy('activities_app:cotizaciones-transformadores-detalle', kwargs={'pk':pk})
+
+    def get_context_data(self, **kwargs):
+        context = super(TaskQuotesTrafoUpdateView, self).get_context_data(**kwargs)
+        trafoQuote = TrafoQuote.objects.get(id = self.object.idTrafoQuote.id)
+        context['quotation'] = trafoQuote
+        return context
+
 # ========================== EMAILS ==========================
-class InitialEmailCreateView(CreateView):
+class InitialEmailCreateView(LoginRequiredMixin,CreateView):
     template_name = "actividades/initial-email.html"
     model = EmailSent
     form_class = EmailSentForm

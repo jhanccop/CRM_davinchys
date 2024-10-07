@@ -14,17 +14,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     ADQUISICIONES = '5'
     FINANZAS = '6'
     TESORERIA = '7'
+    CONSULTOREXTERNO = '8'
     
     #
     ROLES_CHOICES = [
         (ADMINISTRADOR, 'Administrador'),
         (CONTABILIDAD, 'Contabilidad'),
         (SUPERVISOR_PRODUCCION, 'Supervisor producción'),
-        (SUPERVISOR_COMPRAS, 'Supervisor compras'),
+        #(SUPERVISOR_COMPRAS, 'Supervisor compras'),
         (TRABAJADOR, 'Trabajador'),
         (ADQUISICIONES, 'Adquisiciones'),
         (FINANZAS, 'Finanzas'),
         (TESORERIA, 'Tesoreria'),
+        (CONSULTOREXTERNO, 'Consultor'),
     ]
 
     # GENEROS
@@ -75,6 +77,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=CONDITIONS_CHOICES, 
         blank=True
     )
+
+    cv_file = models.FileField(upload_to='cv_pdfs/',null=True,blank=True)
 
     #
     is_staff = models.BooleanField(default=False)

@@ -50,8 +50,8 @@
           <div class="card-header pb-0 ">
             <div class="row align-middle align-items-center">
               <div class="col-lg-6 col-md-3">
-                <h5 class="mb-0">Documentacion</h5>
-                <p class="pt-0">Ingresada</p>
+                <h5 class="mb-0">Documentos</h5>
+                <p class="pt-0">Ingresados</p>
               </div>
               <div class="col-lg-6 col-md-9">
                 <form method="GET" class="">{% csrf_token %}
@@ -94,7 +94,6 @@
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Cont</th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                     </tr>
                   </thead>
@@ -110,7 +109,7 @@
                       
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{t.get_typeInvoice_display}} | {{t.idInvoice}}</h6>
+                          <h6 class="mb-0 text-sm"><a href="{% url 'movimientos_app:documentacion-detalle' t.id %}">{{t.idInvoice}}</a></h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
                         </div>
                       </td>
@@ -121,20 +120,28 @@
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idClient.tradeName }}</p>
                         </div>
                       </td>
-
+                      
                       <td class="text-sm">
-                        <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied }}</span>
-                      </td>
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          {{d}}
-                          {% for i in t.docs.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i}} </p> {%endfor%}
+                        <div class="w-100">
+                          <span class="me-2 text-md font-weight-bold text-info"> {{t.get_typeCurrency_display}} {{ t.amount|floatformat:"2g" }}</span>
+                          
+                          <div class="d-flex align-items-center mb-0">
+                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied|floatformat:"2g" }}</span>
+                            <span class="ms-auto text-sm font-weight-normal">{{ t.per|floatformat:0 }}%</span>
+                          </div>
+                          <div>
+                            <div class="progress progress-md w-100">
+                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                          </div>
                         </div>
                       </td>
 
                       <td class="text-sm">
-                        {{ t.get_contabilidad_display }}
+                        <div class="d-flex flex-column justify-content-center">
+                         {% for i in t.doc_conciliation.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i.idMovOrigin.idAccount.get_currency_display}} {{i.amountReconcilied}} | {{i.idMovOrigin.idAccount.nickName}} | {{i.idMovOrigin.opNumber}} | {{i.idMovOrigin.description}} </p> {% endfor %}
+                        </div>
                       </td>
+
                       <td>
                         <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
                           aria-expanded="false">

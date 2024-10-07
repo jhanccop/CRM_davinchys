@@ -16,6 +16,7 @@ from django.views.generic import (
 from applications.users.mixins import (
   TrabajadorComprasProducciónPermisoMixin
 )
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from applications.users.models import User
 
@@ -28,7 +29,7 @@ from .forms import (
 )
 
 # ================ SOLICITUDES ==================
-class MyRequirementsListView(ListView):
+class MyRequirementsListView(LoginRequiredMixin,ListView):
     template_name = "pedidos/mi-lista-solicitudes.html"
     context_object_name = 'solicitudes'
     
@@ -48,7 +49,7 @@ class MyRequirementsListView(ListView):
         payload["ordenes"] = PaymentRequest.objects.MiListarPorIntervalo(user=userId,interval = intervalDate)
         return payload
     
-class RequirementsCreateView(CreateView):
+class RequirementsCreateView(LoginRequiredMixin,CreateView):
     template_name = "pedidos/nueva-solicitud.html"
     model = PaymentRequest
     form_class = PaymentRequestForm
@@ -59,7 +60,7 @@ class RequirementsCreateView(CreateView):
         # You can add additional processing here if needed
         return response
 
-class RequirementsUpdateView(UpdateView):
+class RequirementsUpdateView(LoginRequiredMixin,UpdateView):
     template_name = "pedidos/editar-solicitud.html"
     model = PaymentRequest
     form_class = PaymentRequestForm
@@ -70,12 +71,12 @@ class RequirementsUpdateView(UpdateView):
         # You can add additional processing here if needed
         return response
 
-class RequirementsDeleteView(DeleteView):
+class RequirementsDeleteView(LoginRequiredMixin,DeleteView):
     template_name = "pedidos/eliminar-solicitud.html"
     model = PaymentRequest
     success_url = reverse_lazy('pedidos_app:mi-lista-solicitudes')
 
-class RequirementsApproveListView(ListView):
+class RequirementsApproveListView(LoginRequiredMixin,ListView):
     template_name = "pedidos/solicitudes-por-aprobar.html"
     context_object_name = 'solicitudes'
     
@@ -99,7 +100,7 @@ class RequirementsApproveListView(ListView):
         payload["historico"] = PaymentRequest.objects.ListarHistoricoPorIntervalo(area=self.request.user.position,user_selected=user_selected,interval = intervalDate)
         return payload
 
-class ApproveRequestUpdateView1(UpdateView):
+class ApproveRequestUpdateView1(LoginRequiredMixin,UpdateView):
     template_name = "pedidos/aprobar-solicitud-1.html"
     model = PaymentRequest
     form_class = ApprovePaymentRequestForm1

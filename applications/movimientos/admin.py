@@ -5,7 +5,8 @@ from .models import (
   InternalTransfers,
   BankMovements,
   Documents,
-  DocumentsUploaded
+  DocumentsUploaded,
+  Conciliation
 )
 
 class TransactionsAdmin(admin.ModelAdmin):
@@ -67,6 +68,20 @@ class DocumentsAdmin(admin.ModelAdmin):
     search_fields = ('idClient',)
     list_filter = ('idClient',)
 
+class ConciliationAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'amountReconcilied',
+        'status',
+        'type',
+        'idMovOrigin',
+        'idMovArrival',
+        'idDoc',
+    )
+    
+    search_fields = ('idMovOrigin',)
+    list_filter = ('type',)
+
 class DocumentsUploadedAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -83,3 +98,4 @@ admin.site.register(DocumentsUploaded, DocumentsUploadedAdmin)
 
 admin.site.register(Transactions, TransactionsAdmin)
 admin.site.register(InternalTransfers, InternalTransfersAdmin)
+admin.site.register(Conciliation, ConciliationAdmin)

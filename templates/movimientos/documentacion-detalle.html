@@ -1,0 +1,145 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Documentación {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Documentacion {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-md-12 col-lg-10 col-sm-10 mx-auto">
+      <div class="card my-sm-5">
+        <div class="card-header text-center">
+          <div class="row justify-content-between">
+            <div class="col-md-4 text-start">
+              <img class="mb-2 w-25 p-2" src="{% static 'assets/img/docs.png' %}" alt="Logo">
+              <h6>
+                {{doc.document.idClient}}
+              </h6>
+              <p class="d-block text-dark">{{doc.document.idInvoice}}</p>
+            </div>
+            <div class="col-lg-3 col-md-7 text-md-end text-start mt-5">
+              <h6 class="d-block mt-2 mb-0">
+                <span class="text-info">{{doc.document.get_typeCurrency_display }} {{doc.document.amount|floatformat:"2g"}}</span>
+              </h6>
+              <p class="text-dark">{{doc.document.description}}<br>
+                {{doc.document.date}}
+              </p>
+            </div>
+          </div>
+          <br>
+          <div class="row justify-content-md-between">
+            <div class="col-md-4 mt-auto">
+              <h6 class="mb-0 text-start text-secondary font-weight-normal">
+                Porcentaje conciliado
+              </h6>
+              <h5 class="text-start mb-0">
+                <span> {{doc.document.per|floatformat:2 }} </span> %
+              </h5>
+            </div>
+            <div class="col-lg-5 col-md-7 mt-auto">
+              <div class="row mt-md-5 mt-4 text-md-end text-start">
+                <div class="col-md-6">
+                  <h6 class="text-secondary font-weight-normal mb-0">M. conciliado total:</h6>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-dark mb-0">{{doc.document.get_typeCurrency_display }} {{doc.document.amountReconcilied}}</h6>
+                </div>
+              </div>
+              <div class="row text-md-end text-start">
+                <div class="col-md-6">
+                  <h6 class="text-secondary font-weight-normal mb-0">Pendiente:</h6>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-dark mb-0"> {{doc.document.get_typeCurrency_display }} <span> {{doc.document.diff|floatformat:2 }}  </span> </h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body pb-0">
+          <div class="row">
+            <div class="col-12">
+              <div class="table-responsive">
+                <table class="table text-right">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="pe-2 text-start ps-2">Mov</th>
+                      <th scope="col" class="pe-2 text-start ps-2">Fecha</th>
+                      <th scope="col" class="pe-2">nOp - Descripción</th>
+                      <th scope="col" class="pe-2 text-end">M. Original</th>
+                      <th scope="col" class="pe-2 text-end">M. Conciliado</th>
+                      <th scope="col" class="pe-2 text-end">T. Cambio</th>
+                      <th scope="col" class="pe-2 text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in doc.document.doc_conciliation.all %}
+                    <tr class="">
+
+                    <td class="text-start align-middle text-sm text-dark">
+                      <a href="{% url 'movimientos_app:movimientos-detalle' i.idMovOrigin.id %}">{{ i.idMovOrigin.idAccount }}</a>
+                    </td>
+                    
+                    <td class="text-start align-middle text-sm text-dark">
+                      {{ i.idMovOrigin.date|date:"d-m-Y" }}
+                    </td>
+                    
+                    <td class="text-start align-middle text-sm text-dark">
+                      {{ i.idMovOrigin.opNumber }} - {{ i.idMovOrigin.description }}
+                    </td>
+                    
+                    <td class="ps-4 align-middle text-end text-sm text-dark">
+                      {{i.idMovOrigin.idAccount.get_currency_display}} {{ i.idMovOrigin.amount|floatformat:"2g"}}
+                    </td>
+                    
+                    <td class="ps-4 align-middle text-end text-sm text-dark">
+                      {{i.idMovOrigin.idAccount.get_currency_display}} {{ i.amountReconcilied|floatformat:"2g"}}
+                    </td>
+
+                    <td class="ps-4 align-middle text-end text-sm text-dark">
+                      {{ i.exchangeRate|floatformat:"3g"}}
+                    </td>
+                    
+                    <td class="text-end align-middle">
+                      <a href="{% url 'movimientos_app:editar-movimiento-con-documento' i.id %}">
+                        <i class="far fa-edit text-dark text-lg"></i>
+                      </a>
+                      &nbsp;
+                      <a href="{% url 'movimientos_app:eliminar-conciliacion' i.id %}">
+                        <i class="far fa-trash-alt text-primary text-lg"></i>
+                      </a>
+                    </td>
+                    
+                    </tr>
+
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th class="h6 ps-4">Total</th>
+                      <th class="h6 ps-4 text-end">{{doc.document.get_typeCurrency_display }} {{doc.document.amountReconcilied}}</th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

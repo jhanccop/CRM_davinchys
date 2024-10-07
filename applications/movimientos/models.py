@@ -12,6 +12,7 @@ from .managers import (
     DocumentsUploadedManager,
     BankMovementsManager,
     DocumentsManager,
+    ConciliationManager,
     TransactionsManager,
     InternalTransfersManager,
 
@@ -60,16 +61,18 @@ class Documents(TimeStampedModel):
     # CATEGORIES INOVICE TYPES
     FACTURA = '0'
     RHE = '1'
-    PL = '2'
-    COMPROBANTE_DAVINCHYS = '3'
-    NC = '4'
+    DOCEXTERIOR = '2'
+    IMPUESTO = '3'
+    PLANILLA = '4'
+    OTROS = "5"
 
     TYPE_INVOICE_CHOISES = [
             (FACTURA, "Factura"),
             (RHE, "RHE"),
-            (PL, "PL"),
-            (COMPROBANTE_DAVINCHYS, "Comprobante Davinchys"),
-            (NC, "NC"),
+            (DOCEXTERIOR, "Doc del exterior"),
+            (IMPUESTO, "Impuesto"),
+            (PLANILLA, "Planilla"),
+            (OTROS, "Otros"),
         ]
     
     # MONEDA
@@ -84,36 +87,20 @@ class Documents(TimeStampedModel):
     ]
 
     # CATEGORIES EGRESOS
-    COMPRA = '0'
-    SERVICIO = '1'
-    PROVEEDOR = '2'
-    IMPUESTOS = '3'
-    CAJACHICA = '4'
-    COMISIONES = '5'
-    PROYECTO = '6'
-    PLANILLA = '7'
-    OPERATVIDAD = '8'
-    MULTAS = '9'
-    GASTOSPERSONALES = '10'
-    TRANFSINTERNA = '11'
-    AGAD = "12"
-    PRESTAMO = '13'
+    AGAD = '0'
+    MERCADERIA = '1'
+    CAJA = '2'
+    VUELOS = '3'
+    ADICIONALES = '4'
+    OTROS = '5'
 
     EXPENSES_CATEGORY_CHOISES = [
-            (COMPRA, "compras"),
-            (SERVICIO, "servicio"),
-            (PROVEEDOR, "proveedor"),
-            (IMPUESTOS, "impuestos"),
-            (CAJACHICA, "caja chica"),
-            (COMISIONES, "comisiones"),
-            (PROYECTO, "proyecto"),
-            (PLANILLA, "planilla"),
-            (OPERATVIDAD, "operaciones"),
-            (MULTAS, "multas"),
-            (GASTOSPERSONALES, "personal"),
-            (TRANFSINTERNA, "transferencias internas"),
-            (AGAD, "agente aduanas"),
-            (PRESTAMO, "prestamo"),
+            (AGAD, "Ag. Aduanas"),
+            (MERCADERIA, "Mercadería"),
+            (CAJA, "Caja"),
+            (VUELOS, "Vuelos"),
+            (ADICIONALES, "Adicionales"),
+            (OTROS, "Otros"),
         ]
 
     # CATEGORIES INGRESOS
@@ -151,6 +138,17 @@ class Documents(TimeStampedModel):
             (BONO, "bono"),
             (OTROPLANILLA, "otro"),
         ]
+    
+    # STATUS FACTURA / GUIA DE REMISION / RHE
+    NOREQUIERE = '0'
+    PENDIENTE = '1'
+    COMPLETADO = '2'
+
+    STATUS_CHOISES = [
+        (NOREQUIERE, "No requiere"),
+        (PENDIENTE, "Pendiente"),
+        (COMPLETADO, "Completado"),
+    ]
 
     # SUB CATEGORIES CAJA CHICA
     MOVILIDAD = '0'
@@ -217,9 +215,6 @@ class Documents(TimeStampedModel):
         ]
     
     # =========== MODELS ===============
-    
-    #created_at = models.DateTimeField(auto_now_add=True)
-    #updated_at = models.DateTimeField(auto_now=True)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -299,6 +294,28 @@ class Documents(TimeStampedModel):
         blank=True,
         null=True
     )
+
+    detraction = models.CharField(
+        'Detracción - Factura',
+        max_length=1, 
+        choices=STATUS_CHOISES, 
+        default="0"
+    )
+
+    shippingGuide = models.CharField(
+        'Guia de remisión - Factura',
+        max_length=1, 
+        choices=STATUS_CHOISES, 
+        default="0"
+    )
+
+    retention = models.CharField(
+        'Retención - RHE',
+        max_length=1, 
+        choices=STATUS_CHOISES, 
+        default="0"
+    )
+
     subCategoryPallRoy = models.CharField(
         'Sub Categoria planilla',
         max_length=1, 
@@ -335,6 +352,13 @@ class Documents(TimeStampedModel):
         blank=True,
     )
 
+    amount = models.DecimalField(
+        'Monto', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0
+    )
+
     amountReconcilied = models.DecimalField(
         'Monto conciliado', 
         max_digits=10, 
@@ -355,7 +379,7 @@ class Documents(TimeStampedModel):
         verbose_name_plural = 'Documentos'
 
     def __str__(self):
-        return f"{self.idInvoice} / {self.get_month_dec_display()}-{self.year_dec} / {self.get_typeCurrency_display()} {self.amountReconcilied} / {self.idClient}"
+        return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] | {self.idClient}"
         
 class BankMovements(TimeStampedModel):
 
@@ -370,13 +394,11 @@ class BankMovements(TimeStampedModel):
     
     # TYPE OF CONCILIATION
     DOCUMENTARIA = '0'
-    CAMBIOMONEDA = '1'
-    PRESTAMO = '2'
+    MOVIMIENTO = '1'
 
     TYPE_CONCILIATION_CHOISES = [
         (DOCUMENTARIA, "Documentaria"),
-        (CAMBIOMONEDA, "Cambio de moneda"),
-        (PRESTAMO, "Prestamo"),
+        (MOVIMIENTO, "Movimiento"),
     ]
 
     idAccount = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
@@ -438,7 +460,7 @@ class BankMovements(TimeStampedModel):
         default=False
     )
 
-    idMovement = models.ManyToManyField('self')
+    idMovement = models.ManyToManyField('self', blank=True)
 
     idDocs = models.ManyToManyField(Documents, blank=True,related_name="docs")
 
@@ -449,10 +471,47 @@ class BankMovements(TimeStampedModel):
         verbose_name_plural = 'Movimientos bancarios'
 
     def __str__(self):
-        return str(self.idAccount) + " / " + str(self.amount) + " / " + str(self.opNumber) + " / " + str(self.description) 
+        return f"{self.idAccount} | {self.opNumber} | {self.idAccount.get_currency_display()}  {self.amount} [{self.amountReconcilied}] | {self.description}"
+                
+class Conciliation(TimeStampedModel):
+    
+    DOC = "0"
+    MOV = "1"
+
+    TYPE_CHOISES = [
+        (DOC, "documento"),
+        (MOV, "movimiento")
+    ]
+
+    type = models.CharField(
+        'Tipo de conciliacion',
+        max_length=1, 
+        choices=TYPE_CHOISES
+    )
+    
+    idMovOrigin = models.ForeignKey(BankMovements, on_delete=models.CASCADE,related_name="mov_origen")
+    idMovArrival = models.ForeignKey(BankMovements, on_delete=models.CASCADE, null=True, blank=True,related_name="mov_destino")
+    idDoc = models.ForeignKey(Documents, on_delete=models.CASCADE, null=True, blank=True,related_name="doc_conciliation")
+    
+    amountReconcilied = models.DecimalField(
+        'Monto conciliado', 
+        max_digits=10, 
+        decimal_places=2
+    )
+
+    status = models.BooleanField("Status", default=False)
+    exchangeRate = models.DecimalField("Tipo de cambio", max_digits=4,decimal_places=3,default=1)
+
+    objects = ConciliationManager()
+
+    class Meta:
+        verbose_name = 'Conciliacion'
+        verbose_name_plural = 'Conciliaciones'
+
+    def __str__(self):
+        return F"{str(self.id)} | {str(self.type)}"
 
 # ========================================================================================
-
 class Transactions(TimeStampedModel):
 
     REMUNERACION = '0'
@@ -651,4 +710,67 @@ def update_movimientos_destino(sender, instance,**kwargs):
     #movDestination.save()
 
     #return instance
-  
+
+@receiver(post_save, sender=Conciliation)
+def update_after_conciliation(sender, instance,**kwargs):
+    print("------------",instance.idMovOrigin,instance.amountReconcilied,instance.status)
+
+    # ACTUALIZAR ESTADO DE CONCILIACION
+    conc = Conciliation.objects.filter(id = instance.id)
+    conc.update(status = True)
+
+    indexOr = int(instance.idMovOrigin.id)
+    movOr = BankMovements.objects.filter(id = indexOr)
+    newAmountOr = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(indexOr)
+    movOr.update(amountReconcilied = newAmountOr["sum"])
+
+    if instance.status:
+        return
+
+    if instance.type == "0": # Documents
+        index = int(instance.idDoc.id)
+        document = Documents.objects.filter(id = index)
+        newAmount = Conciliation.objects.SumaMontosConciliadosPorDocumentos(index)
+        # cambio de divisa
+        document.update(amountReconcilied = newAmount["sum"] * instance.exchangeRate)
+
+    if instance.type == "1": # Movements
+        indexDest = int(instance.idMovArrival.id)
+        movDest = BankMovements.objects.filter(id = indexDest)
+        newAmountDest = Conciliation.objects.SumaMontosConciliadosPorMovimientosDest(indexDest)
+        movDest.update(amountReconcilied = newAmountDest["sum"])
+
+        if not instance.status:
+            
+            conciliation = Conciliation()
+            conciliation.status = True
+            conciliation.type = instance.type
+            conciliation.idMovOrigin = instance.idMovArrival
+            conciliation.idMovArrival = instance.idMovOrigin
+            conciliation.exchangeRate = 1/instance.exchangeRate
+            # cambio de divisa
+            conciliation.amountReconcilied = instance.amountReconcilied * instance.exchangeRate
+            conciliation.save()
+
+@receiver(post_delete, sender=Conciliation)
+def update_after_delete_conciliation(sender, instance,**kwargs):
+    indexOr = int(instance.idMovOrigin.id)
+    movOr = BankMovements.objects.filter(id = indexOr)
+    newAmountOr = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(indexOr)
+    tnewAmountOr = 0 if newAmountOr["sum"] is None else newAmountOr["sum"]
+    movOr.update(amountReconcilied = tnewAmountOr)
+
+    if instance.type == "0": # Documents
+        index = int(instance.idDoc.id)
+        document = Documents.objects.filter(id = index)
+        newAmount = Conciliation.objects.SumaMontosConciliadosPorDocumentos(index)
+        tnewAmount = 0 if newAmount["sum"] is None else newAmount["sum"]
+        document.update(amountReconcilied = tnewAmount)
+
+    if instance.type == "1": # Movements
+        indexDest = int(instance.idMovArrival.id)
+        movDest = BankMovements.objects.filter(id = indexDest)
+        newAmountDest = Conciliation.objects.SumaMontosConciliadosPorMovimientosDest(indexDest)
+        tnewAmountDest = 0 if newAmountDest["sum"] is None else newAmountDest["sum"]
+        movDest.update(amountReconcilied = tnewAmountDest)
+

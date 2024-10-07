@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos
+from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask
 
 class CommissionsAdmin(admin.ModelAdmin):
     list_display = (
@@ -49,6 +49,19 @@ class TrafoQuoteAdmin(admin.ModelAdmin):
     search_fields = ('idQuote',)
     list_filter = ('poStatus','idAttendant')
 
+class TrafoTasksAdmin(admin.ModelAdmin):
+    list_display = (
+        'idTrafoQuote',
+        'nameTask',
+        'start_date',
+        'end_date',
+        'progress',
+        #'dependence',
+        'is_milestone',
+    )
+    search_fields = ('nameTask',)
+    list_filter = ('nameTask','idTrafoQuote')
+
 class TrafosAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -69,3 +82,4 @@ admin.site.register(DailyTasks, DailyTasksAdmin)
 
 admin.site.register(TrafoQuote, TrafoQuoteAdmin)
 admin.site.register(Trafos, TrafosAdmin)
+admin.site.register(TrafoTask, TrafoTasksAdmin)

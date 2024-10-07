@@ -54,6 +54,12 @@ urlpatterns = [
         name='documentacion-editar',
     ),
 
+    path(
+        'documentacion/documentacion-detalle/<pk>/', 
+        views.DocumentacionDetailView.as_view(),
+        name='documentacion-detalle',
+    ),
+
     # ============== MOVIMIENTOS =================
     path(
         'movimientos/', 
@@ -71,7 +77,7 @@ urlpatterns = [
         name='movimientos-editar',
     ),
     path(
-        'movimientos/detalle/<pk>/', 
+        'movimientos/movimientos-detalle/<pk>/', 
         views.MovimientosDetailView.as_view(),
         name='movimientos-detalle',
     ),
@@ -89,15 +95,27 @@ urlpatterns = [
 
     # ============== CONCILIAR =================
     path(
-        'movimientos/conciliar-mov/<pk>/', 
-        views.MovConciliarUpdateView.as_view(),
-        name='movimientos-conciliar-bancario',
+        'movimientos/conciliar-movimiento-con-movimiento/<pk>/', 
+        views.ConciliarMovimientoConMovimientoCreateView.as_view(),
+        name='conciliar-movimiento-con-movimiento',
     ),
     path(
-        'movimientos/conciliar/<pk>/', 
-        views.ConciliarUpdateView.as_view(),
-        name='movimientos-conciliar',
+        'movimientos/conciliar-movimiento-con-documento/<pk>/', 
+        views.ConciliarMovimientoConDocumentoCreateView.as_view(),
+        name='conciliar-movimiento-con-documento',
     ),
+
+    path(
+        'movimientos/editar-movimiento-con-movimiento/<pk>/', 
+        views.EditarMovimientoConMovimientoUpdateView.as_view(),
+        name='editar-movimiento-con-movimiento',
+    ),
+    path(
+        'movimientos/editar-movimiento-con-documento/<pk>/', 
+        views.EditarMovimientoConDocumentoUpdateView.as_view(),
+        name='editar-movimiento-con-documento',
+    ),
+
     path(
         'movimientos/editar-conciliar/<pk>/', 
         views.MovimientosConciliarUpdateView.as_view(),
@@ -106,7 +124,7 @@ urlpatterns = [
     path(
         'movimientos/eliminar-conciliacion/<pk>/', 
         views.MovimientosConciliarDeleteView.as_view(),
-        name='movimientos-conciliacion-eliminar',
+        name='eliminar-conciliacion',
     ),
 
     # ============== TRANSFERENCIAS =================
