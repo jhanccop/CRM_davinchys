@@ -159,7 +159,7 @@ class DocumentacionListView(AdminClientsPermisoMixin,ListView):
 
       intervalDate = self.request.GET.get("dateKword", '')
       if intervalDate == "today" or intervalDate =="":
-        intervalDate = str(date.today() - timedelta(days = 30)) + " to " + str(date.today())
+        intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
 
       if selectedType == "Todo" or selectedType == None or selectedType =="" :
         selectedType = 5
