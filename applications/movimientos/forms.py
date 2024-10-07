@@ -128,7 +128,11 @@ class ConciliationMovDocForm(forms.ModelForm):
         
     def clean_amountReconcilied(self):
         amountReconcilied = self.cleaned_data['amountReconcilied']
-        doc = self.cleaned_data['idDoc']
+        #doc = self.cleaned_data['idDoc'] # self.cleaned_dataget("idDoc",None)
+        doc = self.cleaned_data.get("idDoc",None)
+        if doc == None:
+            raise forms.ValidationError('Primero ingrese un documento.')
+
         movOrigin = self.cleaned_data['idMovOrigin']
         amountOrigin = BankMovements.objects.get(id = movOrigin.id)
         Doc = Documents.objects.get(id = doc.id)
@@ -158,7 +162,7 @@ class ConciliationMovDocForm(forms.ModelForm):
     
     def clean_idDoc(self):
         doc = self.cleaned_data['idDoc']
-        if doc == None:
+        if not doc:
             raise forms.ValidationError('Ingrese un documento.')
         return doc
 
@@ -209,8 +213,8 @@ class EditConciliationMovDocForm(forms.ModelForm):
         amountReconcilied = self.cleaned_data['amountReconcilied']
         exchangeRate = self.cleaned_data['exchangeRate']
         doc = self.cleaned_data.get('idDoc',None)
-        if doc ==None:
-            raise forms.ValidationError('Ingrese un documento.')
+        if doc == None:
+            raise forms.ValidationError('Primero ingrese un documento.')
         
         movOrigin = self.cleaned_data['idMovOrigin']
         amountOrigin = BankMovements.objects.get(id = movOrigin.id)
@@ -304,7 +308,10 @@ class ConciliationMovMovForm(forms.ModelForm):
         accIdMov = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(idMovOrigin.id)
         accIdMovSum = 0 if accIdMov["sum"] is None else accIdMov["sum"]
 
-        idMovArrival = self.cleaned_data['idMovArrival']
+        idMovArrival = self.cleaned_data.get("idMovArrival",None)
+        if idMovArrival == None:
+            raise forms.ValidationError('Primero ingrese un movimiento.')
+
         amountArrival = BankMovements.objects.get(id = idMovArrival.id)
 
         print(amountArrival.amount, amountArrival.amountReconcilied)
@@ -406,7 +413,7 @@ class EditConciliationMovMovForm(forms.ModelForm):
 
         idArrival = self.cleaned_data.get('idMovArrival',None)
         if idArrival == None:
-            raise forms.ValidationError('Ingrese un movimiento.')
+            raise forms.ValidationError('Primero ingrese un movimiento.')
         
         amountOrigin = idOrigin.amount
         amountReconciliedOrigin = idOrigin.amountReconcilied
