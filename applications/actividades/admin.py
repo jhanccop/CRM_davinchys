@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask
+from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask, SuggestionBox
 
 class CommissionsAdmin(admin.ModelAdmin):
     list_display = (
@@ -34,6 +34,16 @@ class DailyTasksAdmin(admin.ModelAdmin):
     )
     search_fields = ('is_overTime',)
     list_filter = ('is_overTime',)
+
+class SuggestionBoxAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'created',
+        'area',
+        'suggestion'
+    )
+    search_fields = ('area',)
+    list_filter = ('area',)
 
 class TrafoQuoteAdmin(admin.ModelAdmin):
     list_display = (
@@ -79,6 +89,7 @@ class TrafosAdmin(admin.ModelAdmin):
 admin.site.register(Commissions, CommissionsAdmin)
 admin.site.register(Projects, ProjectsAdmin)
 admin.site.register(DailyTasks, DailyTasksAdmin)
+admin.site.register(SuggestionBox, SuggestionBoxAdmin)
 
 admin.site.register(TrafoQuote, TrafoQuoteAdmin)
 admin.site.register(Trafos, TrafosAdmin)

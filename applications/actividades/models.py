@@ -15,7 +15,8 @@ from .managers import (
 
   TrafoQuoteManager,
   TrafosManager,
-  TrafoTaskManager
+  TrafoTaskManager,
+  SuggestionBoxManager
 )
 
 class TrafoTracking(TimeStampedModel):
@@ -753,3 +754,46 @@ class EmailSent(TimeStampedModel):
 
     def __str__(self):
         return str(self.subject) + " - " + str(self.send)
+
+# ================= BUZON DE SUGERENCIAS ================
+class SuggestionBox(TimeStampedModel):
+    CONTABILIDAD = '1'
+    SUPERVISOR_PRODUCCION = '2'
+    ADQUISICIONES = '5'
+    FINANZAS = '6'
+    CONSULTOREXTERNO = '8'
+
+    ROLES_CHOICES = [
+        (CONTABILIDAD, 'Contabilidad'),
+        (SUPERVISOR_PRODUCCION, 'Supervisor producción'),
+        (ADQUISICIONES, 'Adquisiciones'),
+        (FINANZAS, 'Finanzas'),
+        (CONSULTOREXTERNO, 'Consultor'),
+    ]
+
+    # ------------- models -------------
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='Usuario',
+    )
+    suggestion = models.TextField(
+        'Sugerencia',
+        null=False,
+        blank=False,
+    )
+    area = models.CharField(
+        'Area',
+        max_length=1, 
+        choices=ROLES_CHOICES, 
+        blank=True
+    )
+
+    objects = SuggestionBoxManager()
+
+    class Meta:
+        verbose_name = 'Sugerencia'
+        verbose_name_plural = 'Sugerencias'
+
+    def __str__(self):
+        return f"{self.user} - {self.get_area_display()}"

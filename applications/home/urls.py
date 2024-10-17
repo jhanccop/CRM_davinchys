@@ -22,10 +22,4 @@ urlpatterns = [
         name='index',
     ),
     
-    path(
-        'panel/reporte-cuentas/', 
-        views.PanelReport.as_view(),
-        name='reporte-cuentas',
-    ),
-    
 ]

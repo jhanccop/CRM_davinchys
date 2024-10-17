@@ -67,7 +67,7 @@ class MainReport(AdminPermisoMixin,ListView):
     
     payload = {}
     payload["intervalDate"] = intervalDate
-    payload["movimientos"] = Transactions.objects.SaldosGeneralPorIntervalo(intervalo = intervalDate)
+    payload["movimientos"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate)
     
     return payload
 
@@ -81,6 +81,7 @@ class ListAccount(AdminPermisoMixin,ListView):
 
     return payload
 
+# ================================ DETALLE CUENTA ================================
 class AccountDetail(AdminPermisoMixin,ListView):
   template_name = "movimientos/reporte-cuentas-detalle.html"
   context_object_name = 'cuenta'
@@ -94,7 +95,10 @@ class AccountDetail(AdminPermisoMixin,ListView):
     payload = {}
     payload["intervalDate"] = intervalDate
     payload["datos"] = Transactions.objects.ReportePorCuenta(intervalo = intervalDate, cuenta = int(pk)) # 1:dolares
-
+    payload["array"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
+    payload["resumen"] = BankMovements.objects.ResumenMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
+    payload["conciliacion"] = BankMovements.objects.ConciliacionPorMontosPorCuentaPorIntervalo(intervalo = intervalDate, cuenta = int(pk))
+    payload["bankMovements"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
     return payload
 
 class AccountReport(AdminPermisoMixin,ListView):

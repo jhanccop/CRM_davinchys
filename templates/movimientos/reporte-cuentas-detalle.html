@@ -1,4 +1,4 @@
-{% extends "movimientos/base-reportes.html" %}
+{% extends "movimientos/base-reporte.html" %}
 
 {% load  static %}
 {% block title %} Movimientos {% endblock title %}
@@ -7,59 +7,11 @@
 {% block Type %} Cuentas / Detalle {% endblock Type %}
 
 {% block panel-content %}
-
-<div class="row">
-  <div class="col-lg-6 col-md-3">
-    <div class="d-flex">
-      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-compra' %}">
-        <span>Compras por autorizar</span>
-        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuenta.comprasPendientes.IdOrderState__count}}</span> </span>
-      </a>
-      &emsp;
-      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-ordenes-servicio' %}">
-        <span>Servicios por autorizar</span>
-        <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{cuenta.ServiciosPendientes.IdOrderState__count}}</span> </span>
-      </a>
-    </div>
-  </div>
-</div>
-
-<div class="nav-wrapper position-relative end-0">
-  <ul class="nav nav-pills nav-fill p-1">
-   
-    <li class="nav-item" role="presentation">
-      <a class="nav-link mb-0 px-0 py-1 " href="{% url 'movimientos_app:reporte-principal' %}" aria-selected="true">
-        <span class="ms-1">Movimientos</span>
-      </a>
-    </li>
-
-    <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
-      <a class="nav-link mb-0 px-0 py-1 active text-white" href="{% url 'movimientos_app:reporte-cuentas' %}" aria-selected="true">
-        <span class="ms-1">Cuentas</span>
-      </a>
-    </li>
-
-    <li class="nav-item" role="presentation">
-      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-cajaChica' %}">
-        <span class="ms-1">Caja Chica</span>
-      </a>
-    </li>
-
-    <li class="nav-item" role="presentation">
-      <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:lista-transferencias' %}">
-        <span class="ms-1">Transferencias</span>
-      </a>
-    </li>
-
-  </ul>
-
-</div>
-
 <div class="row pt-2">
   <div class="col-lg-6 col-md-3">
-    <h5 class="mb-0">{{cuenta.datos.Cuenta}}</h5>
+    <h5 class="mb-0">{{cuenta.datos.Cuenta}} {{cuenta.datos.Cuenta.accountName}}</h5>
     <p class="text-md mb-0 font-weight-bolder text-secondary">
-      {{cuenta.datos.Cuenta.get_currency_display}} - {{cuenta.datos.Cuenta.bankName}}
+      Saldo actual: {{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.array.first.balance|floatformat:"2g"}}
     </p>
   </div>
   <div class="col-lg-6 col-md-9">
@@ -76,213 +28,317 @@
       </div>
     </form>
   </div>
-
 </div>
 
-<!-- ================ BODY ================= -->
+<div class="row">
+  <!-- RESUMEN -->
+  <div class="col-lg-3 col-md-4">
+    <div class="card">
+      <div class="card-header p-3 pb-0">
+        <h6 class="mb-0">Resumen de cuenta</h6>
+        <p class="text-sm mb-0 text-capitalize font-weight-normal">De cuenta</p>
+      </div>
+      <div class="card-body border-radius-lg p-3">
 
-<div class="row align-items-center">
-
-  <div class="col-lg-2 col-6 text-center">
-    <div class="border border-info border-4 border-radius-md py-1">
-      <span class="text-sm mb-0 text-dark">Monto inicial</span>
-      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.saldoFinalDiario.last.dateTime | date:'d-m-Y'}}</p>
-      <h5 class="font-weight-bolder mb-0" id="saldoInicial">{{cuenta.datos.saldoFinalDiario.last.balance}}</h5>
-    </div>
-  </div>
-
-  <div class="col-lg-2 col-6 text-center">
-    <div class="border border-success border-1 border-radius-md py-3">
-      <p class="font-weight-bolder mb-0 text-success">Ingresos</p>
-      <h5 class="text-dark font-weight-bolder mb-0">+ {{cuenta.datos.TotalIngresos.amount__sum}}</h5>
-    </div>
-  </div>
-
-  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
-    <div class="border border-primary border-1 border-radius-md py-3">
-      <p class="font-weight-bolder mb-0 text-primary">Egresos</p>
-      <h5 class="text-dark font-weight-bolder mb-0">- {{cuenta.datos.TotalEgresos.amount__sum}}</h5>
-    </div>
-  </div>
-
-  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
-    <div class="border border-dark border-4 border-radius-md py-1">
-      <span class="text-sm mb-0 text-dark">Monto CRM</span>
-      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.saldoFinalDiario.first.dateTime | date:'d-m-Y'}}</p>
-      <h5 class="font-weight-bolder mb-0">{{cuenta.datos.saldoFinalDiario.first.balance}}</h5>
-    </div>
-  </div>
-
-  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
-    <div class="border border-dark border-4 border-radius-md py-1">
-      <span class="text-sm mb-0 text-dark">
-        <a href="{% url 'cuentas_app:cuentas-manual-agregar' cuenta.datos.Cuenta.id %}"><i class="fas fa-edit"></i>
-        En cuenta
-        </a>
-      </span>
-      <p class="text-info text-md mb-0 font-weight-bolder">{{cuenta.datos.Cuenta.lastUpdateReal | date:'d-m-Y' }}</p>
-      <a href="{% url 'cuentas_app:cuentas-manual-agregar' cuenta.datos.Cuenta.id %}">
-        <h5 class="font-weight-bolder mb-0">{{cuenta.datos.Cuenta.realBalance}}</h5>
-      </a>
-    </div>
-  </div>
-
-  <div class="col-lg-2 col-6 text-center mt-2 mt-lg-0">
-    <div class="border border-warning border-4 border-radius-md py-3">
-      <p class="font-weight-bolder mb-0 text-dark">Diferencia</p>
-      <h5 class="text-dark font-weight-bolder mb-0" id="diferencia"></h5>
-    </div>
-  </div>
-
-</div>
-
-<div class="row mt-4">
-  <!-- Tabla y grafico -->
-  <div class="col-lg-8 col-md-12 mt-4 mb-4">
-    <div class="card z-index-2 ">
-      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
-        <div class="bg-gradient-dark shadow-dark border-radius-lg">
-          <div class="chart">
-            <canvas id="chart-{{cuenta.datos.Cuenta.id}}" class="chart-canvas" height="200"></canvas>
+        <div class="row d-flex">
+          <div class="col-4">
+            <div class="icon icon-shape bg-gradient-info icon-md text-center border-radius-md shadow-none">
+              <i class="fas fa-arrow-up opacity-10"></i>
+            </div>
+          </div>
+          <div class="col-8 text-end">
+            <div class="numbers">
+              <h5 class="mb-0 text-dark font-weight-bold">{{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.resumen.ingresos|floatformat:"2g"}}</h5>
+              <span class="mt-0 text-sm">Ingresos</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="card-body pb-0">
-
-        <div class="nav-wrapper position-relative end-0 pb-0">
-          <ul class="nav nav-pills nav-fill p-1" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#detalle-{{cuenta.datos.Cuenta.id}}" role="tab" aria-controls="preview"
-                aria-selected="true">
-                Detalle
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#resumen-{{cuenta.datos.Cuenta.id}}" role="tab" aria-controls="code"
-                aria-selected="false">
-                Saldo
-              </a>
-            </li>
-          </ul>
+        <div class="row d-flex mt-4">
+          <div class="col-4">
+            <div class="icon icon-shape bg-gradient-info icon-md text-center border-radius-md shadow-none">
+              <i class="fas fa-arrow-down opacity-10"></i>
+            </div>
+          </div>
+          <div class="col-8 text-end">
+            <div class="numbers">
+              <h5 class="mb-0 text-dark font-weight-bold h-100 text-end">{{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.resumen.egresos|floatformat:"2g"}}</h5>
+              <span class="text-sm">Egresos</span>
+            </div>
+          </div>
         </div>
 
-        <div class="tab-content border-radius-lg" id="v-pills-tabContent">
-          <!-- detalle -->
-          <div class="tab-pane position-relative active show " id="detalle-{{cuenta.datos.Cuenta.id}}" role="tabpanel"
-            aria-labelledby="detalle-{{cuenta.datos.Cuenta.id}}" loading="lazy">
-            <div class="table-responsive p-0">
-              <table class="table text-right" id="table-{{cuenta.datos.Cuenta.id}}">
-                <thead>
-                  <tr>
-                    <th class="text-sm font-weight-bold">Fecha</th>
-                    <th class="text-sm font-weight-bold">Razón Social</th>
-                    <th class="text-sm font-weight-bold">Categoria</th>
-                    <th class="text-sm font-weight-bold">Monto</th>
-                  </tr>
-                </thead>
+        <div class="row d-flex mt-4">
+          <div  class="col-4">
+
+            {% if cuenta.resumen.balance > 0%}
+            <div class="icon icon-shape bg-gradient-success icon-md text-center border-radius-md shadow-none">
+              <i class="fas fa-balance-scale-right opacity-10"></i>
+            </div>
+            {% else %}
+            <div class="icon icon-shape bg-gradient-primary icon-md text-center border-radius-md shadow-none">
+              <i class="fas fa-balance-scale-left opacity-10"></i>
+            </div>
+            {% endif %}
+          </div>
+          <div class="col-8 text-end">
+            <div class="numbers">
+              <h5 class="mb-0 text-dark">{{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.resumen.balance|floatformat:"2g"}} </h5>
+              <span class="text-sm">Balance</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PLOT SALDOS -->
+  <div class="col-lg-9 col-md-8 mt-md-0 mt-4">
+    <div class="card overflow-hidden h-100">
+  
+      <div class="card-body mt-3 p-0">
+        <div class="chart bg-gradient-white ">
+          <div ui-jp="plot" id="AllPlots" style="height: 300px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================ RESUMEN ================= -->
+
+<div class="row mt-2">
+  <div class="col-lg-6 col-12">
+    <div class="card z-index-2 mt-4">
+      <div class="card-header p-3 pt-2">
+        <div
+          class="icon icon-lg icon-shape bg-gradient-dark shadow-dark text-center border-radius-xl mt-n4 me-3 float-start">
+          <i class="material-icons opacity-10">leaderboard</i>
+        </div>
+        <h6 class="mb-0">Conciliación en montos</h6>
+        <p class="mb-0 text-sm">Incluye ingresos y egresos</p>
+      </div>
+      <div class="card-body p-3">
+        <div class="row">
+          
+          <div class="col-lg-6 col-12 text-center">
+            <div class="chart bg-gradient-white ">
+              <div ui-jp="plot" id="pie1" style="height: 200px;"></div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-12">
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0">
                 <tbody>
-                  {% for j in cuenta.datos.ListaTransaciones%}
+
                   <tr>
-                    <td class="ps-0 text-start align-middle">{{j.dateTime|date:'d-m-Y h:i'}}</td>
-                    <td class="ps-0 text-start align-middle font-weight-bold">{{j.clientName}}</td>
-                    <td class="ps-0 text-start align-middle">{{j.get_category_display}}</td>
-                    
-                    <td class="ps-4 align-middle text-end">
-                      {% if j.transactionType == "0" %}
-                      <p class="text-md font-weight-bold mb-0 text-primary"> - {{ j.amount }}</p>
-                      {% else %}
-                      <p class="text-md font-weight-bold mb-0 text-success"> + {{ j.amount }}</p>
-                      {% endif %}
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm ms-0 text-success">Conciliado</h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="align-middle text-end text-sm">
+                      <span class="text-sm font-weight-bold"> {{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.conciliacion.sumConciliation|floatformat:"2g"}} </span>
                     </td>
                   </tr>
-                  {% endfor %}
+
+                  <tr>
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm ms-0 text-primary">Pendiente</h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="align-middle text-end text-sm">
+                      <span class="text-sm font-weight-bold"> {{cuenta.datos.Cuenta.get_currency_display}} {{cuenta.conciliacion.sumPending|floatformat:"2g"}} </span>
+                    </td>
+                  </tr>
+                  
                 </tbody>
               </table>
             </div>
-            
-          </div>
-
-          <div class="tab-pane position-relative border-radius-lg" id="resumen-{{cuenta.datos.Cuenta.id}}" role="tabpanel"
-            aria-labelledby="resumen-{{cuenta.datos.Cuenta.id}}" loading="lazy">
-            <table class="table text-right">
-              <tbody>
-                {% for j in cuenta.datos.saldoFinalDiario%}
-                <tr>
-                  <td class="ps-0 text-start align-middle">
-                    {{j.dateTime|date:'d-m-Y'}}
-                  </td>
-  
-                  <td class="ps-0 text-end align-middle">
-                    <p class="text-xs mb-0">{{j.idAccount.get_currency_display}}</p>
-                    <p class="text-md font-weight-bold mb-0 text-dark">{{j.balance}}</p>
-                  </td>
-
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
           </div>
         </div>
-
       </div>
     </div>
   </div>
+  <div class="col-lg-6 col-12 mt-md-0 mt-4">
+    <div class="card z-index-2 mt-4">
+      <div class="card-header p-3 pt-2">
+        <div
+          class="icon icon-lg icon-shape bg-gradient-dark shadow-dark text-center border-radius-xl mt-n4 me-3 float-start">
+          <i class="fas fa-list-ol opacity-10"></i>
+        </div>
+        <h6 class="mb-0">Conciliación en cantidad</h6>
+        <p class="mb-0 text-sm">Número de movimientos</p>
+      </div>
+      <div class="card-body p-3">
+        <div class="row">
+          
+          <div class="col-lg-6 col-12 text-center">
+            <div class="chart bg-gradient-white ">
+              <div ui-jp="plot" id="pie2" style="height: 200px;"></div>
+            </div>
+          </div>
 
-  <!-- Tabla y estadisticas de consumo -->
-  <div class="col-lg-4 col-md-12 mt-4 mb-4">
-    <div class="card z-index-2 ">
+          <div class="col-lg-6 col-12">
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <tbody>
 
-      <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-        <div class="bg-gradient-white shadow-dark border-radius-lg">
-          <div class="chart">
-            <canvas id="chart-categoria" class="chart-canvas" height="200"></canvas>
+                  <tr>
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm ms-0 text-success">Conciliado</h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="align-middle text-end text-sm">
+                      <span class="text-sm font-weight-bold"> {{cuenta.conciliacion.countConciliation}} </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm ms-0 text-primary">Pendiente</h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="align-middle text-end text-sm">
+                      <span class="text-sm font-weight-bold"> {{cuenta.conciliacion.countPending}} </span>
+                    </td>
+                  </tr>
+                  
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div class="card-body pb-0">
-        <table class="table text-right" id="table-categoria">
-          <thead>
+<div class="mt-4">
+  <div class="card">
+
+    <div class="pt-2 pb-0 ps-2">
+      <a class="export btn btn-icon btn-outline-secondary" data-type="csv" type="button">
+        Export CSV
+      </a>
+    </div>
+    
+    <div class="card-body pt-0 px-0 pb-2">
+      
+      <div class="table-responsive p-0">
+        <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+          <thead class="thead-light">
             <tr>
-              <th class="text-sm font-weight-bold text-uppercase">Categoria</th>
-              <th class="text-sm font-weight-bold text-end text-uppercase">Egreso</th>
+              <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha </th>
+              <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción, EEC</th>
+              <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto, Avance</th>
+              <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">
+                
+                    Monto &nbsp;&nbsp;&nbsp;&nbsp;
+                  
+                    Id &nbsp;&nbsp;&nbsp;&nbsp;
+                  
+                    Detalle
+                  
+                
+              </th>
+              <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {% for j in cuenta.datos.PorCategoria %}
+            {% for t in cuenta.bankMovements %}
             <tr>
-              <td>
-                <div class="d-flex px-2 py-0">
-                  {% if j.category == "0" %}
-                  <span class="badge bg-gradient-primary me-3"> </span>
-                  <span class="text-dark">Planilla</span>
-                  {% elif j.category == "1" %}
-                  <span class="badge bg-gradient-info me-3"> </span>
-                  <span class="text-dark">Proveedores</span>
-                  {% elif j.category == "2" %}
-                  <span class="badge bg-gradient-success me-3"> </span>
-                  <span class="text-dark">Servicios</span>
-                  {% elif j.category == "3" %}
-                  <span class="badge bg-gradient-danger me-3"> </span>
-                  <span class="text-dark">Comisiones de trabajo</span>
-                  {% elif j.category == "4" %}
-                  <span class="badge bg-gradient-secondary me-3"> </span>
-                  <span class="text-dark">Compras</span>
-                  {% elif j.category == "5" %}
-                  <span class="badge bg-gradient-light me-3"> </span>
-                  <span class="text-dark">Impuestos</span>
-                  {% elif j.category == "6" %}
-                  <span class="badge bg-gradient-warning me-3"> </span>
-                  <span class="text-dark">Caja Chica</span>
-                  {% elif j.category == "7" %}
-                  <span class="badge bg-gradient-dark me-3"> </span>
-                  <span class="text-dark">Transferencias internas</span>
-                  {% endif %}
+              <td class="text-sm">
+                <div class="d-flex flex-column justify-content-center">
+                  <h6 class="mb-0 text-sm"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{ t.date|date:'y-m' }}</a></h6>
+                  <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
                 </div>
               </td>
-
-              <td class="ps-0 text-start align-middle font-weight-bold text-end">{{j.acumulate}}</td>
+              <td class="text-sm">
+                <div class="d-flex flex-column justify-content-center">
+                  <h6 class="mb-0 text-sm"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} </a> </h6>
+                  <p class="text-sm font-weight-normal text-secondary mb-0"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">nOp: {{t.opNumber}}  </a></p>
+                </div>
+              </td>
+              <td class="text-sm">
+                <div class="w-100">
+                  <div class="d-flex align-items-center mb-0">
+                    <span class="me-2 text-sm font-weight-bold text-dark">{{ t.per|floatformat:0 }} %</span>
+                    <span class="ms-auto text-sm font-weight-normal">{{ t.amountReconcilied|floatformat:"2g" }}</span>
+                  </div>
+                  <div>
+                    <div class="progress progress-md w-100">
+                      <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                    </div>
+                  </div>
+                  {% if t.transactionType == "1" %}
+                  <span class="me-2 text-md font-weight-bold text-success">+{{ t.amount|floatformat:"2g" }}</span>
+                  {% else %}
+                  <span class="me-2 text-md font-weight-bold text-primary">-{{ t.amount|floatformat:"2g" }}</span>
+                  {% endif %}
+                  
+              </td>
+    
+              <td class="text-sm">
+                <div class="d-flex flex-column justify-content-center">
+    
+                  {% for i in t.mov_origen.all %}
+                  
+                    {% if i.type == "0" %}
+                    <p class="text-sm font-weight-normal text-info mb-0">
+                      {% if i.idDoc.pdf_file %}
+                      <a href="/media/{{i.idDoc.pdf_file}}">
+                        <i class="far fa-file-pdf text-info text-lg"></i>
+                      </a>
+                      {% else %}
+                        --
+                      {% endif %}
+                    
+                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp;{{i.idDoc.idInvoice}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idDoc.idClient}}
+                    </p>
+                    {% else %}
+    
+                    <p class="text-sm font-weight-normal text-dark mb-0">
+    
+                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.idAccount}} &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.opNumber}} - {{i.idMovArrival.description}}
+                  </p>
+                    {% endif %}
+                  
+    
+    
+                  {% endfor %}
+    
+    
+                </div>
+              </td>
+    
+              <td>
+                <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
+                  aria-expanded="false">
+                  <i class="fas fa-bars text-lg text-dark"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
+                  <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-detalle' t.id %}">Ver detalle</a></li>
+                  <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
+                  <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:conciliar-movimiento-con-documento' t.id %}"> Conciliacion documentaria</a></li>
+                  <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:conciliar-movimiento-con-movimiento' t.id %}"> Conciliacion bancaria</a></li>
+                  <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'movimientos_app:movimientos-eliminar' t.id %}">Eliminar movimiento</a></li>
+                </ul>
+              </td>
+    
             </tr>
             {% endfor %}
           </tbody>
@@ -290,8 +346,8 @@
       </div>
     </div>
   </div>
-  
 </div>
+
 
 {% endblock panel-content %}
 
@@ -307,178 +363,169 @@
     }
 </script>
 
-<script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
 <script>
-
-  var ctx = document.getElementById("chart-{{cuenta.datos.Cuenta.id}}").getContext("2d");
-  var Labels = [];
-  var Data = [];
-
-  {% for j in cuenta.datos.saldoFinalDiario %}
-  Labels.push("{{j.dateTime|date:'d/m'}}")
-  Data.push("{{j.balance}}")
-  //console.log("{{j.dateTime|date:'d-m-Y'}}")
-  //console.log("{{j.balance}}");
-  {% endfor %}
-
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: Labels.reverse(),
-      datasets: [{
-        label: "Saldo",
-        tension: 0,
-        borderWidth: 0,
-        pointRadius: 5,
-        pointBackgroundColor: "rgba(255, 255, 255, .8)",
-        pointBorderColor: "transparent",
-        borderColor: "rgba(255, 255, 255, .8)",
-        borderColor: "rgba(255, 255, 255, .8)",
-        borderWidth: 4,
-        backgroundColor: "transparent",
-        fill: true,
-        data: Data.reverse(),
-        maxBarThickness: 6
-
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-            color: 'rgba(255, 255, 255, .2)'
-          },
-          ticks: {
-            display: true,
-            color: '#f8f9fa',
-            padding: 10,
-            font: {
-              size: 14,
-              weight: 300,
-              family: "Roboto",
-              style: 'normal',
-              lineHeight: 2
-            },
-          }
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5]
-          },
-          ticks: {
-            display: true,
-            color: '#f8f9fa',
-            padding: 10,
-            font: {
-              size: 14,
-              weight: 300,
-              family: "Roboto",
-              style: 'normal',
-              lineHeight: 2
-            },
-          }
-        },
-      },
-    },
-  });
-
-</script>
-
-<script>
-  var ctx2 = document.getElementById("chart-categoria").getContext("2d");
-  var Labels = [];
-  var Data = [];
-  var barColors = [];
-
-  var Colors = [
-    "#e91e63", // primary
-    "#03a9f4", // info
-    "#4caf50", // success
-    "#f44335", // danger
-    "#7b809a", // secondary
-    "#e9ecef", // light
-    "#fb8c00", // warning
-    "#343a40", // dark
-  ];
-
-  var lab = ["Planilla", "Proveedor", "Servicio", "Comision","Compra","Impuestos","Caja chica", "Transferencias internas"];
-
-  {% for j in cuenta.datos.PorCategoria %}
-  Labels.push(lab[Number("{{j.category}}")])
-  barColors.push(Colors[Number("{{j.category}}")])
-  Data.push("{{j.acumulate}}")
-  {% endfor %}
-
-
-  new Chart(ctx2, {
-    //type: "doughnut",
-    type: "pie",
-    data: {
-      labels: Labels,
-      datasets: [{
-        backgroundColor: barColors,
-        data: Data
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-    }
-  });
-
-</script>
-
-<script>
-  let crm_amount = Number("{{cuenta.datos.saldoFinalDiario.first.balance}}");
-  let real_amount = Number("{{cuenta.datos.Cuenta.realBalance}}");
-  let dif = real_amount - crm_amount;
-  $("#diferencia").html(dif.toFixed(2));
-
-  let inicialamount = Number("{{cuenta.datos.ListaTransaciones.last.balance}}");
-  let gasto = Number("{{cuenta.datos.ListaTransaciones.last.amount}}");
-  console.log(inicialamount,gasto);
-  let initial = inicialamount + gasto;
-  $("#saldoInicial").html(initial.toFixed(2));
+  let ingresos = Number("{{cuenta.ingresos.total}}");
+  let egresos = Number("{{cuenta.egresos.total}}");
+  let dif = ingresos - egresos;
+  $("#diff").html(dif.toFixed(2));
 </script>
 
 <script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
 <script>
-  /* CUENTAS */
-  var datatable = new simpleDatatables.DataTable("#table-{{cuenta.datos.Cuenta.id}}", {
+  /* PROYECTOS */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
     searchable: true,
     fixedHeight: false,
     perPage: 5
   });
 
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "movimientos",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+<script src="{% static 'assets/js/plugins/plotly-2.12.1.min.js' %}"></script>
+<script>
+  let balance = [];
+  let dt = [];
+  '{% for value in cuenta.array %}'
+    balance.push("{{value.balance}}");
+    var ddt = new Date("{{value.date|date:'m-d-y'}}");
+    dt.push(ddt);
+  '{% endfor %}'
+
+  var layout = {
+    margin: { l: 40, t: 0, b: 35, r: 30 },
+    autosize: true,
+
+    xaxis: {
+      autorange: true,
+      showgrid: true,
+      zeroline: true,
+      rangeselector: {
+        buttons: [
+          {
+            count: 1,
+            label: '1w',
+            step: 'week',
+            stepmode: 'backward'
+          },
+          {
+            count: 1,
+            label: '1m',
+            step: 'month',
+            stepmode: 'backward'
+          },
+          { step: 'all' }
+        ]
+      },
+      //range: ['2020-01-01', '2020-01-31'],
+
+      type: 'date'
+    },
+    yaxis: {
+      autorange: true,
+      showgrid: true,
+      zeroline: true,
+      //range: [0, 30],
+      type: 'linear'
+    },
+    legend: {
+      x: 1,
+      y: 0.5,
+      traceorder: 'normal',
+      font: {
+        family: 'sans-serif',
+        size: 12,
+        //color: '#254'
+      },
+      //bgcolor: '#E2E2E2',
+      //bordercolor: '#FFFFFF',
+      //borderwidth: 2
+    }
+  }
+
+  var trace0 = {
+    x: dt,
+    y: balance,
+    type: 'scatter',
+    mode: "markers",
+    name: 'Amount',
+    line: {
+      shape: 'spline',
+      color: '#7b809a',
+    },
+    marker: {
+      color: 'rgb(219, 64, 82)',
+      size: 10
+    }
+    //visible: 'legendonly'
+  };
+
+  var config = {
+    modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'resetScale2d', 'zoomOut2d'],
+    responsive: true,
+    displaylogo: false
+  }
+
+
+  var data = [trace0];
+
+  Plotly.newPlot('AllPlots', data, layout, config);
+</script>
+
+<script>
+  let conciliation = [
+    "{{cuenta.conciliacion.sumConciliation}}",
+    "{{cuenta.conciliacion.sumPending}}"
+  ];
+
+  let data1 = [{
+    values: conciliation,
+    labels: ['Conciliado','Pendiente'],
+    type: 'pie',
+    marker: {
+      colors: ["#4caf50","#e91e63"]
+    },
+  }];
+
+  var layout = {
+      height: 200,
+      margin: { "t": 0, "b": 0, "l": 0, "r": 0 },
+      showlegend: false
+    }
+
+  Plotly.newPlot('pie1', data1, layout, config);
+
+  let cantidad = [
+    "{{cuenta.conciliacion.countConciliation}}",
+    "{{cuenta.conciliacion.countPending}}"
+  ];
+
+  let data2 = [{
+    values: cantidad,
+    labels: ['Conciliado','Pendiente'],
+    type: 'pie',
+    marker: {
+      colors: ["#4caf50","#e91e63"]
+    },
+  }];
+
+  Plotly.newPlot('pie2', data2, layout, config);
 </script>
 
 {% endblock JSscripts %}

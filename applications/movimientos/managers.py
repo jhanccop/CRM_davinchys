@@ -70,6 +70,45 @@ class BankMovementsManager(models.Manager):
             n = Count("mov_origen"),
         ).order_by("-id")
         return result
+
+    def ResumenMovimientosPorCuenta(self,intervalo,cuenta):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+        result = self.filter(
+            date__range = rangeDate,
+            idAccount__id = cuenta,
+        ).aggregate(
+            egresos = Sum("amount", filter=Q(transactionType = "0")),
+            ingresos = Sum("amount", filter=Q(transactionType = "1")),
+            balance = F("ingresos") - F("egresos")
+        )
+        return result
+    
+    def EgresosMovimientosPorCuenta(self,intervalo,cuenta):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+        result = self.filter(
+            date__range = rangeDate,
+            idAccount__id = cuenta,
+            transactionType = "0"
+        ).aggregate(
+            total = Sum("amount")
+        )
+        return result
     
     def ObtenerSaldo(self,cuenta):
        result = self.filter(idAccount__id=cuenta).values("balance").last()
@@ -88,6 +127,31 @@ class BankMovementsManager(models.Manager):
         )
         return result
     
+    def ConciliacionPorMontosPorCuentaPorIntervalo(self,intervalo,cuenta):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+            
+        result = self.filter(
+            date__range = rangeDate,
+            idAccount__id = cuenta
+        ).aggregate(
+            sumAmount = Sum("amount"),
+            sumConciliation = Sum("amountReconcilied"),
+            sumPending = F("sumAmount") - F("sumConciliation"),
+
+            countAmount = Count("amount"),
+            countConciliation = Count("amountReconcilied",filter=Q(amountReconcilied__gt = 0)),
+            countPending = F("countAmount") - F("countConciliation"),
+        )
+        return result
+
 class DocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo):
         Intervals = intervalo.split(' to ')
@@ -397,3 +461,4 @@ class ConciliationManager(models.Manager):
            sum =Sum("amountReconcilied")
         )
         return result
+

@@ -21,7 +21,8 @@ from .models import (
   Commissions,
   DailyTasks,
   EmailSent,
-  TrafoTask
+  TrafoTask,
+  SuggestionBox
 )
 from applications.users.models import User
 
@@ -32,7 +33,8 @@ from .forms import (
   CommissionsForm,
   DailyTaskForm,
   EmailSentForm,
-  TrafoTaskForm
+  TrafoTaskForm,
+  SuggestionBoxForm
 )
 # ======================= PROYECTOS ===========================
 class ProjectsListView(LoginRequiredMixin,ListView):
@@ -156,6 +158,35 @@ class DailyTaskReportView(AdminPermisoMixin,ListView):
         payload["acc"] = DailyTasks.objects.MiListarPorIntervaloHorasExtraAcc(user=int(userid),interval=intervalDate)
         return payload
     
+# ======================= BUZON DE SUGERENCIAS ===========================
+class MySuggestionBoxListView(LoginRequiredMixin,ListView):
+    template_name = "actividades/mi-buzon-de-sugerencias.html"
+    context_object_name = 'buzon'
+    #model = SuggestionBox
+
+    def get_queryset(self):
+        payload = {}
+        payload["suggestion"] = SuggestionBox.objects.MiListaDeSugerencias(user=self.request.user)
+        return payload
+
+class SuggestionBoxCreateView(LoginRequiredMixin,CreateView):
+    template_name = "actividades/crear-buzon-de-sugerencias.html"
+    model = SuggestionBox
+    form_class = SuggestionBoxForm
+    success_url = reverse_lazy('activities_app:mi-buzon-de-sugerencias')
+
+class SuggestionBoxUpdateView(LoginRequiredMixin,UpdateView):
+    template_name = "actividades/editar-buzon-de-sugerencias.html"
+    model = SuggestionBox
+    form_class = SuggestionBoxForm
+    success_url = reverse_lazy('activities_app:mi-buzon-de-sugerencias')
+
+class SuggestionBoxDeleteView(LoginRequiredMixin,DeleteView):
+    template_name = "actividades/eliminar-sugerencia.html"
+    model = SuggestionBox
+    success_url = reverse_lazy('activities_app:mi-buzon-de-sugerencias')
+    
+
 # ======================= COTIZACIONES TRANSFORMADORES ===========================
 class QuotesListView(LoginRequiredMixin,ListView):
     template_name = "actividades/lista-cotizaciones-transformadores.html"

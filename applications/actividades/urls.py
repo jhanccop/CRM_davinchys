@@ -79,6 +79,29 @@ urlpatterns = [
         name='reporte-actividades-diarias',
     ),
 
+    # ============== BUZON DE SUGERENCIAS ===============
+    path(
+        'actividades/mi-buzon-de-sugerencias/', 
+        views.MySuggestionBoxListView.as_view(),
+        name='mi-buzon-de-sugerencias',
+    ),
+    path(
+        'actividades/crear-buzon-de-sugerencias/', 
+        views.SuggestionBoxCreateView.as_view(),
+        name='crear-buzon-de-sugerencias',
+    ),
+    path(
+        'actividades/editar-buzon-de-sugerencias/<pk>/', 
+        views.SuggestionBoxUpdateView.as_view(),
+        name='editar-buzon-de-sugerencias',
+    ),
+    path(
+        'actividades/eliminar-sugerencia/<pk>/', 
+        views.SuggestionBoxDeleteView.as_view(),
+        name='eliminar-sugerencia',
+    ),
+    
+
     # ============== FABRICACION DE TRANSFORMADORES ===============
     path(
         'actividades/cotizaciones-transformadores/', 

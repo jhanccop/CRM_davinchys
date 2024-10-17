@@ -210,3 +210,10 @@ class TrafoTaskManager(models.Manager):
             idTrafoQuote = id
         )
         return result
+    
+class SuggestionBoxManager(models.Manager):
+    def MiListaDeSugerencias(self,user):
+        result = self.filter(
+            user = user
+        )
+        return result

@@ -8,7 +8,8 @@ from .models import (
   Commissions,
   DailyTasks,
   EmailSent,
-  TrafoTask
+  TrafoTask,
+  SuggestionBox
 )
 from applications.users.models import User
 
@@ -520,4 +521,36 @@ class TrafoTaskForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+        }
+
+class SuggestionBoxForm(forms.ModelForm):
+    
+    class Meta:
+        model = SuggestionBox
+        fields = [
+            'user',
+            'area',
+            'suggestion',
+        ]
+        widgets = {
+            'user': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'area': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'suggestion': forms.Textarea(
+                attrs = {
+                    'placeholder': '',
+                    'rows':3,
+                    'class': 'input-group-field form-control',
+                }
+            ),
+                        
+            
         }

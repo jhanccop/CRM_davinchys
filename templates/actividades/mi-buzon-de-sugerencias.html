@@ -1,0 +1,100 @@
+{% extends "actividades/base-buzon.html" %}
+
+{% load  static %}
+
+{% block title %} Actividades {% endblock title %}
+
+{% block main %} Actividades {% endblock main %}
+{% block appName %} Lista {% endblock appName %}
+{% block Type %} Mis sugerencias {% endblock Type %}
+{% block panel-content %}
+
+<div class="row">
+    <div class="col-lg-6 col-12 d-flex ms-auto">
+        
+        <div class="dropleft ms-3 ms-auto">
+            <a class="btn bg-gradient-secondary" href="{% url 'activities_app:crear-buzon-de-sugerencias' %}">
+                NUEVO
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-header pb-0 ">
+                <div class="row">
+                    <div class="col-lg-6 col-md-3">
+                        <h6 class="mb-0">Mis sugerencias </h6>
+                        
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-orders">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-start text-dark text-xs font-weight-bolder opacity-7 ps-4">Fecha</th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Area</th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Sugerencia</th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in buzon.suggestion %}
+                            <tr>
+                            
+                                <td class="font-weight-normal">
+                                    <span class="my-2 text-sm">{{ t.created|date:'Y-m-d' }}</span>
+                                </td>
+                            
+                            
+                                <td class="font-weight-normal">
+                                    <span class="my-2 text-sm">{{ t.get_area_display }}</span>
+                                </td>
+                                <td class="font-weight-normal">
+                                    <span class="my-2 text-sm">{{ t.suggestion }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'activities_app:editar-buzon-de-sugerencias' t.id %}">
+                                        <i class="far fa-edit text-dark text-lg"></i>
+                                    </a>
+                                    &emsp;
+                                    <a href="{% url 'activities_app:eliminar-sugerencia' t.id %}">
+                                        <i class="far fa-trash-alt text-primary text-lg"></i>
+                                    </a>
+                                </td>
+                            
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<!--Table-->
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+
+    const dataTableOrders = new simpleDatatables.DataTable("#datatable-orders", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 10
+    });
+
+</script>
+
+{% endblock JSscripts %}

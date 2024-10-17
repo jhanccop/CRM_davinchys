@@ -86,7 +86,7 @@
         <div class="col-md-3 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
-              <a href="{% url 'home_app:reporte-cuentas' %}">
+              <a href="{% url 'movimientos_app:reporte-cuentas' %}">
                 <div class="icon icon-shape icon-lg bg-gradient-success shadow text-center border-radius-lg">
                   <i class="fas fa-receipt text-lg font-weight-bolder opacity-10"></i>
                 </div>
@@ -96,6 +96,40 @@
               <h6 class="text-center mb-0">Reportes generales</h6>
               <hr class="horizontal dark my-3">
               <a  href="" class="btn bg-gradient-success w-100 mb-0 toast-btn">ENTRAR</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+          <div class="card">
+            <div class="card-header mx-4 p-3 text-center">
+              <a href="{% url 'movimientos_app:reporte-cuentas' %}">
+                <div class="icon icon-shape icon-lg bg-gradient-warning shadow text-center border-radius-lg">
+                  <i class="fas fa-receipt text-lg font-weight-bolder opacity-10"></i>
+                </div>
+              </a>
+            </div>
+            <div class="card-body pt-0 p-3 text-center">
+              <h6 class="text-center mb-0">Auditoria</h6>
+              <hr class="horizontal dark my-3">
+              <a  href="{% url 'movimientos_app:reporte-cuentas' %}" class="btn bg-gradient-warning w-100 mb-0 toast-btn">ENTRAR</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+          <div class="card">
+            <div class="card-header mx-4 p-3 text-center">
+              <a href="{% url 'activities_app:mi-buzon-de-sugerencias' %}">
+                <div class="icon icon-shape icon-lg bg-gradient-secondary shadow text-center border-radius-lg">
+                  <i class="fas fa-receipt text-lg font-weight-bolder opacity-10"></i>
+                </div>
+              </a>
+            </div>
+            <div class="card-body pt-0 p-3 text-center">
+              <h6 class="text-center mb-0">Buzon de sugerencias</h6>
+              <hr class="horizontal dark my-3">
+              <a  href="{% url 'activities_app:mi-buzon-de-sugerencias' %}" class="btn bg-gradient-secondary w-100 mb-0 toast-btn">ENTRAR</a>
             </div>
           </div>
         </div>
