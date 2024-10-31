@@ -81,6 +81,7 @@ class BankMovementsManager(models.Manager):
             rangeDate[1] = intervals[0] + timedelta(days = 1)
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
+            
         result = self.filter(
             date__range = rangeDate,
             idAccount__id = cuenta,
