@@ -219,6 +219,9 @@ class DocumentsManager(models.Manager):
     def DocumentosPorId(self,id):
        return self.filter(id = id).annotate(per = F("amountReconcilied") * 100 / F("amount"),diff =  F("amount") - F("amountReconcilied"))[0]
 
+    def DocumentosPorRUC(self,ruc):
+       return self.filter(idClient__ruc = ruc).order_by("created")
+    
 class TransactionsManager(models.Manager):
   def SaldosGeneralPorIntervalo(self,intervalo):
     Intervals = intervalo.split(' to ')

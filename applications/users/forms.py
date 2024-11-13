@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 #
-from .models import User
+from .models import User, Documentations
 
 class UserRegisterForm(forms.ModelForm):
 
@@ -92,7 +92,6 @@ class UserRegisterForm(forms.ModelForm):
         if self.cleaned_data['password1'] != self.cleaned_data['password2']:
             self.add_error('password2', 'Las contraseñas no son iguales')
 
-
 class LoginForm(forms.Form):
     email = forms.CharField(
         label='E-mail',
@@ -125,7 +124,6 @@ class LoginForm(forms.Form):
         
         return self.cleaned_data
 
-
 class UserUpdateForm(forms.ModelForm):
 
     class Meta:
@@ -135,20 +133,8 @@ class UserUpdateForm(forms.ModelForm):
             'full_name',
             'last_name',
 
-            #'gender',
-            #'date_birth',
-
             'email',
             'position',
-
-            'cv_file',
-            #'condition',
-
-            #'date_entry',
-            #'date_termination',
-
-            #'salary',
-            #'currency',
             
             'is_active',
         )
@@ -177,14 +163,6 @@ class UserUpdateForm(forms.ModelForm):
                     'class': 'form-control',
                 }
             ),
-            'cv_file': forms.ClearableFileInput(
-                attrs = {
-                    'type':"file",
-                    'name':"pdf_file",
-                    'class': 'form-control text-dark',
-                    'id':"id_pdf_file",
-                }
-            ),
             
             'is_active': forms.CheckboxInput(
                 attrs={
@@ -193,7 +171,6 @@ class UserUpdateForm(forms.ModelForm):
                 },
             ),
         }
-
 
 class UpdatePasswordForm(forms.Form):
 
@@ -215,3 +192,50 @@ class UpdatePasswordForm(forms.Form):
             }
         )
     )
+
+class DocumentationsForm(forms.ModelForm):
+    class Meta:
+        model = Documentations
+        fields = (
+            'idUser',
+            'typeDoc',
+            'sumary',
+            'doc_file',
+        )
+        widgets = {
+            'idUser': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'typeDoc': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'sumary': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'doc_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"doc_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_doc_file",
+                }
+            )
+        }
+
+    def clean_doc_file(self):
+        doc_file = self.cleaned_data.get('doc_file')
+        if doc_file:
+            if not doc_file.name.endswith('.pdf') and not doc_file.name.endswith('.png') and not doc_file.name.endswith('.jpg') and not doc_file.name.endswith('.jpeg'):
+                raise forms.ValidationError("Archivos permitidos pdf, png, jpg y jpeg.")
+            if doc_file.size > 1*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 1 MB.")
+        return doc_file

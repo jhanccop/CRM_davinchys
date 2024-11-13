@@ -41,4 +41,24 @@ urlpatterns = [
         views.UserListView.as_view(),
         name='user-lista',
     ),
+    path(
+        'users/detail/<pk>/', 
+        views.UserDetailView.as_view(),
+        name='user-detail',
+    ),
+    path(
+        'users/documentos-crear/<pk>/', 
+        views.UserDocumentsCreateView.as_view(),
+        name='user-documento-crear',
+    ),
+    path(
+        'users/documentos-editar/<pk>/', 
+        views.UserDocumentsUpdateView.as_view(),
+        name='user-documentos-editar',
+    ),
+    path(
+        'users/documentos-eliminar/<pk>/', 
+        views.UserDocumentsDeleteView.as_view(),
+        name='user-documentos-eliminar',
+    ),
 ]

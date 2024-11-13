@@ -1,0 +1,94 @@
+{% extends "users/base-usuarios.html" %}
+
+{% load  static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Documentos {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-3 pb-2">
+                    <h6 class="text-center text-white"> AGREGAR DOCUMENTOS </h6>
+                </div>
+            </div>
+            <div class="card-body pb-0">
+                <form class="" method="POST" enctype="multipart/form-data" id="paymentrequest_form" novalidate>{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+                        <div class="multisteps-form__content">
+                            <h6 class="font-weight-bolder">Características generales</h6>
+                            <div class="row mt-3">
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">User</label>
+                                        {{ form.idUser }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-sm-4">
+                                    <div class="input-group input-group-outline is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Tipo documento</label>
+                                        {{ form.typeDoc }}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-12">
+                                    <p class="mb-0">Resumen</p>
+                                    <div class="input-group input-group-outline">
+                                        {{ form.sumary }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-12">
+                                    <p class="mb-0">Documentos</p>
+                                    <div class="input-group input-group-outline">
+                                      <div class="form-group">
+                                        {{ form.doc_file }}
+                                      </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 1.0 MB.</p>
+                                    {% for error in form.doc_file.errors %}
+                                    <p class="text-sm text-primary font-weight-bolder mb-0">
+                                      {{ error|escape }}
+                                    </p>
+                                    {% endfor %}
+                                  </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                                <a class="btn bg-gradient-dark" href="{% url 'users_app:user-detail' pk %}">
+                                    REGRESAR </a>
+
+                                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                                    title="Next">AGREGAR DOCUMENTO</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script type="text/javascript">
+    document.getElementById("id_idUser").value = "{{pk}}";
+</script>
+
+{% endblock JSscripts %}

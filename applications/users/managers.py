@@ -34,3 +34,9 @@ class UserManager(BaseUserManager, models.Manager):
         return self.get(
             id=id
         )
+    
+class DocsManager(models.Manager):
+    def docs_por_id(self,id):
+        return self.filter(
+            idUser__id=id
+        )

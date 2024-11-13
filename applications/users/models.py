@@ -1,8 +1,10 @@
 from django.db import models
 
+from model_utils.models import TimeStampedModel
+
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 #
-from .managers import UserManager
+from .managers import UserManager, DocsManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     # TIPO DE USUARIOS
@@ -56,6 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField('Nombres', max_length=100)
     last_name = models.CharField('Apellidos', max_length=100, blank=True, null=True)
     phoneNumber = models.CharField('Telefono',blank = True, null=True)
+    ruc = models.CharField('RUC',blank = True, null=True)
 
     position = models.CharField(
         'Tipo de usuario',
@@ -77,9 +80,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=CONDITIONS_CHOICES, 
         blank=True
     )
-
-    cv_file = models.FileField(upload_to='cv_pdfs/',null=True,blank=True)
-
     #
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -98,3 +98,52 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return str(self.full_name)
+
+
+class Documentations(TimeStampedModel):
+    
+    # CONDICIONES
+    CONTRATO = "0"
+    CV = "1"
+    INFORMEMENSUAL = "2"
+    MEMORANDUM = "3"
+    OFICIO = "4"
+    CARTA = "5"
+    OTRO = "6"
+
+    TYPE_CHOICES = [
+        (CONTRATO, 'Contrato'),
+        (CV, 'CV'),
+        (INFORMEMENSUAL, 'Informe Mensual'),
+        (MEMORANDUM, 'Memorandum'),
+        (OFICIO, 'Oficio'),
+        (CARTA, 'Carta'),
+        (OTRO, 'Otro'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    idUser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,related_name="user")
+    
+    typeDoc = models.CharField(
+        'Tipo de dpcumento',
+        max_length=1,
+        choices=TYPE_CHOICES,
+        #unique=True
+    )
+
+    sumary = models.CharField('Resumen',max_length=150,unique=True,null=True,blank=True)
+
+    doc_file = models.FileField(upload_to='doc_pdfs/',null=True,blank=True)
+
+    objects = DocsManager()
+
+    def delete(self, *args, **kwargs):
+        self.doc_file.delete()
+        super(Documentations, self).delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Documento de personal'
+        verbose_name_plural = 'Documentos de personal'
+    
+    def __str__(self):
+        return f"{str(self.idUser)} | {str(self.get_typeDoc_display())}"

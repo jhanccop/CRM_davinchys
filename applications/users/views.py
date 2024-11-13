@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.shortcuts import render
 from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
@@ -11,7 +13,8 @@ from django.views.generic import (
     CreateView,
     ListView,
     UpdateView,
-    DeleteView
+    DeleteView,
+    DetailView
 )
 
 from django.views.generic.edit import (
@@ -23,9 +26,16 @@ from .forms import (
     LoginForm,
     UserUpdateForm,
     UpdatePasswordForm,
+    DocumentationsForm,
 )
 #
-from .models import User
+from .models import (
+    User,
+    Documentations
+)
+
+from applications.actividades.models import DailyTasks
+from applications.movimientos.models import Documents
 # 
 
 class UserRegisterView(AdminPermisoMixin,FormView):
@@ -109,3 +119,54 @@ class UserListView(LoginRequiredMixin,ListView):
     def get_queryset(self):
         return User.objects.usuarios_sistema()
     
+class UserDetailView(ListView):
+    template_name = "users/user-detail.html"
+    context_object_name = 'worker'
+
+    def get_queryset(self,**kwargs):
+        pk = self.kwargs['pk']
+        intervalDate = self.request.GET.get("dateKword", '')
+        if intervalDate == "today" or intervalDate =="":
+            intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
+
+        payload = {}
+        US = User.objects.usuarios_sistema_id(id = int(pk))
+        payload["intervalDate"] = intervalDate
+        payload["person"] = US
+        payload["docs"] = Documentations.objects.docs_por_id(id = int(pk))
+        payload["docsFin"] = Documents.objects.DocumentosPorRUC(ruc = US.ruc)
+        payload["tasks"] = DailyTasks.objects.MiListarPorIntervaloHorasExtraAcc(user = US, interval = intervalDate)
+        return payload
+   
+class UserDocumentsCreateView(CreateView):
+    template_name = "users/user-documento-crear.html"
+    model = Documentations
+    form_class = DocumentationsForm
+
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        return reverse_lazy('users_app:user-detail', kwargs={'pk':pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super(UserDocumentsCreateView, self).get_context_data(**kwargs)
+        context['pk'] = self.kwargs['pk']
+        return context
+
+class UserDocumentsUpdateView(UpdateView):
+    template_name = "users/user-documento-editar.html"
+    model = Documentations
+    form_class = DocumentationsForm
+
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
+
+class UserDocumentsDeleteView(DeleteView):
+    template_name = "users/user-documento-eliminar.html"
+    model = Documentations
+
+    def get_success_url(self, *args, **kwargs):
+        return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
+
+
+

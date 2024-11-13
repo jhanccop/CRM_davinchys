@@ -226,6 +226,10 @@ class PaymentRequest(TimeStampedModel):
 
     objects = PaymentRequestManager()
 
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(PaymentRequest, self).delete(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Requerimiento de pago'
         verbose_name_plural = 'Requerimientos de pagos'
