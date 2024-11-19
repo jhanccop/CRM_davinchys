@@ -21,18 +21,46 @@
               {% if user.position == "1" or user.position == "5" or user.position == "6" or user.position == "7" %}
               <a class="btn bg-gradient-info" href="{% url 'pedidos_app:solicitudes-por-aprobar' %}">
                 <span>Solicitudes por autorizar</span>
-                <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{solicitudes.nRequest.count}}</span> </span>
+                <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{data.nRequest.count}}</span> </span>
               </a>
               {% endif %}
+
+              {% for doc in data.docs %}
+
+              <ul class="list-group">
+                <li class="list-group-item border-0 d-flex align-items-center px-0 mb-2">
+                  <div class="w-100">
+                    <div class="d-flex align-items-center mb-2">
+                      <a class="btn btn-facebook btn-simple mb-0 p-0" href="javascript:;">
+                        <i class="fas fa-bell fa-lg text-info"></i>
+                      </a>
+                      <span class="me-2 text-sm font-weight-normal text-uppercase ms-2 text-dark">{{doc.created|date:"Y-m-d"}} - {{doc.idDoc}} - {{doc.sumary}}</span>
+                      <span class="ms-auto text-sm font-weight-normal">
+                        {% if doc.doc_file %}
+                        <a href="/media/{{ doc.doc_file }}">
+                            <i class="far fa-file-pdf text-info text-lg"></i>
+                        </a>
+                        {% endif %}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+
+              {% endfor %}
+
             </div>
+
           </div>
+
+          
 
         </div>
       </div>
 
       <div class="row mt-4">
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-2 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'activities_app:mi-actividad-diaria-lista' %}">
@@ -42,14 +70,12 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Actividades diarias</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'activities_app:mi-actividad-diaria-lista' %}" class="btn bg-gradient-primary w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'activities_app:mi-actividad-diaria-lista' %}" class="btn bg-gradient-primary w-100 mb-0 toast-btn">Actividades</a>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 col-6 mb-4">
+        <div class="col-md-2 col-6 mb-4">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'pedidos_app:mi-lista-solicitudes' %}">
@@ -59,14 +85,12 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Requerimientos</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'pedidos_app:mi-lista-solicitudes' %}" class="btn bg-gradient-info w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'pedidos_app:mi-lista-solicitudes' %}" class="btn bg-gradient-info w-100 mb-0 toast-btn">Requerimientos</a>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-2 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'movimientos_app:lista-movimientos' %}">
@@ -76,14 +100,12 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Movimientos bancarios</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'movimientos_app:lista-movimientos' %}" class="btn bg-gradient-dark w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'movimientos_app:lista-movimientos' %}" class="btn bg-gradient-dark w-100 mb-0 toast-btn">Finanzas</a>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-2 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'users_app:user-lista' %}">
@@ -93,14 +115,12 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Recursos Humanos</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'users_app:user-lista' %}" class="btn bg-gradient-success w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'users_app:user-lista' %}" class="btn bg-gradient-success w-100 mb-0 toast-btn">R. humanos</a>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-2 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'movimientos_app:reporte-cuentas' %}">
@@ -110,14 +130,12 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Auditoria</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'movimientos_app:reporte-cuentas' %}" class="btn bg-gradient-warning w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'movimientos_app:reporte-cuentas' %}" class="btn bg-gradient-warning w-100 mb-0 toast-btn">Auditoria</a>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 col-6">
+        <div class="col-md-2 col-6">
           <div class="card">
             <div class="card-header mx-4 p-3 text-center">
               <a href="{% url 'activities_app:mi-buzon-de-sugerencias' %}">
@@ -127,9 +145,7 @@
               </a>
             </div>
             <div class="card-body pt-0 p-3 text-center">
-              <h6 class="text-center mb-0">Buzon de sugerencias</h6>
-              <hr class="horizontal dark my-3">
-              <a  href="{% url 'activities_app:mi-buzon-de-sugerencias' %}" class="btn bg-gradient-secondary w-100 mb-0 toast-btn">ENTRAR</a>
+              <a  href="{% url 'activities_app:mi-buzon-de-sugerencias' %}" class="btn bg-gradient-secondary w-100 mb-0 toast-btn">B. Sugerencias</a>
             </div>
           </div>
         </div>

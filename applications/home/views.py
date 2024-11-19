@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 
 # models
 from applications.movimientos.models import DocumentsUploaded
-from applications.cuentas.models import Account
+from applications.users.models import Documentations
 from applications.actividades.models import Trafos
 from applications.pedidos.models import PaymentRequest
 
@@ -33,13 +33,15 @@ class QuoteView(CreateView):
 
 class PanelHomeView(LoginRequiredMixin,ListView):
     template_name = "home/main.html"
-    context_object_name = 'solicitudes'
+    context_object_name = 'data'
 
     def get_queryset(self):
         userId = self.request.user
         userArea = userId.position
+        intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
         payload = {}
         payload["nRequest"] = PaymentRequest.objects.RequerimientosPendientes(area=userArea)
+        payload["docs"] = Documentations.objects.docs_publics(intervalo=intervalDate)
         return payload
 
         

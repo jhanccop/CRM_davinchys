@@ -116,8 +116,11 @@ class UserListView(LoginRequiredMixin,ListView):
     template_name = "users/lista_creative.html"
     context_object_name = 'usuarios'
 
-    def get_queryset(self):
-        return User.objects.usuarios_sistema()
+    def get_queryset(self,**kwargs):
+        payload = {}
+        payload["person"] = User.objects.usuarios_sistema()
+        payload["docs"] = Documentations.objects.docs_all()
+        return payload
     
 class UserDetailView(ListView):
     template_name = "users/user-detail.html"
@@ -152,14 +155,21 @@ class UserDocumentsCreateView(CreateView):
         context['pk'] = self.kwargs['pk']
         return context
 
+class UserDocumentsGenericCreateView(CreateView):
+    template_name = "users/documento-general-crear.html"
+    model = Documentations
+    form_class = DocumentationsForm
+    success_url = reverse_lazy('users_app:user-lista')
+
 class UserDocumentsUpdateView(UpdateView):
     template_name = "users/user-documento-editar.html"
     model = Documentations
     form_class = DocumentationsForm
+    success_url = reverse_lazy('users_app:user-lista')
 
-    def get_success_url(self, *args, **kwargs):
-        pk = self.kwargs["pk"]
-        return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
+    #def get_success_url(self, *args, **kwargs):
+    #    pk = self.kwargs["pk"]
+    #    return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
 
 class UserDocumentsDeleteView(DeleteView):
     template_name = "users/user-documento-eliminar.html"

@@ -52,6 +52,11 @@ urlpatterns = [
         name='user-documento-crear',
     ),
     path(
+        'users/documentos-general-crear/', 
+        views.UserDocumentsGenericCreateView.as_view(),
+        name='documento-general-crear',
+    ),
+    path(
         'users/documentos-editar/<pk>/', 
         views.UserDocumentsUpdateView.as_view(),
         name='user-documentos-editar',

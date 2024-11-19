@@ -17,6 +17,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     FINANZAS = '6'
     TESORERIA = '7'
     CONSULTOREXTERNO = '8'
+    RECURSOSHUMANOS = '9'
     
     #
     ROLES_CHOICES = [
@@ -29,6 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         (FINANZAS, 'Finanzas'),
         (TESORERIA, 'Tesoreria'),
         (CONSULTOREXTERNO, 'Consultor'),
+        (RECURSOSHUMANOS, 'Recursos humanos'),
     ]
 
     # GENEROS
@@ -59,6 +61,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField('Apellidos', max_length=100, blank=True, null=True)
     phoneNumber = models.CharField('Telefono',blank = True, null=True)
     ruc = models.CharField('RUC',blank = True, null=True)
+    dni = models.CharField('DNI',blank = True, null=True)
+    address = models.CharField('Direccion',blank = True, null=True)
 
     position = models.CharField(
         'Tipo de usuario',
@@ -80,6 +84,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=CONDITIONS_CHOICES, 
         blank=True
     )
+
+    # CONTACTO DE EMERGENCIA
+    EC_full_name = models.CharField('Contacto - nombres', max_length=100,blank = True, null=True)
+    EC_relationship = models.CharField('Contacto - parentesco', max_length=20,blank = True, null=True)
+    EC_phone = models.CharField('Contacto - telefono', max_length=20,blank = True, null=True)
+    EC_email = models.EmailField('Contacto - correo',blank = True, null=True)
+
     #
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -99,7 +110,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return str(self.full_name)
 
-
 class Documentations(TimeStampedModel):
     
     # CONDICIONES
@@ -110,6 +120,7 @@ class Documentations(TimeStampedModel):
     OFICIO = "4"
     CARTA = "5"
     OTRO = "6"
+    DNI = "7"
 
     TYPE_CHOICES = [
         (CONTRATO, 'Contrato'),
@@ -119,10 +130,11 @@ class Documentations(TimeStampedModel):
         (OFICIO, 'Oficio'),
         (CARTA, 'Carta'),
         (OTRO, 'Otro'),
+        (DNI, 'DNI'),
     ]
 
     id = models.AutoField(primary_key=True)
-    idUser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,related_name="user")
+    idUser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,related_name="person")
     
     typeDoc = models.CharField(
         'Tipo de dpcumento',
@@ -130,8 +142,9 @@ class Documentations(TimeStampedModel):
         choices=TYPE_CHOICES,
         #unique=True
     )
-
-    sumary = models.CharField('Resumen',max_length=150,unique=True,null=True,blank=True)
+    idDoc = models.CharField('Id doc',max_length=25,null=True,blank=True)
+    sumary = models.CharField('Resumen',max_length=150,null=True,blank=True)
+    is_multiple = models.BooleanField(default=False)
 
     doc_file = models.FileField(upload_to='doc_pdfs/',null=True,blank=True)
 

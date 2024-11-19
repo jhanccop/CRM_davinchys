@@ -127,16 +127,24 @@ class LoginForm(forms.Form):
 class UserUpdateForm(forms.ModelForm):
 
     class Meta:
-
         model = User
         fields = (
             'full_name',
             'last_name',
-
             'email',
+
+            'phoneNumber',
+            'ruc',
+            'dni',
+
             'position',
-            
-            'is_active',
+            'address',
+            'gender',
+
+            'EC_full_name',
+            'EC_relationship',
+            'EC_phone',
+            'EC_email',
         )
         widgets = {
             'full_name': forms.TextInput(
@@ -157,18 +165,69 @@ class UserUpdateForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+
+            'phoneNumber': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'ruc': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'dni': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
             'position': forms.Select(
                 attrs={
                     'placeholder': 'Permisos',
                     'class': 'form-control',
                 }
             ),
-            
-            'is_active': forms.CheckboxInput(
+            'address': forms.TextInput(
                 attrs={
-                    'type':'checkbox',
-                    'class': 'form-check-input',
-                },
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'gender': forms.Select(
+                attrs={
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
+
+            'EC_full_name': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
+            'EC_relationship': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
+            'EC_phone': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'EC_email': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
             ),
         }
 
@@ -201,6 +260,7 @@ class DocumentationsForm(forms.ModelForm):
             'typeDoc',
             'sumary',
             'doc_file',
+            'is_multiple'
         )
         widgets = {
             'idUser': forms.Select(
@@ -228,7 +288,13 @@ class DocumentationsForm(forms.ModelForm):
                     'class': 'form-control text-dark',
                     'id':"id_doc_file",
                 }
-            )
+            ),
+            'is_multiple': forms.CheckboxInput(
+                attrs={
+                    'type':'checkbox',
+                    'class': 'form-check-input',
+                },
+            ),
         }
 
     def clean_doc_file(self):

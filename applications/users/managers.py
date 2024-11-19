@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import timedelta,datetime
 #
 from django.contrib.auth.models import BaseUserManager
 
@@ -39,4 +40,14 @@ class DocsManager(models.Manager):
     def docs_por_id(self,id):
         return self.filter(
             idUser__id=id
+        )
+    def docs_all(self):
+        return self.all().order_by('-created')
+    def docs_publics(self,intervalo):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+        rangeDate = [intervals[0] - timedelta(days = 1),intervals[1] + timedelta(days = 1)]
+        return self.filter(
+            created__range = rangeDate,
+            is_multiple = True
         )

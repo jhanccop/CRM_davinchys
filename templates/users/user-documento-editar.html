@@ -39,6 +39,13 @@
                                     </div>
                                 </div>
 
+                                <div class="col-6 col-sm-4">
+                                    <div class="form-check form-switch ms-auto is-filled">
+                                        <label for="exampleFormControlInput1" class="form-label">Difusión general</label>
+                                        {{ form.is_multiple }}
+                                    </div>
+                                </div>
+
                             </div>
 
                             <div class="row mt-3">
@@ -68,7 +75,7 @@
                             </div>
 
                             <div class="button-row d-flex mt-4">
-                                <a class="btn bg-gradient-dark" href="{% url 'users_app:user-detail' object.idUser.pk %}">
+                                <a class="btn bg-gradient-dark" href="{% url 'users_app:user-lista'%}">
                                     REGRESAR </a>
 
                                 <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
