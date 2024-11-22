@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from applications.users.mixins import AdminPermisoMixin
+from applications.users.mixins import AdminPermisoMixin,RHPermisoMixin
 from django.http import HttpResponseRedirect
 
 from django.views.generic import (
@@ -38,7 +38,7 @@ from applications.actividades.models import DailyTasks
 from applications.movimientos.models import Documents
 # 
 
-class UserRegisterView(AdminPermisoMixin,FormView):
+class UserRegisterView(RHPermisoMixin,FormView):
     template_name = 'users/register_creative.html'
     form_class = UserRegisterForm
     success_url = reverse_lazy('users_app:user-lista')
@@ -80,13 +80,13 @@ class LogoutView(View):
             )
         )
 
-class UserUpdateView(AdminPermisoMixin,UpdateView):
+class UserUpdateView(RHPermisoMixin,UpdateView):
     template_name = "users/update_creative.html"
     model = User
     form_class = UserUpdateForm
     success_url = reverse_lazy('users_app:user-lista')
 
-class UserDeleteView(AdminPermisoMixin,DeleteView):
+class UserDeleteView(RHPermisoMixin,DeleteView):
     template_name = "users/delete_creative.html"
     model = User
     success_url = reverse_lazy('users_app:user-lista')
@@ -122,7 +122,7 @@ class UserListView(LoginRequiredMixin,ListView):
         payload["docs"] = Documentations.objects.docs_all()
         return payload
     
-class UserDetailView(ListView):
+class UserDetailView(RHPermisoMixin,ListView):
     template_name = "users/user-detail.html"
     context_object_name = 'worker'
 
@@ -141,7 +141,7 @@ class UserDetailView(ListView):
         payload["tasks"] = DailyTasks.objects.MiListarPorIntervaloHorasExtraAcc(user = US, interval = intervalDate)
         return payload
    
-class UserDocumentsCreateView(CreateView):
+class UserDocumentsCreateView(RHPermisoMixin,CreateView):
     template_name = "users/user-documento-crear.html"
     model = Documentations
     form_class = DocumentationsForm
@@ -155,13 +155,13 @@ class UserDocumentsCreateView(CreateView):
         context['pk'] = self.kwargs['pk']
         return context
 
-class UserDocumentsGenericCreateView(CreateView):
+class UserDocumentsGenericCreateView(RHPermisoMixin,CreateView):
     template_name = "users/documento-general-crear.html"
     model = Documentations
     form_class = DocumentationsForm
     success_url = reverse_lazy('users_app:user-lista')
 
-class UserDocumentsUpdateView(UpdateView):
+class UserDocumentsUpdateView(RHPermisoMixin,UpdateView):
     template_name = "users/user-documento-editar.html"
     model = Documentations
     form_class = DocumentationsForm
@@ -171,7 +171,7 @@ class UserDocumentsUpdateView(UpdateView):
     #    pk = self.kwargs["pk"]
     #    return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
 
-class UserDocumentsDeleteView(DeleteView):
+class UserDocumentsDeleteView(RHPermisoMixin,DeleteView):
     template_name = "users/user-documento-eliminar.html"
     model = Documentations
 

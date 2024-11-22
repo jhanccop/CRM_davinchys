@@ -1,4 +1,4 @@
-{% extends "users/base_users_creative.html" %}
+{% extends "users/base-usuarios.html" %}
 
 {% load  static %}
 {% block title %} Personas {% endblock title %}
@@ -8,115 +8,157 @@
 
 {% block panel-content %}
 
-<div class="row">
-  <div class="col-12">
-    <div class="multisteps-form mb-9">
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
 
-      <div class="row">
-        <div class="col-12 col-lg-8 mx-auto my-5">
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> CREAR NUEVO USUARIO </h6>
         </div>
       </div>
+      <div class="card-body pb-0">
+        <form class="" method="POST">{% csrf_token %}
 
-      <div class="row">
-        <div class="col-12 col-lg-8 m-auto">
-          <div class="card">
-            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
-                <div class="multisteps-form__progress text-center">
-                  <h5 class="text-white">Actualizar informacion de usuario</h5>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <form class="multisteps-form__form" style="height: 250px;" method="POST">{% csrf_token %}
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
 
-                <div class="multisteps-form__panel border-radius-xl bg-white js-active" data-animation="FadeIn">
-                  
-                  <div class="multisteps-form__content">
+            <div class="multisteps-form__content">
 
-                    <div class="row mt-3">
-                      <div class="col-12 col-sm-6">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Nombres</label>
-                          {{form.full_name}}
-                        </div>
-                      </div>
-                      <div class="col-12 col-sm-6 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Apellidos</label>
-                          {{form.last_name}}
-                        </div>
-                      </div>
-                    </div>
+              <h6>Información de colaborador</h6>
 
-                    <div class="row mt-3">
-                      <div class="col-12 col-sm-6">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Email Address</label>
-                          {{form.email}}
-                        </div>
-                        {% for error in form.email.errors %}
-                          <p class="cell" style="color: red;">
-                            {{ error|escape }}
-                          </p>
-                        {% endfor %}
-                      </div>
-                      <div class="col-12 col-sm-6 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Tipo de ususario</label>
-                          {{form.position}}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row mt-3">
-                      <div class="col-6 col-sm-6 d-flex">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Contraseña</label>
-                          {{form.password1}}
-                        </div>
-                        {% for error in form.password1.errors %}
-                        <p class="cell" style="color: red;">
-                          {{ error|escape }}
-                        </p>
-                      {% endfor %}
-                      </div>
-                      <div class="col-6 col-sm-6 d-flex">
-                        <div class="input-group input-group-outline focused is-focused">
-                          <label class="form-label">Repetir</label>
-                          {{form.password2}}
-                        </div>
-                        {% for error in form.password2.errors %}
-                        <p class="cell" style="color: red;">
-                          {{ error|escape }}
-                        </p>
-                      {% endfor %}
-                      </div>
-                    </div>
-
-                    <div class="row mt-3">
-                      <div class="col-6 col-sm-3 d-flex">
-                        <p class="font-weight-bold">Habilitado</p>
-                        <div class="form-check form-switch ms-auto is-filled">
-                          {{form.is_active}}&emsp; 
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="button-row d-flex mt-4">
-                      <a class="btn bg-gradient-dark" href="{% url 'users_app:user-lista' %}"> REGRESAR </a>
-                      
-                      <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
-                      title="Next">CREAR</button>
-                    </div>
-                    
+              <div class="row mt-3">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Nombres</label>
+                    {{form.full_name}}
                   </div>
                 </div>
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Apellidos</label>
+                    {{form.last_name}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Correo</label>
+                    {{form.email}}
+                  </div>
+                </div>
+              </div>
 
-              </form>
+              <div class="row mt-3">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Telefono</label>
+                    {{form.phoneNumber}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">RUC</label>
+                    {{form.ruc}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">DNI</label>
+                    {{form.dni}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Area</label>
+                    {{form.position}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Dirección</label>
+                    {{form.address}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Sexo</label>
+                    {{form.gender}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-6 col-sm-6 d-flex">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Contraseña</label>
+                    {{form.password1}}
+                  </div>
+                  {% for error in form.password1.errors %}
+                  <p class="cell" style="color: red;">
+                    {{ error|escape }}
+                  </p>
+                {% endfor %}
+                </div>
+                <div class="col-6 col-sm-6 d-flex">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Repetir</label>
+                    {{form.password2}}
+                  </div>
+                  {% for error in form.password2.errors %}
+                  <p class="cell" style="color: red;">
+                    {{ error|escape }}
+                  </p>
+                {% endfor %}
+                </div>
+              </div>
+
+              <br>
+
+              <h6>Contacto de emergencia</h6>
+
+              <div class="row mt-3">
+                <div class="col-6 col-sm-6">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Nombre</label>
+                    {{form.EC_full_name}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Parentesco</label>
+                    {{form.EC_relationship}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-6 col-sm-6">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Teléfono</label>
+                    {{form.EC_phone}}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label class="form-label">Correo</label>
+                    {{form.EC_email}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'users_app:user-lista' %}"> REGRESAR </a>
+
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                  title="Next">ACTUALIZAR</button>
+              </div>
+
             </div>
           </div>
-        </div>
+
+        </form>
       </div>
     </div>
   </div>

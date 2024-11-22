@@ -33,59 +33,105 @@ class UserRegisterForm(forms.ModelForm):
         fields = (
             'email',
             'full_name',
-            'position',
             'last_name',
+            'phoneNumber',
+            'ruc',
+            'dni',
+
+            'position',
+            'address',
+            'gender',
+
+            'EC_full_name',
+            'EC_relationship',
+            'EC_phone',
+            'EC_email',
         #    'gender',
         #    'date_birth',
         )
         widgets = {
-            'email': forms.EmailInput(
-                attrs={
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'value': '@mail',
-                    #'disabled': True
-                }
-            ),
             'full_name': forms.TextInput(
                 attrs={
-                    'placeholder': '',
+                    'placeholder': 'Nombres ...',
                     'class': 'input-group-field form-control',
                 }
             ),
             'last_name': forms.TextInput(
                 attrs={
+                    'placeholder': 'Apellidos ...',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'email': forms.EmailInput(
+                attrs={
+                    'placeholder': 'Correo Electronico ...',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
+            'phoneNumber': forms.TextInput(
+                attrs={
                     'placeholder': '',
                     'class': 'input-group-field form-control',
                 }
             ),
+            'ruc': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'dni': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
             'position': forms.Select(
+                attrs={
+                    'placeholder': 'Permisos',
+                    'class': 'form-control',
+                }
+            ),
+            'address': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'gender': forms.Select(
                 attrs={
                     'placeholder': '',
                     'class': 'form-control',
                 }
             ),
-            
-            'is_active': forms.CheckboxInput(
+
+            'EC_full_name': forms.TextInput(
                 attrs={
-                    'type':'checkbox',
-                    'class': 'form-check-input',
-                },
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
             ),
 
-            #'position': forms.Select(
-            #    attrs={
-            #        'placeholder': 'position ...',
-            #        'class': 'input-group-field',
-            #    }
-            #),
-            #'date_birth': forms.DateInput(
-            #    format='%Y-%m-%d',
-            #    attrs={
-            #        'type': 'date',
-            #        'class': 'input-group-field',
-            #    },
-            #),
+            'EC_relationship': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
+            'EC_phone': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'EC_email': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
         }
     
     def clean_password2(self):
@@ -260,7 +306,8 @@ class DocumentationsForm(forms.ModelForm):
             'typeDoc',
             'sumary',
             'doc_file',
-            'is_multiple'
+            'is_multiple',
+            'idDoc'
         )
         widgets = {
             'idUser': forms.Select(
@@ -281,6 +328,14 @@ class DocumentationsForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+
+            'idDoc': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
             'doc_file': forms.ClearableFileInput(
                 attrs = {
                     'type':"file",
