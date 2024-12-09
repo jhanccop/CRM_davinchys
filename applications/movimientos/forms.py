@@ -503,7 +503,9 @@ class BankMovementsForm(forms.ModelForm):
             'description',
             'amount',
             'opNumber',
-            'transactionType'
+            'transactionType',
+            'expenseSubCategory',
+            'incomeSubCategory'
         ]
         widgets = {
                 'idAccount': forms.Select(
@@ -540,9 +542,21 @@ class BankMovementsForm(forms.ModelForm):
                     attrs = {
                         'placeholder': '',
                         'class': 'input-group-field form-control',
+                        'onchange':"toggleDiv()"
                     }
                 ),
-                            
+                'expenseSubCategory': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                    }
+                ),
+                'incomeSubCategory': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                    }
+                ),
                 
             }
 

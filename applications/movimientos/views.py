@@ -30,6 +30,8 @@ from django.views.generic import (
 
 from .models import (
   DocumentsUploaded,
+  IncomeSubCategories,
+  ExpenseSubCategories,
   BankMovements,
   Documents,
 
@@ -100,6 +102,37 @@ class AccountDetail(AdminPermisoMixin,ListView):
     payload["conciliacion"] = BankMovements.objects.ConciliacionPorMontosPorCuentaPorIntervalo(intervalo = intervalDate, cuenta = int(pk))
     payload["bankMovements"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
     return payload
+  
+# ================================ FLUJO DE CAJA POR CUENTA ================================
+class CashBalanceDetail(AdminPermisoMixin,ListView):
+  template_name = "movimientos/reporte-flujo-de-caja.html"
+  context_object_name = 'cuenta'
+
+  def get_queryset(self,**kwargs):
+    pk = self.kwargs['pk']
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
+
+    idIncomes = IncomeSubCategories.objects.all()
+    idExpenses = ExpenseSubCategories.objects.all()
+    print("iocomes", idIncomes)
+
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    payload["months"] = BankMovements.objects.GetMonths(intervalo = intervalDate, cuenta = int(pk))
+    payload["initial"] = intervalDate
+    payload["keyI"] = idIncomes
+    payload["income"] = BankMovements.objects.GetIncome(intervalo = intervalDate, cuenta = int(pk), idi = idIncomes)
+    payload["totalIncome"] = intervalDate
+    payload["expense"] = intervalDate
+    payload["totalExpense"] = intervalDate
+    payload["EndBalance"] = intervalDate
+    payload["Profit"] = intervalDate
+
+    payload["cashFlow"] = BankMovements.objects.FlujoDeCajaPorCuenta(intervalo = intervalDate, cuenta = int(pk), idi =  idIncomes, ide =  idExpenses)
+    
+    return payload
 
 class AccountReport(AdminPermisoMixin,ListView):
   template_name = "movimientos/reporte-cuentas.html"
@@ -142,7 +175,6 @@ class ListCajaChica(ComprasContabilidadPermisoMixin,ListView):
     payload = {}
     payload["cuenta"] = Account.objects.CuentasByCajaChica(cajaChica = True)
 
-    
     return payload
   
 class CajaChicaReport(ComprasContabilidadPermisoMixin,ListView):

@@ -3,6 +3,8 @@ from django.contrib import admin
 from .models import (
   Transactions,
   InternalTransfers,
+  ExpenseSubCategories,
+  IncomeSubCategories,
   BankMovements,
   Documents,
   DocumentsUploaded,
@@ -36,6 +38,21 @@ class InternalTransfersAdmin(admin.ModelAdmin):
     )
     search_fields = ('idSourceAcount','SourceAmount')
 
+class ExpenseSubCategoriesAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'nameSubCategoy',
+        'category',
+    )
+    search_fields = ('category',)
+
+class IncomeSubCategoriesAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'nameSubCategoy',
+    )
+    search_fields = ('nameSubCategoy',)
+
 class BankMovementsAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -44,6 +61,8 @@ class BankMovementsAdmin(admin.ModelAdmin):
         'get_docs',
         'description',
         'transactionType',
+        'expenseSubCategory',
+        'incomeSubCategory',
         'amount',
         'balance',
         'amountReconcilied',
@@ -92,9 +111,10 @@ class DocumentsUploadedAdmin(admin.ModelAdmin):
     list_filter = ('idAccount',)
 
 admin.site.register(Documents, DocumentsAdmin)
+admin.site.register(ExpenseSubCategories, ExpenseSubCategoriesAdmin)
+admin.site.register(IncomeSubCategories, IncomeSubCategoriesAdmin)
 admin.site.register(BankMovements, BankMovementsAdmin)
 admin.site.register(DocumentsUploaded, DocumentsUploadedAdmin)
-
 
 admin.site.register(Transactions, TransactionsAdmin)
 admin.site.register(InternalTransfers, InternalTransfersAdmin)

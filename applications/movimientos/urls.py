@@ -22,6 +22,11 @@ urlpatterns = [
         name='reporte-cuentas-detalle',
     ),
     path(
+        'reporte-flujo-de-caja/<pk>/', 
+        views.CashBalanceDetail.as_view(),
+        name='reporte-flujo-de-caja',
+    ),
+    path(
         'reporte-cajaChica/', 
         views.ListCajaChica.as_view(),
         name='reporte-cajaChica',

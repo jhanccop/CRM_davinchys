@@ -63,7 +63,35 @@
                   </div>
                 </div>
 
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo de movimiento</label>
+                    {{ form.transactionType }}
+                  </div>
+                </div>
+
               </div>
+
+              <br>
+
+              <h6 class="font-weight-bolder">Categoria de movimiento</h6>
+
+              <div class="row">
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0" id="expenses" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Subcategoria gasto</label>
+                    {{ form.expenseSubCategory }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0" id="incomes" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Subcategoria ingreso</label>
+                    {{ form.incomeSubCategory }}
+                  </div>
+                </div>
+              </div>
+
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
 
@@ -90,5 +118,32 @@
             //mode: "range"
         }); // flatpickr
     }
+</script>
+
+<script>
+  function toggleDiv() {
+    let selected = document.getElementById("id_transactionType").value;
+
+    let expenses = document.getElementById("expenses");
+    let incomes = document.getElementById("incomes");
+
+    switch(Number(selected)){
+      case 0:
+        expenses.style.display = "inline-block";
+        incomes.style.display = "none";
+        break;
+      case 1:
+        expenses.style.display = "none";
+        incomes.style.display = "inline-block";
+        break;
+      default:
+        expenses.style.display = "none";
+        incomes.style.display = "none";
+        break;
+    }
+  }
+
+  toggleDiv();
+
 </script>
 {% endblock JSscripts %}

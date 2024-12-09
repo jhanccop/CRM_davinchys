@@ -67,13 +67,13 @@ class Documents(TimeStampedModel):
     OTROS = "5"
 
     TYPE_INVOICE_CHOISES = [
-            (FACTURA, "Factura"),
-            (RHE, "RHE"),
-            (DOCEXTERIOR, "Doc del exterior"),
-            (IMPUESTO, "Impuesto"),
-            (PLANILLA, "Planilla"),
-            (OTROS, "Otros"),
-        ]
+        (FACTURA, "Factura"),
+        (RHE, "RHE"),
+        (DOCEXTERIOR, "Doc del exterior"),
+        (IMPUESTO, "Impuesto"),
+        (PLANILLA, "Planilla"),
+        (OTROS, "Otros"),
+    ]
     
     # MONEDA
     SOLES = '0'
@@ -86,7 +86,7 @@ class Documents(TimeStampedModel):
         (EUROS, "€"),
     ]
 
-    # CATEGORIES EGRESOS
+    # CATEGORIAS EGRESOS
     AGAD = '0'
     MERCADERIA = '1'
     CAJA = '2'
@@ -103,7 +103,7 @@ class Documents(TimeStampedModel):
             (OTROS, "Otros"),
         ]
 
-    # CATEGORIES INGRESOS
+    # CATEGORIAS INGRESOS
     ABONOPEDIDO = '0'
     VENTA = '1'
     ALQUILER = '2'
@@ -122,7 +122,7 @@ class Documents(TimeStampedModel):
             (TRANFSINTERNA, "Transferencia interna"),
         ]
 
-    # SUB CATEGORIES PLANILLA
+    # SUB CATEGORIAS PLANILLA
     REMUNERACION = '0'
     AFP = '1'
     CTS = '2'
@@ -381,8 +381,69 @@ class Documents(TimeStampedModel):
     def __str__(self):
         return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] | {self.idClient}"
         
-class BankMovements(TimeStampedModel):
+class ExpenseSubCategories(TimeStampedModel):
+    # CATEGORIES INOVICE TYPES
+    PRODUCT = '0'
+    ASSETBUYS = '1'
+    FIXED = '2'
+    VARIABLE = '3'
+    IGVRECCOST = '4'
+    EXCHANGE = '5'
+    DEDUCTIONS = '6'
+    WITHDRAWS = '7'
+    OTHER = "8"
 
+    ESPENSE_CATEGORIES_CHOICES = [
+        (PRODUCT, "Producto"),
+        (ASSETBUYS, "Compras activos"),
+        (FIXED, "Fijos"),
+        (VARIABLE, "Variables"),
+        (IGVRECCOST, "Impuestos"),
+        (EXCHANGE, "Cambio de moneda"),
+        (DEDUCTIONS, "Deducciones"),
+        (WITHDRAWS, "Retiros"),
+        (OTHER, "Otros"),
+    ]
+
+    nameSubCategoy = models.CharField(
+        'Nombre de subcategoria',
+        max_length=20,
+        null=True,
+        blank=True,
+    )
+
+    category = models.CharField(
+        'Categoria',
+        max_length = 1, 
+        choices = ESPENSE_CATEGORIES_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Categoria de gasto'
+        verbose_name_plural = 'Categorias de gastos'
+
+    def __str__(self):
+        return f"{self.get_category_display()} | {self.nameSubCategoy}"
+
+class IncomeSubCategories(TimeStampedModel):
+    # CATEGORIES INOVICE TYPES
+    nameSubCategoy = models.CharField(
+        'Nombre de subcategoria',
+        max_length=30,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Categoria de ingreso'
+        verbose_name_plural = 'Categorias de ingresos'
+
+    def __str__(self):
+        return f"{self.nameSubCategoy}"
+
+class BankMovements(TimeStampedModel):
     # TYPE OF MOVEMENT
     EGRESO = "0"
     INGRESO = "1"
@@ -418,6 +479,8 @@ class BankMovements(TimeStampedModel):
         choices=TYPE_TRANSACTION_CHOISES, 
         blank=True
     )
+    expenseSubCategory = models.ForeignKey(ExpenseSubCategories, on_delete=models.CASCADE, null=True, blank=True)
+    incomeSubCategory = models.ForeignKey(IncomeSubCategories, on_delete=models.CASCADE, null=True, blank=True)
     conciliationType = models.CharField(
         'Tipo de conciliacion',
         max_length=1, 

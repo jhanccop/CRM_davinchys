@@ -26,7 +26,7 @@
             <li>Resumen: <span class="font-weight-bold">{{object.sumary}}</span></li>
           </ul>
           <div class="d-flex">
-            <a href="{% url 'users_app:user-detail' object.idUser.id %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
+            <a href="{% url 'users_app:user-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
                 class="fas fa-undo-alt"></i> Volver</a>
           
             <form class="cell medium-5 ms-auto" action="{% url 'users_app:user-documentos-eliminar' object.id %}" method="POST">

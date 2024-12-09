@@ -66,4 +66,9 @@ urlpatterns = [
         views.UserDocumentsDeleteView.as_view(),
         name='user-documentos-eliminar',
     ),
+    #path(
+    #    'users/documentos-eliminar-general/<pk>/', 
+    #    views.UserDocumentsGeneralDeleteView.as_view(),
+    #    name='user-documentos-eliminar-general',
+    #),
 ]

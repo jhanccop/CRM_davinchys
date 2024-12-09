@@ -117,16 +117,25 @@
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">
-                      {{t.date|date:'y-m' }}</a></h6>
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
+                      {{ t.date|date:'d-m-Y' }}</a></h6>
+                    <p class="text-sm font-weight-normal text-secondary mb-0">nOp: {{t.opNumber}}</p>
                   </div>
                 </td>
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm"> <a
                         href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} </a> </h6>
-                    <p class="text-sm font-weight-normal text-secondary mb-0"> <a
-                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">nOp: {{t.opNumber}} </a></p>
+                    <p class="text-sm font-weight-normal text-secondary mb-0">
+                      <a
+                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">
+                        {% if t.expenseSubCategory %}
+                        <span class="text-primary"> {{t.expenseSubCategory}}</span>
+                        {% endif %}
+                        {% if t.incomeSubCategory %}
+                        <span class="text-success"> {{t.incomeSubCategory}} </span>
+                        {% endif %}
+                      </a>
+                    </p>
                   </div>
                 </td>
                 <td class="text-sm">

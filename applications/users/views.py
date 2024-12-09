@@ -174,9 +174,10 @@ class UserDocumentsUpdateView(RHPermisoMixin,UpdateView):
 class UserDocumentsDeleteView(RHPermisoMixin,DeleteView):
     template_name = "users/user-documento-eliminar.html"
     model = Documentations
+    success_url = reverse_lazy('users_app:user-lista')
 
-    def get_success_url(self, *args, **kwargs):
-        return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
+    #def get_success_url(self, *args, **kwargs):
+    #    return reverse_lazy('users_app:user-detail', kwargs={'pk':self.object.idUser.id})
 
 
 
