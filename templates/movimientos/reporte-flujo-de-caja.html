@@ -56,10 +56,13 @@
                   <p class="text-sm font-weight-normal mb-0">1. Monto inicial</p>
                 </td>
                 <td>
-                  <p class="text-sm font-weight-normal mb-0">345</p>
+                  <p class="text-sm font-weight-normal mb-0">-</p>
                 </td>
                 <td>
-                  <p class="text-sm font-weight-normal mb-0">00:17:07</p>
+                  <p class="text-sm font-weight-normal mb-0">-</p>
+                </td>
+                <td>
+                  <p class="text-sm font-weight-normal mb-0">-</p>
                 </td>
               </tr>
 
@@ -68,10 +71,13 @@
                   <p class="text-sm font-weight-normal mb-0">2. Ingresos</p>
                 </td>
                 <td>
-                  <p class="text-sm font-weight-normal mb-0">520</p>
+                  <p class="text-sm font-weight-normal mb-0"></p>
                 </td>
                 <td>
-                  <p class="text-sm font-weight-normal mb-0">00:23:13</p>
+                  <p class="text-sm font-weight-normal mb-0"></p>
+                </td>
+                <td>
+                  <p class="text-sm font-weight-normal mb-0"></p>
                 </td>
               </tr>
 
@@ -93,6 +99,36 @@
                 {% endfor %}
               </tr>
 
+              <tr>
+                <td>
+                  <p class="text-sm font-weight-normal mb-0">3. Egresos</p>
+                </td>
+                <td>
+                  <p class="text-sm font-weight-normal mb-0"></p>
+                </td>
+                <td>
+                  <p class="text-sm font-weight-normal mb-0"></p>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  {% for k in cuenta.keyE %}
+                  <p class="text-sm font-weight-normal mb-0">{{k.nameSubCategoy}}</p>
+                  {% endfor %}
+                </td>
+
+                {% for key, value in cuenta.expense.items %}
+                <td>
+                  {% for key,value in value.items %}
+                  <p class="text-sm font-weight-normal mb-0">
+                    {{value}}
+                  </p>
+                  {% endfor %}
+                </td>
+                {% endfor %}
+              </tr>
+
             </tbody>
           </table>
         </div>
@@ -102,101 +138,18 @@
 
 </div>
 
-<div id="table-container"></div>
-
 
 {% endblock panel-content %}
 {% block JSscripts %}
 
 <script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
-    if (document.querySelector('.datetimepicker')) {
-        flatpickr('.datetimepicker', {
-            allowInput: true,
-            mode: "range"
-        }); // flatpickr
-    }
-</script>
-
-<script>
-
-  const data = [
-    {
-      "name": "Juan",
-      "age": 25,
-      "contact": {"phone": "123-456-7890" }
-    },
-    {
-      "name": "Maria",
-      "age": 30,
-      "contact": { "email": "maria@example.com", "phone": "987-654-3210" }
-    },
-    {
-      "name": "Carlos",
-      "age": 35,
-      "contact": { "email": "carlos@example.com", "phone": "555-123-4567" }
-    }
-  ];
-  const container = document.getElementById('table-container');
-
-  // Crear la tabla
-  function createTable(data) {
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
-
-    // Crear encabezados de tabla
-    const headers = ['Name', 'Age', 'Email', 'Phone'];
-    
-    //const headers = [];
-    //"{% for i in cuenta.months %}"
-    //headers.push("{{i.month|date:'m-Y'}}");
-    //"{% endfor %}"
-
-    console.log(headers);
-
-    const headerRow = document.createElement('tr');
-    headers.forEach(headerText => {
-      const th = document.createElement('th');
-      th.textContent = headerText;
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-
-    // Crear filas de datos
-    data.forEach(item => {
-      const row = document.createElement('tr');
-
-      const nameCell = document.createElement('td');
-      nameCell.textContent = item.name;
-      row.appendChild(nameCell);
-
-      const ageCell = document.createElement('td');
-      ageCell.textContent = item.age;
-      row.appendChild(ageCell);
-
-      const emailCell = document.createElement('td');
-      emailCell.textContent = item.contact.email;
-      row.appendChild(emailCell);
-
-      const phoneCell = document.createElement('td');
-      phoneCell.textContent = item.contact.phone;
-      row.appendChild(phoneCell);
-
-      tbody.appendChild(row);
-    });
-
-    // Añadir thead y tbody a la tabla
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    return table;
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', {
+      allowInput: true,
+      mode: "range"
+    }); // flatpickr
   }
-
-  // Añadir la tabla al contenedor
-  container.appendChild(createTable(data));
-
 </script>
-
 
 {% endblock JSscripts %}

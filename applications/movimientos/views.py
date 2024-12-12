@@ -116,16 +116,17 @@ class CashBalanceDetail(AdminPermisoMixin,ListView):
 
     idIncomes = IncomeSubCategories.objects.all()
     idExpenses = ExpenseSubCategories.objects.all()
-    print("iocomes", idIncomes)
+    #print("iocomes", idIncomes)
 
     payload = {}
     payload["intervalDate"] = intervalDate
     payload["months"] = BankMovements.objects.GetMonths(intervalo = intervalDate, cuenta = int(pk))
     payload["initial"] = intervalDate
     payload["keyI"] = idIncomes
-    payload["income"] = BankMovements.objects.GetIncome(intervalo = intervalDate, cuenta = int(pk), idi = idIncomes)
+    payload["income"] = BankMovements.objects.GetIncomes(intervalo = intervalDate, cuenta = int(pk), idi = idIncomes)
     payload["totalIncome"] = intervalDate
-    payload["expense"] = intervalDate
+    payload["keyE"] = idExpenses
+    payload["expense"] = BankMovements.objects.GetExpenses(intervalo = intervalDate, cuenta = int(pk), ide = idExpenses)
     payload["totalExpense"] = intervalDate
     payload["EndBalance"] = intervalDate
     payload["Profit"] = intervalDate

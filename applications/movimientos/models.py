@@ -481,6 +481,7 @@ class BankMovements(TimeStampedModel):
     )
     expenseSubCategory = models.ForeignKey(ExpenseSubCategories, on_delete=models.CASCADE, null=True, blank=True)
     incomeSubCategory = models.ForeignKey(IncomeSubCategories, on_delete=models.CASCADE, null=True, blank=True)
+    originDestination = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
     conciliationType = models.CharField(
         'Tipo de conciliacion',
         max_length=1, 

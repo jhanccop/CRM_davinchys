@@ -51,7 +51,7 @@
     <div class="card">
       <div class="card-header pb-0 ">
         <div class="row">
-          <div class="col-lg-6 col-md-3">
+          <div class="col-lg-5 col-md-3">
             <h6 class="mb-0">{{movimientos.selectedAccount.accountName}} </h6>
             <p class="text-sm mb-0 text-info font-weight-bold">
               <span class="text-md font-weight-bold">{{movimientos.selectedAccount.get_currency_display}}
@@ -59,7 +59,7 @@
                 class="text-xs text-secondary">{{movimientos.selectedAccount.modified|date:'Y-m-d H:i'}}</small>
             </p>
           </div>
-          <div class="col-lg-6 col-md-9">
+          <div class="col-lg-7 col-md-9">
             <form method="GET" class="">{% csrf_token %}
               <div class="d-flex align-items-center">
                 <div class="input-group input-group-outline is-valid">
@@ -118,13 +118,13 @@
                   <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm"> <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">
                       {{ t.date|date:'d-m-Y' }}</a></h6>
-                    <p class="text-sm font-weight-normal text-secondary mb-0">nOp: {{t.opNumber}}</p>
+                    <p class="text-sm font-weight-normal text-secondary mb-0">nOp {{t.opNumber}}</p>
                   </div>
                 </td>
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm"> <a
-                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} </a> </h6>
+                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} <span class="text-xs text-secondary">[{{t.originDestination.tradeName}}]</span></a> </h6>
                     <p class="text-sm font-weight-normal text-secondary mb-0">
                       <a
                         href="{% url 'movimientos_app:movimientos-detalle' t.id %}">
@@ -267,6 +267,5 @@
   });
 
 </script>
-
 
 {% endblock JSscripts %}

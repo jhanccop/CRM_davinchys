@@ -48,6 +48,35 @@ class Cliente(models.Model):
             (NACIONAL, "nacional"),
             (EXTRANGERO, "extrangero"),
         ]
+    
+    # Bancos
+    BCP = '0'
+    BBVA = '1'
+    INTERBANK = '2'
+    SCOTIABANK = '3'
+    COMERCIO = '4'
+    BANBIF = '5'
+    PICHINCHA = '6'
+    GNB = '7'
+    MIBANCO = '8'
+    FALABELLA = '9'
+    CITIBANK = '10'
+    RIPLEY = '11'
+    
+    BANK_CHOICES = [
+            (BCP, "BCP"),
+            (BBVA, "BBVA"),
+            (INTERBANK, "INTERBANK"),
+            (SCOTIABANK, "SCOTIABANK"),
+            (COMERCIO, "COMERCIO"),
+            (BANBIF, "BANBIF"),
+            (PICHINCHA, "PICHINCHA"),
+            (GNB, "GNB"),
+            (MIBANCO, "MIBANCO"),
+            (FALABELLA, "FALABELLA"),
+            (CITIBANK, "CITIBANK"),
+            (RIPLEY, "RIPLEY"),
+        ]
 
     tradeName = models.CharField('Razon Social',blank = True, null=True)
     ruc = models.CharField('RUC - DNI',blank = True, null=True)
@@ -57,6 +86,14 @@ class Cliente(models.Model):
     contact = models.OneToOneField(Contacto, on_delete=models.CASCADE, null=True, blank=True, unique=True)
     webPage = models.CharField('Página Web',blank = True, null=True)
     email = models.EmailField(unique = True,blank = True, null=True)
+    bankName = models.CharField(
+        'Banco',
+        max_length=2, 
+        choices=BANK_CHOICES,
+        null=True,
+        blank=True
+    )
+    account = models.CharField('Nro Cuenta',blank = True, null=True)
 
     typeClient = models.CharField(
         'Categoria',
@@ -83,4 +120,4 @@ class Cliente(models.Model):
         return self.tradeName
     
     def __str__(self):
-        return str(self.ruc) + " - " + str(self.tradeName)
+        return f"[{self.ruc}] {self.tradeName} {self.account}"

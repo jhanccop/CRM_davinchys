@@ -90,9 +90,20 @@
                   </div>
                 </div>
               </div>
+
+              <br>
+              <h6 class="font-weight-bolder">Origen o destino</h6>
+
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline">
+                    {{ form.originDestination }}
+                  </div>
+                </div>
+              </div>
+
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:lista-movimientos' %}"> REGRESAR </a>
-
                 <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">AGREGAR MOVIMIENTO</button>
               </div>
 
@@ -139,6 +150,14 @@
         incomes.style.display = "none";
         break;
     }
+  }
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+  if (document.getElementById('id_originDestination')) {
+    var element = document.getElementById('id_originDestination');
+    const example = new Choices(element, {});
   }
 </script>
 

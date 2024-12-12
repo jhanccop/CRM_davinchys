@@ -24,7 +24,7 @@
                         data-animation="FadeIn">
                         
                         <div class="multisteps-form__content">
-                          <h5 class="font-weight-bolder">Informacion de cliente</h5>
+                          <h6 class="font-weight-bolder">Informacion de cliente</h6>
                             <div class="row">
                                 <div class="col-12 col-sm-4">
                                     <div class="input-group input-group-outline focused is-focused">
@@ -47,7 +47,7 @@
                             </div>
 
                             <br>
-                            <h5 class="font-weight-bolder">Contacto</h5>
+                            <h6 class="font-weight-bolder">Contacto</h6>
                             <div class="row">
                               <div class="col-12 col-sm-4">
                                 <div class="input-group input-group-outline focused is-focused">
@@ -86,6 +86,23 @@
                                 <div class="input-group input-group-outline focused is-focused">
                                   <label for="exampleFormControlInput1" class="form-label">Ubicación</label>
                                   {{ form.locationClient }}
+                                </div>
+                              </div>
+                            </div>
+
+                            <br>
+                            <h6 class="font-weight-bolder">Datos bancarios</h6>
+                            <div class="row">
+                              <div class="col-12 col-sm-4">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Banco</label>
+                                  {{ form.bankName }}
+                                </div>
+                              </div>
+                              <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                  <label for="exampleFormControlInput1" class="form-label">Cuenta</label>
+                                  {{ form.account }}
                                 </div>
                               </div>
                             </div>

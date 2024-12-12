@@ -505,7 +505,8 @@ class BankMovementsForm(forms.ModelForm):
             'opNumber',
             'transactionType',
             'expenseSubCategory',
-            'incomeSubCategory'
+            'incomeSubCategory',
+            'originDestination'
         ]
         widgets = {
                 'idAccount': forms.Select(
@@ -552,6 +553,12 @@ class BankMovementsForm(forms.ModelForm):
                     }
                 ),
                 'incomeSubCategory': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                    }
+                ),
+                'originDestination': forms.Select(
                     attrs = {
                         'placeholder': '',
                         'class': 'input-group-field form-control',

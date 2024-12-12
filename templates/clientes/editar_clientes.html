@@ -86,6 +86,23 @@
                 </div>
               </div>
 
+              <br>
+              <h6 class="font-weight-bolder">Datos bancarios</h6>
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Banco</label>
+                    {{ form.bankName }}
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Cuenta</label>
+                    {{ form.account }}
+                  </div>
+                </div>
+              </div>
+
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'clients_app:cliente-lista' %}"> REGRESAR </a>
                 <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ACTUALIZAR

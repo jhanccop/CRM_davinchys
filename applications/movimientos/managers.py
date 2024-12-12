@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from django.db.models import Sum, Max, DateField,F, Q, Count
+from django.db.models import Sum, Max, DateField,F, Q, Count, Window
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
@@ -201,7 +201,43 @@ class BankMovementsManager(models.Manager):
             ).distinct('month').order_by('month')
         return result
 
-    def GetIncome(self,intervalo,cuenta, idi):
+    def GetExpenses(self,intervalo,cuenta, ide):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+            
+        results = self.filter(
+                date__range = rangeDate,
+                idAccount__id = cuenta
+            ).annotate(
+                month =TruncMonth('created'),
+                name = F("expenseSubCategory__nameSubCategoy")
+            ).values(
+                'month','expenseSubCategory__nameSubCategoy'
+            ).annotate(
+                expense = Sum('amount',filter=Q(expenseSubCategory__in = ide)),
+            ).order_by('month','expenseSubCategory')
+        resultado = defaultdict(dict)
+
+        for result in results:
+            #if result['income'] == None:
+            #    continue
+            month = result['month'].strftime('%Y-%m')
+            name = result['expenseSubCategory__nameSubCategoy']
+            expense = result['expense']
+            resultado[month][name] = expense
+
+        print(resultado)
+        
+        return dict(resultado)
+
+    def GetIncomes(self,intervalo,cuenta, idi):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -223,8 +259,8 @@ class BankMovementsManager(models.Manager):
             ).annotate(
                 income = Sum('amount',filter=Q(incomeSubCategory__in = idi)),
             ).order_by('month','incomeSubCategory')
-        
         resultado = defaultdict(dict)
+
         for result in results:
             #if result['income'] == None:
             #    continue
@@ -236,8 +272,6 @@ class BankMovementsManager(models.Manager):
         print(resultado)
         
         return dict(resultado)
-        
-        return result
 
 class DocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo):

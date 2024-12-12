@@ -107,7 +107,7 @@ class Account(TimeStampedModel):
         verbose_name_plural = 'Cuentas bancarias'
 
     def __str__(self):
-        return str(self.nickName)
+        return f"[{self.nickName}] {self.accountNumber}"
     
 class ManualAccount(TimeStampedModel):
     """
