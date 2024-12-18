@@ -1,6 +1,6 @@
 from datetime import date, datetime,timedelta
 
-from django.db.models import OuterRef, Subquery, Count
+from django.db.models import OuterRef, Subquery, Count, Sum, Q
 
 from django.db import models
 
@@ -148,7 +148,116 @@ class ServiceTrackingManager(models.Manager):
         payload = self.filter(pk=Subquery(sq.values('pk')[:1])).order_by('-idOrder')
 
         return payload
+
+class ListRequestManager(models.Manager):
+    def ListaPorId(self,pk):
+        result = self.get(
+            id = pk
+        )
+
+        return result
+    def ListasPorIntervalo(self,user,interval):
+        Intervals = interval.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        result = self.filter(
+            created__range = rangeDate,
+            idPetitioner = user
+        ).order_by("-created")
+
+        return result
     
+    def ListaPorAreaUsuarioTiempo(self,area,user_selected,TimeSelect):
+        date = datetime.now()
+        year = date.strftime('%Y')
+        month = date.strftime('%m')
+        
+        fil = self.all()
+        # FLITRO DE TIEMPO
+        if TimeSelect == "1":
+            fil = self.filter(
+                created__year = year,
+                created__month = month
+                )
+        elif TimeSelect == "2":
+            fil = self.filter(
+                created__year = year,
+                )
+            
+        # FLITRO DE USUARIO
+        if user_selected == "all":
+            result = fil.all().order_by("-created")
+        else:
+            result = fil.filter(
+                    idPetitioner = user_selected
+                ).order_by("-tag1","-created")
+            
+        # FLITRO POR AREA Y TAG
+        payload = result
+        if area == "5":
+            payload = payload.filter(Q(tag1 = "0") | Q(tag1 = "1"))
+        elif area == "1":
+            payload = payload.filter(Q(tag2 = "0") | Q(tag2 = "1"))
+        elif area == "6":
+            payload = payload.filter(Q(tag3 = "0") | Q(tag3 = "1"))
+        elif area == "0":
+            payload = payload.filter(Q(tag4 = "0") | Q(tag4 = "1"))
+
+        return payload
+    
+    def ListasPendientes(self,area):
+        if area == "5": # adquisiciones
+            result = self.filter(
+            tag1 = "0" # pedidos solicitados
+            ).aggregate(count = Count("tag1"))
+            return result
+        elif area == "1": # contabilidad
+            result = self.filter(
+            tag2="0" # pedidos solicitados
+            ).aggregate(count = Count("tag2"))
+            return result
+        elif area == "6": # finanzas
+            result = self.filter(
+            tag3="0" # pedidos solicitados
+            ).aggregate(count = Count("tag3"))
+            return result
+        elif area == "0": # gerencia
+            result = self.filter(
+            tag4="0" # pedidos solicitados
+            ).aggregate(count = Count("tag4"))
+            return result
+        return result
+    
+    def RequerimientosPendientes(self,area):
+        if area == "5": # adquisiciones
+            result = self.filter(
+            tag1 = "0" # pedidos solicitados
+            ).aggregate(count = Count("tag1"))
+            return result
+        elif area == "1": # contabilidad
+            result = self.filter(
+            tag2="0" # pedidos solicitados
+            ).aggregate(count = Count("tag2"))
+            return result
+        elif area == "6": # finanzas
+            result = self.filter(
+            tag3="0" # pedidos solicitados
+            ).aggregate(count = Count("tag3"))
+            return result
+        elif area == "7": # tesoreria
+            result = self.filter(
+            tag4="0" # pedidos solicitados
+            ).aggregate(count = Count("tag4"))
+            return result
+
 class PaymentRequestManager(models.Manager):
     def MiListarPorIntervalo(self,user,interval):
         Intervals = interval.split(' to ')
@@ -166,6 +275,65 @@ class PaymentRequestManager(models.Manager):
             created__range = rangeDate,
             idPetitioner = user
         ).order_by("-created")
+
+        return result
+    
+    def ListaPorAreaUsuarioTiempo(self,area,user_selected,TimeSelect):
+        date = datetime.now()
+        year = date.strftime('%Y')
+        month = date.strftime('%m')
+
+        fil = self.all()
+        
+        if TimeSelect == "1":
+            fil = self.filter(
+                created__year = year,
+                created__month = month
+                )
+        elif TimeSelect == "2":
+            fil = self.filter(
+                created__year = year,
+                )
+                    
+        if user_selected == "all":
+            if area == "5": # adquisiciones
+                result = fil.filter(
+                    tag1 = "0",
+                ).order_by("-created")
+            elif area == "1": # contabilidad
+                result = fil.filter(
+                    tag2 = "0",
+                ).order_by("-created")
+            elif area == "6": # finanzas
+                result = fil.filter(
+                    tag3 = "0",
+                ).order_by("-created")
+            elif area == "7": # tesoreria
+                result = fil.filter(
+                    tag4 = "0",
+                ).order_by("-created")
+
+        else:
+            if area == "5": # adquisiciones
+                result = fil.filter(
+                    idPetitioner = user_selected,
+                    tag1 = "0",
+                ).order_by("-created")
+            elif area == "1": # contabilidad
+                result = fil.filter(
+                    idPetitioner = user_selected,
+                    tag2 = "0",
+                ).order_by("-created")
+            elif area == "6": # finanzas
+                result = fil.filter(
+                    idPetitioner = user_selected,
+                    tag3 = "0",
+                ).order_by("-created")
+            elif area == "7": # tesoreria
+                result = fil.filter(
+                    idPetitioner = user_selected,
+                    tag4 = "0",
+                ).order_by("-created")
 
         return result
 
@@ -310,4 +478,25 @@ class PaymentRequestManager(models.Manager):
             tag4="0" # pedidos solicitados
             ).aggregate(count = Count("tag4"))
             return result
+        
+    def RequerimientosPorNombreLista(self,pk, area = None):
+        if area == "1":
+            result = self.filter(
+                idList__id=pk,
+                tag2 = 0
+            ).order_by("-created")
+        else:
+            result = self.filter(
+                idList__id=pk
+            ).order_by("-created")
+        
+        return result
+    
+    def RequerimientosContabilidadPorId(self,pk):
+        result = self.filter(
+            idList__id = pk,
+            tag2 = "0",
+        ).aggregate(n = Count("id"))
+        
+        return result
 

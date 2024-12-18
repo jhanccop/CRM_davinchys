@@ -4,7 +4,7 @@
 
 {% block title %} Ordenes {% endblock title %}
 {% block main %} Ordenes {% endblock main %}
-{% block appName %} Requerimientos {% endblock appName %}
+{% block appName %} Requerimiento {% endblock appName %}
 {% block Type %} Nuevo {% endblock Type %}
 
 {% block panel-content %}
@@ -15,7 +15,7 @@
     <div class="card">
       <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
         <div class="bg-gradient-info shadow-dark border-radius-lg pt-3 pb-2">
-          <h6 class="text-center text-white"> NUEVO REQUERIMIENTO </h6>
+          <h6 class="text-center text-white"> NUEVO ITEM </h6>
         </div>
       </div>
       <div class="card-body pb-0">
@@ -24,7 +24,14 @@
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
 
             <div class="multisteps-form__content">
-              <h6 class="font-weight-bolder">Informacion de solicitud</h6>
+              <div class="row" hidden>
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline">
+                    <label for="exampleFormControlInput1" class="form-label">idList</label>
+                    {{ form.idList }}
+                  </div>
+                </div>
+              </div>
 
               <div class="row" hidden>
                 <div class="col-12 col-sm-12">
@@ -36,12 +43,20 @@
               </div>
 
               <div class="row">
-                <div class="col-12 col-sm-12">
+                <div class="col-6 col-sm-7">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Descripción</label>
                     {{ form.requirementName }}
                   </div>
                 </div>
+
+                <div class="col-6 col-sm-5">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Categoria</label>
+                    {{ form.paymentType }}
+                  </div>
+                </div>
+
               </div>
 
               <br>
@@ -55,7 +70,7 @@
                 </div>
                 <div class="col-6 col-sm-3 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
+                    <label for="exampleFormControlInput1" class="form-label">Monto total</label>
                     {{ form.amountRequested }}
                   </div>
                   {% for error in form.amountRequested.errors %}
@@ -84,7 +99,7 @@
               <br>
 
               <div class="row">
-                <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                <div class="col-12 col-sm-12 mt-3 mt-sm-0">
                   <p class="mb-0">Proveedor</p>
                   <div class="input-group input-group-outline">
                     {{ form.idProvider }}
@@ -110,42 +125,11 @@
                 </div>
               </div>
 
-              <br>
-
-              <h6 class="font-weight-bolder">Información adicional</h6>
-
-              <div class="row">
-                <div class="col-6 col-sm-3">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">O. Transformador</label>
-                    {{ form.idTrafoOrder }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Categoria</label>
-                    {{ form.paymentType }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Comisión</label>
-                    {{ form.idCommissions }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Proyecto</label>
-                    {{ form.idProjects }}
-                  </div>
-                </div>
-              </div>
-
               <div class="button-row d-flex mt-4">
-                <a class="btn bg-gradient-dark" href="{% url 'pedidos_app:mi-lista-solicitudes' %}"> REGRESAR </a>
+                <a class="btn bg-gradient-dark" href="{% url 'pedidos_app:detalle-lista' lista %}"> REGRESAR </a>
 
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">CREAR
-                  REQUERIMIENTO</button>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="AGREGAR">AGREGAR
+                  ITEM</button>
               </div>
             </div>
           </div>
@@ -155,7 +139,6 @@
     </div>
   </div>
 </div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}
@@ -172,6 +155,7 @@
 
 <script>
   document.getElementById("id_idPetitioner").value = "{{user.id}}";
+  document.getElementById("id_idList").value = "{{lista}}";
 </script>
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>

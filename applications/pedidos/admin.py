@@ -3,8 +3,22 @@ from django.contrib import admin
 from .models import (
 
   RequestTracking,
-  PaymentRequest
+  PaymentRequest,
+  RequestList
 )
+
+class RequestListAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'created',
+        'listName',
+        'idPetitioner',
+        'tag1',
+        'tag2',
+        'tag3',
+        'tag4',
+    )
+    search_fields = ('idPetitioner',)
 
 class PaymentRequestAdmin(admin.ModelAdmin):
     list_display = (
@@ -30,6 +44,6 @@ class RequestTrackingAdmin(admin.ModelAdmin):
     )
     search_fields = ('orderState',)
 
-
+admin.site.register(RequestList, RequestListAdmin)
 admin.site.register(PaymentRequest, PaymentRequestAdmin)
 admin.site.register(RequestTracking, RequestTrackingAdmin)

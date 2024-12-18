@@ -2,15 +2,41 @@
 from django import forms
 # local
 from .models import (
-
-  PaymentRequest
+    RequestList,
+    PaymentRequest
 )
+
+from applications.clientes.models import Cliente
+
+class ListRequestForm(forms.ModelForm):
+    class Meta:
+        model = RequestList
+        fields = (
+            'listName',
+            'idPetitioner',
+        )
+        
+        widgets = {
+            'listName': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idPetitioner': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+        }
 
 class PaymentRequestForm(forms.ModelForm):
     class Meta:
         model = PaymentRequest
         fields = (
             'idPetitioner',
+            'idList',
 
             'requirementName',
 
@@ -30,6 +56,12 @@ class PaymentRequestForm(forms.ModelForm):
         
         widgets = {
             'idPetitioner': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idList': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

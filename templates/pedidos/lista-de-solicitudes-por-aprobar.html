@@ -1,0 +1,161 @@
+{% extends "pedidos/base-mis-solicitudes.html" %}
+
+{% load static %}
+{% block title %} Ordenes {% endblock title %}
+{% block main %} Ordenes {% endblock main %}
+{% block appName %} Requerimientos {% endblock appName %}
+{% block Type %} Por aprobar {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-header pb-0 bg-gradient-light">
+                <div class="row">
+                    <div class="col-lg-6 col-md-3">
+                        <h5 class="mb-0">Lista de requerimientos por aprobar</h5>
+                        <p class="text-sm mb-0 text-info font-weight-bold">
+                            {{user.full_name}} {{user.last_name}}
+                        </p>
+                    </div>
+                    <div class="col-lg-6 col-md-9">
+                        <form method="GET" class="">{% csrf_token %}
+                            <div class="d-flex align-items-center">
+
+                                <div class="input-group input-group-outline my-3 focused is-focused">
+                                    <label class="form-label">Persona</label>
+                                    <select class="form-control" name="UserKword" id="UserKword">
+                                        <option value="" selected>todos</option>
+                                        {% for i in data.users %}
+                                        {% if i.id == data.user_selected.id %}
+                                        <option value="{{i.id}}" selected>{{i.full_name}}</option>
+                                        {% else %}
+                                        <option value="{{i.id}}">{{i.full_name}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                &emsp;
+
+                                <div class="input-group input-group-outline my-3 focused is-focused">
+                                    <label class="form-label">Tiempo</label>
+                                    <select class="form-control" name="timeKword" id="timeKword">
+                                        <option value="0">todo</option>
+                                        <option value="1">último mes</option>
+                                        <option value="2">último año</option>
+                                    </select>
+                                </div>
+                                &emsp;
+                                <div class="pt-3 pb-0">
+                                    <button class="btn bg-gradient-info" type="submit"> Buscar </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="datatable-orders">
+                        <thead>
+                            <tr>
+                                <th
+                                    class="text-uppercase text-center text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                                    Fecha</th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                                    Solicitante</th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Id lista
+                                </th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Estado
+                                </th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lista in data.listas %}
+                            <tr>
+                                <td class="text-sm mb-0">
+                                    <a href="{% url 'pedidos_app:detalle-lista-aprobar' lista.id %}">
+                                        {{ lista.created|date:'d-m-Y' }}
+                                    </a>
+                                </td>
+                                <td class="text-sm mb-0 font-weight-bold"> {{ lista.idPetitioner.full_name}} </td>
+                                <td class="text-sm mb-0">
+                                    <a href="{% url 'pedidos_app:detalle-lista-aprobar' lista.id %}">
+                                        {{ lista.listName }}
+                                    </a>
+                                </td>
+                                <td class="text-sm mb-0">
+                                    {% if user.position == "5" and lista.tag1 == "0" %}<!-- Adquicisiones -->
+                                        <span class="badge bg-gradient-primary">{{lista.get_tag1_display}}</span>
+                                    {% elif user.position == "1" and lista.tag2 == "0" %} <!-- Contabilidad -->
+                                        <span class="badge bg-gradient-primary">{{lista.get_tag2_display}}</span>
+                                    {% elif user.position == "6" and lista.tag3 == "0" %} <!-- Finanza -->
+                                        <span class="badge bg-gradient-primary">{{lista.get_tag3_display}}</span>
+                                    {% elif user.position == "0" and lista.tag4 == "0" %} <!-- Administrador -->
+                                        <span class="badge bg-gradient-primary">{{lista.get_tag4_display}}</span>
+                                    {% else %}
+                                        <span class="badge bg-gradient-secondary">Atendido</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'pedidos_app:detalle-lista-aprobar' lista.id %}">
+                                        <i class="fas fa-eye text-dark text-lg"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<!--Table-->
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTableOrders = new simpleDatatables.DataTable("#datatable-orders", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "solicitudes",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+      dataTableOrders.export(data);
+    });
+  });
+</script>
+
+<script>
+    console.log("{{data.TimeSelect}}");
+    var sel = "{{data.TimeSelect}}";
+    
+    const $select = document.querySelector('#timeKword');
+    $select.value = sel;
+
+</script>
+
+
+{% endblock JSscripts %}

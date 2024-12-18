@@ -4,7 +4,7 @@
 
 {% block title %} Ordenes {% endblock title %}
 {% block main %} Ordenes {% endblock main %}
-{% block appName %} Requerimientos {% endblock appName %}
+{% block appName %} Requerimiento {% endblock appName %}
 {% block Type %} Editar {% endblock Type %}
 
 {% block panel-content %}
@@ -24,7 +24,15 @@
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
 
             <div class="multisteps-form__content">
-              <h6 class="font-weight-bolder">Informacion de solicitud</h6>
+
+              <div class="row" hidden>
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline">
+                    <label for="exampleFormControlInput1" class="form-label">idList</label>
+                    {{ form.idList }}
+                  </div>
+                </div>
+              </div>
 
               <div class="row" hidden>
                 <div class="col-12 col-sm-12">
@@ -36,10 +44,16 @@
               </div>
 
               <div class="row">
-                <div class="col-12 col-sm-12">
+                <div class="col-6 col-sm-7">
                   <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Descripción</label>
                     {{ form.requirementName }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-5">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Categoria</label>
+                    {{ form.paymentType }}
                   </div>
                 </div>
               </div>
@@ -84,7 +98,7 @@
               <br>
 
               <div class="row">
-                <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                <div class="col-12 col-sm-12 mt-3 mt-sm-0">
                   <p class="mb-0">Proveedor</p>
                   <div class="input-group input-group-outline">
                     {{ form.idProvider }}
@@ -111,41 +125,10 @@
                 </div>
               </div>
 
-              <br>
-
-              <h6 class="font-weight-bolder">Información adicional</h6>
-
-              <div class="row">
-                <div class="col-6 col-sm-3">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">O. Transformador</label>
-                    {{ form.idTrafoOrder }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Categoria</label>
-                    {{ form.paymentType }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Comisión</label>
-                    {{ form.idCommissions }}
-                  </div>
-                </div>
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Proyecto</label>
-                    {{ form.idProjects }}
-                  </div>
-                </div>
-              </div>
-
               <div class="button-row d-flex mt-4">
-                <a class="btn bg-gradient-dark" href="{% url 'pedidos_app:mi-lista-solicitudes' %}"> REGRESAR </a>
+                <a class="btn bg-gradient-dark" href="{% url 'pedidos_app:detalle-lista' object.idList.id %}"> REGRESAR </a>
 
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ATUALIZAR
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="update">ATUALIZAR
                   REQUERIMIENTO</button>
               </div>
             </div>

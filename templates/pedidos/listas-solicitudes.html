@@ -14,9 +14,9 @@
   <div class="col-lg-6 col-12 d-flex ms-auto ">
 
     {% if user.position == "0" or user.position == "5" or user.position == "6" or user.position == "7" or user.position == "1" %}
-    <a class="btn bg-gradient-info" href="{% url 'pedidos_app:solicitudes-por-aprobar' %}">
-      <span>Solicitudes por autorizar</span>
-      <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{solicitudes.nRequest.count}}</span> </span>
+    <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-de-solicitudes-por-aprobar' %}">
+      <span>Pendientes por autorizar</span>
+      <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{data.nRequest.count}}</span> </span>
     </a>
     {% endif %}
 
@@ -24,7 +24,7 @@
       Export CSV
     </a>
     <div class="dropleft ms-3">
-      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:nueva-solicitud' %}">
+      <a class="btn bg-gradient-info" href="{% url 'pedidos_app:nueva-lista' %}">
         NUEVO
       </a>
     </div>
@@ -38,7 +38,7 @@
       <div class="card-header pb-0 ">
         <div class="row">
           <div class="col-lg-6 col-md-3">
-            <h5 class="mb-0">Mi lista de requerimientos</h5>
+            <h5 class="mb-0">Listas de solicitudes</h5>
             <p class="text-sm mb-0 text-info font-weight-bold">
               {{user.full_name}} {{user.last_name}}
             </p>
@@ -68,86 +68,75 @@
           <table class="table align-items-center mb-0" id="datatable-orders">
             <thead>
               <tr>
-                <th class="text-uppercase text-center text-dark text-xs font-weight-bolder opacity-7 ps-2">Fecha</th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">[Cant.] Descripción</th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Observaciones</th>
+                <th class="text-uppercase text-start text-dark text-xs font-weight-bolder opacity-7 ps-2">Fecha</th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Id Lista</th>
                 <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Doc.</th>
                 <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {% for pedido in solicitudes.ordenes %}
+              {% for lista in data.listas %}
               <tr>
-                <td class="text-sm mb-0"> {{ pedido.created|date:'d-m-Y' }} </td>
-                <td class="text-sm mb-0"> <span class="font-weight-bold text-dark"> [ {{ pedido.quantity }} ]</span> {{ pedido.requirementName }} </td>
-                <td class="text-sm text-end font-weight-bold mb-0"> {{ pedido.amountRequested|floatformat:"2g" }}  {{ pedido.get_currencyType_display }}</td>
-                <td class="text-sm mb-0"> {{ pedido.observations }} </td>
+                <td class="text-sm mb-0"> <a href="{% url 'pedidos_app:detalle-lista' lista.id %}"> {{ lista.created|date:'d-m-Y' }} </a> </td>
+                <td class="text-sm mb-0 font-weight-bold text-dark"> <a href="{% url 'pedidos_app:detalle-lista' lista.id %}"> {{ lista.listName }}  </a> </td>
                 <td class="text-md font-weight-normal">
-                  {% if pedido.tag1 == "0" %}
+                  {% if lista.tag1 == "0" %}
                   <i class="fas fa-circle text-secondary"></i>
-                  {% elif pedido.tag1 == "1"%}
+                  {% elif lista.tag1 == "1"%}
                   <i class="fas fa-circle text-success"></i>
-                  {% elif pedido.tag1 == "2"%}
+                  {% elif lista.tag1 == "2"%}
                   <i class="fas fa-circle text-danger"></i>
-                  {% elif pedido.tag1 == "3"%}
+                  {% elif lista.tag1 == "3"%}
                   <i class="fas fa-circle text-warning"></i>
                   {% else %}
                   <i class="far fa-circle"></i>
                   {% endif %}
 
-                  {% if pedido.typeRequest == "1" %}
-                    {% if pedido.tag2 == "0" %}
+                  {% if lista.typeRequest == "1" %}
+                    {% if lista.tag2 == "0" %}
                     <i class="fas fa-circle text-secondary"></i>
-                    {% elif pedido.tag2 == "1"%}
+                    {% elif lista.tag2 == "1"%}
                     <i class="fas fa-circle text-success"></i>
-                    {% elif pedido.tag2 == "2"%}
+                    {% elif lista.tag2 == "2"%}
                     <i class="fas fa-circle text-danger"></i>
-                    {% elif pedido.tag2 == "3"%}
+                    {% elif lista.tag2 == "3"%}
                     <i class="fas fa-circle text-warning"></i>
                     {% else %}
                     <i class="far fa-circle"></i>
                     {% endif %}
                   {% endif %}
 
-                  {% if pedido.tag3 == "0" %}
+                  {% if lista.tag3 == "0" %}
                   <i class="fas fa-circle text-secondary"></i>
-                  {% elif pedido.tag3 == "1"%}
+                  {% elif lista.tag3 == "1"%}
                   <i class="fas fa-circle text-success"></i>
-                  {% elif pedido.tag3 == "2"%}
+                  {% elif lista.tag3 == "2"%}
                   <i class="fas fa-circle text-danger"></i>
-                  {% elif pedido.tag3 == "3"%}
+                  {% elif lista.tag3 == "3"%}
                   <i class="fas fa-circle text-warning"></i>
                   {% else %}
                   <i class="far fa-circle"></i>
                   {% endif %}
 
-                  {% if pedido.tag4 == "0" %}
+                  {% if lista.tag4 == "0" %}
                   <i class="fas fa-circle text-secondary"></i>
-                  {% elif pedido.tag4 == "1"%}
+                  {% elif lista.tag4 == "1"%}
                   <i class="fas fa-circle text-success"></i>
-                  {% elif pedido.tag4 == "2"%}
+                  {% elif lista.tag4 == "2"%}
                   <i class="fas fa-circle text-danger"></i>
-                  {% elif pedido.tag4 == "3"%}
+                  {% elif lista.tag4 == "3"%}
                   <i class="fas fa-circle text-warning"></i>
                   {% else %}
                   <i class="far fa-circle"></i>
                   {% endif %}
                 </td>
+
                 <td>
-                  {% if pedido.pdf_file %}
-                  <a href="/media/{{ pedido.pdf_file }}">
-                    <i class="far fa-file-pdf text-info text-lg"></i>
-                  </a>
-                  {% endif %}
-                </td>
-                <td>
-                  <a href="{% url 'pedidos_app:editar-solicitud' pedido.id %}">
+                  <a href="{% url 'pedidos_app:detalle-lista' lista.id %}">
                     <i class="far fa-edit text-dark text-lg"></i>
                   </a>
                   &emsp;
-                  <a href="{% url 'pedidos_app:eliminar-solicitud' pedido.id %}">
+                  <a href="{% url 'pedidos_app:listas-solicitudes' %}">
                     <i class="far fa-trash-alt text-primary text-lg"></i>
                   </a>
                 </td>

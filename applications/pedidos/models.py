@@ -1,5 +1,4 @@
 from django.db import models
-from django import forms
 from django.conf import settings
 from django.db.models.signals import post_save
 
@@ -10,6 +9,7 @@ from applications.clientes.models import Cliente
 from applications.producto.models import Transformer
 from applications.personal.models import Workers
 from applications.actividades.models import Commissions, Projects, TrafoOrder
+from applications.movimientos.models import ExpenseSubCategories
 
 from .signals import (
   #CreatePurchaseTracking,
@@ -25,8 +25,50 @@ from .managers import (
   OrdersManager,
   OrdersTrakManager,
 
-  PaymentRequestManager
+  PaymentRequestManager,
+  ListRequestManager
 )
+
+class RequestList(TimeStampedModel):
+
+    # === CATEGORIA ESTADO ====
+    SOLICITADO = '0'
+    ATENDIDO = '1'
+    DENEGADO = '2'
+    OBSERVADO = '3'
+    CREADO = '4'
+
+    STATUS_CHOICES = [
+        (SOLICITADO,'Solicitado'),
+        (ATENDIDO,'Atendido'),
+        (DENEGADO,'Denegado'),
+        (OBSERVADO,'Observado'),
+        (CREADO,'Creado'),
+    ]
+
+    listName = models.CharField("Nombre de lista",max_length=100, null=True, blank=True)
+    idPetitioner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,related_name="lista_solicitante")
+    
+    tag1 = models.CharField("Adquisiciones",default="0",choices=STATUS_CHOICES,max_length=1,blank=True,null=True)# adquisitions
+    dt1 = models.DateTimeField("F. adquisiciones",null=True,blank=True) # adquisiciones
+
+    tag2 = models.CharField("Contabilidad",default="4",choices=STATUS_CHOICES,max_length=1,blank=True,null=True) # contabilidad
+    dt2 = models.DateTimeField("F. contabilidad ",null=True,blank=True) # contabilidad
+
+    tag3 = models.CharField("Finanzas",default="4",choices=STATUS_CHOICES,max_length=1,blank=True,null=True) # finanzas
+    dt3 = models.DateTimeField("F. gereFinanzasncia",null=True,blank=True) # finanzas
+
+    tag4 = models.CharField("Gerencia",default="4",choices=STATUS_CHOICES,max_length=1,blank=True,null=True) # only tesoreria
+    dt4 = models.DateTimeField("F. Gerencia",null=True,blank=True) # ejecutado
+
+    objects = ListRequestManager()
+
+    class Meta:
+        verbose_name = 'Lista de solicitudes'
+        verbose_name_plural = 'Listas de solicitudes'
+    
+    def __str__(self):
+        return str(self.listName)
 
 class RequestTracking(TimeStampedModel):
     """ Modelo de seguimiento de ordenes """
@@ -72,57 +114,24 @@ class RequestTracking(TimeStampedModel):
         return str(self.orderState)
 
 class PaymentRequest(TimeStampedModel):
-    """ Modelo de reuwrimiento de pago """
-
-    # CATEGORIAS
-    COMPRA = '0'
-    SERVICIO = '1'
-    PROVEEDOR = '2'
-    IMPUESTOS = '3'
-    CAJACHICA = '4'
-    COMISIONES = '5'
-    PROYECTO = '6'
-    PLANILLA = '7'
-    OPERATVIDAD = '8'
-    MULTAS = '9'
-    GASTOSPERSONALES = '10'
-    TRANFSINTERNA = '11'
-    AGAD = "12"
-    PRESTAMO = '13'
-    
-    PAYMENT_CHOISES = [
-            (COMPRA, "compras"),
-            (SERVICIO, "servicio"),
-            (PROVEEDOR, "proveedor"),
-            (IMPUESTOS, "impuestos"),
-            (CAJACHICA, "caja chica"),
-            (COMISIONES, "comisiones"),
-            (PROYECTO, "proyecto"),
-            (PLANILLA, "planilla"),
-            (OPERATVIDAD, "operaciones"),
-            (MULTAS, "multas"),
-            (GASTOSPERSONALES, "personal"),
-            (TRANFSINTERNA, "transferencias internas"),
-            (AGAD, "agente aduanas"),
-            (PRESTAMO, "prestamo"),
-        ]
+    """ Modelo de requerimiento de pago """
     
     # === CATEGORIA MONEDA ====
     SOLES = '0'
     DOLARES = '1'
     EUROS = '2'
 
-    CURRENCY_CHOISES = [
-        (SOLES,'soles'),
-        (DOLARES,'dolares'),
-        (EUROS,'euros'),
+    CURRENCY_CHOICES = [
+        (SOLES,'S/.'),
+        (DOLARES,'$'),
+        (EUROS,'€'),
     ]
 
     # === CATEGORIA TIPO SOLICITUD ====
     SIMPLE = '0'
     CONTABILIDAD = '1'
 
-    TYPE_REQUEST_CHOISES = [
+    TYPE_REQUEST_CHOICES = [
         (SIMPLE,'simple'),
         (CONTABILIDAD,'contabilidad'),
     ]
@@ -157,6 +166,8 @@ class PaymentRequest(TimeStampedModel):
     
     idProvider = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
 
+    idList = models.ForeignKey(RequestList, on_delete=models.CASCADE, null=True, blank=True,related_name="lista")
+
     requirementName = models.CharField('Nombre de requerimiento',max_length=150,unique=True,null=True,blank=True)
     quantity = models.PositiveIntegerField('Cantidad', null=True, blank=True)
 
@@ -172,18 +183,12 @@ class PaymentRequest(TimeStampedModel):
         default=0
     )
 
-    paymentType = models.CharField(
-        'Categoria de pago',
-        max_length=2, 
-        choices = PAYMENT_CHOISES,
-        null=True,
-        blank=True
-    )
+    paymentType = models.ForeignKey(ExpenseSubCategories, on_delete=models.CASCADE, null=True, blank=True)
 
     currencyType = models.CharField(
         'Moneda',
-        max_length=2, 
-        choices = CURRENCY_CHOISES,
+        max_length = 1, 
+        choices = CURRENCY_CHOICES,
         null=True,
         blank=True
     )
@@ -201,7 +206,7 @@ class PaymentRequest(TimeStampedModel):
     typeRequest = models.CharField(
         'Tipo de solicitud',
         max_length=2, 
-        choices = TYPE_REQUEST_CHOISES,
+        choices = TYPE_REQUEST_CHOICES,
         null=True,
         blank=True
     )

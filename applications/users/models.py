@@ -8,13 +8,13 @@ from .managers import UserManager, DocsManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     # TIPO DE USUARIOS
-    ADMINISTRADOR = '0'
-    CONTABILIDAD = '1'
+    ADMINISTRADOR = '0' # Joel, Gustavo, Jesus
+    CONTABILIDAD = '1' # Keren
     SUPERVISOR_PRODUCCION = '2'
     SUPERVISOR_COMPRAS = '3'
     TRABAJADOR = '4'
-    ADQUISICIONES = '5'
-    FINANZAS = '6'
+    ADQUISICIONES = '5' # Jose
+    FINANZAS = '6' # Gustavo
     TESORERIA = '7'
     CONSULTOREXTERNO = '8'
     RECURSOSHUMANOS = '9'

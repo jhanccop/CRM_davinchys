@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from applications.movimientos.models import DocumentsUploaded
 from applications.users.models import Documentations
 from applications.actividades.models import Trafos
-from applications.pedidos.models import PaymentRequest
+from applications.pedidos.models import PaymentRequest, RequestList
 
 # forms
 from applications.actividades.forms import TrafoForm
@@ -40,7 +40,7 @@ class PanelHomeView(LoginRequiredMixin,ListView):
         userArea = userId.position
         intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
         payload = {}
-        payload["nRequest"] = PaymentRequest.objects.RequerimientosPendientes(area=userArea)
+        payload["nRequest"] = RequestList.objects.ListasPendientes(area=userArea)
         payload["docs"] = Documentations.objects.docs_publics(intervalo=intervalDate)
         return payload
 
