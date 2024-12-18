@@ -5,6 +5,8 @@ from django.urls import reverse_lazy
 from applications.users.mixins import AdminClientsPermisoMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.http import HttpResponseRedirect
+
 from django.views.generic import (
     View,
     CreateView,
@@ -28,7 +30,10 @@ class ClientCreateView(AdminClientsPermisoMixin,CreateView):
     template_name = "clientes/crear_clientes.html"
     model = Cliente
     form_class = ClientForm
-    success_url = reverse_lazy('clients_app:cliente-lista')
+    #success_url = reverse_lazy('clients_app:cliente-lista')
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
 
 class ClientDeleteView(AdminClientsPermisoMixin,DeleteView):
     template_name = "clientes/eliminar_clientes.html"

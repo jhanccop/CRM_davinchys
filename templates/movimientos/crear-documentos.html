@@ -131,12 +131,20 @@
               <br>
 
               <div class="row">
-                <div class="col-12 col-sm-12">
+                <div class="col-12 col-sm-8">
                   <p class="mb-0">Proveedor</p>
                   <div class="input-group input-group-outline">
                     {{ form.idClient }}
                   </div>
                 </div>
+
+                <div class="col-12 col-sm-4">
+                  <button id="abrir-formulario">Nuevo Registro</button>
+                  <button id="abrir-formulario" type="button" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Nuevo cliente
+                  </button>
+                </div>
+                
               </div>
 
               <br>
@@ -254,11 +262,35 @@
   </div>
 </div>
 
-{% for error in form.errors %}
-<p class="text-sm text-primary font-weight-bolder mb-0">
-  {{ error|escape }}
-</p>
-{% endfor %}
+<!-- Contenedor de la ventana flotante -->
+<div id="modal" style="display: none;">
+  <div id="modal-content">
+      <span id="cerrar-modal">&times;</span>
+      <div id="formulario"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-normal" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn bg-gradient-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock panel-content %}
 
@@ -359,5 +391,44 @@
     const example = new Choices(element, {});
   }
 </script>
+
+<script>
+  document.getElementById('abrir-formulario').addEventListener('click', function() {
+      // Carga el formulario en la ventana flotante
+      fetch("{% url 'clients_app:cliente-add' %}")
+          .then(response => response.text())
+          .then(html => {
+              document.getElementById('formulario').innerHTML = html;
+              document.getElementById('modal').style.display = 'block';
+  
+              // Maneja el envío del formulario
+              document.getElementById('mimodelo-form').addEventListener('submit', function(e) {
+                  e.preventDefault(); // Evita el envío tradicional del formulario
+                  const form = e.target;
+                  const data = new FormData(form);
+  
+                  fetch(form.action, {
+                      method: 'POST',
+                      body: data,
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.status === 'success') {
+                          alert('Registro guardado exitosamente');
+                          location.reload(); // Actualiza la página o maneja el DOM según sea necesario
+                      } else {
+                          alert('Error al guardar');
+                          console.error(data.errors);
+                      }
+                  });
+              });
+          });
+  });
+  
+  // Cierra la ventana flotante
+  document.getElementById('cerrar-modal').addEventListener('click', function() {
+      document.getElementById('modal').style.display = 'none';
+  });
+  </script>
 
 {% endblock JSscripts %}

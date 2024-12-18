@@ -149,7 +149,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'movimientos_app:documentacion-editar' t.id %}"> Editar documento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="javascript:;">Eliminar documento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'movimientos_app:documentacion-eliminar' t.id %}">Eliminar documento</a></li>
                         </ul>
                       </td>
                     </tr>

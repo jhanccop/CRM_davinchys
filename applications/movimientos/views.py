@@ -232,6 +232,11 @@ class DocumentacionDetailView(AdminClientsPermisoMixin,ListView):
     document = Documents.objects.DocumentosPorId(id = int(pk))
     payload["document"] = document
     return payload
+  
+class DocumentacionDeleteView(AdminClientsPermisoMixin,DeleteView):
+  template_name = "movimientos/documentacion-eliminar.html"
+  model = Documents
+  success_url = reverse_lazy('movimientos_app:lista-documentacion')
 
 # ================= MOVIMIENTOS ========================
 class MovimientosListView(AdminClientsPermisoMixin,ListView):

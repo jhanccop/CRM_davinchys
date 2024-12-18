@@ -65,6 +65,12 @@ urlpatterns = [
         name='documentacion-detalle',
     ),
 
+    path(
+        'documentacion/documentacion-eliminar/<pk>/', 
+        views.DocumentacionDeleteView.as_view(),
+        name='documentacion-eliminar',
+    ),
+
     # ============== MOVIMIENTOS =================
     path(
         'movimientos/', 
