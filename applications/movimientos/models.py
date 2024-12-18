@@ -405,6 +405,8 @@ class ExpenseSubCategories(TimeStampedModel):
         (OTHER, "Otros"),
     ]
 
+    id = models.AutoField(primary_key=True)
+
     nameSubCategoy = models.CharField(
         'Nombre de subcategoria',
         max_length=20,
