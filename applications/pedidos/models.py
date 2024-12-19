@@ -185,7 +185,7 @@ class PaymentRequest(TimeStampedModel):
         default=0
     )
 
-    paymentType = models.ForeignKey(ExpenseSubCategories, on_delete=models.CASCADE, null=True, blank=True)
+    paymentType = models.ForeignKey(ExpenseSubCategories, on_delete=models.CASCADE, null=True, blank=True,related_name="EsubCategory")
 
     currencyType = models.CharField(
         'Moneda',

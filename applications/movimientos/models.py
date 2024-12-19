@@ -416,7 +416,8 @@ class ExpenseSubCategories(TimeStampedModel):
 
     category = models.CharField(
         'Categoria',
-        max_length = 1, 
+        max_length = 1,
+        default="8",
         choices = ESPENSE_CATEGORIES_CHOICES,
         null=True,
         blank=True
