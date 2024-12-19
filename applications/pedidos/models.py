@@ -159,6 +159,8 @@ class PaymentRequest(TimeStampedModel):
         (CLIENTE,'cliente'),
         (INTERMEDIARIO,'intermediario'),
     ]
+
+    id = models.AutoField(primary_key=True)
     
     # ==================== models ======================
     idPetitioner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,related_name="solicitante")
