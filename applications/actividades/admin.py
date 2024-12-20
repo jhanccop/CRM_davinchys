@@ -1,8 +1,18 @@
 from django.contrib import admin
 
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+
 from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask, SuggestionBox
 
-class CommissionsAdmin(admin.ModelAdmin):
+## ==================== Commissions =====================
+class CommissionsResource(resources.ModelResource):
+    class Meta:
+        model = Commissions
+
+@admin.register(Commissions)
+class CommissionsAdmin(ImportExportModelAdmin):
+    resource_class = CommissionsResource
     list_display = (
         'commissionName',
         'startDate',
@@ -13,7 +23,14 @@ class CommissionsAdmin(admin.ModelAdmin):
     search_fields = ('commissionName','status',)
     list_filter = ('status',)
 
-class ProjectsAdmin(admin.ModelAdmin):
+## ==================== Projects =====================
+class ProjectsResource(resources.ModelResource):
+    class Meta:
+        model = Projects
+
+@admin.register(Projects)
+class ProjectsAdmin(ImportExportModelAdmin):
+    resource_class = ProjectsResource
     list_display = (
         'projectName',
         'startDate',
@@ -23,7 +40,14 @@ class ProjectsAdmin(admin.ModelAdmin):
     search_fields = ('projectName','status',)
     list_filter = ('status',)
 
-class DailyTasksAdmin(admin.ModelAdmin):
+## ==================== DailyTasks =====================
+class DailyTasksResource(resources.ModelResource):
+    class Meta:
+        model = DailyTasks
+
+@admin.register(DailyTasks)
+class DailyTasksAdmin(ImportExportModelAdmin):
+    resource_class = DailyTasksResource
     list_display = (
         'user',
         'date',
@@ -35,7 +59,14 @@ class DailyTasksAdmin(admin.ModelAdmin):
     search_fields = ('is_overTime',)
     list_filter = ('is_overTime',)
 
-class SuggestionBoxAdmin(admin.ModelAdmin):
+## ==================== SuggestionBox =====================
+class SuggestionBoxResource(resources.ModelResource):
+    class Meta:
+        model = SuggestionBox
+
+@admin.register(SuggestionBox)
+class SuggestionBoxAdmin(ImportExportModelAdmin):
+    resource_class = SuggestionBoxResource
     list_display = (
         'user',
         'created',
@@ -45,7 +76,14 @@ class SuggestionBoxAdmin(admin.ModelAdmin):
     search_fields = ('area',)
     list_filter = ('area',)
 
-class TrafoQuoteAdmin(admin.ModelAdmin):
+## ==================== TrafoQuote =====================
+class TrafoQuoteResource(resources.ModelResource):
+    class Meta:
+        model = TrafoQuote
+
+@admin.register(TrafoQuote)
+class TrafoQuoteAdmin(ImportExportModelAdmin):
+    resource_class = TrafoQuoteResource
     list_display = (
         'id',
         'idQuote',
@@ -59,7 +97,14 @@ class TrafoQuoteAdmin(admin.ModelAdmin):
     search_fields = ('idQuote',)
     list_filter = ('poStatus','idAttendant')
 
-class TrafoTasksAdmin(admin.ModelAdmin):
+## ==================== TrafoTask =====================
+class TrafoTaskResource(resources.ModelResource):
+    class Meta:
+        model = TrafoTask
+
+@admin.register(TrafoTask)
+class TrafoTaskAdmin(ImportExportModelAdmin):
+    resource_class =TrafoTaskResource
     list_display = (
         'idTrafoQuote',
         'nameTask',
@@ -72,7 +117,14 @@ class TrafoTasksAdmin(admin.ModelAdmin):
     search_fields = ('nameTask',)
     list_filter = ('nameTask','idTrafoQuote')
 
-class TrafosAdmin(admin.ModelAdmin):
+## ==================== Trafos =====================
+class TrafosResource(resources.ModelResource):
+    class Meta:
+        model = Trafos
+
+@admin.register(Trafos)
+class TrafosAdmin(ImportExportModelAdmin):
+    resource_class = TrafosResource
     list_display = (
         'id',
         'idQuote',
@@ -85,12 +137,3 @@ class TrafosAdmin(admin.ModelAdmin):
     )
     search_fields = ('MOUNTING',)
     list_filter = ('idQuote','provider')
-
-admin.site.register(Commissions, CommissionsAdmin)
-admin.site.register(Projects, ProjectsAdmin)
-admin.site.register(DailyTasks, DailyTasksAdmin)
-admin.site.register(SuggestionBox, SuggestionBoxAdmin)
-
-admin.site.register(TrafoQuote, TrafoQuoteAdmin)
-admin.site.register(Trafos, TrafosAdmin)
-admin.site.register(TrafoTask, TrafoTasksAdmin)

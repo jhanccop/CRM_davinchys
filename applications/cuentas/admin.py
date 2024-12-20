@@ -1,8 +1,18 @@
 from django.contrib import admin
+
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 #
 from .models import Account,ManualAccount,Tin
 
-class AccountAdmin(admin.ModelAdmin):
+## ==================== Account =====================
+class AccountResource(resources.ModelResource):
+    class Meta:
+        model = Account
+
+@admin.register(Account)
+class AccountAdmin(ImportExportModelAdmin):
+    resource_class = AccountResource
     list_display = (
         'id',
         'accountName',
@@ -15,23 +25,17 @@ class AccountAdmin(admin.ModelAdmin):
     search_fields = ('nickName','state',)
     list_filter = ('nickName',)
 
-class TinAdmin(admin.ModelAdmin):
+## ==================== Tin =====================
+class TinResource(resources.ModelResource):
+    class Meta:
+        model = Tin
+
+@admin.register(Tin)
+class TinAdmin(ImportExportModelAdmin):
+    resource_class = TinResource
     list_display = (
         'tin',
         'tinName'
     )
     search_fields = ('tin',)
     list_filter = ('tin',)
-
-class ManualAccountAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'created_at',
-        'idAcount',
-        'realBalance',
-    )
-    list_filter = ('idAcount',)
-
-admin.site.register(Account, AccountAdmin)
-admin.site.register(Tin, TinAdmin)
-admin.site.register(ManualAccount, ManualAccountAdmin)

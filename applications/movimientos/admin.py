@@ -1,5 +1,8 @@
 from django.contrib import admin
 
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+
 from .models import (
   Transactions,
   InternalTransfers,
@@ -11,7 +14,14 @@ from .models import (
   Conciliation
 )
 
-class TransactionsAdmin(admin.ModelAdmin):
+## ==================== Transactions =====================
+class TransactionsResource(resources.ModelResource):
+    class Meta:
+        model = Transactions
+
+@admin.register(Transactions)
+class TransactionsAdmin(ImportExportModelAdmin):
+    resource_class = TransactionsResource
     list_display = (
         'id',
         'dateTime',
@@ -26,7 +36,14 @@ class TransactionsAdmin(admin.ModelAdmin):
     search_fields = ('category','idAccount')
     list_filter = ('category','idAccount')
 
-class InternalTransfersAdmin(admin.ModelAdmin):
+## ==================== InternalTransfers =====================
+class InternalTransfersResource(resources.ModelResource):
+    class Meta:
+        model = InternalTransfers
+
+@admin.register(InternalTransfers)
+class InternalTransfersAdmin(ImportExportModelAdmin):
+    resource_class = InternalTransfersResource
     list_display = (
         'id',
         'created_at',
@@ -38,7 +55,14 @@ class InternalTransfersAdmin(admin.ModelAdmin):
     )
     search_fields = ('idSourceAcount','SourceAmount')
 
-class ExpenseSubCategoriesAdmin(admin.ModelAdmin):
+## ==================== ExpenseSubCategories =====================
+class ExpenseSubCategoriesResource(resources.ModelResource):
+    class Meta:
+        model = ExpenseSubCategories
+
+@admin.register(ExpenseSubCategories)
+class ExpenseSubCategoriesAdmin(ImportExportModelAdmin):
+    resource_class = ExpenseSubCategoriesResource
     list_display = (
         'id',
         'nameSubCategoy',
@@ -46,14 +70,28 @@ class ExpenseSubCategoriesAdmin(admin.ModelAdmin):
     )
     search_fields = ('category',)
 
-class IncomeSubCategoriesAdmin(admin.ModelAdmin):
+## ==================== IncomeSubCategories =====================
+class IncomeSubCategoriesResource(resources.ModelResource):
+    class Meta:
+        model = IncomeSubCategories
+
+@admin.register(IncomeSubCategories)
+class IncomeSubCategoriesAdmin(ImportExportModelAdmin):
+    resource_class = IncomeSubCategoriesResource
     list_display = (
         'id',
         'nameSubCategoy',
     )
     search_fields = ('nameSubCategoy',)
 
-class BankMovementsAdmin(admin.ModelAdmin):
+## ==================== BankMovements =====================
+class BankMovementsResource(resources.ModelResource):
+    class Meta:
+        model = BankMovements
+
+@admin.register(BankMovements)
+class BankMovementsAdmin(ImportExportModelAdmin):
+    resource_class = BankMovementsResource
     list_display = (
         'id',
         'idAccount',
@@ -61,8 +99,8 @@ class BankMovementsAdmin(admin.ModelAdmin):
         'get_docs',
         'description',
         'transactionType',
-        'expenseSubCategory',
-        'incomeSubCategory',
+        #'expenseSubCategory',
+        #'incomeSubCategory',
         'amount',
         'balance',
         'amountReconcilied',
@@ -74,7 +112,14 @@ class BankMovementsAdmin(admin.ModelAdmin):
     search_fields = ('transactionType','idAccount')
     list_filter = ('transactionType','idAccount')
 
-class DocumentsAdmin(admin.ModelAdmin):
+## ==================== Documents =====================
+class DocumentsResource(resources.ModelResource):
+    class Meta:
+        model = Documents
+
+@admin.register(Documents)
+class DocumentsAdmin(ImportExportModelAdmin):
+    resource_class = DocumentsResource
     list_display = (
         'id',
         'date',
@@ -87,7 +132,31 @@ class DocumentsAdmin(admin.ModelAdmin):
     search_fields = ('idClient',)
     list_filter = ('idClient',)
 
-class ConciliationAdmin(admin.ModelAdmin):
+## ==================== DocumentsUploaded =====================
+class DocumentsUploadedResource(resources.ModelResource):
+    class Meta:
+        model = DocumentsUploaded
+
+@admin.register(DocumentsUploaded)
+class DocumentsUploadedAdmin(ImportExportModelAdmin):
+    resource_class = DocumentsUploadedResource
+    list_display = (
+        'id',
+        'created',
+        'idAccount',
+        'fileName',
+    )
+    list_filter = ('idAccount',)
+
+## ==================== Conciliation =====================
+class ConciliationResource(resources.ModelResource):
+    class Meta:
+        model = Conciliation
+
+@admin.register(Conciliation)
+class ConciliationAdmin(ImportExportModelAdmin):
+    resource_class = ConciliationResource
+    
     list_display = (
         'id',
         'amountReconcilied',
@@ -100,22 +169,3 @@ class ConciliationAdmin(admin.ModelAdmin):
     
     search_fields = ('idMovOrigin',)
     list_filter = ('type',)
-
-class DocumentsUploadedAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'created',
-        'idAccount',
-        'fileName',
-    )
-    list_filter = ('idAccount',)
-
-admin.site.register(Documents, DocumentsAdmin)
-admin.site.register(ExpenseSubCategories, ExpenseSubCategoriesAdmin)
-admin.site.register(IncomeSubCategories, IncomeSubCategoriesAdmin)
-admin.site.register(BankMovements, BankMovementsAdmin)
-admin.site.register(DocumentsUploaded, DocumentsUploadedAdmin)
-
-admin.site.register(Transactions, TransactionsAdmin)
-admin.site.register(InternalTransfers, InternalTransfersAdmin)
-admin.site.register(Conciliation, ConciliationAdmin)

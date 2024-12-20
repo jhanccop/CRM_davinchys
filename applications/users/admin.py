@@ -1,8 +1,18 @@
 from django.contrib import admin
 
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+
 from .models import User, Documentations
 
-class UserAdmin(admin.ModelAdmin):
+## ==================== user =====================
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+
+@admin.register(User)
+class UserAdmin(ImportExportModelAdmin):
+    resource_class = UserResource
     list_display = (
         'id',
         'full_name',
@@ -12,13 +22,17 @@ class UserAdmin(admin.ModelAdmin):
     )
     list_filter = ('position',)
 
-class DocumentationsAdmin(admin.ModelAdmin):
+## ==================== user =====================
+class DocumentationsResource(resources.ModelResource):
+    class Meta:
+        model = Documentations
+
+@admin.register(Documentations)
+class DocumentationsAdmin(ImportExportModelAdmin):
+    resource_class = DocumentationsResource
     list_display = (
         'idUser',
         'typeDoc',
         'sumary',
     )
     list_filter = ('typeDoc',)
-
-admin.site.register(User, UserAdmin)
-admin.site.register(Documentations, DocumentationsAdmin)

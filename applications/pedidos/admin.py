@@ -1,26 +1,37 @@
 from django.contrib import admin
 
-from .models import (
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
+from .models import (
   RequestTracking,
   PaymentRequest,
   RequestList
 )
 
-class RequestListAdmin(admin.ModelAdmin):
+## ==================== RequestTracking =====================
+class RequestTrackingResource(resources.ModelResource):
+    class Meta:
+        model = RequestTracking
+
+@admin.register(RequestTracking)
+class RequestTrackingAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
-        'created',
-        'listName',
-        'idPetitioner',
-        'tag1',
-        'tag2',
-        'tag3',
-        'tag4',
+        'idOrder',
+        'dateChange',
+        'amountAssigned',
+        'orderState',
     )
-    search_fields = ('idPetitioner',)
+    search_fields = ('orderState',)
 
-class PaymentRequestAdmin(admin.ModelAdmin):
+## ==================== PaymentRequest =====================
+class PaymentRequestResource(resources.ModelResource):
+    class Meta:
+        model = PaymentRequest
+
+@admin.register(PaymentRequest)
+class PaymentRequestAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'idPetitioner',
@@ -34,16 +45,21 @@ class PaymentRequestAdmin(admin.ModelAdmin):
     )
     search_fields = ('paymentType',)
 
-class RequestTrackingAdmin(admin.ModelAdmin):
+## ==================== RequestList =====================
+class RequestListResource(resources.ModelResource):
+    class Meta:
+        model = RequestList
+
+@admin.register(RequestList)
+class RequestListAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
-        'idOrder',
-        'dateChange',
-        'amountAssigned',
-        'orderState',
+        'created',
+        'listName',
+        'idPetitioner',
+        'tag1',
+        'tag2',
+        'tag3',
+        'tag4',
     )
-    search_fields = ('orderState',)
-
-admin.site.register(RequestList, RequestListAdmin)
-admin.site.register(PaymentRequest, PaymentRequestAdmin)
-admin.site.register(RequestTracking, RequestTrackingAdmin)
+    search_fields = ('idPetitioner',)
