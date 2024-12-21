@@ -168,18 +168,7 @@ class Documents(TimeStampedModel):
             (PERSONAL, "personal"),
             (OTROCAJACHICA, "otro"),
         ]
-
-    # CATEGORIES ACTIVIDADES
-    FABTRAFOS = '0'
-    COMISION = '1'
-    PROYECTO = '2'
-    
-    SUB_CATEGORY_ACTIVITIES_CHOISES = [
-            (FABTRAFOS, "pedidos trafos"),
-            (COMISION, "comision"),
-            (PROYECTO, "proyecto"),
-        ]
-    
+   
     # SUB CATEGORIES ANNOTATIONS
     ANTICIPO = '0'
     PAGOFINAL = '1'
@@ -268,14 +257,6 @@ class Documents(TimeStampedModel):
         blank=True,
     )
 
-    # ================ actividades ===============
-    ActivitiesCategory = models.CharField(
-        'Categoria de actividades',
-        max_length=10, 
-        choices=SUB_CATEGORY_ACTIVITIES_CHOISES,
-        null=True,
-        blank=True
-    )
     idTrafoOrder = models.ForeignKey(TrafoOrder, on_delete=models.CASCADE, null=True, blank=True)
     idCommission = models.ForeignKey(Commissions, on_delete=models.CASCADE, null=True, blank=True)
     idProject = models.ForeignKey(Projects, on_delete=models.CASCADE, null=True, blank=True)

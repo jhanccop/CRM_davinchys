@@ -85,7 +85,7 @@ class Cliente(models.Model):
     phoneNumber = models.CharField('Telefono',blank = True, null=True)
     contact = models.OneToOneField(Contacto, on_delete=models.CASCADE, null=True, blank=True, unique=True)
     webPage = models.CharField('Página Web',blank = True, null=True)
-    email = models.EmailField(unique = True,blank = True, null=True)
+    email = models.EmailField(blank = True, null=True)
     bankName = models.CharField(
         'Banco',
         max_length=2, 

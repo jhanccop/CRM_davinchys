@@ -595,7 +595,6 @@ class DocumentsForm(forms.ModelForm):
 
             'description',
             
-            'ActivitiesCategory',
             'idTrafoOrder',
             'idCommission',
             'idProject',
@@ -693,13 +692,6 @@ class DocumentsForm(forms.ModelForm):
                 }
             ),
             # =======================
-            'ActivitiesCategory': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDivActivities()"
-                }
-            ),
 
             'idTrafoOrder': forms.Select(
                 attrs = {
@@ -790,7 +782,6 @@ class DocReconciliationUpdateForm(forms.ModelForm):
 
             'description',
             
-            'ActivitiesCategory',
             'idTrafoOrder',
             'idCommission',
             'idProject',
@@ -854,14 +845,6 @@ class DocReconciliationUpdateForm(forms.ModelForm):
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
-                }
-            ),
-            # =======================
-            'ActivitiesCategory': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDivActivities()"
                 }
             ),
 
