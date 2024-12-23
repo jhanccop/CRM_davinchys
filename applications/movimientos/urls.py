@@ -128,11 +128,6 @@ urlpatterns = [
     ),
 
     path(
-        'movimientos/editar-conciliar/<pk>/', 
-        views.MovimientosConciliarUpdateView.as_view(),
-        name='movimientos-conciliar-editar',
-    ),
-    path(
         'movimientos/eliminar-conciliacion/<pk>/', 
         views.MovimientosConciliarDeleteView.as_view(),
         name='eliminar-conciliacion',

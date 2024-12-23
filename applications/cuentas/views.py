@@ -9,12 +9,13 @@ from django.views.generic import (
     CreateView,
     ListView,
     UpdateView,
-    DeleteView
+    DeleteView,
+    FormView
 )
 
-from .models import Account,ManualAccount
+from .models import Account
 
-from .forms import AccountForm, ManualAccountForm
+from .forms import AccountForm, SelectTinForm
 
 class AccountListView(AdminClientsPermisoMixin,ListView):
     template_name = "cuentas/lista_cuentas.html"
@@ -37,3 +38,12 @@ class AccountUpdateView(AdminPermisoMixin,UpdateView):
     model = Account
     form_class = AccountForm
     success_url = reverse_lazy('cuentas_app:cuenta-lista')
+
+class SelectTinView(FormView):
+    template_name = "cuentas/seleccionar_empresa.html"
+    form_class = SelectTinForm
+
+    def form_valid(self, form):
+        tin = form.cleaned_data['tin']
+        self.request.session['compania_id'] = tin.id
+        return redirect('movimientos_app:lista-movimientos')

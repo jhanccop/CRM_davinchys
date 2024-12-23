@@ -50,7 +50,7 @@ from .forms import (
   ConciliationBankMovementsForm,
   
   DocumentsForm,
-  DocReconciliationUpdateForm,
+  #DocReconciliationUpdateForm,
   ConciliationMovDocForm,
   ConciliationMovMovForm,
   EditConciliationMovMovForm,
@@ -216,6 +216,11 @@ class DocumentacionCreateView(AdminClientsPermisoMixin,CreateView):
   form_class = DocumentsForm
   success_url = reverse_lazy('movimientos_app:lista-documentacion')
 
+  def get_form_kwargs(self):
+    kwargs = super().get_form_kwargs()
+    kwargs['request'] = self.request
+    return kwargs
+  
 class DocumentacionEditView(AdminClientsPermisoMixin,UpdateView):
   template_name = "movimientos/editar-documentos.html"
   model = Documents
@@ -244,20 +249,21 @@ class MovimientosListView(AdminClientsPermisoMixin,ListView):
   context_object_name = 'movimientos'
 
   def get_queryset(self,**kwargs):
+    compania_id = self.request.session.get('compania_id')
     selectedAccount = self.request.GET.get("AccountKword", '')
     intervalDate = self.request.GET.get("dateKword", '')
     if intervalDate == "today" or intervalDate =="":
-      intervalDate = str(date.today() - timedelta(days = 30)) + " to " + str(date.today())
+      intervalDate = str(date.today() - timedelta(days = 90)) + " to " + str(date.today())
 
     if selectedAccount == "None" or selectedAccount == None or selectedAccount =="" :
-      idSelected = Account.objects.CuentasByLastUpdate()
+      idSelected = Account.objects.CuentasByLastUpdate(compania_id = compania_id)
       selectedAccount = idSelected.id # seleccionar por default la primera cuenta
 
     bankMovements = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(selectedAccount))
     payload = {}
     payload["intervalDate"] = intervalDate
     payload["selectedAccount"] = Account.objects.CuentasById(int(selectedAccount))
-    payload["listAccount"] = Account.objects.listarcuentas()
+    payload["listAccount"] = Account.objects.listarcuentas(compania_id = compania_id)
     payload["lastBalance"] = BankMovements.objects.ObtenerSaldo(cuenta=int(selectedAccount))
 
     payload["bankMovements"] = bankMovements
@@ -268,12 +274,20 @@ class MovimientosEditView(AdminClientsPermisoMixin,UpdateView):
   model = BankMovements
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
+  def get_queryset(self,**kwargs):
+    payload = { "compania_id": self.request.session.get('compania_id')}
+    return payload
 
 class MovimientosCreateView(AdminClientsPermisoMixin,CreateView):
   template_name = "movimientos/crear-movimientos.html"
   model = BankMovements
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
+
+  def get_form_kwargs(self):
+    kwargs = super().get_form_kwargs()
+    kwargs['request'] = self.request
+    return kwargs
 
 class MovimientosDeleteView(AdminClientsPermisoMixin,DeleteView):
   template_name = "movimientos/eliminar-movimientos.html"
@@ -342,14 +356,6 @@ class EditarMovimientoConDocumentoUpdateView(AdminClientsPermisoMixin,UpdateView
     return reverse_lazy('movimientos_app:movimientos-detalle', kwargs={'pk':idMov.idMovOrigin.id})
 
 # ======================= UPDATE DOC ===============================
-class MovimientosConciliarUpdateView(AdminClientsPermisoMixin,UpdateView):
-  template_name = "movimientos/editar-conciliar-movimientos.html"
-  model = Documents
-  form_class = DocReconciliationUpdateForm
-
-  def get_success_url(self, *args, **kwargs):
-    pk = self.object.idBankMovements.all()[0].id
-    return reverse_lazy('movimientos_app:movimientos-detalle', kwargs={'pk':pk})
 
 class MovimientosDetailView(AdminClientsPermisoMixin,ListView):
   template_name = "movimientos/detalle-movimiento.html"

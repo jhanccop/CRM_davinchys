@@ -6,6 +6,11 @@ app_name = "cuentas_app"
 
 urlpatterns = [
     path(
+        'accounts/seleccionar-empresa/', 
+        views.SelectTinView.as_view(),
+        name='seleccionar-empresa',
+    ),
+    path(
         'accounts/lista/', 
         views.AccountListView.as_view(),
         name='cuentas-lista',

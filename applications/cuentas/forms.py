@@ -1,7 +1,7 @@
 # django
 from django import forms
 # local
-from .models import Account, ManualAccount
+from .models import Account, ManualAccount, Tin
 
 class AccountForm(forms.ModelForm):
 
@@ -80,4 +80,14 @@ class ManualAccountForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-        }     
+        }
+        
+class SelectTinForm(forms.Form):
+    tin = forms.ModelChoiceField(
+        queryset = Tin.objects.all(),
+        widget=forms.RadioSelect(
+            attrs={
+            'class': 'form-check-input text-md text-dark'
+            }),
+            empty_label=None
+        )

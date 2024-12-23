@@ -4,9 +4,8 @@ from model_utils.models import TimeStampedModel
 from django.db import models
 from django.conf import settings
 
-from applications.cuentas.models import Account
+from applications.cuentas.models import Account, Tin
 from applications.clientes.models import Cliente
-from applications.actividades.models import Projects,Commissions,TrafoOrder
 
 from .managers import (
     DocumentsUploadedManager,
@@ -85,59 +84,6 @@ class Documents(TimeStampedModel):
         (DOLARES, "$"),
         (EUROS, "€"),
     ]
-
-    # CATEGORIAS EGRESOS
-    AGAD = '0'
-    MERCADERIA = '1'
-    CAJA = '2'
-    VUELOS = '3'
-    ADICIONALES = '4'
-    OTROS = '5'
-
-    EXPENSES_CATEGORY_CHOISES = [
-            (AGAD, "Ag. Aduanas"),
-            (MERCADERIA, "Mercadería"),
-            (CAJA, "Caja"),
-            (VUELOS, "Vuelos"),
-            (ADICIONALES, "Adicionales"),
-            (OTROS, "Otros"),
-        ]
-
-    # CATEGORIAS INGRESOS
-    ABONOPEDIDO = '0'
-    VENTA = '1'
-    ALQUILER = '2'
-    DONACION = '3'
-    SUSCRIPCION = '4'
-    PRESTAMO = '5'
-    TRANFSINTERNA = '6'
-    
-    INCOME_CATEGORY_CHOISES = [
-            (ABONOPEDIDO, "abono pedido"),
-            (VENTA, "venta"),
-            (ALQUILER, "alquiler"),
-            (DONACION, "donacion"),
-            (SUSCRIPCION, "suscripcion"),
-            (PRESTAMO, "prestamo"),
-            (TRANFSINTERNA, "Transferencia interna"),
-        ]
-
-    # SUB CATEGORIAS PLANILLA
-    REMUNERACION = '0'
-    AFP = '1'
-    CTS = '2'
-    SEGUROS = '3'
-    BONO = '4'
-    OTROPLANILLA = '5'
-
-    SUB_CATEGORY_PAYROLL_CHOISES = [
-            (REMUNERACION, "remuneracion"),
-            (AFP, "AFP"),
-            (CTS, "CTS"),
-            (SEGUROS, "seguros"),
-            (BONO, "bono"),
-            (OTROPLANILLA, "otro"),
-        ]
     
     # STATUS FACTURA / GUIA DE REMISION / RHE
     NOREQUIERE = '0'
@@ -149,25 +95,6 @@ class Documents(TimeStampedModel):
         (PENDIENTE, "Pendiente"),
         (COMPLETADO, "Completado"),
     ]
-
-    # SUB CATEGORIES CAJA CHICA
-    MOVILIDAD = '0'
-    OFICINA = '1'
-    ALIMENTACION = '2'
-    LIMPIEZA = '3'
-    REPUESTOS = '4'
-    PERSONAL = '5'
-    OTROCAJACHICA = '6'
-
-    SUB_CATEGORY_CASHBOX_CHOISES = [
-            (MOVILIDAD, "movilidad"),
-            (OFICINA, "oficina"),
-            (ALIMENTACION, "alimentacion"),
-            (LIMPIEZA, "limpieza"),
-            (REPUESTOS, "repuestos"),
-            (PERSONAL, "personal"),
-            (OTROCAJACHICA, "otro"),
-        ]
    
     # SUB CATEGORIES ANNOTATIONS
     ANTICIPO = '0'
@@ -234,6 +161,7 @@ class Documents(TimeStampedModel):
     )
    
     idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
+    idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
 
     typeInvoice = models.CharField(
         'Tipo de comprobante',
@@ -257,25 +185,6 @@ class Documents(TimeStampedModel):
         blank=True,
     )
 
-    idTrafoOrder = models.ForeignKey(TrafoOrder, on_delete=models.CASCADE, null=True, blank=True)
-    idCommission = models.ForeignKey(Commissions, on_delete=models.CASCADE, null=True, blank=True)
-    idProject = models.ForeignKey(Projects, on_delete=models.CASCADE, null=True, blank=True)
-
-    expensesCategory = models.CharField(
-        'Categoria de egresos',
-        max_length=2, 
-        choices=EXPENSES_CATEGORY_CHOISES, 
-        blank=True,
-        null=True
-    )
-    incomeCategory = models.CharField(
-        'Categoria de ingresos',
-        max_length=1, 
-        choices=INCOME_CATEGORY_CHOISES, 
-        blank=True,
-        null=True
-    )
-
     detraction = models.CharField(
         'Detracción - Factura',
         max_length=1, 
@@ -297,20 +206,6 @@ class Documents(TimeStampedModel):
         default="0"
     )
 
-    subCategoryPallRoy = models.CharField(
-        'Sub Categoria planilla',
-        max_length=1, 
-        choices=SUB_CATEGORY_PAYROLL_CHOISES,
-        null=True,
-        blank=True
-    )
-    subCategoryCashBox = models.CharField(
-        'Sub Categoria caja chica',
-        max_length=2, 
-        choices=SUB_CATEGORY_CASHBOX_CHOISES,
-        null=True,
-        blank=True
-    )
     annotation = models.CharField(
         'Anotaciones',
         max_length=2, 

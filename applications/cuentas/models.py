@@ -45,7 +45,7 @@ class Account(TimeStampedModel):
     )
 
     nickName = models.CharField(
-        'Nombre cortp',
+        'Nombre corto',
         max_length=10,
         blank=True,
         null=True

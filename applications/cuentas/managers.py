@@ -3,8 +3,10 @@ from django.db import models
 class AccountManager(models.Manager):
     """ procedimiento para listar cuentas """
     
-    def listarcuentas(self):
-        return self.all()
+    def listarcuentas(self,compania_id):
+        return self.filter(
+            idTin__id = compania_id
+        )
     
     def ListaCuentasGeneral(self,moneda,cajaChica):
         return self.filter(currency = moneda,cajaChica=cajaChica).order_by("id")
@@ -12,8 +14,10 @@ class AccountManager(models.Manager):
     def CuentasById(self,id):
         return self.get(id = id)
     
-    def CuentasByLastUpdate(self):
-        return self.all().order_by("modified").last()
+    def CuentasByLastUpdate(self, compania_id):
+        return self.filter(
+            idTin__id = compania_id
+        ).order_by("modified").last()
     
     def CuentasByNumber(self,number):
         return self.get(accountNumber = number)

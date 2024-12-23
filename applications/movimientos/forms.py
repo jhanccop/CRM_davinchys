@@ -8,6 +8,8 @@ from .models import (
   Conciliation
 )
 
+from applications.cuentas.models import Account
+
 from django.db.models import F
 
 class InternalTransfersForm(forms.ModelForm):
@@ -566,7 +568,16 @@ class BankMovementsForm(forms.ModelForm):
                 ),
                 
             }
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(BankMovementsForm, self).__init__(*args, **kwargs)
 
+        if self.request:
+            self.fields['idAccount'].queryset = Account.objects.filter(idTin__id = self.request.session['compania_id'])
+
+        #print(compania_id)
+        
 class DocumentsForm(forms.ModelForm):
     class Meta:
         model = Documents
@@ -575,9 +586,7 @@ class DocumentsForm(forms.ModelForm):
             'user',
 
             # generales
-            'incomeCategory',
-            'expensesCategory',
-
+            'idTin',
             'date',
             'typeInvoice',
             'idInvoice',
@@ -595,18 +604,18 @@ class DocumentsForm(forms.ModelForm):
 
             'description',
             
-            'idTrafoOrder',
-            'idCommission',
-            'idProject',
-            
-            'subCategoryPallRoy',
-            'subCategoryCashBox',
-            
             'contabilidad',
             'pdf_file'
             
         ]
         widgets = {
+            'idTin': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control',
+                    'readonly':True
+                }
+            ),
             'date': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs = {
@@ -691,51 +700,7 @@ class DocumentsForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            # =======================
 
-            'idTrafoOrder': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-
-                }
-            ),
-            'idCommission': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-
-                }
-            ),
-            'idProject': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-
-                }
-            ),
-
-            # =======================
-            'expensesCategory': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-
-                }
-            ),
-            
-            'subCategoryCashBox': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'subCategoryPallRoy': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
             # =======================
             'contabilidad': forms.Select(
                 attrs = {
@@ -759,161 +724,13 @@ class DocumentsForm(forms.ModelForm):
         if not amount > 0:
             raise forms.ValidationError('Ingrese un monto mayor a cero')
         return amount
-
-class DocReconciliationUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Documents
-        fields = [
-            # oculto
-            'user',
-            #'idBankMovements',
-
-            # generales
-            'incomeCategory',
-            'expensesCategory',
-
-            'date',
-            'typeInvoice',
-            'idInvoice',
-            'annotation',
-
-            'idClient',
-            'amountReconcilied',
-
-            'description',
-            
-            'idTrafoOrder',
-            'idCommission',
-            'idProject',
-            
-            'subCategoryPallRoy',
-            'subCategoryCashBox',
-            
-            'contabilidad',
-            'pdf_file'
-            
-        ]
-        widgets = {
-
-            #'idBankMovements': forms.SelectMultiple(
-            #    attrs = {
-            #        'placeholder': '',
-            #        'class': 'input-group-field form-control w-100',
-                    #'disabled': True
-            #    }
-            #),
-            'date': forms.DateInput(
-                format='%Y-%m-%d',
-                attrs = {
-                    'type': 'date',
-                    'placeholder': '',
-                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
-                }
-            ),
-            'typeInvoice': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'idInvoice': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'annotation': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            # =======================
-            'idClient': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'amountReconcilied': forms.NumberInput(
-                attrs = {
-                    'class': 'input-group-field form-control text-center',
-                }
-            ),
-            # =======================
-            'description': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-
-            'idTrafoOrder': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-            'idCommission': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-            'idProject': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-
-            # =======================
-            'expensesCategory': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-            
-            'subCategoryCashBox': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'subCategoryPallRoy': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            # =======================
-            'contabilidad': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-            'pdf_file': forms.ClearableFileInput(
-                attrs = {
-                    'type':"file",
-                    'name':"pdf_file",
-                    'class': 'form-control text-dark',
-                    'id':"id_pdf_file",
-                }
-            ),
-        }
     
-    def clean_amountReconcilied(self):
-        amountReconcilied = self.cleaned_data['amountReconcilied']
-        if not amountReconcilied > 0:
-            raise forms.ValidationError('Ingrese un monto mayor a cero')
-        return amountReconcilied
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(DocumentsForm, self).__init__(*args, **kwargs)
+
+        if self.request:
+            self.fields['idTin'].initial = self.request.session['compania_id']
 
 class UploadFileForm(forms.Form):
     file = forms.FileField(
