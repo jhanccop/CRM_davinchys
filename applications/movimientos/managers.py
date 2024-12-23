@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from django.db.models import Sum, Max, DateField,F, Q, Count, Window
+from django.db.models import Sum, Max, DateField,F, Q, Count, Window, Case, When, FloatField
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
@@ -67,7 +67,12 @@ class BankMovementsManager(models.Manager):
             date__range = rangeDate,
             idAccount__id = cuenta
         ).annotate(
-            per = (F("amountReconcilied")/F("amount")) * 100,
+            #per = (F("amountReconcilied")/F("amount")) * 100,
+            per = Case(
+                When(amount = 0, then = 0.0),
+                default=(F("amountReconcilied")/F("amount")) * 100,
+                output_field=FloatField()
+            ),
             n = Count("mov_origen"),
         ).order_by("-id")
         return result
@@ -122,7 +127,10 @@ class BankMovementsManager(models.Manager):
         )
         result = ids.values('idBankMovements__id').annotate(
             accumulate = Sum("amountReconcilied"),
-            per = Abs(Sum("amountReconcilied")*100/F('idBankMovements__amount')),
+            per = Case(
+                When(idBankMovements__amount = 0, then = 0),
+                default=Abs(Sum("amountReconcilied")*100/F('idBankMovements__amount'))
+            ),
             tin =  ArrayAgg('idClient__ruc'),
             doc =  ArrayAgg('description'),
             amount = ArrayAgg('amountReconcilied'),
