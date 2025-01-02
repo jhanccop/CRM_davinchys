@@ -282,7 +282,7 @@ class BankMovementsManager(models.Manager):
         return dict(resultado)
 
 class DocumentsManager(models.Manager):
-    def ListaDocumentosPorTipo(self,intervalo,tipo):
+    def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -297,12 +297,14 @@ class DocumentsManager(models.Manager):
         if tipo == 5:
             result = self.filter(
                 date__range = rangeDate,
+                idTin__id = compania_id
             ).annotate(
                 per = (F("amountReconcilied")/F("amount")) * 100,
             ).order_by("date")
         else:
             result = self.filter(
                 date__range = rangeDate,
+                idTin__id = compania_id,
                 typeInvoice = str(tipo)
             ).annotate(
                 per = (F("amountReconcilied")/F("amount")) * 100,

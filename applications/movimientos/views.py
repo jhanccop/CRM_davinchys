@@ -192,23 +192,28 @@ class DocumentacionListView(AdminClientsPermisoMixin,ListView):
   context_object_name = 'documentos'
 
   def get_queryset(self,**kwargs):
-      selectedType = self.request.GET.get("DocKword", '')
+    compania_id = self.request.session.get('compania_id')
+    selectedType = self.request.GET.get("DocKword", '')
 
-      intervalDate = self.request.GET.get("dateKword", '')
-      if intervalDate == "today" or intervalDate =="":
-        intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
 
-      if selectedType == "Todo" or selectedType == None or selectedType =="" :
-        selectedType = 5
+    if selectedType == "Todo" or selectedType == None or selectedType =="" :
+      selectedType = 5
 
-      documentation = Documents.objects.ListaDocumentosPorTipo(intervalo = intervalDate, tipo = int(selectedType))
-   
-      payload = {}
-      payload["intervalDate"] = intervalDate
-      payload["selected"] = selectedType
-      payload["documentation"] = documentation
-      
-      return payload
+    documentation = Documents.objects.ListaDocumentosPorTipo(
+      intervalo = intervalDate,
+      tipo = int(selectedType),
+      compania_id = compania_id
+      )
+  
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    payload["selected"] = selectedType
+    payload["documentation"] = documentation
+    
+    return payload
 
 class DocumentacionCreateView(AdminClientsPermisoMixin,CreateView):
   template_name = "movimientos/crear-documentos.html"
