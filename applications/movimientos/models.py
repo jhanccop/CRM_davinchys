@@ -102,7 +102,7 @@ class Documents(TimeStampedModel):
     TOTAL = '2'
     
     ANNOTATION_CHOISES = [
-            (PAGOFINAL, "anticipo"),
+            (ANTICIPO, "anticipo"),
             (PAGOFINAL, "pago final"),
             (TOTAL, "total"),
         ]
