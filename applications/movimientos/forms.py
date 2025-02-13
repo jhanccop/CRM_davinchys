@@ -725,6 +725,15 @@ class DocumentsForm(forms.ModelForm):
             raise forms.ValidationError('Ingrese un monto mayor a cero')
         return amount
     
+    def clean_pdf_file(self):
+        pdf_file = self.cleaned_data.get('pdf_file')
+        if pdf_file:
+            if not pdf_file.name.endswith('.pdf'):
+                raise forms.ValidationError("Archivos permitidos pdf")
+            if pdf_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return pdf_file
+    
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(DocumentsForm, self).__init__(*args, **kwargs)

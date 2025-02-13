@@ -357,6 +357,6 @@ class DocumentationsForm(forms.ModelForm):
         if doc_file:
             if not doc_file.name.endswith('.pdf') and not doc_file.name.endswith('.png') and not doc_file.name.endswith('.jpg') and not doc_file.name.endswith('.jpeg'):
                 raise forms.ValidationError("Archivos permitidos pdf, png, jpg y jpeg.")
-            if doc_file.size > 1*1024*1024:  # 5 MB limit
-                raise forms.ValidationError("El tamaño del archivo no debe superar los 1 MB.")
+            if doc_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return doc_file
