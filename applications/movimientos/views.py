@@ -9,6 +9,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
+from django.utils import timezone
+from datetime import timedelta
+
 from django.views.generic.edit import ModelFormMixin
 
 from applications.users.mixins import (
@@ -103,6 +106,63 @@ class AccountDetail(AdminPermisoMixin,ListView):
     payload["bankMovements"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
     return payload
   
+# ================================ REPORTE SEMANAL ================================
+class WeeklyReportDetail(AdminPermisoMixin,ListView):
+  template_name = "movimientos/reporte-semanal.html"
+  context_object_name = 'movements'
+
+  def get_queryset(self,**kwargs):
+    pk = self.kwargs['pk']
+    year = int(self.kwargs['year'])
+    week = int(self.kwargs['week'])
+
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      today = date.today()
+      week = today.isocalendar()[1]
+      year = today.year
+    else:
+      week = intervalDate.split(" - ")[0]
+      year = intervalDate.split(" - ")[1]
+    
+    print(week,year)
+    # Calcular el inicio y el fin de la semana
+    start_date = timezone.datetime.strptime(f'{year}-{week}-1', "%Y-%W-%w").date()
+    end_date = start_date + timedelta(days=6)
+
+    account = Account.objects.CuentasById(id=pk)
+
+    listIncome = BankMovements.objects.ListaMovimientosPorCuentaPorRangoPorTipo(
+      id = pk,
+      sDate = start_date,
+      eDate = end_date,
+      type = "1" # 0: egreso    1: ingreso
+      )
+
+    listExpense = BankMovements.objects.ListaMovimientosPorCuentaPorRangoPorTipo(
+      id = pk,
+      sDate = start_date,
+      eDate = end_date,
+      type = "0" # 0: egreso    1: ingreso
+      )
+    
+    totalIncome = sum(m.amount for m in listIncome)
+    totalExpense = sum(m.amount for m in listExpense)
+
+    payload = {
+      "account":account,
+      "weekSelect":str(week) + str(year),
+      "listIncome":listIncome,
+      "listExpense":listExpense,
+      "totalIncome":totalIncome,
+      "totalExpense":totalExpense,
+      'balance': totalIncome - totalExpense,
+      'start_date': start_date,
+      'end_date': end_date,
+    }
+
+    return payload
+
 # ================================ FLUJO DE CAJA POR CUENTA ================================
 class CashBalanceDetail(AdminPermisoMixin,ListView):
   template_name = "movimientos/reporte-flujo-de-caja.html"

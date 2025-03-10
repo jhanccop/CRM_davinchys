@@ -280,6 +280,15 @@ class BankMovementsManager(models.Manager):
         print(resultado)
         
         return dict(resultado)
+    
+    # ================================== WEEKLY REPORT ===================================
+    def ListaMovimientosPorCuentaPorRangoPorTipo(self,id,sDate,eDate,type):
+        result = self.filter(
+            idAccount__id = id,
+            date__range=[sDate, eDate],
+            transactionType = type
+        )
+        return result
 
 class DocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):

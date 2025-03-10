@@ -1,9 +1,9 @@
 import os
 from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["167.71.98.235","erpdavinchy.cloud"]
+ALLOWED_HOSTS = ["167.71.98.235","erpdavinchy.cloud","localhost"]
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

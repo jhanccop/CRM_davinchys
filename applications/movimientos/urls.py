@@ -5,7 +5,7 @@ from . import views
 app_name = "movimientos_app"
 
 urlpatterns = [
-    # ============== TRANSFERENCIAS =================
+    # ============== REPORTES =================
     path(
         'reporte-principal/', 
         views.MainReport.as_view(),
@@ -20,6 +20,11 @@ urlpatterns = [
         'reporte-cuentas-detalle/<pk>/', 
         views.AccountDetail.as_view(),
         name='reporte-cuentas-detalle',
+    ),
+    path(
+        'reporte-semanal/<pk>/<int:year>/<int:week>/', 
+        views.WeeklyReportDetail.as_view(),
+        name='reporte-semanal',
     ),
     path(
         'reporte-flujo-de-caja/<pk>/', 

@@ -1,0 +1,340 @@
+{% extends "movimientos/base-reporte.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Cuentas / Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row pt-2">
+    <div class="col-lg-9 col-md-9">
+        <h6 class="mb-0">{{movements.account}} {{movements.account.accountName}}</h6>
+        <p class="text-md mb-0 font-weight-bolder text-secondary">
+            Del {{movements.start_date}} al {{movements.end_date}}
+        </p>
+    </div>
+    <div class="col-lg-3 col-md-3">
+        <form method="GET" class="">{% csrf_token %}
+            <div class="d-flex align-items-center">
+                <div class="input-group input-group-outline">
+                    <input class="form-control datetimepicker text-center text-dark" value="{{object_list.weekSelect}}"
+                        placeholder="today" id="dateKword" name="dateKword">
+                </div>
+                &emsp;
+                <div class="pt-3 pb-0">
+                    <button class="btn bg-gradient-secondary" type="submit"> Buscar </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================ TABLES ================= -->
+
+<div class="row mt-2">
+    <!-- ================ INCOME TABLE ================= -->
+    <div class="col-lg-6 col-12">
+        <div class="card">
+            <div class="card-header p-2">
+                <h6 class="mb-0 ps-4"> Tabla de ingresos</h6>
+            </div>
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                        <thead class="thead-light">
+                            <tr>
+                                <th
+                                    class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">
+                                    Fecha </th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Razón Social
+                                    (Destino)</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">EEC/ Motivo
+                                </th>
+                                <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in movements.listIncome %}
+                            <tr>
+                                <td class="text-xs">
+                                    <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.date|date:'d-m-Y' }}</a>
+                                    
+                                </td>
+                                <td class="text-xs">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}}</a> 
+                                    </div>
+                                </td>
+                                <td class="text-xs">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}"> <span class="text-xxs text-secondary">nOp:{{t.opNumber}} 0455 {{t.description}}</span>  / </a>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-end">
+                                    <span class="me-2 text-xs font-weight-bold text-success">{{ t.amount|floatformat:"2g"}}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th class="h6 ps-4 text-sm">Total</th>
+                                <th class="h6 ps-4 text-sm-end">
+                                    {{movements.account.get_currency_display }}
+                                    {{movements.totalIncome|floatformat:"2g"}}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================ EXPENSE TABLE ================= -->
+    <div class="col-lg-6 col-12">
+        <div class="card">
+            <div class="card-header p-2">
+                <h6 class="mb-0 ps-4"> Tabla de egresos</h6>
+            </div>
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                        <thead class="thead-light">
+                            <tr>
+                                <th
+                                    class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">
+                                    Fecha </th>
+                                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Razón Social
+                                    (Destino)</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">EEC/ Motivo
+                                </th>
+                                <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in movements.listExpense %}
+                            <tr  class="p-0 mb-0">
+                                <td class="text-xs">
+                                    <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.date|date:'d-m-Y' }}</a>
+                                    
+                                </td>
+                                <td class="text-xs">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}}</a> 
+                                    </div>
+                                </td>
+                                <td class="text-xs">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <a href="{% url 'movimientos_app:movimientos-detalle' t.id %}"> <span class="text-xxs text-secondary">nOp:{{t.opNumber}} 0455 {{t.description}}</span>  / </a>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-end">
+                                    <span class="me-2 text-xs font-weight-bold text-primary">{{ t.amount|floatformat:"2g"}}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th class="h6 ps-4 text-sm">Total</th>
+                                <th class="h6 ps-4 text-sm-end">
+                                    {{movements.account.get_currency_display}}
+                                    {{movements.totalExpense|floatformat:"2g"}}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-5 mb-md-0">
+    <div class="col-sm-8">
+        <div class="card overflow-hidden h-100">
+            <div class="card overflow-hidden h-100">
+                <div class="card-body mt-3 p-0">
+                  <div class="chart bg-gradient-white ">
+                    <div ui-jp="plot" id="AllPlots" style="height: 300px;"></div>
+                  </div>
+                </div>
+              </div>
+          </div>
+    </div>
+
+    <!-- ================ RESUME ================= -->
+    <div class="col-sm-4">
+      <div class="card h-100 mt-4 mt-md-0">
+        <div class="card-header pb-0 p-3">
+          <div class="d-flex align-items-center">
+            <h6>Resumen</h6>
+          </div>
+        </div>
+        <div class="card-body px-3 pt-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center justify-content-center mb-0">
+              
+              <tbody>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">1. Saldo inicial</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0 text-end font-weight-bold text-dark"> {{movements.account.get_currency_display}} {{movements.totalIncome|floatformat:"2g"}}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">2. Ingresos</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0 text-end font-weight-bold text-success">{{movements.account.get_currency_display}} {{movements.totalIncome|floatformat:"2g"}}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">3. Egresos</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0 text-end font-weight-bold text-primary">{{movements.account.get_currency_display}} {{movements.totalExpense|floatformat:"2g"}}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">4. Balance</p>
+                  </td>
+                  <td>
+                    {% if movements.balance < 0 %}
+                    <p class="text-sm font-weight-normal mb-0 text-end font-weight-bold text-primary">{{movements.account.get_currency_display}} {{movements.balance|floatformat:"2g"}}</p>
+                    {% else %}
+                    <p class="text-sm font-weight-normal mb-0 text-end font-weight-bold text-success">{{movements.account.get_currency_display}} {{movements.balance|floatformat:"2g"}}</p>
+                    {% endif%}
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">5. Saldo Final Calculado</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0 text-end">1,442</p>
+                  </td>
+                </tr>
+                <tr>
+                    <td>
+                      <p class="text-sm font-weight-normal mb-0">6. Saldo Final EEC</p>
+                    </td>
+                    <td>
+                      <p class="text-sm font-weight-normal mb-0 text-end">1,442</p>
+                    </td>
+                  </tr>
+                <tr>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0">7. Diferencia</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal mb-0 text-end">201</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr(".datetimepicker", {
+            weekNumbers: true,
+            dateFormat: "W - Y",
+            altFormat: "W - Y",
+            altInput: true,
+            locale: {
+                firstDayOfWeek: 1 // Monday as first day (ISO week numbering)
+            },
+            /*
+            onChange: function(selectedDates, dateStr, instance) {
+                // The dateStr will be in the format "Week Number, Year"
+                // e.g. "1, 2025" for the first week of 2025
+                console.log("Selected:", dateStr);
+            }*/
+        });
+    }
+
+    
+</script>
+
+<script src="{% static 'assets/js/plugins/plotly-2.12.1.min.js' %}"></script>
+<script>
+    let expense = [];
+    let income = [];
+    let daysIncome = [];
+    let daysExpense = [];
+
+    '{% for value in movements.listIncome %}'
+    daysIncome.push("{{value.date|date:'M-d'}}");
+    income.push("{{value.amount}}");
+    '{% endfor %}'
+
+    '{% for value in movements.listExpense %}'
+    daysExpense.push("{{value.date|date:'M-d'}}");
+    expense.push("{{value.amount}}");
+    '{% endfor %}'
+
+    var trace1 = {
+        x: daysIncome,
+        y: income,
+        type: 'bar',
+        text: income.map(String),
+        name: 'Ingresos',
+        marker: {
+            color: 'rgb(76,175,80)',
+            opacity: 0.7,
+        }
+    };
+
+    var trace2 = {
+        x: daysExpense,
+        y: expense,
+        type: 'bar',
+        text: expense.map(String),
+        name: 'Egresos',
+        marker: {
+            color: 'rgb(233,33,99)',
+            opacity: 0.7
+        }
+    };
+
+    var data = [trace1, trace2];
+
+    var layout = {
+        //height: 200,
+        margin: { "t": 35, "b": 20, "l": 35, "r": 20 },
+        title: {
+            text: 'Movimientos'
+        },
+        xaxis: {
+            tickangle: 0
+        },
+        barmode: 'group'
+    };
+
+    Plotly.newPlot('AllPlots', data, layout);
+
+</script>
+
+{% endblock JSscripts %}
