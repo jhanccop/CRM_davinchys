@@ -51,6 +51,13 @@
               <div class="row">
                 <div class="col-6 col-sm-4">
                   <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo de movimiento</label>
+                    {{ form.transactionType }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
                     <label for="exampleFormControlInput1" class="form-label">Monto</label>
                     {{ form.amount }}
                   </div>
@@ -62,14 +69,24 @@
                     {{ form.opNumber }}
                   </div>
                 </div>
-
-                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-12 col-sm-12">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Tipo de movimiento</label>
-                    {{ form.transactionType }}
+                    <label for="exampleFormControlInput1" class="form-label">Justificación</label>
+                    {{ form.justification }}
                   </div>
                 </div>
-
+              </div>
+              <br>
+              <h6 class="font-weight-bolder">Intermediario</h6>
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline">
+                    {{ form.intermediary }}
+                  </div>
+                </div>
               </div>
 
               <br>
@@ -91,7 +108,7 @@
               </div>
 
               <br>
-              <h6 class="font-weight-bolder">Origen o destino</h6>
+              <h6 class="font-weight-bolder">Destino</h6>
               <div class="row">
                 <div class="col-12 col-sm-12">
                   <div class="input-group input-group-outline">
@@ -159,6 +176,10 @@
 <script type="text/javascript">
   if (document.getElementById('id_originDestination')) {
     var element = document.getElementById('id_originDestination');
+    const example = new Choices(element, {});
+  }
+  if (document.getElementById('id_intermediary')) {
+    var element = document.getElementById('id_intermediary');
     const example = new Choices(element, {});
   }
 </script>

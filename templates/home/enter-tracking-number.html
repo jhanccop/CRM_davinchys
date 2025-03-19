@@ -1,0 +1,71 @@
+{% extends 'home/base-home.html' %}
+{% load static %}
+
+{% block title %} Tracking {% endblock title %}
+
+{% block content %}
+
+<br><br>
+<div class="row">
+    <div class="col-12 col-lg-8 mx-auto my-5">
+        <div class="card">
+
+            <div class="card-body">
+                <form class="multisteps-form__form" style="height: 371px;">
+                    <!--single form panel-->
+                    <div class="multisteps-form__panel js-active" data-animation="FadeIn">
+                        <div class="row text-center mt-4">
+                            <div class="col-10 mx-auto">
+                                <h5 class="font-weight-normal">Enter number tracking</h5>
+                            </div>
+                        </div>
+                        <div class="multisteps-form__content">
+                            <form method="GET" class="">{% csrf_token %}
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-8 mt-4 mt-sm-0 text-start">
+                                    <div class="input-group input-group-outline focused is-focused mb-4">
+                                        <label class="form-label">  Tracking</label>
+                                        <input type="text" class="form-control focused is-focused " value="{{order.order}}" id="order" name="order">
+                                    </div>
+
+                                </div>
+                                <div class="col-12 col-sm-4 mt-4 mt-sm-0 text-start">
+                                    <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="submit"
+                                        title="Next">search</button>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+
+                        {% if order.tracking %}
+
+                        <div class="d-flex">
+                            <a href="/media/{{ order.tracking.0.pdf_file }}">
+                                <div>
+                                    <div class="icon icon-shape bg-gradient-info icon-md text-center border-radius-md shadow-none">
+                        
+                                        <i class="fas fa-file-pdf text-white text-lg"></i>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="ms-3">
+                                <a href="/media/{{ order.tracking.0.pdf_file }}">
+                                    <div class="numbers">
+                                        <h6 class="mb-1 text-dark text-sm">{{ order.tracking.0.pdf_file }} </h6>
+                                        <span class="text-sm">Last update: {{ order.tracking.0.modified }}</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        <h6>Not found</h6>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

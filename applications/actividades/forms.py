@@ -14,7 +14,6 @@ from .models import (
 from applications.users.models import User
 
 class ProjectsForm(forms.ModelForm):
-    
     class Meta:
         model = Projects
         fields = [
@@ -286,7 +285,6 @@ class QuoteTrafoForm(forms.ModelForm):
         self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
 
 class TrafoForm(forms.ModelForm):
-    
     class Meta:
         model = Trafos
         fields = (
@@ -524,7 +522,6 @@ class TrafoTaskForm(forms.ModelForm):
         }
 
 class SuggestionBoxForm(forms.ModelForm):
-    
     class Meta:
         model = SuggestionBox
         fields = [

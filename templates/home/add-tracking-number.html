@@ -1,0 +1,84 @@
+{% extends "actividades/base-actividades.html" %}
+
+{% load  static %}
+
+{% block title %} Tracking {% endblock title %}
+
+{% block main %} Tracking {% endblock main %}
+{% block appName %} ordenes {% endblock appName %}
+{% block Type %} crear {% endblock Type %}
+
+{% block panel-content %}
+<div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+        <div class="card">
+            <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+                <div class="bg-gradient-primary shadow-dark border-radius-lg pt-3 pb-2">
+                    <h6 class="text-center text-white"> AGREGAR NUEVO SEGUIMIENTO </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="" method="POST">{% csrf_token %}
+
+                    <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+                        <div class="multisteps-form__content">
+                            <h5 class="font-weight-bolder">Informacion de proyecto</h5>
+                            <div class="row">
+                                <div class="col-12 col-sm-4">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">
+                                            Número de seguimiento
+                                        </label>
+                                        {{ form.trackingNumber }}
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">Estado</label>
+                                        {{ form.status }}
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-12">
+                                    <p class="mb-0"> Documentos </p>
+                                    <div class="input-group input-group-outline">
+                                        <div class="form-group">
+                                            {{ form.pdf_file }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 5.0 MB.</p>
+                                    {% for error in form.pdf_file.errors %}
+                                    <p class="text-sm text-primary font-weight-bolder mb-0">
+                                        {{ error|escape }}
+                                    </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="button-row d-flex mt-4">
+                                <a class="btn bg-gradient-dark" href="{% url 'home_app:list-tracking-number' %}">
+                                    REGRESAR </a>
+                                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit"
+                                    title="Next">AGREGAR</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+{% endblock JSscripts %}

@@ -151,7 +151,7 @@ class WeeklyReportDetail(AdminPermisoMixin,ListView):
 
     payload = {
       "account":account,
-      "weekSelect":str(week) + str(year),
+      "weekSelect":str(week) + " - " + str(year),
       "listIncome":listIncome,
       "listExpense":listExpense,
       "totalIncome":totalIncome,
@@ -334,14 +334,19 @@ class MovimientosListView(AdminClientsPermisoMixin,ListView):
     payload["bankMovements"] = bankMovements
     return payload
 
-class MovimientosEditView(AdminClientsPermisoMixin,UpdateView):
+class MovimientosEditView(UpdateView):
   template_name = "movimientos/editar-movimientos.html"
   model = BankMovements
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientos_app:lista-movimientos')
-  def get_queryset(self,**kwargs):
-    payload = { "compania_id": self.request.session.get('compania_id')}
-    return payload
+
+  #def get_queryset(self,**kwargs):
+  #  payload = { "compania_id": self.request.session.get('compania_id')}
+  #  return payload
+  def get_form_kwargs(self):
+    kwargs = super().get_form_kwargs()
+    kwargs['request'] = self.request
+    return kwargs
 
 class MovimientosCreateView(AdminClientsPermisoMixin,CreateView):
   template_name = "movimientos/crear-movimientos.html"

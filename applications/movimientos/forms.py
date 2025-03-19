@@ -503,9 +503,11 @@ class BankMovementsForm(forms.ModelForm):
             'idAccount',
             'date',
             'description',
+            'transactionType',
             'amount',
             'opNumber',
-            'transactionType',
+            'justification',
+            'intermediary',
             'expenseSubCategory',
             'incomeSubCategory',
             'originDestination'
@@ -530,6 +532,13 @@ class BankMovementsForm(forms.ModelForm):
                         'class': 'input-group-field form-control',
                     }
                 ),
+                'transactionType': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
+                        'onchange':"toggleDiv()"
+                    }
+                ),
                 'amount': forms.NumberInput(
                     attrs = {
                         'class': 'input-group-field form-control',
@@ -541,11 +550,16 @@ class BankMovementsForm(forms.ModelForm):
                         'class': 'input-group-field form-control',
                     }
                 ),
-                'transactionType': forms.Select(
+                'justification': forms.TextInput(
                     attrs = {
                         'placeholder': '',
                         'class': 'input-group-field form-control',
-                        'onchange':"toggleDiv()"
+                    }
+                ),
+                'intermediary': forms.Select(
+                    attrs = {
+                        'placeholder': '',
+                        'class': 'input-group-field form-control',
                     }
                 ),
                 'expenseSubCategory': forms.Select(

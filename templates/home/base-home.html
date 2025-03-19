@@ -6,8 +6,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/oil-refinery.png' %}">
-    <link rel="icon" type="image/png" href=".{% static 'assets/img/oil-refinery.png' %}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/crm.png' %}">
+    <link rel="icon" type="image/png" href=".{% static 'assets/img/crm.png' %}">
     <title>
         ERP - {% block title %}{% endblock title %}
     </title>
@@ -18,7 +18,7 @@
     <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet" />
     <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
     <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <script src="{% static 'assets/js/plugins/awesone.js' %}" crossorigin="anonymous"></script>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- CSS Files -->
@@ -70,9 +70,9 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link me-2" type="button" href="">
+                                    <a class="nav-link me-2" type="button" href="{% url 'home_app:enter-tracking-number' %}">
                                         <i class="fas fa-key opacity-6 text-dark me-1"></i>
-                                        Contact Us
+                                        Tracking
                                     </a>
                                 </li>
                                 <li class="nav-item">

@@ -393,6 +393,14 @@ class BankMovements(TimeStampedModel):
         null=True,
         blank=True
     )
+    justification = models.CharField(
+        'Justification',
+        max_length = 50,
+        null=True,
+        blank=True
+    )
+    intermediary = models.ForeignKey(Cliente,on_delete=models.CASCADE, null=True, blank=True,related_name="intermeddiario")
+
     conciliated = models.BooleanField(
         'Conciliado?',
         default=False

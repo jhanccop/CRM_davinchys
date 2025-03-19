@@ -5,6 +5,8 @@ from django.views.generic import (
     CreateView,
     TemplateView,
     ListView,
+    DeleteView,
+    UpdateView
 )
 
 from django.urls import reverse_lazy
@@ -20,11 +22,46 @@ from applications.actividades.forms import TrafoForm
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 #
-#from .functions import detalle_resumen_ventas
+from .models import ContainerTracking
+
+from .forms import TrackingForm
 
 class HomeView(TemplateView):
     template_name = "home/home.html"
-    
+
+class EnterTrackingNumberView(ListView):
+    template_name = "home/enter-tracking-number.html"
+    context_object_name = 'order'
+
+    def get_queryset(self):
+        order = self.request.GET.get("order", '')
+        payload = {}
+        payload["order"] = order
+        payload["tracking"] = ContainerTracking.objects.searchOrder(order = order)
+        return payload
+
+class TrackingListView(LoginRequiredMixin,ListView):
+    template_name = "home/list-tracking-number.html"
+    context_object_name = 'order'
+    model = ContainerTracking
+
+class TrackingCreateView(LoginRequiredMixin, CreateView):
+    template_name = "home/add-tracking-number.html"
+    model = ContainerTracking
+    form_class = TrackingForm
+    success_url = reverse_lazy('home_app:list-tracking-number')
+
+class TrackingEditView(LoginRequiredMixin, UpdateView):
+    template_name = "home/edit-tracking-number.html"
+    model = ContainerTracking
+    form_class = TrackingForm
+    success_url = reverse_lazy('home_app:list-tracking-number')
+
+class TrackingDeleteView(LoginRequiredMixin,DeleteView):
+    template_name = "home/delete-tracking-number.html"
+    model = ContainerTracking
+    success_url = reverse_lazy('home_app:list-tracking-number')
+
 class QuoteView(CreateView):
     template_name = "home/quote-with-us.html"
     model = Trafos

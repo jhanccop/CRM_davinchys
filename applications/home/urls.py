@@ -21,5 +21,30 @@ urlpatterns = [
         views.PanelHomeView.as_view(),
         name='index',
     ),
+    path(
+        'enter-tracking-number/', 
+        views.EnterTrackingNumberView.as_view(),
+        name='enter-tracking-number',
+    ),
+    path(
+        'list-tracking-number/', 
+        views.TrackingListView.as_view(),
+        name='list-tracking-number',
+    ),
+    path(
+        'add-tracking-number/', 
+        views.TrackingCreateView.as_view(),
+        name='add-tracking-number',
+    ),
+    path(
+        'edit-tracking-number/<pk>/', 
+        views.TrackingEditView.as_view(),
+        name='edit-tracking-number',
+    ),
+    path(
+        'delete-tracking-number/<pk>/', 
+        views.TrackingDeleteView.as_view(),
+        name='delete-tracking-number',
+    ),
     
 ]
