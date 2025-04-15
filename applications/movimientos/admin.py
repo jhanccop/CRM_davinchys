@@ -169,3 +169,8 @@ class ConciliationAdmin(ImportExportModelAdmin):
     
     search_fields = ('idMovOrigin',)
     list_filter = ('type',)
+
+
+admin.site.site_header = "Administrador Davinchys"
+admin.site.site_title = "Administrador Davinchys"
+admin.site.index_title = "Bienvenido al Panel de Administración"

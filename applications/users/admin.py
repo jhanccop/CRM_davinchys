@@ -17,6 +17,7 @@ class UserAdmin(ImportExportModelAdmin):
         'id',
         'full_name',
         'last_name',
+        'last_login',
         'position',
         'condition'
     )
