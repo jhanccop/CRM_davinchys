@@ -389,13 +389,13 @@ class BankMovements(TimeStampedModel):
     )
     opNumber = models.CharField(
         'Numero de operacion',
-        max_length=10,
+        max_length=15,
         null=True,
         blank=True
     )
     justification = models.CharField(
         'Justification',
-        max_length = 50,
+        max_length = 100,
         null=True,
         blank=True
     )
@@ -611,6 +611,11 @@ class InternalTransfers(TimeStampedModel):
 #post_save.connect(update_cuentas_transferencias, sender = InternalTransfers)
 #post_save.connect(update_reconcilation, sender = BankMovements)
 #m2m_changed.connect(update_movimientos_destino, sender = BankMovements)
+
+#@receiver(pre_save, sender = BankMovements)
+#def search_tinAccounts(sender, instance, **kwargs):
+#    if not instance.campo_auto:
+#        instance.campo_auto = "Valor automático"
 
 @receiver(post_save, sender=BankMovements)
 def update_movimientos_destino(sender, instance,**kwargs):

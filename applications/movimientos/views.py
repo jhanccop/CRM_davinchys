@@ -380,6 +380,13 @@ class ConciliarMovimientoConDocumentoCreateView(AdminClientsPermisoMixin,CreateV
     context['mov'] = bankMovement
     context['sum'] = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(bankMovement.id)
     return context
+  
+  def get_form_kwargs(self):
+        # Obtén los kwargs que normalmente se pasan al formulario
+        kwargs = super().get_form_kwargs()
+        company_id = self.request.session.get('compania_id')
+        kwargs['company_id'] = company_id
+        return kwargs
 
 class ConciliarMovimientoConMovimientoCreateView(AdminClientsPermisoMixin,CreateView):
   template_name = "movimientos/conciliar-movimiento-con-movimiento.html"
