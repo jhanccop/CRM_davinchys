@@ -395,7 +395,7 @@ class BankMovements(TimeStampedModel):
     )
     justification = models.CharField(
         'Justification',
-        max_length = 150,
+        max_length = 250,
         null=True,
         blank=True
     )
