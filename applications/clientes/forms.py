@@ -17,8 +17,8 @@ class ClientForm(forms.ModelForm):
             'email',
             'typeClient',
             'locationClient',
-            'bankName',
-            'account'
+            #'bankName',
+            #'account'
         )
         widgets = {
             'tradeName': forms.TextInput(
@@ -80,16 +80,16 @@ class ClientForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'bankName': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'account': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
+            #'bankName': forms.Select(
+            #    attrs = {
+            #        'class': 'input-group-field form-control',
+            #    }
+            #),
+            #'account': forms.TextInput(
+            #    attrs = {
+            #        'placeholder': '',
+            #        'class': 'input-group-field form-control',
+            #    }
+            #),
         }
 

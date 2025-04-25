@@ -96,7 +96,7 @@
               <tr>
                 <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha
                 </th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción, EEC</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">EEC, Razón social EEC, Para qué</th>
                 <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto, Avance</th>
                 <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">
 
@@ -123,9 +123,12 @@
                 </td>
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-sm"> <a
-                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} <span class="text-xs text-secondary">[{{t.originDestination.tradeName}}]</span></a> </h6>
+                    <h6 class="mb-0 text-xs text-secondary"> <a
+                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}">{{t.description}} <span class=" text-dark"> -> {{t.originDestination.tradeName}} </span></a> </h6>
                     <p class="text-sm font-weight-normal text-secondary mb-0">
+                      <a
+                        href="{% url 'movimientos_app:movimientos-detalle' t.id %}"> {{t.justification}}
+                      </a>
                       <a
                         href="{% url 'movimientos_app:movimientos-detalle' t.id %}">
                         {% if t.expenseSubCategory %}

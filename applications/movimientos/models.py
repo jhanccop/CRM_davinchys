@@ -1,11 +1,12 @@
 # third-party
+import re
 from model_utils.models import TimeStampedModel
 
 from django.db import models
 from django.conf import settings
 
 from applications.cuentas.models import Account, Tin
-from applications.clientes.models import Cliente
+from applications.clientes.models import Cliente, CuentasBancarias
 
 from .managers import (
     DocumentsUploadedManager,
@@ -612,26 +613,39 @@ class InternalTransfers(TimeStampedModel):
 #post_save.connect(update_reconcilation, sender = BankMovements)
 #m2m_changed.connect(update_movimientos_destino, sender = BankMovements)
 
-#@receiver(pre_save, sender = BankMovements)
-#def search_tinAccounts(sender, instance, **kwargs):
-#    if not instance.campo_auto:
-#        instance.campo_auto = "Valor automático"
+@receiver(pre_save, sender = BankMovements)
+def search_tinAccounts(sender, instance, **kwargs):
+    try:
+        text = instance.description
+        codeNumber = re.sub(r'\D', '', text)
+        #print(text,codeNumber)
+        accountClient = CuentasBancarias.objects.filter(
+            account__contains = codeNumber
+        ).first()
+        #print(accountClient)
+        if accountClient:
+            instance.originDestination = accountClient.idClient
+        else:
+            pass
+            
+    except Exception as e:
+        print(f"Error al buscar el modelo relacionado: {str(e)}")
 
 @receiver(post_save, sender=BankMovements)
 def update_movimientos_destino(sender, instance,**kwargs):
   #from .models import BankMovements
 
   if instance.conciliationType != "0":
-    print("mmmmmmmmmmmmmmmmm")
+    #print("mmmmmmmmmmmmmmmmm")
 
-    print(instance.id)
-    print(instance.idAccount)
-    print(instance.date)
-    print(instance.description)
-    print(instance.transactionType)
-    print(instance.amount)
-    print(instance.amountReconcilied)
-    print(instance.idMovement.all())
+    #print(instance.id)
+    #print(instance.idAccount)
+    #print(instance.date)
+    #print(instance.description)
+    #print(instance.transactionType)
+    #print(instance.amount)
+    #print(instance.amountReconcilied)
+    #print(instance.idMovement.all())
 
 
     if not kwargs["created"]:
