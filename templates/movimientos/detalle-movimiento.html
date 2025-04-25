@@ -20,7 +20,7 @@
               </h6>
               <p class="d-block text-dark">{{mov.bankMovement.idAccount}} </p>
             </div>
-            <div class="col-lg-3 col-md-7 text-md-end text-start mt-5">
+            <div class="col-lg-8 col-md-7 text-md-end text-start mt-5">
               <h6 class="d-block mt-2 mb-0">
                 {% if mov.bankMovement.transactionType == "0" %}
                 <span class="text-primary">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amount|floatformat:"2g"}}</span>
@@ -28,7 +28,8 @@
                 <span class="text-success">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amount|floatformat:"2g"}}</span>
                 {% endif %}
               </h6>
-              <p class="text-dark">{{mov.bankMovement.description}}<br>
+              <p class="text-dark text-sm">{{mov.bankMovement.description}} -> {{mov.bankMovement.originDestination}}<br>
+                {{mov.bankMovement.justification}}<br>
                 {{mov.bankMovement.date}}<br>
                 nOp: {{mov.bankMovement.opNumber}}
               </p>

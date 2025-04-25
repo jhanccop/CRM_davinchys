@@ -149,11 +149,15 @@ class CuentasBancarias(models.Model):
     AHORROS = '0'
     CORRIENTE = '1'
     SUELDO = '2'
+    AHORROSJSAT = '3'
+    AHORROSDAV = '4'
 
     TYPE_ACCOUNT_CHOISES = [
         (AHORROS, "Ahorros"),
         (CORRIENTE, "Corriente"),
         (SUELDO, "Sueldo"),
+        (AHORROSJSAT, "Ahorros JSAT"),
+        (AHORROSDAV, "Ahorros DAVINCHY"),
     ]
 
     typeAccount = models.CharField(

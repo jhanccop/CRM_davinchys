@@ -176,7 +176,11 @@
                       --
                       {% endif %}
 
-                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp;{{i.idDoc.idInvoice}} &nbsp;&nbsp;&nbsp;&nbsp;
+                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp; 
+                      <a href="{% url 'movimientos_app:documentacion-detalle' i.idDoc.id %}">
+                        {{i.idDoc.idInvoice}}
+                      </a>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
                       {{i.idDoc.idClient}}
                     </p>
                     {% else %}
@@ -187,12 +191,7 @@
                       &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.opNumber}} - {{i.idMovArrival.description}}
                     </p>
                     {% endif %}
-
-
-
                     {% endfor %}
-
-
                   </div>
                 </td>
 
