@@ -91,7 +91,7 @@ class ConciliationMovDocForm(forms.ModelForm):
             "type",
             'idDoc',
             'amountReconcilied',
-            'exchangeRate',
+            'equivalentAmount',
             'status'
         ]
         widgets = {
@@ -114,7 +114,7 @@ class ConciliationMovDocForm(forms.ModelForm):
                         'class': 'input-group-field form-control',
                     }
                 ),
-                'exchangeRate': forms.NumberInput(
+                'equivalentAmount': forms.NumberInput(
                     attrs = {
                         'class': 'input-group-field form-control',
                     }
@@ -156,11 +156,11 @@ class ConciliationMovDocForm(forms.ModelForm):
         
         return amountReconcilied
     
-    def clean_exchangeRate(self):
-        exchangeRate = self.cleaned_data['exchangeRate']
-        if exchangeRate <= 0:
+    def clean_equivalentAmount(self):
+        equivalentAmount = self.cleaned_data['equivalentAmount']
+        if equivalentAmount < 0:
             raise forms.ValidationError('Ingrese un tipo de cambio válido.')
-        return exchangeRate
+        return equivalentAmount
     
     def clean_idDoc(self):
         doc = self.cleaned_data['idDoc']
@@ -217,7 +217,7 @@ class EditConciliationMovDocForm(forms.ModelForm):
         
     def clean_amountReconcilied(self):
         amountReconcilied = self.cleaned_data['amountReconcilied']
-        exchangeRate = self.cleaned_data['exchangeRate']
+        equivalentAmount = self.cleaned_data['equivalentAmount']
         doc = self.cleaned_data.get('idDoc',None)
         if doc == None:
             raise forms.ValidationError('Primero ingrese un documento.')
@@ -233,11 +233,11 @@ class EditConciliationMovDocForm(forms.ModelForm):
         if amountReconcilied <= 0:
             raise forms.ValidationError('Ingrese un monto mayor a cero.')
         
-        diffAmountAmountReconcilied = amountOrigin.amount - amountOrigin.amountReconcilied + accIdDocSum * exchangeRate
+        diffAmountAmountReconcilied = amountOrigin.amount - amountOrigin.amountReconcilied + accIdDocSum + equivalentAmount
         if amountReconcilied > diffAmountAmountReconcilied:
             raise forms.ValidationError(f'El monto máximo a conciliar es {diffAmountAmountReconcilied}')
         
-        diffAmountDocaccIdDocSum = AmountDoc - accIdDocSum * exchangeRate
+        diffAmountDocaccIdDocSum = AmountDoc - accIdDocSum + equivalentAmount
         if amountReconcilied > diffAmountDocaccIdDocSum:
             raise forms.ValidationError(f'El monto supera al saldo en el documento. {diffAmountDocaccIdDocSum}')
         
@@ -257,7 +257,7 @@ class ConciliationMovMovForm(forms.ModelForm):
             "type",
             'idMovArrival',
             'amountReconcilied',
-            'exchangeRate',
+            'equivalentAmount',
             'status'
         ]
         widgets = {
@@ -287,7 +287,7 @@ class ConciliationMovMovForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'exchangeRate': forms.NumberInput(
+            'equivalentAmount': forms.NumberInput(
                 attrs = {
                     'class': 'input-group-field form-control',
                 }
@@ -335,11 +335,11 @@ class ConciliationMovMovForm(forms.ModelForm):
         
         return amountReconcilied
     
-    def clean_exchangeRate(self):
-        exchangeRate = self.cleaned_data['exchangeRate']
-        if exchangeRate <= 0:
+    def clean_equivalentAmount(self):
+        equivalentAmount = self.cleaned_data['equivalentAmount']
+        if equivalentAmount < 0:
             raise forms.ValidationError('Ingrese un tipo de cambio válido.')
-        return exchangeRate
+        return equivalentAmount
             
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.pop("pk")
@@ -361,7 +361,7 @@ class EditConciliationMovMovForm(forms.ModelForm):
             'idMovArrival',
             'amountReconcilied',
             'status',
-            'exchangeRate'
+            'equivalentAmount'
         ]
         widgets = {
             'idMovArrival': forms.Select(
@@ -397,7 +397,7 @@ class EditConciliationMovMovForm(forms.ModelForm):
                     #'disabled': True
                 }
             ),
-            'exchangeRate': forms.NumberInput(
+            'equivalentAmount': forms.NumberInput(
                 attrs = {
                     'class': 'input-group-field form-control',
                     #'disabled': True
@@ -414,7 +414,7 @@ class EditConciliationMovMovForm(forms.ModelForm):
     def clean_amountReconcilied(self):
         #print(self.cleaned_data)
         amountReconcilied = self.cleaned_data['amountReconcilied']
-        exchangeRate = self.cleaned_data['exchangeRate']
+        equivalentAmount = self.cleaned_data['equivalentAmount']
         idOrigin = self.cleaned_data['idMovOrigin']
 
         idArrival = self.cleaned_data.get('idMovArrival',None)
@@ -428,11 +428,11 @@ class EditConciliationMovMovForm(forms.ModelForm):
         if amountReconcilied <= 0: # validación para depurar numeros negativos
             raise forms.ValidationError('Ingrese un monto mayor a cero.')
 
-        diff = amountOrigin - amountReconciliedOrigin + amountReconciliedArrival * exchangeRate
+        diff = amountOrigin - amountReconciliedOrigin + amountReconciliedArrival + equivalentAmount
         if amountReconcilied > diff: # validación par no superar el monto pendiente del movimeinto de origen
             raise forms.ValidationError(f'Ingrese un monto menor a {diff}.')
         
-        diff2 = idArrival.amount - idArrival.amountReconcilied + amountReconciliedArrival * exchangeRate
+        diff2 = idArrival.amount - idArrival.amountReconcilied + amountReconciliedArrival + equivalentAmount
         if amountReconcilied > diff2:
             raise forms.ValidationError(f'Ingrese un monto menor a {diff2}.')
         

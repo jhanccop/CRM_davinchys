@@ -512,7 +512,7 @@ class Conciliation(TimeStampedModel):
     )
 
     status = models.BooleanField("Status", default=False)
-    exchangeRate = models.DecimalField("Tipo de cambio", max_digits=4,decimal_places=3,default=1)
+    equivalentAmount = models.DecimalField("Monto equivalente", max_digits=10,decimal_places=3,default=0)
 
     objects = ConciliationManager()
 

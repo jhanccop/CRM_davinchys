@@ -1,5 +1,5 @@
 from datetime import date, timedelta, datetime
-from django.db.models import Sum, Max, DateField,F, Q, Count, Window, Case, When, FloatField
+from django.db.models import Sum, Max, DateField,F, Q, Count, When, Value, Case, When, FloatField
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
@@ -308,7 +308,12 @@ class DocumentsManager(models.Manager):
                 date__range = rangeDate,
                 idTin__id = compania_id
             ).annotate(
-                per = (F("amountReconcilied")/F("amount")) * 100,
+                per=Case(
+                    When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
+                    default=(F("amountReconcilied") * 100) / F("amount"),
+                    output_field=FloatField()
+                ),
+                #per = (F("amountReconcilied")/F("amount")) * 100,
             ).order_by("date")
         else:
             result = self.filter(
@@ -316,7 +321,12 @@ class DocumentsManager(models.Manager):
                 idTin__id = compania_id,
                 typeInvoice = str(tipo)
             ).annotate(
-                per = (F("amountReconcilied")/F("amount")) * 100,
+                per=Case(
+                    When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
+                    default=(F("amountReconcilied") * 100) / F("amount"),
+                    output_field=FloatField()
+                ),
+                #per = (F("amountReconcilied")/F("amount")) * 100,
             ).order_by("date")
 
         return result
