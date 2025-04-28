@@ -50,7 +50,7 @@ class Cliente(models.Model):
         ]
     
     tradeName = models.CharField('Razon Social',blank = True, null=True)
-    ruc = models.CharField('RUC - DNI',blank = True, null=True)
+    ruc = models.CharField('RUC - DNI',blank = True, null=True, unique=True)
     brandName = models.CharField('Marca',blank = True, null=True)
     city = models.CharField('Ciudad',blank = True, null=True)
     phoneNumber = models.CharField('Telefono',blank = True, null=True)

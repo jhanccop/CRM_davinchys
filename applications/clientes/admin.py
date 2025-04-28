@@ -40,6 +40,7 @@ class ClienteResource(resources.ModelResource):
 class ClienteAdmin(ImportExportModelAdmin):
     resource_class = ClienteResource
     list_display = (
+        'id',
         'tradeName',
         'ruc',
         'phoneNumber',

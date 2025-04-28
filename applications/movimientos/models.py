@@ -58,13 +58,22 @@ class DocumentsUploaded(TimeStampedModel):
 
 class Documents(TimeStampedModel):
     
-    # CATEGORIES INOVICE TYPES
+    # TYPES
     FACTURA = '0'
     RHE = '1'
     DOCEXTERIOR = '2'
     IMPUESTO = '3'
     PLANILLA = '4'
-    OTROS = "5"
+    NOTACREDITO = '5'
+    LIQ = '6'
+    DIARIO = '7'
+    DUA = '8'
+    FTVUELO = '9'
+    VUELO = '10'
+    LIQ = '11'
+    PERCEPCION = '12'
+
+    OTROS = "13"
 
     TYPE_INVOICE_CHOISES = [
         (FACTURA, "Factura"),
@@ -72,6 +81,14 @@ class Documents(TimeStampedModel):
         (DOCEXTERIOR, "Doc del exterior"),
         (IMPUESTO, "Impuesto"),
         (PLANILLA, "Planilla"),
+        (NOTACREDITO, "Nota de credito"),
+        (LIQ, "Liq"),
+        (DIARIO, "Diario"),
+        (DUA, "DUA"),
+        (FTVUELO, "FT Vuelo"),
+        (VUELO, "Vuelo"),
+        (LIQ, "Planilla"),
+        (PERCEPCION, "Planilla"),
         (OTROS, "Otros"),
     ]
     
@@ -120,16 +137,16 @@ class Documents(TimeStampedModel):
     RENTA = '8'
 
     CONTABILIDAD_CHOISES = [
-            (AG_AD, "Agente de aduana"),
-            (CCH, "Caja chica"),
-            (GEN, "Caja General"),
-            (GEN_V, "Caja General ventas"),
-            (G_RHE, "RHE general"),
-            (ADD, "Adicional"),
-            (PER, "Personal"),
-            (PL, "PL"),
-            (RENTA, "renta"),
-        ]
+        (AG_AD, "Agente de aduana"),
+        (CCH, "Caja chica"),
+        (GEN, "Caja General"),
+        (GEN_V, "Caja General ventas"),
+        (G_RHE, "RHE general"),
+        (ADD, "Adicional"),
+        (PER, "Personal"),
+        (PL, "PL"),
+        (RENTA, "renta"),
+    ]
     
     # =========== MODELS ===============
 
@@ -166,81 +183,81 @@ class Documents(TimeStampedModel):
 
     typeInvoice = models.CharField(
         'Tipo de comprobante',
-        max_length=1, 
+        max_length = 2, 
         choices = TYPE_INVOICE_CHOISES,
         null=True,
         blank=True
     )
     typeCurrency = models.CharField(
         'Tipo de moneda',
-        max_length=1, 
+        max_length = 1, 
         choices = TYPE_CURRENCY_CHOISES,
-        null=True,
-        blank=True
+        null = True,
+        blank = True
     )
     idInvoice = models.CharField(
         'Id de comprobante',
-        max_length=25,
-        unique=False,
-        null=True, 
-        blank=True,
+        max_length = 50,
+        unique = False,
+        null = True, 
+        blank = True,
     )
 
     detraction = models.CharField(
         'Detracción - Factura',
-        max_length=1, 
-        choices=STATUS_CHOISES, 
-        default="0"
+        max_length = 1, 
+        choices = STATUS_CHOISES, 
+        default = "0"
     )
 
     shippingGuide = models.CharField(
         'Guia de remisión - Factura',
-        max_length=1, 
-        choices=STATUS_CHOISES, 
+        max_length = 1, 
+        choices = STATUS_CHOISES, 
         default="0"
     )
 
     retention = models.CharField(
         'Retención - RHE',
-        max_length=1, 
-        choices=STATUS_CHOISES, 
-        default="0"
+        max_length = 1, 
+        choices = STATUS_CHOISES, 
+        default = "0"
     )
 
     annotation = models.CharField(
         'Anotaciones',
-        max_length=2, 
-        choices=ANNOTATION_CHOISES,
+        max_length = 2, 
+        choices = ANNOTATION_CHOISES,
         null=True,
         blank=True
     )
 
     contabilidad = models.CharField(
         'Sub Categoria contabilidad',
-        max_length=2, 
+        max_length = 2, 
         choices=CONTABILIDAD_CHOISES,
         null=True,
         blank=True
     )
     description = models.CharField(
         'Descripción',
-        max_length=100, 
-        null=True, 
-        blank=True,
+        max_length = 200, 
+        null = True, 
+        blank = True,
     )
 
     amount = models.DecimalField(
         'Monto', 
-        max_digits=10, 
-        decimal_places=2,
-        default=0
+        max_digits = 10, 
+        decimal_places = 2,
+        default = 0
     )
 
     amountReconcilied = models.DecimalField(
         'Monto conciliado', 
-        max_digits=10, 
-        decimal_places=2,
-        default=0
+        max_digits = 10, 
+        decimal_places = 2,
+        default = 0
     )
 
     pdf_file = models.FileField(upload_to='conciliaciones_pdfs/',null=True,blank=True)
@@ -257,7 +274,50 @@ class Documents(TimeStampedModel):
 
     def __str__(self):
         return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] | {self.idClient}"
-        
+
+class OtherDocuments(TimeStampedModel):
+    # TYPES
+    GUIAREMISION = '0'
+    LIQUIDACION = '1'
+    OTROS = "9"
+
+    TYPE_DOC_CHOISES = [
+        (GUIAREMISION, "Guia de remision"),
+        (LIQUIDACION, "Liquidacion"),
+        (OTROS, "Otros"),
+    ]
+
+    typeDoc = models.CharField(
+        'Tipo de comprobante',
+        max_length = 2, 
+        choices = TYPE_DOC_CHOISES,
+        null=True,
+        blank=True
+    )
+
+    idDocument = models.CharField(
+        'Id de comprobante',
+        max_length = 50,
+        unique = False,
+        null = True, 
+        blank = True,
+    )
+
+    idDoc = models.ForeignKey(Documents, on_delete=models.CASCADE, null=True, blank=True, related_name="OtheDocuments")
+
+    pdf_file = models.FileField(upload_to='otherDocs_pdfs/',null = True, blank = True)
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(OtherDocuments, self).delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Documento complementario'
+        verbose_name_plural = 'Documentos complementarios'
+
+    def __str__(self):
+        return f"{self.idDocument} | {self.get_typeDoc_display()} to {self.idDoc}"
+
 class ExpenseSubCategories(TimeStampedModel):
     # CATEGORIES INOVICE TYPES
     PRODUCT = '0'
@@ -613,20 +673,24 @@ class InternalTransfers(TimeStampedModel):
 #post_save.connect(update_reconcilation, sender = BankMovements)
 #m2m_changed.connect(update_movimientos_destino, sender = BankMovements)
 
+
 @receiver(pre_save, sender = BankMovements)
 def search_tinAccounts(sender, instance, **kwargs):
     try:
         text = instance.description
         codeNumber = re.sub(r'\D', '', text)
-        #print(text,codeNumber)
-        accountClient = CuentasBancarias.objects.filter(
-            account__contains = codeNumber
-        ).first()
-        #print(accountClient)
-        if accountClient:
-            instance.originDestination = accountClient.idClient
-        else:
+
+        if codeNumber == "" or codeNumber == None:
             pass
+        else:
+            accountClient = CuentasBancarias.objects.filter(
+                account__startswith = codeNumber
+            ).first()
+            print(text,codeNumber,accountClient)
+            if accountClient :
+                instance.originDestination = accountClient.idClient
+            else:
+                pass
             
     except Exception as e:
         print(f"Error al buscar el modelo relacionado: {str(e)}")

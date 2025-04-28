@@ -34,6 +34,7 @@ class TinResource(resources.ModelResource):
 class TinAdmin(ImportExportModelAdmin):
     resource_class = TinResource
     list_display = (
+        'id',
         'tin',
         'tinName'
     )
