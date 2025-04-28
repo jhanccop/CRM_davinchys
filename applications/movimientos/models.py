@@ -766,7 +766,7 @@ def update_after_conciliation(sender, instance,**kwargs):
         document = Documents.objects.filter(id = index)
         newAmount = Conciliation.objects.SumaMontosConciliadosPorDocumentos(index)
         # cambio de divisa
-        document.update(amountReconcilied = newAmount["sum"] * instance.exchangeRate)
+        document.update(amountReconcilied = newAmount["sum"] + instance.equivalentAmount)
 
     if instance.type == "1": # Movements
         indexDest = int(instance.idMovArrival.id)
@@ -781,9 +781,9 @@ def update_after_conciliation(sender, instance,**kwargs):
             conciliation.type = instance.type
             conciliation.idMovOrigin = instance.idMovArrival
             conciliation.idMovArrival = instance.idMovOrigin
-            conciliation.exchangeRate = 1/instance.exchangeRate
+            conciliation.equivalentAmount = instance.equivalentAmount
             # cambio de divisa
-            conciliation.amountReconcilied = instance.amountReconcilied * instance.exchangeRate
+            conciliation.amountReconcilied = instance.amountReconcilied# * instance.exchangeRate
             conciliation.save()
 
 @receiver(post_delete, sender=Conciliation)

@@ -130,8 +130,8 @@ class DocumentsAdmin(ImportExportModelAdmin):
         'description',
     )
     
-    search_fields = ('idClient',)
-    list_filter = ('idClient',)
+    search_fields = ('idInvoice',)
+    list_filter = ('idInvoice',)
 
 ## ==================== DocumentsUploaded =====================
 class DocumentsUploadedResource(resources.ModelResource):
@@ -147,6 +147,7 @@ class DocumentsUploadedAdmin(ImportExportModelAdmin):
         'idAccount',
         'fileName',
     )
+    search_fields = ('status',)
     list_filter = ('idAccount',)
 
 ## ==================== Conciliation =====================
@@ -168,8 +169,8 @@ class ConciliationAdmin(ImportExportModelAdmin):
         'idDoc',
     )
     
-    search_fields = ('idMovOrigin',)
-    list_filter = ('type',)
+    search_fields = ('status',)
+    list_filter = ('status',)
 
 admin.site.site_header = "Administrador Davinchys"
 admin.site.site_title = "Administrador Davinchys"
