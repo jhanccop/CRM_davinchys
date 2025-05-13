@@ -1,0 +1,228 @@
+from datetime import date, timedelta
+
+from csv import DictReader
+from io import TextIOWrapper
+import pandas as pd
+
+from django.shortcuts import render,redirect
+from django.http import HttpResponseRedirect
+from django.urls import reverse_lazy, reverse
+from django.contrib import messages
+
+from django.utils import timezone
+
+from django.views.generic.edit import ModelFormMixin
+
+from applications.users.mixins import (
+  AdminPermisoMixin,
+  AdminClientsPermisoMixin, # Adquisiciones, Finanzas, Tesoreria, contabilidad y administrador
+  ContabilidadPermisoMixin,
+  ComprasContabilidadPermisoMixin
+)
+
+from django.views.generic import (
+    DetailView,
+    DeleteView,
+    CreateView,
+    ListView,
+    UpdateView,
+    DeleteView,
+    View
+)
+
+from .models import (
+  DocumentsUploaded,
+  IncomeSubCategories,
+  ExpenseSubCategories,
+  BankMovements,
+  Conciliation
+)
+
+from applications.cuentas.models import Account
+from applications.documentos.models import FinancialDocuments
+
+
+from .forms import (
+  BankMovementsForm,
+  ConciliationMovDocForm,
+  ConciliationMovMovForm,
+  EditConciliationMovMovForm,
+  EditConciliationMovDocForm
+)
+
+# ================= MOVIMIENTOS ========================
+class MovimientosListView(AdminClientsPermisoMixin,ListView):
+  template_name = "movimientosBancarios/lista-movimientos.html"
+  context_object_name = 'movimientos'
+
+  def get_queryset(self,**kwargs):
+    compania_id = self.request.session.get('compania_id')
+    selectedAccount = self.request.GET.get("AccountKword", '')
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 90)) + " to " + str(date.today())
+
+    if selectedAccount == "None" or selectedAccount == None or selectedAccount =="" :
+      idSelected = Account.objects.CuentasByLastUpdate(compania_id = compania_id)
+      selectedAccount = idSelected.id # seleccionar por default la primera cuenta
+
+    bankMovements = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(selectedAccount))
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    payload["selectedAccount"] = Account.objects.CuentasById(int(selectedAccount))
+    payload["listAccount"] = Account.objects.listarcuentas(compania_id = compania_id)
+    payload["lastBalance"] = BankMovements.objects.ObtenerSaldo(cuenta=int(selectedAccount))
+
+    payload["bankMovements"] = bankMovements
+    return payload
+
+class MovimientosEditView(UpdateView):
+  template_name = "movimientosBancarios/editar-movimientos.html"
+  model = BankMovements
+  form_class = BankMovementsForm
+  success_url = reverse_lazy('movimientosBancarios_app:lista-movimientos')
+
+  #def get_queryset(self,**kwargs):
+  #  payload = { "compania_id": self.request.session.get('compania_id')}
+  #  return payload
+  def get_form_kwargs(self):
+    kwargs = super().get_form_kwargs()
+    kwargs['request'] = self.request
+    return kwargs
+
+class MovimientosCreateView(AdminClientsPermisoMixin,CreateView):
+  template_name = "movimientosBancarios/crear-movimientos.html"
+  model = BankMovements
+  form_class = BankMovementsForm
+  success_url = reverse_lazy('movimientosBancarios_app:lista-movimientos')
+
+  def get_form_kwargs(self):
+    kwargs = super().get_form_kwargs()
+    kwargs['request'] = self.request
+    return kwargs
+
+class MovimientosDeleteView(AdminClientsPermisoMixin,DeleteView):
+  template_name = "movimientosBancarios/eliminar-movimientos.html"
+  model = BankMovements
+  success_url = reverse_lazy('movimientosBancarios_app:lista-movimientos')
+
+class MovimientosDetailView(AdminClientsPermisoMixin,ListView):
+  template_name = "movimientosBancarios/detalle-movimiento.html"
+  context_object_name = 'mov'
+  def get_queryset(self,**kwargs):
+    pk = self.kwargs['pk']
+    payload = {}
+    bankMovement = BankMovements.objects.MovimientosPorId(id = int(pk))
+    #documentation = Documents.objects.ListaConciliacionPorIdMovimiento(bankMovement.id)
+    suma = Conciliation.objects.SumaMontosPorIdMov(bankMovement.id)#[0].sum
+    payload["bankMovement"] = bankMovement
+    payload["sum"] = suma
+    return payload
+
+# ================= CONCILIACION ========================
+class ConciliarMovimientoConDocumentoCreateView(AdminClientsPermisoMixin,CreateView):
+  template_name = "movimientosBancarios/conciliar-movimiento-con-documento.html"
+  model = Conciliation
+  form_class = ConciliationMovDocForm
+
+  def get_success_url(self, *args, **kwargs):
+    pk = self.kwargs["pk"]
+    #return reverse_lazy('movimientos_app:asignar-montos-documento', kwargs={'pk':pk})
+    return reverse_lazy('movimientosBancarios_app:movimientos-detalle', kwargs={'pk':pk})
+
+  def get_context_data(self, **kwargs):
+    context = super(ConciliarMovimientoConDocumentoCreateView, self).get_context_data(**kwargs)
+    bankMovement = BankMovements.objects.get(id = self.kwargs['pk'])
+    context['mov'] = bankMovement
+    #context['sum'] = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(bankMovement.id)
+    return context
+  
+  def get_form_kwargs(self):
+        # Obtén los kwargs que normalmente se pasan al formulario
+        kwargs = super().get_form_kwargs()
+        company_id = self.request.session.get('compania_id')
+        kwargs['company_id'] = company_id
+        return kwargs
+
+class ConciliarMovimientoConMovimientoCreateView(AdminClientsPermisoMixin,CreateView):
+  template_name = "movimientosBancarios/conciliar-movimiento-con-movimiento.html"
+  model = Conciliation
+  form_class = ConciliationMovMovForm
+  #success_url = reverse_lazy('movimientos_app:lista-movimientos')
+
+  def get_success_url(self, *args, **kwargs):
+    pk = self.kwargs["pk"]
+    #return reverse_lazy('movimientos_app:asignar-montos-documento', kwargs={'pk':pk})
+    return reverse_lazy('movimientosBancarios_app:movimientos-detalle', kwargs={'pk':pk})
+
+
+  def get_form_kwargs(self):
+    kwargs = super(ConciliarMovimientoConMovimientoCreateView, self).get_form_kwargs()
+    kwargs.update({'pk': self.kwargs["pk"]})
+    return kwargs
+
+  def get_context_data(self, **kwargs):
+    context = super(ConciliarMovimientoConMovimientoCreateView, self).get_context_data(**kwargs)
+    bankMovement = BankMovements.objects.get(id = self.kwargs['pk'])
+    context['mov'] = bankMovement
+    context['sum'] = Conciliation.objects.SumaMontosConciliadosPorMovimientosOr(bankMovement.id)
+    return context
+ 
+class EditarMovimientoConMovimientoUpdateView(AdminClientsPermisoMixin,UpdateView):
+  template_name = "movimientosBancarios/editar-movimiento-con-movimiento.html"
+  model = Conciliation
+  form_class = EditConciliationMovMovForm
+
+  def get_success_url(self, **kwargs):
+    idOr = self.kwargs["pk"]
+    idMov = Conciliation.objects.get(id = idOr)
+    return reverse_lazy('movimientosBancarios_app:movimientos-detalle', kwargs={'pk':idMov.idMovOrigin.id})
+
+class EditarMovimientoConDocumentoUpdateView(AdminClientsPermisoMixin,UpdateView):
+  template_name = "movimientosBancarios/editar-movimiento-con-documento.html"
+  model = Conciliation
+  form_class = EditConciliationMovDocForm
+
+  def get_success_url(self, **kwargs):
+    idOr = self.kwargs["pk"]
+    idMov = Conciliation.objects.get(id = idOr)
+    return reverse_lazy('movimientosBancarios_app:movimientos-detalle', kwargs={'pk':idMov.idMovOrigin.id})
+
+class MovimientosConciliarDeleteView(AdminClientsPermisoMixin,DeleteView):
+  template_name = "movimientosBancarios/eliminar-conciliacion.html"
+  model = Conciliation
+  def get_success_url(self, *args, **kwargs):
+    pk = self.object.idMovOrigin.id
+    #model = Documents.objects.get(id=self.kwargs["pk"])
+    #model.delete()
+    return reverse_lazy('movimientosBancarios_app:movimientos-detalle', kwargs={'pk':pk})
+  #success_url = reverse_lazy('movimientos_app:lista-transferencias')
+
+# ================= REPORTES ========================
+class ListAccountReport(AdminPermisoMixin,ListView):
+  template_name = "movimientosBancarios/reporte-de-cuentas.html"
+  context_object_name = 'cuentas'
+  
+  def get_queryset(self):
+    payload = {}
+    payload['cuenta'] = Account.objects.CuentasByCajaChica(cajaChica = False)
+    return payload
+  
+class AccountReportDetail(AdminPermisoMixin,ListView):
+  template_name = "movimientosBancarios/reporte-de-cuentas-detalle.html"
+  context_object_name = 'cuenta'
+
+  def get_queryset(self,**kwargs):
+    pk = self.kwargs['pk']
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 7)) + " to " + str(date.today())
+
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    #payload["datos"] = Transactions.objects.ReportePorCuenta(intervalo = intervalDate, cuenta = int(pk)) # 1:dolares
+    payload["array"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
+    payload["resumen"] = BankMovements.objects.ResumenMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
+    payload["conciliacion"] = BankMovements.objects.ConciliacionPorMontosPorCuentaPorIntervalo(intervalo = intervalDate, cuenta = int(pk))
+    payload["bankMovements"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
+    return payload

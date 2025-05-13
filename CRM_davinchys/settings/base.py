@@ -42,6 +42,8 @@ LOCAL_APPS = (
     'applications.personal',
     'applications.actividades',
     'applications.movimientos',
+    'applications.movimientosBancarios',
+    'applications.documentos',
 
     'multiselectfield',
     'import_export',

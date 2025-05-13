@@ -35,8 +35,8 @@ class Account(TimeStampedModel):
     """
 
     CURRENCY_CHOISES = [
-            ("0", "S/."),
-            ("1", "$")
+            ("0", "PEN"),
+            ("1", "USD")
         ]
     
     accountName = models.CharField(

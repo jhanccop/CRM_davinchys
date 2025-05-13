@@ -46,4 +46,4 @@ class SelectTinView(FormView):
     def form_valid(self, form):
         tin = form.cleaned_data['tin']
         self.request.session['compania_id'] = tin.id
-        return redirect('movimientos_app:lista-movimientos')
+        return redirect('movimientosBancarios_app:lista-movimientos')

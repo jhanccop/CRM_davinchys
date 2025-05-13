@@ -1,0 +1,53 @@
+{% extends "movimientos/base-reporte.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Reportes {% endblock appName %}
+{% block Type %} Cuentas {% endblock Type %}
+
+{% block panel-content %}
+
+<!-- ================ BODY ================= -->
+
+<div class="row pt-2">
+    <h5 class="pt-2">Cuentas en el sistema</h5>
+    {% for cuenta in cuentas.cuenta %}
+    <div class="col-md-3 col-6 pt-0 mb-4">
+        <div class="card">
+            <div class="card-header mx-4 p-3 text-center">
+                <a href="{% url 'movimientosBancarios_app:reporte-de-cuentas-detalle' cuenta.id %}">
+                    {% if cuenta.currency == "0" %}
+                    <div class="icon icon-shape icon-lg bg-gradient-secondary shadow-dark text-center border-radius-lg">
+                        <i class="fab fa-stripe-s"></i>
+                    </div>
+                    {% else %}
+                    <div class="icon icon-shape icon-lg bg-gradient-success shadow-dark text-center border-radius-lg">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    {% endif %}
+                </a>
+            </div>
+
+            <div class="card-body pt-0 p-3 text-center">
+                <h6 class="text-center mb-0">{{cuenta.nickName}}</h6>
+                <span class="text-md">{{cuenta.accountName}}</span>
+                <hr class="horizontal dark my-3">
+                <h5 class="mb-0"><a href="{% url 'movimientosBancarios_app:reporte-de-cuentas-detalle' cuenta.id %}">
+                        <span class="text-sm text-secondary"></span> {{cuenta.accountBalance}} </a> </h5>
+                <h4 class="mb-0"><a href="{% url 'movimientosBancarios_app:reporte-de-cuentas-detalle' cuenta.id %}">
+                        <span class="text-sm text-secondary"></span> {{cuenta.realBalance}} </a> </h4>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+{% endblock JSscripts %}

@@ -1,0 +1,148 @@
+# Query: reporte-cuentas
+# ContextLines: 1
+
+32 results - 24 files
+
+applications/movimientos/urls.py:
+  14      path(
+  15:         'reporte-cuentas/', 
+  16          views.ListAccount.as_view(),
+  17:         name='reporte-cuentas',
+  18      ),
+  19      path(
+  20:         'reporte-cuentas-detalle/<pk>/', 
+  21          views.AccountDetail.as_view(),
+  22:         name='reporte-cuentas-detalle',
+  23      ),
+
+applications/movimientos/views.py:
+   79  class ListAccount(AdminPermisoMixin,ListView):
+   80:   template_name = "movimientos/reporte-cuentas.html"
+   81    context_object_name = 'cuentas'
+
+   90  class AccountDetail(AdminPermisoMixin,ListView):
+   91:   template_name = "movimientos/reporte-cuentas-detalle.html"
+   92    context_object_name = 'cuenta'
+
+  198  class AccountReport(AdminPermisoMixin,ListView):
+  199:   template_name = "movimientos/reporte-cuentas.html"
+  200    context_object_name = 'cuentas'
+
+templates/actividades/base-actividades.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/actividades/base-buzon.html:
+  124                              <li class="nav-item">
+  125:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  126                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/actividades/base-comisiones.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/actividades/base-pedidos-transformadores.html:
+  143                              <li class="nav-item">
+  144:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  145                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/actividades/base-proyectos.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/clientes/base-clientes.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/cuentas/base-cuentas.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/documentos/base-movimientos.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/home/main.html:
+  123              <div class="card-header mx-4 p-3 text-center">
+  124:               <a href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  125                  <div class="icon icon-shape icon-lg bg-gradient-warning shadow text-center border-radius-lg">
+
+  130              <div class="card-body pt-0 p-3 text-center">
+  131:               <a  href="{% url 'movimientos_app:reporte-de-cuentas' %}" class="btn bg-gradient-warning w-100 mb-0 toast-btn">Auditoria</a>
+  132              </div>
+
+templates/movimientos/base-movimientos.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/movimientos/base-reporte.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white active bg-gradient-secondary" href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/movimientos/reporte-cajaChica-detalle.html:
+  36      <li class="nav-item" role="presentation">
+  37:       <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-de-cuentas' %}" aria-selected="false">
+  38          <span class="ms-1">Cuentas</span>
+
+templates/movimientos/reporte-cajaChica.html:
+  36      <li class="nav-item" role="presentation">
+  37:       <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-de-cuentas' %}" aria-selected="false">
+  38          <span class="ms-1">Cuentas</span>
+
+templates/movimientos/reporte-cuentas.html:
+  18        <div class="card-header mx-4 p-3 text-center">
+  19:         <a href="{% url 'movimientos_app:reporte-cuentas-detalle' cuenta.id %}">
+  20            {% if cuenta.currency == "0" %}
+
+  34          <hr class="horizontal dark my-3">
+  35:         <h5 class="mb-0"><a href="{% url 'movimientos_app:reporte-cuentas-detalle' cuenta.id %}"> <span class="text-sm text-secondary"></span> {{cuenta.accountBalance}} </a>  </h5>
+  36:         <h4 class="mb-0"><a href="{% url 'movimientos_app:reporte-cuentas-detalle' cuenta.id %}"> <span class="text-sm text-secondary"></span> {{cuenta.realBalance}} </a>  </h4>
+  37        </div>
+
+templates/movimientos/reporte-principal.html:
+  34      <li class="nav-item" role="presentation">
+  35:       <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientos_app:reporte-cuentas' %}">
+  36          <span class="ms-1">Cuentas</span>
+
+templates/movimientos/reporte-transferencias.html:
+  52      <li class="nav-item bg-gradient-secondary  border-radius-lg" role="presentation">
+  53:       <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'movimientos_app:reporte-cuentas' %}">
+  54          <i class="fas fa-chart-bar text-md position-relative"></i>
+
+templates/movimientosBancarios/base-movimientos.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/pedidos/base-mis-solicitudes.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/pedidos/base-nueva-solicitud.html:
+  117                              <li class="nav-item">
+  118:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  119                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/producto/base-inventario.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/producto/base-transformadores.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>
+
+templates/users/base-usuarios.html:
+  118                              <li class="nav-item">
+  119:                                 <a class="nav-link text-white " href="{% url 'movimientos_app:reporte-de-cuentas' %}">
+  120                                      <span class="sidenav-mini-icon"> R </span>

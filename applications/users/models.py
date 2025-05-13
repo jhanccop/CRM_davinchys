@@ -160,3 +160,4 @@ class Documentations(TimeStampedModel):
     
     def __str__(self):
         return f"{str(self.idUser)} | {str(self.get_typeDoc_display())}"
+

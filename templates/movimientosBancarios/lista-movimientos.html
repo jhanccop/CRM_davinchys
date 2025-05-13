@@ -1,0 +1,297 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Listas {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row ">
+  <div class="col-lg-6 col-md-6">
+    <div class="nav-wrapper position-relative end-0">
+      <ul class="nav nav-pills nav-fill p-1">
+        <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+          <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'movimientosBancarios_app:lista-movimientos' %}">
+            <span class="ms-1">Movimientos</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link mb-0 px-0 py-1" href="{% url 'documentos_app:documento-financiero-lista' %}">
+            <span class="ms-1">Documentos financieros</span>
+          </a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link mb-0 px-0 py-1" href="{% url 'documentos_app:documento-generico-lista' %}">
+            <span class="ms-1">Documentos genéricos</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ================ BODY ================= -->
+<div class="row">
+  <div class="col-lg-6 col-12 d-flex ms-auto">
+    <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+      Export CSV
+    </a>
+    <div class="dropleft ms-3">
+      <a class="btn bg-gradient-secondary" href="{% url 'movimientosBancarios_app:movimientos-nuevo' %}">
+        NUEVO
+      </a>
+    </div>
+    <div class="dropleft ms-3">
+      <a class="btn bg-gradient-dark" href="{% url 'movimientosBancarios_app:movimientos-subir-excel' %}">
+        SUBIR EXCEL
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header pb-0 ">
+        <div class="row">
+          <div class="col-lg-5 col-md-3">
+            <h6 class="mb-0">{{movimientos.selectedAccount.accountName}} </h6>
+            <p class="text-sm mb-0 text-info font-weight-bold">
+              <span class="text-md font-weight-bold">{{movimientos.selectedAccount.get_currency_display}}
+                {{movimientos.lastBalance.balance|floatformat:"2g"}}</span> <small
+                class="text-xs text-secondary">{{movimientos.selectedAccount.modified|date:'Y-m-d H:i'}}</small>
+            </p>
+          </div>
+          <div class="col-lg-7 col-md-9">
+            <form method="GET" class="">{% csrf_token %}
+              <div class="d-flex align-items-center">
+                <div class="input-group input-group-outline is-valid">
+                  <select class="form-control" name="AccountKword" id="AccountKword">
+                    {% for i in movimientos.listAccount %}
+                    {% if i.id == movimientos.selectedAccount.id %}
+                    <option value="{{i.id}}" selected>{{i}}</option>
+                    {% else %}
+                    <option value="{{i.id}}">{{i}}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+
+                </div>
+                &emsp;
+                <div class="input-group input-group-outline">
+                  <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
+                    placeholder="today" id="dateKword" name="dateKword">
+                </div>
+                &emsp;
+                <div class="pt-3 pb-0">
+                  <button class="btn bg-gradient-dark" type="submit"> Buscar </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-0 px-0 pb-2">
+        <div class="table-responsive p-0">
+          <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+            <thead class="thead-light">
+              <tr>
+                <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha
+                </th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">EEC, Razón social EEC, Para qué</th>
+                <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Días</th>
+                <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Monto, Avance</th>
+                <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">
+
+                  Monto &nbsp;&nbsp;&nbsp;&nbsp;
+
+                  Id &nbsp;&nbsp;&nbsp;&nbsp;
+
+                  Detalle
+
+
+                </th>
+                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in movimientos.bankMovements %}
+              <tr>
+                <td class="text-sm">
+                  <div class="d-flex flex-column justify-content-center">
+                    <h6 class="mb-0 text-sm"> <a href="{% url 'movimientosBancarios_app:movimientos-detalle' t.id %}">
+                      {{ t.date|date:'d-m-Y' }}</a></h6>
+                    <p class="text-sm font-weight-normal text-secondary mb-0">nOp {{t.opNumber}} {{t.days_since_date}}</p>
+                  </div>
+                </td>
+                <td class="text-sm">
+                  <div class="d-flex flex-column justify-content-center">
+                    <h6 class="mb-0 text-xs text-secondary"> <a
+                        href="{% url 'movimientosBancarios_app:movimientos-detalle' t.id %}">{{t.description}} <span class=" text-dark"> -> {{t.originDestination.tradeName}} </span></a> </h6>
+                    <p class="text-sm font-weight-normal text-secondary mb-0">
+                      <a
+                        href="{% url 'movimientosBancarios_app:movimientos-detalle' t.id %}"> {{t.justification}}
+                      </a>
+                      <a
+                        href="{% url 'movimientosBancarios_app:movimientos-detalle' t.id %}">
+                        {% if t.expenseSubCategory %}
+                        <span class="text-primary"> {{t.expenseSubCategory}}</span>
+                        {% endif %}
+                        {% if t.incomeSubCategory %}
+                        <span class="text-success"> {{t.incomeSubCategory}} </span>
+                        {% endif %}
+                      </a>
+                    </p>
+                  </div>
+                </td>
+                <td class="text-sm text-end">
+                  {% if t.per == 100 %}
+                  <span class="badge bg-gradient-success">0K</span>                  
+                  {% else %}
+                  {% if t.days_since_date > 30 %}
+                  <span class="badge bg-gradient-primary">{{t.days_since_date}}</span>
+                  {% elif t.days_since_date <= 30 and t.days_since_date > 7 %}
+                  <span class="badge bg-gradient-warning">{{t.days_since_date}}</span>
+                  {% else %}
+                  <span class="badge bg-gradient-secondary">{{t.days_since_date}}</span>
+                  {% endif %}
+                  {% endif %}
+                </td>
+                <td class="text-sm">
+                  <div class="w-100">
+                    <div class="d-flex align-items-center mb-0">
+                      <span class="me-2 text-sm font-weight-bold text-dark">{{ t.per|floatformat:0 }} %</span>
+                      <span class="ms-auto text-sm font-weight-normal">{{ t.amountReconcilied|floatformat:"2g" }}</span>
+                    </div>
+                    <div>
+                      <div class="progress progress-md w-100">
+                        <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;">
+                        </div>
+                      </div>
+                    </div>
+                    {% if t.transactionType == "1" %}
+                    <span class="me-2 text-md font-weight-bold text-success">+{{ t.amount|floatformat:"2g" }}</span>
+                    {% else %}
+                    <span class="me-2 text-md font-weight-bold text-primary">-{{ t.amount|floatformat:"2g" }}</span>
+                    {% endif %}
+
+                </td>
+
+                <td class="text-sm">
+                  <div class="d-flex flex-column justify-content-center text-start">
+
+                    {% for i in t.mov_origen.all %}
+
+                    {% if i.type == "0" %}
+
+                    <p class="text-sm font-weight-normal text-info mb-0">
+                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp; 
+
+                      {% if i.idDoc.pdf_file %}
+                      <a href="/media/{{i.idDoc.pdf_file}}">
+                        <i class="far fa-file-pdf text-success text-lg"></i>
+                      </a>
+                      {% else %}
+                      <i class="far fa-file-pdf text-light text-lg"></i>
+                      {% endif %}
+
+                      &nbsp;&nbsp;&nbsp;&nbsp; 
+                      <a href="{% url 'documentos_app:documento-financiero-detalle' i.idDoc.id %}">
+                        <u>{{i.idDoc.idInvoice}}</u> 
+                      </a>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      {{i.idDoc.idClient}}
+                    </p>
+                    {% else %}
+
+                    <p class="text-sm font-weight-normal text-dark mb-0">
+                      {{i.amountReconcilied}} &nbsp;&nbsp;&nbsp;&nbsp;
+                      <a href="{% url 'movimientosBancarios_app:movimientos-detalle' i.idMovArrival.id %}">
+                        <u>{{i.idMovArrival.idAccount}}</u> 
+                      </a>
+                      &nbsp;&nbsp;&nbsp;&nbsp; {{i.idMovArrival.opNumber}} - {{i.idMovArrival.description}}
+                    </p>
+                    {% endif %}
+                    {% endfor %}
+                  </div>
+                </td>
+
+                <td>
+                  <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
+                    data-bs-placement="left" aria-expanded="false">
+                    <i class="fas fa-bars text-lg text-dark"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
+                    aria-labelledby="dropdownMarketingCard" style="">
+                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                        href="{% url 'movimientosBancarios_app:movimientos-detalle' t.id %}">Ver detalle</a></li>
+                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                        href="{% url 'movimientosBancarios_app:movimientos-editar' t.id %}"> Editar movimiento</a></li>
+                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                        href="{% url 'movimientosBancarios_app:conciliar-movimiento-con-documento' t.id %}"> Conciliacion
+                        documentaria</a></li>
+                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                        href="{% url 'movimientosBancarios_app:conciliar-movimiento-con-movimiento' t.id %}"> Conciliacion
+                        bancaria</a></li>
+                    <li><a class="dropdown-item border-radius-md font-weight-bold text-primary"
+                        href="{% url 'movimientosBancarios_app:movimientos-eliminar' t.id %}">Eliminar movimiento</a></li>
+                  </ul>
+                </td>
+
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* PROYECTOS */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 15
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "movimientos",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+{% endblock JSscripts %}

@@ -22,5 +22,9 @@ urlpatterns = [
     re_path('', include('applications.actividades.urls')),
     # movimientos app
     re_path('', include('applications.movimientos.urls')),
+    # movimientosBancarios app
+    re_path('', include('applications.movimientosBancarios.urls')),
+    # documentos app
+    re_path('', include('applications.documentos.urls')),
 ]
 

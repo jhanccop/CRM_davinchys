@@ -68,8 +68,7 @@ class Documents(TimeStampedModel):
     LIQ = '6'
     DIARIO = '7'
     DUA = '8'
-    FTVUELO = '9'
-    VUELO = '10'
+    BOLETOAEREO = '9'
     LIQ = '11'
     PERCEPCION = '12'
 
@@ -85,10 +84,9 @@ class Documents(TimeStampedModel):
         (LIQ, "Liq"),
         (DIARIO, "Diario"),
         (DUA, "DUA"),
-        (FTVUELO, "FT Vuelo"),
-        (VUELO, "Vuelo"),
-        (LIQ, "Planilla"),
-        (PERCEPCION, "Planilla"),
+        (BOLETOAEREO, "Boleto Aéreo"),
+        (LIQ, "Liquidacion"),
+        (PERCEPCION, "percepcion"),
         (OTROS, "Otros"),
     ]
     
@@ -269,8 +267,8 @@ class Documents(TimeStampedModel):
         super(Documents, self).delete(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Documento'
-        verbose_name_plural = 'Documentos'
+        verbose_name = 'Documento contable'
+        verbose_name_plural = 'Documentos contables'
 
     def __str__(self):
         return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] | {self.idClient}"

@@ -1,0 +1,50 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Movimientos {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Cuentas {% endblock appName %}
+{% block Type %} Eliminar - conciliacion{% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-secondary shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> ELIMINAR CONCILIACION </h6>
+        </div>
+      </div>
+      <div class="card-body">
+        <h6 class="mb-3">¿Esta seguro de eliminar la conciliación?</h6>
+        <ul>
+          <li>Conciliación: <span class="font-weight-bold">{{object.idMovOrigin}}</span></li>
+          <li>Tipo: <span class="font-weight-bold">{{object.get_type_display}}</span></li>
+          <li>Mov destino: <span class="font-weight-bold">{{object.idMovArrival}}</span></li>
+          <li>Documentos: <span class="font-weight-bold">{{object.idDoc}}</span></li>
+          <li>Monto: <span class="font-weight-bold">{{object.amountReconcilied}}</span></li>
+        </ul>
+        <div class="d-flex">
+          <a href="{% url 'documentos_app:documento-financiero-detalle' object.id %}" class="btn bg-gradient-dark mb-0 js-btn-next">
+            <i class="fas fa-undo-alt"></i> Volver
+          </a>
+        
+          <form class="cell medium-5 ms-auto" action="{% url 'movimientosBancarios_app:eliminar-conciliacion' object.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn bg-gradient-primary ms-auto mb-0 js-btn-next">Eliminar conciliación</button>
+          </form>
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

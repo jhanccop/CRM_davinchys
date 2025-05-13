@@ -1,0 +1,208 @@
+{% extends "movimientos/base-movimientos.html" %}
+
+{% load  static %}
+{% block title %} Documentación {% endblock title %}
+{% block main %} Movimientos {% endblock main %}
+{% block appName %} Documentacion {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-lg-6 col-md-6">
+    <div class="nav-wrapper position-relative end-0">
+      <ul class="nav nav-pills nav-fill p-1">
+        <li class="nav-item " role="presentation">
+          <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientosBancarios_app:lista-movimientos' %}">
+            <span class="ms-1">Movimientos</span>
+          </a>
+        </li>
+        <li class="nav-item " role="presentation">
+          <a class="nav-link mb-0 px-0 py-1" href="{% url 'documentos_app:documento-financiero-lista' %}">
+            <span class="ms-1">Documentos financieros</span>
+          </a>
+        </li>
+        <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+          <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'documentos_app:documento-generico-lista' %}">
+            <span class="ms-1">Documentos genéricos</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ================ BODY ================= -->
+
+<div class="row">
+  <div class="col-lg-6 col-12 d-flex ms-auto ">
+    <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+      Export CSV
+    </a>
+    <div class="dropleft ms-3">
+      <a class="btn bg-gradient-dark" href="{% url 'documentos_app:documento-generico-nuevo' %}">
+        NUEVO DOCUMENTO
+      </a>
+      
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  
+  <div class="col-12">
+      <div class="card">
+          <div class="card-header pb-0 ">
+            <div class="row align-middle align-items-center">
+              <div class="col-lg-6 col-md-3">
+                <h5 class="mb-0">Documentos</h5>
+                <p class="pt-0">GENERICOS</p>
+              </div>
+              <div class="col-lg-6 col-md-9">
+                <form method="GET" class="">{% csrf_token %}
+                  <div class="d-flex align-items-center">
+
+                    <div class="input-group input-group-outline is-valid">
+                      
+                      <select class="form-control" name="DocKword" id="DocKword">
+                        <option value="0">Guia de remisión</option>
+                        <option value="1">Liquidación</option>
+                        <option value="3">Retencion</option>
+                        <option value="4">Detraccion</option>
+                        <option value="5" selected>Todos</option>
+                      </select>
+                      
+                    </div>
+                    &emsp;
+                    <div class="input-group input-group-outline">
+                      <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
+                        placeholder="today" id="dateKword" name="dateKword">
+                    </div>
+                    &emsp; 
+                    <div class="pt-3 pb-0">
+                      <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+                    </div>
+                    
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-0 px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecho</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Id Documento</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Doc Referencia</th>
+                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">PDF</th>
+                      <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in documentos.documentation %}
+                    <tr>
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.date|date:'Y-m-d' }}</h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.get_typeDoc_display }}</h6>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-generico-detalle' t.id %}">{{t.idOtherDocument}}</a></h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.idFinacialDocuments.idInvoice }} {{ t.idFinacialDocuments.idClient }}</h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          {% if t.pdf_file %}
+                          <a href="/media/{{t.pdf_file}}">
+                            <i class="far fa-file-pdf text-info text-lg"></i>
+                          </a>
+                          {% endif %}
+                        </div>
+                      </td>
+
+                      <td>
+                        <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
+                          aria-expanded="false">
+                          <i class="fas fa-bars text-lg text-dark"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'documentos_app:documento-generico-editar' t.id %}"> Editar documento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'documentos_app:documento-generico-eliminar' t.id %}">Eliminar documento</a></li>
+                        </ul>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* PROYECTOS */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "documentos",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+<script>
+  const $select = document.querySelector('#DocKword');
+  $select.value = "{{documentos.selected}}";
+</script>
+
+{% endblock JSscripts %}
