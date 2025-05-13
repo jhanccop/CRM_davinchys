@@ -1,4 +1,4 @@
-{% extends "movimientos/base-movimientos.html" %}
+{% extends "movimientosBancarios/base-movimientos.html" %}
 
 {% load  static %}
 {% block title %} Movimientos {% endblock title %}
@@ -44,7 +44,7 @@
       </a>
     </div>
     <div class="dropleft ms-3">
-      <a class="btn bg-gradient-dark" href="{% url 'movimientosBancarios_app:movimientos-subir-excel' %}">
+      <a class="btn bg-gradient-dark" href="{% url 'movimientos_app:movimientos-subir-excel' %}">
         SUBIR EXCEL
       </a>
     </div>
