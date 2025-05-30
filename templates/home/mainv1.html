@@ -1,0 +1,1005 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/crm.png' %}">
+    <link rel="icon" type="image/png" href=".{% static 'assets/img/crm.png' %}">
+    <title>
+        ERP - USER
+    </title>
+
+    <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link id="pagestyle" href="{% static 'assets/css/material-dashboard.css' %}" rel="stylesheet" />
+    <!-- Font Awesome para iconos -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script src="{% static 'assets/js/plugins/awesone.js' %}" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f2;
+            color: #333;
+        }
+        
+        .sidebar {
+            background-color: white;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+        
+        .menu-item {
+            padding: 0.8rem 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            color: #555;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .submenu {
+            padding-left: 30px;
+            background-color: rgba(0,0,0,0.02);
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+        }
+        
+        .navbar-top {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 500;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .stats-card {
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: white;
+        }
+        
+        .stats-card .numero {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card .label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .badge-custom {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .approval-item {
+            transition: all 0.3s;
+        }
+        
+        .approval-item:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .tooltip-inner {
+            padding: 10px; /* Esto funcionará correctamente */
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="sidebar bg-gradient-dark text-white">
+        <div class="sidebar-brand">
+            <i class="fas fa-users-cog me-2"></i> Mi perfil
+        </div>
+        <ul class="sidebar-menu">
+            <li class="menu-item active">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </li>
+            <li class="menu-item">
+                <i class="fas fa-user"></i> Perfil
+            </li>
+            
+            <li class="menu-item menu-toggle">
+            
+            <br>
+
+            <h5 class="text-white">Módulos</h5>
+            
+            <hr class="bg-white horizontal my-0">
+
+            
+            <li class="menu-item bg-gradient-info">
+                <a href="" class="text-white"><i class="fas fa-wallet"></i>Actividades diarias</a>
+            </li>
+
+            <a href="">
+                <li class="menu-item bg-gradient-light text-light">
+                    <a href=""><i class="fas fa-wallet"></i>Adquisiciones</a>
+                </li>
+            </a>
+            
+            
+            
+            <li class="menu-item bg-gradient-success text-light">
+                <a href="" class="text-white"><i class="fas fa-wallet"></i>Finanzas</a>
+            </li>
+            
+
+            <hr class="bg-white horizontal my-0">
+            
+            <li class="menu-item">
+                <a href="" class="text-white">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+
+        <div class="alert alert-secondary d-flex align-items-center text-white pt-2 pb-2" role="alert">
+            <div class="dropdown d-flex align-items-center">
+                <a class="btn btn-link dropdown-toggle text-white pb-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,5">
+                    <i class="fas fa-user-shield fs-4"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mi perfil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
+                </ul>
+            </div>
+            <div class="ms-auto text-start">
+                Bienvenio {{user}}, has ingresado con el perfil de  <strong>{{user.get_position_display}}</strong>
+            </div>
+
+            <div class="ms-auto text-center bg-white text-dark text-lg"style="width: 30%; border: 1px solid #000; border-radius: 10px; padding: 10px;">
+                <form id="monthSelectForm" method="GET" action="{% url 'home_app:index' %}">
+                    <select class="form-control" name="Kword" id="Kword" placeholder="Este mes">
+                        {% for month in data.listMonths %}
+                        <option value="{{month}}" {% if month == data.monthSelected %}selected{% endif %}>{{month}}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+        </div>
+        
+        <!-- por aprobar y estadisticas -->
+        <div class="row">
+
+            <!-- HORAS LABORADAS -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header p-3 pb-0">
+                        <h6 class="mb-0">Indicadores laborales</h6>
+                    </div>
+                    <div class="card-body border-radius-lg p-3">
+                        <div class="d-flex">
+                            <div>
+                                <div class="icon icon-shape bg-gradient-success icon-md text-center border-radius-md shadow-none">
+                                    <i class="fas fa-calendar-alt text-white opacity-10"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <div class="numbers">
+                                    <h4 class="mb-0 text-dark">{{data.nDays.regular_days}}</h4>
+                                    <p class="text-sm pt-0">Días laborados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex mt-4">
+                            <div>
+                                <div class="icon icon-shape bg-gradient-warning icon-md text-center border-radius-md shadow-none">
+                                    <i class="fas fa-business-time text-white opacity-10"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <div class="numbers">
+                                    <h4 class="mb-0 text-dark">{{data.nDays.overtime_hours}}</h4>
+                                    <p class="text-sm pt-0">Horas extra</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex mt-4">
+                            <div>
+                                <div class="icon icon-shape bg-gradient-primary icon-md text-center border-radius-md shadow-none">
+                                    <i class="fas fa-gifts text-white opacity-10"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <div class="numbers">
+                                    <h4 class="mb-0 text-dark">{{data.nDays.holiday_days}} </h4>
+                                    <p class="text-sm pt-0">Feriados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="dark horizontal my-0">
+                    <div class="card-footer p-2 ps-3">
+                        <a href="{% url 'activities_app:mi-actividad-diaria-lista' %}" type="button" class="btn btn-sm bg-gradient-dark mb-0">
+                            Ver mas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERMISOS -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header pb-0 p-3">
+                      <h6 class="mb-0">Permisos aprobados</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon icon-shape icon-sm me-3 bg-gradient-secondary shadow text-center">
+                                <i class="fas fa-user-times opacity-10 pt-2"></i>
+                            </div>
+                            <div class="d-flex flex-column ">
+                                <h4 class="mb-0 text-dark text-center font-weight-bold">{{data.nRestDays.particular_days}} <span class="text-sm text-secondary font-weight-normal"> Dias - particulares</span> </h4>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon icon-shape icon-sm me-3 bg-gradient-primary shadow text-center">
+                                <i class="fas fa-briefcase-medical opacity-10 pt-2"></i>
+                            </div>
+                            <div class="d-flex flex-column ">
+                                <h4 class="mb-0 text-dark text-center font-weight-bold"> {{data.nRestDays.medical_rest_days}} <span class="text-sm text-secondary font-weight-normal"> Dias - D. Médico</span> </h4>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon icon-shape icon-sm me-3 bg-gradient-warning shadow text-center">
+                                <i class="fas fa-glass-cheers opacity-10 pt-2"></i>
+                            </div>
+                            <div class="d-flex flex-column ">
+                                <h4 class="mb-0 text-dark text-center font-weight-bold">{{data.nRestDays.vacation_days}} <span class="text-sm text-secondary font-weight-normal"> Dias - Vacaciones</span> </h4>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="icon icon-shape icon-sm me-3 bg-gradient-success shadow text-center">
+                                <i class="fas fa-baby opacity-10 pt-2"></i>
+                            </div>
+                            <div class="d-flex flex-column ">
+                                <h4 class="mb-0 text-dark text-center font-weight-bold">{{data.nRestDays.maternity_days}} <span class="text-sm text-secondary font-weight-normal">Dias - Maternidad</span> </h4>
+                            </div>
+                        </div>
+                        
+                        <li class="d-flex mb-2 align-items-center">
+                            <p class="mb-0 text-sm text-dark font-weight-bolder">Balance dias:</p>
+                            <span class="badge badge-primary ms-auto text-md">{{data.nRestDays.compensated_days}}</span> / <span class="badge badge-success text-md">{{data.nRestDays.total_compensated_days}}</span> 
+                        </li>
+
+                        <li class="d-flex align-items-center" >
+                            <p class="mb-0 text-sm text-dark font-weight-bolder">Balance Horas:</p>
+                            <span class="badge badge-primary ms-auto text-md">{{data.nRestDays.compensated_hours}}</span> / <span class="badge badge-success text-md">{{data.nRestDays.total_compensated_hours}}</span> 
+                        </li>
+
+                    </div>
+                    <hr class="dark horizontal my-0">
+                    <div class="card-footer p-2 ps-3">
+                        <a href="{% url 'activities_app:mi-lista-permisos' %}" type="button" class="btn btn-sm bg-gradient-dark mb-0">
+                            Ver mas
+                        </a>
+                    </div>
+                  </div>
+            </div>
+
+            <!-- SOLICITUDES DE COMPRA O DESEMBOLSO POR APROBAR -->
+            <div class="col-lg-6 mt-4 mt-lg-0" >
+                <div class="card h-100">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex align-items-center">
+                            <h6>DESEMBOLSOS SOLICITADOS</h6>
+                        </div>
+                    </div>
+                    <div class="card-body px-3 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Solicitante</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Descripción</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Categoría</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data.PaymentReq %}
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.idPetitioner}}, {{i.created|date:"d-M-Y"}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.requirementName}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">Compra</p>
+                                        </td>
+                                        <td>
+                                            <a href=""><span class="badge badge-warning">aprobar</span></a> <a href=""><span class="badge badge-warning">denegar</span></a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% for i in data.RestDaysReq %}
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.user}}, {{i.created|date:"d-M-Y"}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">
+                                                {{i.get_type_display}}
+                                                {% if i.days %} {{i.days}} días {% endif %}
+                                                {% if i.hours %} {{i.hours}} horas {% endif %}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary">PERMISO</span>
+                                        </td>
+                                        <td>
+                                            {% if user.position == "9" %}
+                                            {% if i.tag1 == "1" %}
+                                            <span class="badge badge-success ms-auto">{{ i.get_tag1_display }}</span>
+                                            {% else %}
+                                            <span class="badge badge-warning ms-auto">{{ i.get_tag1_display }}</span>
+                                            {% endif %}
+                                            {% endif %}
+                                            
+                                        </td>
+                                        <td>
+                                            {% if user.position == "9" %}
+                                            <a href="#" onclick="openApproveModal({{i.id}}, 'RRHH')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
+                                            <a href="#" onclick="openDenyModal({{i.id}}, 'RRHH')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
+                                            {% elif user.position == "0" %}
+                                            <a href="#" onclick="openApproveModal({{i.id}}, 'GERENCIA')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
+                                            <a href="#" onclick="openDenyModal({{i.id}}, 'GERENCIA')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOLICITUDES DE COMPRA O DESEMBOLSO POR APROBAR -->
+            <div class="col-lg-6 mt-4 mt-lg-4" >
+                <div class="card h-100 mt-4 mt-md-0">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex align-items-center">
+                            <h6>PERMISOS LABORALES SOLICITADOS</h6>
+                        </div>
+                    </div>
+                    <div class="card-body px-3 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Solicitante</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Descripción</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Categoría</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    {% for i in data.RestDaysReq %}
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.user}}, {{i.created|date:"d-M-Y"}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">
+                                                {{i.get_type_display}}
+                                                {% if i.days %} {{i.days}} días {% endif %}
+                                                {% if i.hours %} {{i.hours}} horas {% endif %}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary">PERMISO</span>
+                                        </td>
+                                        <td>
+                                            {% if user.position == "9" %}
+                                            {% if i.tag1 == "1" %}
+                                            <span class="badge badge-success ms-auto">{{ i.get_tag1_display }}</span>
+                                            {% else %}
+                                            <span class="badge badge-warning ms-auto">{{ i.get_tag1_display }}</span>
+                                            {% endif %}
+                                            {% endif %}
+                                            
+                                        </td>
+                                        <td>
+                                            {% if user.position == "9" %}
+                                            <a href="#" onclick="openApproveModal({{i.id}}, 'RRHH')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
+                                            <a href="#" onclick="openDenyModal({{i.id}}, 'RRHH')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
+                                            {% elif user.position == "0" %}
+                                            <a href="#" onclick="openApproveModal({{i.id}}, 'GERENCIA')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
+                                            <a href="#" onclick="openDenyModal({{i.id}}, 'GERENCIA')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MIS PEDIDOS -->
+        <div class="row mt-4 mb-5 mb-md-0">
+
+            <!-- MIS SOLICITUDES DE COMPRA O PAGOS -->
+            <div class="col-sm-6">
+                <div class="card h-100">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0">Mis solicitudes de compra o desembolso</h6>
+                            <a href="{% url 'pedidos_app:listas-solicitudes' %}" class="ms-auto"><i class="fas fa-info-circle"></i></a>
+                        </div>
+                        
+                    </div>
+                    <div class="card-body px-3 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Fecha</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Concepto</th>
+                                        <th class="text-uppercase text-end text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data.listPaymentReq%}
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.created|date:"d-m-Y"}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.requirementName}}</p>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if i.tag1 == "4" %}
+                                            <span class="badge badge-light ms-auto">ADQ</span>
+                                            {% elif i.tag1 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">ADQ</span>
+                                            {% elif i.tag1 == "1" %}
+                                            <span class="badge badge-success ms-auto">ADQ</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">ADQ</span>
+                                            {% endif %}
+
+                                            {% if lista.typeRequest == "1" %}
+                                            {% if i.tag2 == "4" %}
+                                            <span class="badge badge-light ms-auto">CNT</span>
+                                            {% elif i.tag2 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">CNT</span>
+                                            {% elif i.tag2 == "1" %}
+                                            <span class="badge badge-success ms-auto">CNT</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">CNT</span>
+                                            {% endif %}
+                                            {% endif %}
+
+                                            {% if i.tag3 == "4" %}
+                                            <span class="badge badge-light ms-auto">FIN</span>
+                                            {% elif i.tag3 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">FIN</span>
+                                            {% elif i.tag3 == "1" %}
+                                            <span class="badge badge-success ms-auto">FIN</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">FIN</span>
+                                            {% endif %}
+
+                                            {% if i.tag4 == "4" %}
+                                            <span class="badge badge-light ms-auto">GG</span>
+                                            {% elif i.tag4 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">GG</span>
+                                            {% elif i.tag4 == "1" %}
+                                            <span class="badge badge-success ms-auto">GG</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">GG</span>
+                                            {% endif %}
+
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <!-- MIS SOLICITUDES DE PERMISOS -->
+            <div class="col-sm-6">
+                <div class="card h-100 mt-4 mt-md-0">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex align-items-center">
+                            <h6>Mis permisos solicitados</h6>
+                        </div>
+                    </div>
+                    <div class="card-body px-3 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Fecha</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Categoría</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                            Periodo</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">
+                                            Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data.listRestDayReq%}
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.created|date:"d-m-Y"}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{i.get_type_display}}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">
+                                                {% if i.hours %}
+                                                {{ i.hours }} el {{i.startDate|date:"d-m-Y"}}  
+                                                {% else %}
+                                                {{ i.days }} dias: {{i.startDate|date:"d-m-Y"}} - {{i.endDate|date:"d-m-Y"}}
+                                                {% endif %}
+                                            </p>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if i.tag1 == "4" %}
+                                            <span class="badge badge-light ms-auto">RRHH</span>
+                                            {% elif i.tag1 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">RRHH</span>
+                                            {% elif i.tag1 == "1" %}
+                                            <span class="badge badge-success ms-auto">RRHH</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">RRHH</span>
+                                            {% endif %}
+
+                                            {% if i.tag2 == "4" %}
+                                            <span class="badge badge-light ms-auto">GG</span>
+                                            {% elif i.tag2 == "0" %}
+                                            <span class="badge badge-secondary ms-auto">GG</span>
+                                            {% elif i.tag2 == "1" %}
+                                            <span class="badge badge-success ms-auto">GG</span>
+                                            {% else %}
+                                            <span class="badge badge-danger ms-auto">GG</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Aprobación RRHH -->
+    <div class="modal fade" id="approveRRHHModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aprobar Permiso (RRHH)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="approveRRHHForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="approve_rrhh_id" name="permiso_id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="approve_rrhh_comment">Comentario (opcional):</label>
+                            <textarea class="form-control" id="approve_rrhh_comment" name="comentario" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Aprobación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Denegación RRHH -->
+    <div class="modal fade" id="denyRRHHModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Denegar Permiso (RRHH)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="denyRRHHForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="deny_rrhh_id" name="permiso_id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="deny_rrhh_comment">Motivo de denegación:</label>
+                            <textarea class="form-control" id="deny_rrhh_comment" name="comentario" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar Denegación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aprobación Gerencia -->
+    <div class="modal fade" id="approveGerenciaModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aprobar Permiso (Gerencia)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="approveGerenciaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="approve_gerencia_id" name="permiso_id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="approve_gerencia_comment">Comentario (opcional):</label>
+                            <textarea class="form-control" id="approve_gerencia_comment" name="comentario" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Aprobación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Denegación Gerencia -->
+    <div class="modal fade" id="denyGerenciaModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Denegar Permiso (Gerencia)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="denyGerenciaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="deny_gerencia_id" name="permiso_id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="deny_gerencia_comment">Motivo de denegación:</label>
+                            <textarea class="form-control" id="deny_gerencia_comment" name="comentario" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar Denegación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Funciones para abrir modales
+        function openApproveModal(permisoId, nivel) {
+            if (nivel === 'RRHH') {
+                $('#approve_rrhh_id').val(permisoId);
+                $('#approve_rrhh_comment').val('');
+                $('#approveRRHHModal').modal('show');
+            } else if (nivel === 'GERENCIA') {
+                $('#approve_gerencia_id').val(permisoId);
+                $('#approve_gerencia_comment').val('');
+                $('#approveGerenciaModal').modal('show');
+            }
+        }
+        
+        function openDenyModal(permisoId, nivel) {
+            if (nivel === 'RRHH') {
+                $('#deny_rrhh_id').val(permisoId);
+                $('#deny_rrhh_comment').val('');
+                $('#denyRRHHModal').modal('show');
+            } else if (nivel === 'GERENCIA') {
+                $('#deny_gerencia_id').val(permisoId);
+                $('#deny_gerencia_comment').val('');
+                $('#denyGerenciaModal').modal('show');
+            }
+        }
+        
+        // Manejo de formularios con AJAX
+        $(document).ready(function() {
+            // Aprobación RRHH
+            $('#approveRRHHForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'activities_app:aprobar_rrhh' %}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#approveRRHHModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Error: ' + xhr.responseJSON.message);
+                    }
+                });
+            });
+        
+            // Denegación RRHH
+            $('#denyRRHHForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'activities_app:denegar_rrhh' %}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#denyRRHHModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Error: ' + xhr.responseJSON.message);
+                    }
+                });
+            });
+        
+            // Aprobación Gerencia
+            $('#approveGerenciaForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'activities_app:aprobar_gerencia' %}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#approveGerenciaModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Error: ' + xhr.responseJSON.message);
+                    }
+                });
+            });
+        
+            // Denegación Gerencia
+            $('#denyGerenciaForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'activities_app:denegar_gerencia' %}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#denyGerenciaModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Error: ' + xhr.responseJSON.message);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+
+    <script src="{% static 'assets/js/material-dashboard.min.js' %}"></script>
+
+    <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+    <script type="text/javascript">
+        if (document.getElementById('Kword')) {
+            var element = document.getElementById('Kword');
+            const example = new Choices(element, {});
+        }
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+        const monthSelect = document.getElementById('Kword');
+        const monthSelectForm = document.getElementById('monthSelectForm');
+        
+        // Enviar el formulario automáticamente al cambiar la selección
+        monthSelect.addEventListener('change', function() {
+            monthSelectForm.submit();
+        });
+    });
+    </script>
+
+    
+</body>
+</html>

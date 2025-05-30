@@ -229,12 +229,14 @@ class FinancialDocuments(TimeStampedModel):
         super(FinancialDocuments, self).delete(*args, **kwargs)
 
     class Meta:
+        ordering = ['created']
         verbose_name = 'Documento financiero'
         verbose_name_plural = 'Documentos financieros'
 
     def __str__(self):
         return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] | {self.idClient}"
-
+        #return f"{self.idInvoice}"
+    
 class OthersDocuments(TimeStampedModel):
     
     # TYPES

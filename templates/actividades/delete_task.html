@@ -1,0 +1,10 @@
+html
+<!-- actividades/delete_task.html -->
+<div class="text-center">
+    <p>¿Estás seguro que deseas eliminar esta actividad?</p>
+    <form method="post" action="{% url 'activities_app:delete_task' object.id %}">
+        {% csrf_token %}
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    </form>
+</div>

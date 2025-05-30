@@ -31,6 +31,19 @@ class Contacto(models.Model):
         return self.full_name
 
 class Cliente(models.Model):
+
+     # idioma de contrato
+    ESP = '0'
+    ENG = '1'
+    OTRO = '1'
+    
+    LANGUAGE_CHOISES = [
+            (ESP, "Español"),
+            (ENG, "Ingles"),
+            (OTRO, "Otro"),
+        ]
+    
+
     # tipo de cliente
     CLIENTE = '0'
     PROVEEDOR = '1'
@@ -38,6 +51,19 @@ class Cliente(models.Model):
     CLIENT_CHOISES = [
             (CLIENTE, "cliente"),
             (PROVEEDOR, "proveedor"),
+        ]
+    
+    # Canal de captación:
+    DIRECTO = '0'
+    PARTNER = '1'
+    LICITACION = '2'
+    OTRO = '3'
+    
+    CHANNEL_CHOISES = [
+            (DIRECTO, "Directo"),
+            (PARTNER, "Partner"),
+            (LICITACION, "Licitación"),
+            (OTRO, "Otro"),
         ]
     
     # ORIGEN
@@ -51,12 +77,15 @@ class Cliente(models.Model):
     
     tradeName = models.CharField('Razon Social',blank = True, null=True)
     ruc = models.CharField('RUC - DNI',blank = True, null=True, unique=True)
+    locationClient = models.CharField(
+        'Por origen',
+        max_length=1, 
+        choices=LOCATION_CHOISES,
+        null=True,
+        blank=True
+    )
+    country = models.CharField('País',blank = True, null=True)
     brandName = models.CharField('Marca',blank = True, null=True)
-    city = models.CharField('Ciudad',blank = True, null=True)
-    phoneNumber = models.CharField('Telefono',blank = True, null=True)
-    contact = models.OneToOneField(Contacto, on_delete=models.CASCADE, null=True, blank=True, unique=True)
-    webPage = models.CharField('Página Web',blank = True, null=True)
-    email = models.EmailField(blank = True, null=True)
 
     typeClient = models.CharField(
         'Categoria',
@@ -66,13 +95,31 @@ class Cliente(models.Model):
         blank=True
     )
 
-    locationClient = models.CharField(
-        'Por origen',
+    channel = models.CharField(
+        'Canal de captación',
         max_length=1, 
-        choices=LOCATION_CHOISES,
+        choices=CHANNEL_CHOISES,
         null=True,
         blank=True
-    ) 
+    )
+
+    contact = models.OneToOneField(Contacto, on_delete=models.CASCADE, null=True, blank=True, unique=True)
+
+    phoneNumber = models.CharField('Telefono',blank = True, null=True)
+    webPage = models.CharField('Página Web',blank = True, null=True)
+    email = models.EmailField(blank = True, null=True)
+
+    languageContract = models.CharField(
+        'Idioma de contrato',
+        max_length=1, 
+        choices=LANGUAGE_CHOISES,
+        null=True,
+        blank=True
+    )
+
+    legalJurisdiction = models.BooleanField("Jurisdicción legal aplicable",default=True,blank = True, null=True)
+    internationalBilling = models.BooleanField("Facturación internacional",default=True,blank = True, null=True)
+    electronicSignature = models.BooleanField("Firma electrónica",default=False,blank = True, null=True)
 
     objects = ClientManager()
 
@@ -81,6 +128,9 @@ class Cliente(models.Model):
     
     def get_full_name(self):
         return self.tradeName
+    
+    class Meta:
+        ordering = ['tradeName']
     
     def __str__(self):
         return f"[{self.ruc}] {self.tradeName}"

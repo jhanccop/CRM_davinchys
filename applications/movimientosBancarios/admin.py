@@ -66,7 +66,7 @@ class BankMovementsAdmin(ImportExportModelAdmin):
     #def get_docs(self, obj):
     #    return "\n".join([str(p) for p in obj.idDocs.all()])
 
-    search_fields = ('opNumber','date')
+    search_fields = ("id",'opNumber','date')
     list_filter = ('transactionType','idAccount')
     autocomplete_fields = ['originDestination']
 
@@ -108,9 +108,14 @@ class ConciliationAdmin(ImportExportModelAdmin):
         'idDoc',
     )
     
-    search_fields = ('status',)
-    list_filter = ('status','idMovOrigin')
-    autocomplete_fields = ['idMovOrigin','idMovArrival','idDoc']
+    search_fields = (
+        "id",
+        'status',
+        'type',
+        'idDoc__idInvoice'
+    )
+    list_filter = ('status','type')
+    autocomplete_fields = ['idMovOrigin','idDoc','idMovArrival']
 
 admin.site.site_header = "Administrador Davinchys"
 admin.site.site_title = "Administrador Davinchys"

@@ -1,0 +1,200 @@
+<!-- actividades/edit_task.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Actividad{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #e0e6ed;
+    }
+    .form-control:focus {
+        border-color: #5e72e4;
+        box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #344767;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <p class="mb-0">Editar Actividad</p>
+                        <a href="{% url 'activities_app:weekly_tasks' %}" class="btn btn-primary btn-sm ms-auto">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'activities_app:update_task' object.pk %}">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Por favor, corrige los siguientes errores:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field|title }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.date.id_for_label }}" class="form-label">Fecha</label>
+                                    {{ form.date }}
+                                    {% if form.date.errors %}
+                                        <div class="text-danger small mt-1">{{ form.date.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
+                                    {{ form.type }}
+                                    {% if form.type.errors %}
+                                        <div class="text-danger small mt-1">{{ form.type.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.activity.id_for_label }}" class="form-label">Actividad</label>
+                            {{ form.activity }}
+                            {% if form.activity.errors %}
+                                <div class="text-danger small mt-1">{{ form.activity.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hours.id_for_label }}" class="form-label">Horas</label>
+                                    {{ form.hours }}
+                                    {% if form.hours.errors %}
+                                        <div class="text-danger small mt-1">{{ form.hours.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.overTime.id_for_label }}" class="form-label">Horas Extra</label>
+                                    {{ form.overTime }}
+                                    {% if form.overTime.errors %}
+                                        <div class="text-danger small mt-1">{{ form.overTime.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.idTin.id_for_label }}" class="form-label">Empresa</label>
+                            {{ form.idTin }}
+                            {% if form.idTin.errors %}
+                                <div class="text-danger small mt-1">{{ form.idTin.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.rest_day }}
+                                <label class="form-check-label" for="{{ form.rest_day.id_for_label }}">
+                                    Día de descanso
+                                </label>
+                            </div>
+                            {% if form.rest_day.errors %}
+                                <div class="text-danger small mt-1">{{ form.rest_day.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.trafoOrder.id_for_label }}" class="form-label">Orden de Trabajo</label>
+                            {{ form.trafoOrder }}
+                            {% if form.trafoOrder.errors %}
+                                <div class="text-danger small mt-1">{{ form.trafoOrder.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.commissions.id_for_label }}" class="form-label">Comisiones</label>
+                            {{ form.commissions }}
+                            {% if form.commissions.errors %}
+                                <div class="text-danger small mt-1">{{ form.commissions.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.projects.id_for_label }}" class="form-label">Proyectos</label>
+                            {{ form.projects }}
+                            {% if form.projects.errors %}
+                                <div class="text-danger small mt-1">{{ form.projects.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.assignedTasks.id_for_label }}" class="form-label">Tareas Asignadas</label>
+                            {{ form.assignedTasks }}
+                            {% if form.assignedTasks.errors %}
+                                <div class="text-danger small mt-1">{{ form.assignedTasks.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <hr class="horizontal dark">
+                        
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'activities_app:weekly_tasks' %}" class="btn bg-gradient-secondary me-2">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn bg-gradient-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Agregar clases Bootstrap a los campos del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar clases a inputs de texto
+        const textInputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], input[type="time"], textarea');
+        textInputs.forEach(function(input) {
+            input.classList.add('form-control');
+        });
+        
+        // Agregar clases a selects
+        const selects = document.querySelectorAll('select');
+        selects.forEach(function(select) {
+            select.classList.add('form-select');
+        });
+        
+        // Agregar clases a checkboxes
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.classList.add('form-check-input');
+        });
+    });
+</script>
+{% endblock %}

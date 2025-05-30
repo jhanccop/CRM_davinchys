@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 # Django
 from django.db import models
 
-from .managers import AccountManager
+from .managers import AccountManager, TinManager
 
 from .signals import (
   update_accounts,
@@ -21,6 +21,8 @@ class Tin(TimeStampedModel):
         'Razón Social',
         max_length=50,
     )
+
+    #objects = TinManager()
 
     class Meta:
         verbose_name = 'Ruc'

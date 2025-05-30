@@ -24,3 +24,8 @@ class AccountManager(models.Manager):
     
     def CuentasByCajaChica(self,cajaChica):
         return self.filter(cajaChica = cajaChica).order_by("id")
+    
+
+class TinManager(models.Manager):
+    def allCompanies(self):
+        return self.all()

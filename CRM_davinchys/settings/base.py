@@ -47,6 +47,8 @@ LOCAL_APPS = (
 
     'multiselectfield',
     'import_export',
+
+    'rest_framework',
 )
 
 THIRD_PARTY_APPS = (

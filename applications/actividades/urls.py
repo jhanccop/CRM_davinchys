@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 
 #
 from django.urls import path
+from .views import get_task_detail
 from . import views
 
 app_name = "activities_app"
@@ -52,32 +53,64 @@ urlpatterns = [
         name='comision-eliminar',
     ),
 
+
+    # ============== ACTIVIDADES SEMANALES ===============
+    #path(
+    #    'actividades/mi-lista-actividades-semanales/', 
+    #    views.MyWeeklyTaskListView.as_view(),
+    #    name='mi-lista-actividades-semanales',
+    #),
+
+    path('weekly/', views.WeeklyTasksView.as_view(), name='weekly_tasks'),
+    path('task/create/', views.CreateDailyTaskView.as_view(), name='create_task'),
+    path('task/update/<int:pk>/', views.UpdateDailyTaskView.as_view(), name='update_task'),
+    path('task/delete/<int:pk>/', views.DeleteDailyTaskView.as_view(), name='delete_task'),
     # ============== ACTIVIDADES DIARIAS ===============
     path(
         'actividades/mi-lista-actividades-diarias/', 
         views.MyDailyTaskListView.as_view(),
         name='mi-actividad-diaria-lista',
     ),
-    path(
-        'actividades/crear-actividad-diaria/', 
-        views.DailyTaskCreateView.as_view(),
-        name='actividad-diaria-nuevo',
-    ),
-    path(
-        'actividades/editar-actividad-diaria/<pk>/', 
-        views.DailyTaskUpdateView.as_view(),
-        name='actividad-diaria-editar',
-    ),
-    path(
-        'actividades/eliminar-actividad-diaria/<pk>/', 
-        views.DailyTaskDeleteView.as_view(),
-        name='actividad-diaria-eliminar',
-    ),
+
+    path('api/tasks/<int:task_id>/', get_task_detail, name='task-detail'),
+
     path(
         'actividades/reporte-actividades-diarias/', 
         views.DailyTaskReportView.as_view(),
         name='reporte-actividades-diarias',
     ),
+
+    path('calendar/', views.CalendarView.as_view(), name='calendar'),
+    path('calendar/events/', views.DailyTasksListView.as_view(), name='calendar_events'),
+    path('calendar/save/', views.DailyTasksSaveView.as_view(), name='calendar_save'),
+
+    # ============== PERMISOS ===============
+    path(
+        'actividades/mi-lista-permisos/', 
+        views.MyListRestDays.as_view(),
+        name='mi-lista-permisos',
+    ),
+    path(
+        'actividades/crear-permiso-laboral/', 
+        views.RestTimeCreateView.as_view(),
+        name='crear-permiso-laboral',
+    ),
+    path(
+        'actividades/editar-permiso-laboral/<pk>/', 
+        views.RestTimeUpdateView.as_view(),
+        name='permiso-laboral-editar',
+    ),
+    path(
+        'actividades/eliminar-permiso-laboral/<pk>/', 
+        views.RestTimeDeleteView.as_view(),
+        name='eliminar-permiso-laboral',
+    ),
+
+    path('aprobar/rrhh/', views.AprobarPermisoRRHHView.as_view(), name='aprobar_rrhh'),
+    path('denegar/rrhh/', views.DenegarPermisoRRHHView.as_view(), name='denegar_rrhh'),
+    path('aprobar/gerencia/', views.AprobarPermisoGerenciaView.as_view(), name='aprobar_gerencia'),
+    path('denegar/gerencia/', views.DenegarPermisoGerenciaView.as_view(), name='denegar_gerencia'),
+
 
     # ============== BUZON DE SUGERENCIAS ===============
     path(

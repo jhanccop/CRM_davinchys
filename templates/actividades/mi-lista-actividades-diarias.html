@@ -4,11 +4,12 @@
 {% block title %} Actividades {% endblock title %}
 {% block main %} Actividades {% endblock main %}
 {% block appName %} Mis actividades {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% block Type %} Calendario {% endblock Type %}
 
 {% block panel-content %}
 
 <!-- ================ BODY ================= -->
+
 
 <div class="row">
   <div class="col-lg-6 col-12 d-flex ms-auto ">
@@ -18,165 +19,332 @@
     </a>
     {% endif %}
 
-    <a class="export btn btn-icon btn-outline-primary ms-auto" data-type="csv" type="button">
-      Export CSV
-    </a>
-    <div class="dropleft ms-3">
-      <a class="btn bg-gradient-primary" href="{% url 'activities_app:actividad-diaria-nuevo' %}">
-        NUEVO
-      </a>
-    </div>
   </div>
 </div>
 
-<div class="row">
-
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header pb-0 ">
-        <div class="row">
-          <div class="col-lg-6 col-md-3">
-            <h5 class="mb-0">Mi registro de actividades diarias</h5>
-            <p class="text-sm mb-0 text-info font-weight-bold">
-              {{user.full_name}} {{user.last_name}}
-            </p>
-          </div>
-          <div class="col-lg-6 col-md-9">
-            <form method="GET" class="">{% csrf_token %}
-              <div class="d-flex align-items-center">
-                <div class="input-group input-group-outline is-valid">
-
-                  <select class="form-control" name="TypeKword" id="TypeKword">
-                    <option value="0">jornada diaria</option>
-                    <option value="1">horas extra</option>
-                    <option value="2">todo</option>
-                  </select>
-
-                </div>
-                &emsp;
-                <div class="input-group input-group-outline">
-                  <input class="form-control datetimepicker text-center text-dark"
-                    value="{{actividadesDiarias.intervalDate}}" placeholder="today" id="dateKword" name="dateKword">
-                </div>
-                &emsp;
-                <div class="pt-3 pb-0">
-                  <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
-                </div>
-
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="card-body pt-0 px-0 pb-0">
-        <div class="table-responsive p-0">
-          <table class="table table-flush mb-0 align-items-center" id="datatable-move">
-            <thead class="thead-light">
-              <tr>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Fecha </th>
-
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                {% if actividadesDiarias.selected == "1" %}
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Inicio</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Final</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Horas</th>
-                {% else %}
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Horas extra</th>
-                {% endif %}
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in actividadesDiarias.actividades %}
-              <tr>
-                <td class="text-sm font-weight-bold">
-                  {{ t.date|date:'d-m-Y' }}
-                </td>
-                <td class="text-sm text-dark">
-                  {{ t.activity }}
-                </td>
-                {% if actividadesDiarias.selected == "1" %}
-                <td class="text-sm">
-                  {{ t.startTime }}
-                </td>
-                <td class="text-sm">
-                  {{ t.endTime }}
-                </td>
-                <td class="text-sm">
-                  {{ t.delta }}
-                </td>
-                {% else %}
-                <td class="text-sm">
-                  {{ t.is_overTime }}
-                </td>
-                {% endif %}
-                <td>
-                  <a href="{% url 'activities_app:actividad-diaria-editar' t.id %}">
-                    <i class="far fa-edit text-dark text-lg"></i>
-                  </a>
-                  &emsp;
-                  <a href="{% url 'activities_app:actividad-diaria-eliminar' t.id %}">
-                    <i class="far fa-trash-alt text-primary text-lg"></i>
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% if actividadesDiarias.selected == "1" %}
-          <h6 class="pe-4 text-end">Total de horas extra acumulados: {{actividadesDiarias.acc.acc}}</h6>
-          {% endif %}
-        </div>
+<!-- Calendario -->
+<div class="card card-calendar bg-gradient-white">
+  <div class="card-header d-flex align-items-center p-4">
+    <div class="text-start pt-0 ">
+      <a class="btn bg-gradient-info" href="{% url 'activities_app:crear-permiso-laboral' %}">Solicitar permiso</a>
+    </div>
+    <div class="ms-auto">
+      <div style="margin:10px 0;">
+        <strong>Leyenda:</strong>
+        <span class="badge badge-success">Jornada diaria</span>
+        <span class="badge badge-info">Horas extra</span>
+        <span class="badge badge-warning">Feriado</span>
+        <span class="badge badge-secondary">Otro</span>
+        <span class="badge badge-primary">Compensación</span>
       </div>
     </div>
   </div>
-  
+
+  <hr>
+
+  <div class="card-body p-3 pt-0 ">
+    <div class="calendar pt-0" data-bs-toggle="calendar" id="calendar"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="taskModal" class="bg-gradient-light" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); color:#fff; padding:20px; border-radius:10px; box-shadow:0 0 20px rgba(255, 255, 255, 0.7); z-index:9999; width:400px; max-width:90%;">
+  <form id="taskForm">
+    <h5> Ingreso de actividad </h5>
+    <input type="hidden" id="taskId" />
+    <input type="hidden" id="taskDate" />
+
+    <label class="text-dark">Actividad:</label><br>
+    <textarea id="taskActivity" rows="3" style="width:100%; background:#ffffff; border:1px solid #444; border-radius:4px;">Actividad regular</textarea><br/><br/>
+
+    <label class="text-dark">Tipo:</label>
+    <select id="taskType" style="width:100%; background:#ffffff; border:1px solid #444; border-radius:4px;">
+      <option value="0">Jornada diaria</option>
+      <option value="1">Horas extra</option>
+      <option value="2">Feriado</option>
+      <option value="3">Otro</option>
+      <option value="4">Compensar</option>
+    </select><br/><br/>
+
+    <!-- Contenedor para Horas Extra (oculto por defecto) -->
+    <div id="overtimeContainer" style="display:none;">
+      <label class="text-dark">Horas extra:</label>
+      <input class="text-center" type="number" id="taskOverTime" min="0" step="0.25" value="0"
+             style="width:100%; background:#ffffff; border:1px solid #444; border-radius:4px;" /><br/><br/>
+    </div>
+
+    <!-- Contenedor para Compensación (oculto por defecto) -->
+    <div id="restContainer" style="display:none;">
+      <label class="text-dark">Seleccionar permiso a compensar:</label>
+      <select id="taskRest" style="width:100%; background:#ffffff; border:1px solid #444; border-radius:4px;">
+        {% for i in data.rest %}
+        <option value="{{i.id}}">{{i.startDate|date:"d-M-Y"}} {% if i.days %} {{i.days}} dias {% endif %} {% if i.hours %} {{i.hours}} horas {% endif %}</option>
+        {% endfor %}
+      </select><br/><br/>
+    </div>
+
+    <div style="display:flex; justify-content: space-between;">
+      <button class="btn bg-gradient-success" type="submit">Guardar</button>
+      <button type="button" onclick="deleteTask()" class="btn bg-gradient-primary">Eliminar</button>
+      <button type="button" onclick="closeModal()" class="btn bg-gradient-secondary">Cancelar</button>
+    </div>
+  </form>
 </div>
 
 {% endblock panel-content %}
 
 {% block JSscripts %}
 
-<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script src="{% static 'assets/js/plugins/fullcalendar.min.js' %}"></script>
+
 <script>
-    if (document.querySelector('.datetimepicker')) {
-        flatpickr('.datetimepicker', {
-            allowInput: true,
-            mode: "range"
-        }); // flatpickr
+  document.addEventListener('DOMContentLoaded', function () {
+    // Inicialización del calendario
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      firstDay: 1,
+      selectable: true,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: ''
+      },
+      events: '{% url "activities_app:calendar_events" %}',
+
+      eventDidMount: function (info) {
+        const { overTime, type, rest_day_info } = info.event.extendedProps;
+        
+        // Establecer colores según el tipo
+        const typeColors = {
+          '1': '#03a9f4', // Horas extra
+          '2': '#fb8c00', // Feriado
+          '3': '#7b809a', // Otro
+          '4': '#e91e63'  // Compensación
+        };
+        info.el.style.backgroundColor = typeColors[type] || '#4caf50'; // Jornada diaria por defecto
+
+        // Mostrar información adicional
+        const titleContainer = info.el.querySelector('.fc-event-title');
+        if (titleContainer) {
+          if (overTime > 0) {
+            const extraDiv = document.createElement('div');
+            extraDiv.style.fontSize = '0.9em';
+            extraDiv.style.marginTop = '2px';
+            extraDiv.style.color = '#f8f9fa';
+            extraDiv.innerText = `${overTime} h extra`;
+            titleContainer.appendChild(extraDiv);
+          }
+          
+          if (type === '4' && rest_day_info) {
+            const restDiv = document.createElement('div');
+            restDiv.style.fontSize = '0.8em';
+            restDiv.style.marginTop = '2px';
+            restDiv.style.color = '#f8f9fa';
+            restDiv.innerText = `Compensa: ${rest_day_info}`;
+            titleContainer.appendChild(restDiv);
+          }
+        }
+      },
+
+      dateClick: function (info) {
+        openModal(info.dateStr);
+      },
+
+      eventClick: function (info) {
+        openModalForEdit(
+          info.event.id,
+          info.event.startStr,
+          info.event.title,
+          info.event.extendedProps.type,
+          info.event.extendedProps.overTime,
+          info.event.extendedProps.rest_day_id
+        );
+      }
+    });
+
+    calendar.render();
+
+    // Función para abrir modal para nueva tarea
+    function openModal(date) {
+      resetModalForm();
+      document.getElementById('taskDate').value = date;
+      document.getElementById('taskModal').style.display = 'block';
+      updateDynamicFields('0');
     }
-</script>
 
-<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
-<script>
-  /* PROYECTOS */
-  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
-    searchable: true,
-    fixedHeight: false,
-    perPage: 10
-  });
+    // Función para abrir modal para edición
+    function openModalForEdit(id, date, title, type, overTime, restDayId = null) {
+      resetModalForm();
+      
+      document.getElementById('taskId').value = id;
+      document.getElementById('taskDate').value = date;
+      document.getElementById('taskActivity').value = title;
+      document.getElementById('taskType').value = type;
+      
+      if (type === '1') {
+        document.getElementById('taskOverTime').value = overTime || '0';
+      }
+      
+      if (type === '4' && restDayId) {
+        document.getElementById('taskRest').value = restDayId;
+      }
+      
+      document.getElementById('taskModal').style.display = 'block';
+      updateDynamicFields(type);
+    }
 
-  document.querySelectorAll(".export").forEach(function (el) {
-    el.addEventListener("click", function (e) {
-      var type = el.dataset.type;
+    // Función para resetear el formulario
+    function resetModalForm() {
+      document.getElementById('taskForm').reset();
+      document.getElementById('taskId').value = '';
+      document.getElementById('taskActivity').value = 'Actividad regular';
+      document.getElementById('taskType').value = '0';
+      document.getElementById('taskOverTime').value = '0';
+      document.getElementById('taskRest').value = '';
+    }
 
-      var data = {
-        type: type,
-        filename: "actividades",
+    // Función para cerrar el modal
+    window.closeModal = function () {
+      document.getElementById('taskModal').style.display = 'none';
+    }
+
+    // Función para actualizar campos dinámicos
+    function updateDynamicFields(type) {
+      const overtimeContainer = document.getElementById('overtimeContainer');
+      const restContainer = document.getElementById('restContainer');
+      
+      // Ocultar todos los campos primero
+      overtimeContainer.style.display = 'none';
+      restContainer.style.display = 'none';
+      
+      // Mostrar campos según el tipo seleccionado
+      if (type === '1') {
+        overtimeContainer.style.display = 'block';
+        document.getElementById('taskOverTime').required = true;
+      } else if (type === '4') {
+        restContainer.style.display = 'block';
+        document.getElementById('taskRest').required = true;
+      }
+    }
+
+    // Event listener para cambios en el tipo de tarea
+    document.getElementById('taskType').addEventListener('change', function() {
+      updateDynamicFields(this.value);
+    });
+
+    // Función para obtener el token CSRF
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Validación del formulario
+    function validateForm() {
+      const type = document.getElementById('taskType').value;
+      
+      if (type === '1' && !document.getElementById('taskOverTime').value) {
+        alert('Debe ingresar las horas extra');
+        return false;
+      }
+      
+      if (type === '4' && !document.getElementById('taskRest').value) {
+        alert('Debe seleccionar un permiso a compensar');
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Envío del formulario
+    document.getElementById('taskForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!validateForm()) return;
+      
+      const formData = {
+        date: document.getElementById('taskDate').value,
+        activity: document.getElementById('taskActivity').value,
+        type: document.getElementById('taskType').value,
+        overTime: document.getElementById('taskOverTime').value,
+        rest_day: document.getElementById('taskRest').value
       };
 
-      if (type === "csv") {
-        data.columnDelimiter = ",";
-      }
+      const taskId = document.getElementById('taskId').value;
+      const url = '{% url "activities_app:calendar_save" %}';
+      const method = taskId ? 'PUT' : 'POST';
+      const body = taskId ? {id: taskId, ...formData} : formData;
 
-      dataTableclientes.export(data);
+      fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify(body)
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => { throw err; });
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === 'error') {
+          alert(`Error: ${data.message}`);
+        } else {
+          closeModal();
+          calendar.refetchEvents();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(`Error al guardar: ${error.message || 'Datos inválidos'}`);
+      });
     });
+
+    // Eliminar tarea
+    window.deleteTask = function () {
+      const id = document.getElementById('taskId').value;
+      if (!id) return;
+
+      if (confirm("¿Estás seguro de eliminar esta actividad?")) {
+        fetch('{% url "activities_app:calendar_save" %}', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ id: id })
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(err => { throw err; });
+          }
+          return response.json();
+        })
+        .then(data => {
+          closeModal();
+          calendar.refetchEvents();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert(`Error al eliminar: ${error.message || 'Error desconocido'}`);
+        });
+      }
+    }
   });
-
-</script>
-
-<script>
-  document.getElementById("TypeKword").selectedIndex = "{{actividadesDiarias.selected}}";
 </script>
 
 {% endblock JSscripts %}

@@ -35,22 +35,21 @@
           <table class="table align-items-canter mb-0" id="datatable-clientes">
             <thead>
               <tr>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">RUC/ID</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Numero</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Correo</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Banco/Cuenta</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social / Ruc</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Origen</th>
                 <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {% for t in clientes %}
               <tr class="mb-0 pb-0">
-                <td class="text-sm">{{ t.tradeName }}</td>
-                <td class="text-start text-sm">{{ t.ruc }}</td>
-                <td class="text-start text-sm">{{ t.phoneNumber }}</td>
-                <td class="text-start text-sm">{{ t.email }}</td>
-                <td class="text-start text-sm">{{ t.get_bankName_display }} / {{ t.account }}</td>
+                <td class="text-sm mb-0 ">
+                  {{ t.tradeName }}
+                  <p class=" mb-0 text-dark font-weight-bolder">{{ t.ruc }}</p>
+                </td>
+                <td class="text-start text-sm text-uppercase">{{ t.get_typeClient_display }}</td>
+                <td class="text-start text-sm text-uppercase">{{ t.get_locationClient_display }}</td>
                 <td>
                   <a href="{% url 'clients_app:cliente-editar' t.id %}">
                     <i class="far fa-edit text-dark text-lg"></i>

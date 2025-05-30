@@ -7,11 +7,20 @@ from applications.clientes.models import Cliente
 from applications.producto.models import Transformer
 from applications.personal.models import Workers
 
+from applications.cuentas.models import Tin
+
+from django.db import transaction
+from decimal import Decimal
+
+from django.db.models.signals import pre_save, post_save, post_delete
+from django.dispatch import receiver
 
 from .managers import (
   TrafoOrderManager,
   TrafoTrackingManager,
+
   DailyTasksManager,
+  RestDaysManager,
 
   TrafoQuoteManager,
   TrafosManager,
@@ -270,17 +279,188 @@ class AssignedTasks(TimeStampedModel):
     def __str__(self):
         return str(self.activity)
 
-class DailyTasks(TimeStampedModel):
-    # TIPO DE JORNADA 
-    JORNADA = '0'
-    SOBRETIEMPO = '1'
-    OTRO = '2'
+# ================= RRHH ================
+class RestDays(TimeStampedModel):
+    # TIPO DE PERMISO 
+    PARTICULAR = '0'
+    DESCANSOMEDICO = '1'
+    VACACIONES = '2'
+    MATERNIDAD = '3'
+    OTROS = '4'
 
     #
     TYPE_CHOICES = [
-        (JORNADA, 'jornada diaria'),
-        (SOBRETIEMPO, 'horas extra'),
-        (OTRO, 'otro'),
+        (PARTICULAR, 'Permiso particular'),
+        (DESCANSOMEDICO, 'Descanso médico'),
+        (VACACIONES, 'Vacaciones'),
+        (MATERNIDAD, 'Maternidad'),
+        (OTROS, 'Otro'),
+    ]
+
+    # === CATEGORIA ESTADO ====
+    ESPERA = '0'
+    ACEPTADO = '1'
+    DENEGADO = '2'
+    OBSERVADO = '3'
+    CREADO = '4'
+
+    STATUS_CHOICES = [
+        (ESPERA,'espera'),
+        (ACEPTADO,'aceptado'),
+        (DENEGADO,'denegado'),
+        (OBSERVADO,'observado'),
+        (CREADO,'creado'),
+    ]
+
+    # ------------- models -------------
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='Usuario',
+    )
+
+    type = models.CharField(
+        'Tipo de permiso',
+        max_length=1, 
+        choices=TYPE_CHOICES,
+        null=True,
+        blank=True,
+        default="0",
+    )
+
+    hours = models.DecimalField(
+        'Horas',
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=3
+    )
+
+    days = models.IntegerField(
+        'Dias',
+        null=True,
+        blank=True,
+        default=0
+    )
+
+    isCompensated = models.BooleanField(
+        "Compensación necesaria",
+        default=True
+    )
+
+    hoursCompensated = models.IntegerField(
+        "Horas compensados",
+        null=True,
+        blank=True,
+        default=0
+    )
+
+    daysCompensated = models.IntegerField(
+        "Dias compensados",
+        null=True,
+        blank=True,
+        default=0
+    )
+
+    startDate = models.DateField(
+        'Fecha de inicio',
+        null=True,
+        blank=True,
+    )
+    endDate = models.DateField(
+        'Fecha de término',
+        null=True,
+        blank=True,
+    )
+
+    motive = models.TextField(
+        'Motivo',
+        null=True,
+        blank=True,
+    )
+
+    tag1 = models.CharField("Ap RRHH",default="0",choices=STATUS_CHOICES,max_length=1,blank=True,null=True)# only adquisitions
+    dt1 = models.DateTimeField("F. RRHH",null=True,blank=True) # adquisiciones
+
+    tag2 = models.CharField("VB Gerencia",default="4",choices=STATUS_CHOICES,max_length=1,blank=True,null=True) # only contabilidad
+    dt2 = models.DateTimeField("F. Gerencia ",null=True,blank=True) # contabilidad
+
+    pdf_file = models.FileField(upload_to='descansos_pdfs/',null=True,blank=True)
+
+    objects = RestDaysManager()
+
+    class Meta:
+        verbose_name = 'Descanso'
+        verbose_name_plural = 'Descansos'
+
+    def __str__(self):
+        return f"{self.user} | {self.startDate} | {self.get_type_display()}"
+
+class DailyTasks(TimeStampedModel):
+
+    # TIPO DE JORNADA 
+    JORNADAREGULAR = '0'
+    HORASEXTRA = '1'
+    FERIADO = '2'
+    OTROS = '3'
+    COMPENSACION = '4'
+
+    #
+    TYPE_CHOICES = [
+        (JORNADAREGULAR, 'Jornada diaria'),
+        (HORASEXTRA, 'Horas extra'),
+        (FERIADO, 'Feriado'),
+        (COMPENSACION, 'Compensación'),
+        (OTROS, 'Otro'),
+    ]
+
+    # CLASE DE ACTIVIDAD 
+    INSPECCION = '0'
+    MANTENIMIENTO = '1'
+    PRODUCCION = '2'
+    CONTROLDECALIDAD = '3'
+    TRANSPORTE = '4'
+    LOGISTICA = '5'
+
+    DOCUMENTACION = '6'
+    REUNION = '7'
+    MARKETING = '8'
+    PLANIFICACION = '9'
+    FINANZAS = '10'
+    CONTABILIDAD = '11'
+    REPRESENTACION = '12'
+    AUDITORIA = '13'
+
+    DESARROLLO = '14'
+    TESTING = '15'
+
+    ADUANAS = '16'
+    OTRO = '17'
+    
+    #
+    WORK_CHOICES = [
+        (INSPECCION, 'Inspección'),
+        (MANTENIMIENTO, 'Mantenimiento'),
+        (PRODUCCION, 'Producción'),
+        (CONTROLDECALIDAD, 'Control de calidad'),
+        (TRANSPORTE, 'Transporte'),
+        (LOGISTICA, 'Logistica'),
+
+        (DOCUMENTACION, 'Documentación'),
+        (REUNION, 'Reunión'),
+        (MARKETING, 'Marketing'),
+        (PLANIFICACION, 'Planificación'),
+        (FINANZAS, 'Finanzas'),
+        (CONTABILIDAD, 'Contabilidad'),
+        (REPRESENTACION, 'Representación'),
+        (AUDITORIA, 'Auditoria'),
+
+        (DESARROLLO, 'Desarrollo'),
+        (TESTING, 'Testing'),
+
+        (ADUANAS, 'Aduanas'),
+        (OTRO, 'Otro'),
+
     ]
 
     # ------------- models -------------
@@ -296,34 +476,51 @@ class DailyTasks(TimeStampedModel):
 
     activity = models.TextField(
         'Actividad',
-        null=False,
-        blank=False,
-    )
-
-    is_overTime = models.BooleanField('Horas extra',default=False)
-
-    #type = models.CharField(
-    #    'Tipo de jornada',
-    #    max_length=1, 
-    #    choices=TYPE_CHOICES,
-    #    null=True,
-    #    blank=True
-    #)
-    startTime = models.TimeField(
-        'Hora de inicio',
-        null=True,
-        blank=True,
-    )
-    endTime = models.TimeField(
-        'Hora de termino',
         null=True,
         blank=True,
     )
 
+    type = models.CharField(
+        'Tipo de jornada',
+        max_length=1, 
+        choices=TYPE_CHOICES,
+        null=True,
+        blank=True,
+        default="0",
+    )
+
+    task = models.CharField(
+        'Tipo de actividad',
+        max_length=2, 
+        choices=WORK_CHOICES,
+        null=True,
+        blank=True,
+        default="7",
+    )
+
+    overTime = models.DecimalField(
+        'Horas extra',
+        null=True,
+        blank=True,
+        decimal_places=2,
+        max_digits=3
+    )
+
+    hours = models.DecimalField(
+        'Horas',
+        decimal_places=1,
+        max_digits=3,
+        null=True,
+        blank=True,
+    )
+
+    idTin = models.ForeignKey(Tin, on_delete = models.CASCADE, null=True, blank=True, related_name="DialyTaskTin")
+    rest_day = models.ForeignKey(RestDays, on_delete = models.CASCADE, null=True, blank=True, related_name="compensations")
     trafoOrder = models.ForeignKey(TrafoOrder, on_delete = models.CASCADE, null=True, blank=True)
     commissions = models.ForeignKey(Commissions, on_delete = models.CASCADE, null=True, blank=True)
     projects = models.ForeignKey(Projects, on_delete = models.CASCADE, null=True, blank=True)
     assignedTasks = models.ForeignKey(AssignedTasks, on_delete = models.CASCADE, null=True, blank=True)
+    
 
     objects = DailyTasksManager()
 
@@ -797,3 +994,114 @@ class SuggestionBox(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user} - {self.get_area_display()}"
+
+# ======================= SIGNAL REST DAYS =======================
+@receiver(pre_save, sender=RestDays)
+def update_tag2_when_tag1_approved(sender, instance, **kwargs):
+    """
+    Actualiza tag2 a 'ESPERA' (0) cuando tag1 cambia a 'ACEPTADO' (1)
+    y tag2 estaba en su valor por defecto ('CREADO' - 4)
+    """
+    if instance.pk:  # Solo para instancias existentes
+        try:
+            original = RestDays.objects.get(pk=instance.pk)
+            
+            # Verificar si tag1 cambió a ACEPTADO (1)
+            if original.tag1 != instance.tag1 and instance.tag1 == RestDays.ACEPTADO:
+                # Si tag2 está en su valor por defecto (CREADO - 4), cambiarlo a ESPERA (0)
+                if instance.tag2 == RestDays.CREADO:
+                    instance.tag2 = RestDays.ESPERA
+                    
+        except RestDays.DoesNotExist:
+            pass  # Para nuevos registros, no hacemos nada
+
+@receiver(pre_save, sender=RestDays)
+def calculate_days_between_dates(sender, instance, **kwargs):
+    """
+    Calcula el número de días entre startDate y endDate y lo guarda en el campo 'days'.
+    Este signal se ejecuta antes de guardar un objeto RestDays.
+    """
+    try:
+        if instance.startDate and instance.endDate:
+            # Calcular la diferencia en días
+            delta = instance.endDate - instance.startDate
+            
+            # Asignar el valor al campo 'days' (añadir +1 para incluir ambos días)
+            # Por ejemplo: del 10 al 12 son 3 días (10, 11, 12)
+            instance.days = delta.days + 1
+
+    except Exception as e:
+        print(f"Error al buscar el modelo relacionado: {str(e)}")
+
+def get_actual_days_count(rest_day):
+    """
+    Función para contar los días únicos correctamente.
+    Realizamos una consulta manual para evitar problemas de cache o conteo incorrecto.
+    """
+    # Obtenemos las fechas únicas y las contamos manualmente
+    unique_dates = set(
+        DailyTasks.objects.filter(
+            rest_day=rest_day,
+            type=DailyTasks.COMPENSACION
+        ).values_list('date', flat=True)
+    )
+    
+    # Retornamos el número exacto de días únicos
+    return len(unique_dates)
+
+@receiver(post_save, sender=DailyTasks)
+def update_rest_day_compensation(sender, instance, created, **kwargs):
+    """
+    Signal para actualizar las hoursCompensated y daysCompensated en RestDays
+    cuando se guarda un DailyTasks.
+    
+    - hoursCompensated: Se copia el valor de hours del RestDay
+    - daysCompensated: Se completa con cantidad de DailyTask con el restday respectivo en diferentes días
+    """
+    # Solo procesar si hay un rest_day asociado y es de tipo compensación
+    if instance.rest_day and instance.type == DailyTasks.COMPENSACION:
+        rest_day = instance.rest_day
+        
+        # Copiar el valor de hours de RestDay a hoursCompensated
+        # Si hours es None, se asigna 0
+        if rest_day.hours is not None:
+            hours_compensated = rest_day.hours
+        else:
+            hours_compensated = 0
+            
+        # Actualizar hoursCompensated
+        rest_day.hoursCompensated = hours_compensated
+        
+        # Actualizar daysCompensated: contar días distintos con compensaciones
+        # Usamos nuestra función personalizada para garantizar un conteo exacto
+        days_compensated = get_actual_days_count(rest_day)
+        
+        rest_day.daysCompensated = days_compensated - 1
+        
+        # Guardar los cambios sin disparar más signals para evitar recursión
+        rest_day.save(update_fields=['hoursCompensated', 'daysCompensated'])
+
+@receiver(post_delete, sender=DailyTasks)
+def update_rest_day_compensation_on_delete(sender, instance, **kwargs):
+    """
+    Signal para actualizar las hoursCompensated y daysCompensated en RestDays
+    cuando se elimina un DailyTasks.
+    """
+    # Solo procesar si había un rest_day asociado y era de tipo compensación
+    if instance.rest_day and instance.type == DailyTasks.COMPENSACION:
+        rest_day = instance.rest_day
+        
+        # Mantener hoursCompensated igual al campo hours del RestDay
+        if rest_day.hours is not None:
+            hours_compensated = rest_day.hours
+        else:
+            hours_compensated = 0
+            
+        rest_day.hoursCompensated = hours_compensated
+        
+        # Recalcular daysCompensated usando nuestra función personalizada
+        days_compensated = get_actual_days_count(rest_day)
+        rest_day.daysCompensated = days_compensated
+        
+        # Guardar los cambios con update_fields para evitar recursión
+        rest_day.save(update_fields=['hoursCompensated', 'daysCompensated'])

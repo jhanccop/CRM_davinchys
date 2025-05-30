@@ -16,10 +16,16 @@ class FinancialDocumentsResource(resources.ModelResource):
 @admin.register(FinancialDocuments)
 class FinancialDocumentsAdmin(ImportExportModelAdmin):
     resource_class = FinancialDocumentsResource
+
+    def get_client_ruc(self, obj):
+        if obj.idClient:
+            return obj.idClient.ruc
+        return None
+    
     list_display = (
         'id',
         'date',
-        'idClient',
+        'get_client_ruc',
         'typeInvoice',
         'idInvoice',
         'typeCurrency',
@@ -28,9 +34,9 @@ class FinancialDocumentsAdmin(ImportExportModelAdmin):
         'description',
     )
     
-    search_fields = ('idInvoice','idClient',)
+    search_fields = ("id",'idInvoice',)
     list_filter = ('idInvoice','idClient')
-    autocomplete_fields = ['idClient']
+    autocomplete_fields = ['idClient',]
 
 ## ==================== OthersDocuments =====================
 class OthersDocumentsResource(resources.ModelResource):

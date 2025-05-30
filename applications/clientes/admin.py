@@ -43,10 +43,9 @@ class ClienteAdmin(ImportExportModelAdmin):
         'id',
         'tradeName',
         'ruc',
-        'phoneNumber',
-        'contact',
-        'webPage',
-        'email'
+        'locationClient',
+        'country',
+        'channel'
     )
     search_fields = ('tradeName','ruc',)
 

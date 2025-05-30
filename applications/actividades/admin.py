@@ -3,7 +3,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask, SuggestionBox
+from .models import Commissions, Projects, DailyTasks, TrafoQuote, Trafos, TrafoTask, SuggestionBox, RestDays
 
 ## ==================== Commissions =====================
 class CommissionsResource(resources.ModelResource):
@@ -52,12 +52,29 @@ class DailyTasksAdmin(ImportExportModelAdmin):
         'user',
         'date',
         'activity',
-        'is_overTime',
-        'startTime',
-        'endTime',
+        'type',
+        #'is_overTime',
     )
-    search_fields = ('is_overTime',)
-    list_filter = ('is_overTime',)
+    search_fields = ('type',)
+    list_filter = ('type',)
+
+## ==================== REST DAYS =====================
+class RestDaysResource(resources.ModelResource):
+    class Meta:
+        model = RestDays
+
+@admin.register(RestDays)
+class RestDaysAdmin(ImportExportModelAdmin):
+    resource_class = RestDaysResource
+    list_display = (
+        'user',
+        'type',
+        'startDate',
+        'endDate',
+        'motive',
+    )
+    search_fields = ('type',)
+    list_filter = ('type',)
 
 ## ==================== SuggestionBox =====================
 class SuggestionBoxResource(resources.ModelResource):

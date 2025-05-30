@@ -196,6 +196,7 @@ class BankMovements(TimeStampedModel):
     objects = BankMovementsManager()
 
     class Meta:
+        ordering = ['date']
         verbose_name = 'Movimiento bancario'
         verbose_name_plural = 'Movimientos bancarios'
 
@@ -234,6 +235,7 @@ class Conciliation(TimeStampedModel):
     objects = ConciliationManager()
 
     class Meta:
+        ordering = ['created']
         verbose_name = 'Conciliacion'
         verbose_name_plural = 'Conciliaciones'
 

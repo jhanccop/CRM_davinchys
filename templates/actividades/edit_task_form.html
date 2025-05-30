@@ -1,0 +1,89 @@
+
+{% load  static %}
+<!-- actividades/edit_task_form.html -->
+<form method="post" action="{% url 'activities_app:update_task' object.pk %}">
+    {% csrf_token %}
+
+    <div class="mb-3 input-group input-group-outline focused is-focused">
+        <label class="form-label">Empresa</label>
+        {{ form.idTin }}
+        {% if form.idTin.errors %}
+            <div class="text-danger small">{{ form.idTin.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-6" hidden>
+        <div class="mb-3">
+            <label for="{{ form.date.id_for_label }}" class="form-label">Fecha</label>
+            {{ form.date }}
+            {% if form.date.errors %}
+                <div class="text-danger small">{{ form.date.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-6 col-md-6">
+            <div class="mb-3 input-group input-group-outline focused is-focused">
+                <label class="form-label">Tipo</label>
+                {{ form.type }}
+                {% if form.type.errors %}
+                    <div class="text-danger small">{{ form.type.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-6">
+            <div class="mb-3 input-group input-group-outline focused is-focused">
+                <label class="form-label">Tipo</label>
+                {{ form.task }}
+                {% if form.task.errors %}
+                    <div class="text-danger small">{{ form.task.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-3 input-group input-group-outline focused is-focused">
+        <label for="{{ form.activity.id_for_label }}" class="form-label">Actividad</label>
+        {{ form.activity }}
+        {% if form.activity.errors %}
+            <div class="text-danger small">{{ form.activity.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3 input-group input-group-outline focused is-focused">
+                <label for="{{ form.hours.id_for_label }}" class="form-label">Horas</label>
+                {{ form.hours }}
+                {% if form.hours.errors %}
+                    <div class="text-danger small">{{ form.hours.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="mb-3 input-group input-group-outline focused is-focused">
+                <label for="{{ form.overTime.id_for_label }}" class="form-label">Horas Extra</label>
+                {{ form.overTime }}
+                {% if form.overTime.errors %}
+                    <div class="text-danger small">{{ form.overTime.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3 input-group input-group-outline focused is-focused">
+        <label class="form-label">Día de descanso</label>
+        {{ form.rest_day }}
+        {% if form.rest_day.errors %}
+            <div class="text-danger small">{{ form.rest_day.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn bg-gradient-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn bg-gradient-primary">Guardar Cambios</button>
+    </div>
+</form>

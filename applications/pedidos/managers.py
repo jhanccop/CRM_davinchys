@@ -1,4 +1,5 @@
-from datetime import date, datetime,timedelta
+import datetime
+from datetime import date, datetime,timedelta, time
 
 from django.db.models import OuterRef, Subquery, Count, Sum, Q
 
@@ -457,7 +458,7 @@ class PaymentRequestManager(models.Manager):
 
         return result
     
-    def RequerimientosPendientes(self,area):
+    def ListasPendientesPagoPorArea(self,area):
         if area == "5": # adquisiciones
             result = self.filter(
             tag1 = "0" # pedidos solicitados
@@ -499,4 +500,58 @@ class PaymentRequestManager(models.Manager):
         ).aggregate(n = Count("id"))
         
         return result
+    
+    def getMyListPaymentRequestForMonth(self,userId,yearSelected,monthSelected):
+        
+        yearSelected = int(yearSelected)
+        monthSelected = int(monthSelected)
+        
+        start_date = date(yearSelected, monthSelected, 1)
+    
+        # Obtener el último día del mes
+        if monthSelected == 12:
+            end_date = date(yearSelected + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(yearSelected, monthSelected + 1, 1) - timedelta(days=1)
+        
+        # Ajustar para incluir todo el día final
+        end_datetime = datetime.combine(end_date, time.max)
+        
+        # Filtrar por usuario y rango de fechas en el campo created
+        payment_requests = self.filter(
+            idPetitioner=userId,
+            created__gte=start_date,
+            created__lte=end_datetime
+        )
+        
+        return payment_requests
+    
+    def getListOfPaymentRequestByArea(self, area):
+        """
+        Obtener los requerimientos solicitados al aera
+        """
+
+        if area == "5": # 5 ADQUISICIONES
+            result =  self.filter(
+                tag1 = "0", # en espera
+            )
+            return result
+
+        elif area == "1": # 1 CONTABILIDAD
+            result =  self.filter(
+                tag2 = "0", # en espera
+            )
+            return result
+        
+        elif area == "6": # 6 FINANZAS
+            result =  self.filter(
+                tag3 = "0", # en espera
+            )
+            return result
+
+        elif area == "0": # 0 ADMINISTRADOR
+            result =  self.filter(
+                Q(tag4="0") | Q(tag4="1")
+            )
+            return result
 

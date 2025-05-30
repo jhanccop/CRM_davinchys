@@ -1,0 +1,182 @@
+{% extends "actividades/base-actividades.html" %}
+
+{% load  static %}
+{% block title %} Actividades {% endblock title %}
+{% block main %} Actividades {% endblock main %}
+{% block appName %} Permiso Laboral {% endblock appName %}
+{% block Type %} Crear {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-primary shadow-primary border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white text-uppercase"> crear permiso laboral </h6>
+        </div>
+      </div>
+      <div class="card-body pb-0">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+
+              <div class="row" hidden>
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline ">
+                    <label for="exampleFormControlInput1" class="form-label">user</label>
+                    {{ form.user }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4 d-flex">
+                  <div class="form-check d-flex">
+                    {{form.isCompensated}}
+                    <label class="form-check-label">Por compensar</label>
+                  </div>
+                </div>
+
+              </div>
+
+              <p>En caso de solicitar horas, no colocar fecha de finalización.</p>
+
+              <div class="row">
+
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Tipo</label>
+                    {{ form.type }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Fecha de inicio</label>
+                    {{ form.startDate }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Fecha de finalización</label>
+                    {{ form.endDate }}
+                  </div>
+                  {% for error in form.endDate.errors %}
+                  <p class="text-xs text-primary mb-0">
+                    {{ error|escape }}
+                  </p>
+                  {% endfor %}
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-6 col-sm-4 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Horas</label>
+                    {{ form.hours }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Motivo</label>
+                    {{ form.motive }}
+                  </div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-12 col-sm-12 mt-sm-0">
+                  <h6 class="mb-0">Documento:</h6>
+                  <div class="input-group input-group-outline">
+                    <div class="form-group w-100">
+                      {{ form.pdf_file }}
+                    </div>
+                  </div>
+                  <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                  {% for error in form.pdf_file.errors %}
+                  <p class="text-xs text-primary mb-0">
+                    {{ error|escape }}
+                  </p>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'activities_app:mi-lista-permisos' %}"> REGRESAR </a>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit">Solicitar permiso</button>
+              </div>
+
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  function updateSelect() {
+    const selected = document.getElementById("id_type").value;
+    const checkbox = document.getElementById('id_isCompensated');
+
+    console.log(selected);
+
+    if(selected == 0 || selected == 4){
+      checkbox.checked = true;
+      
+    }
+    else{
+      checkbox.checked = false;
+    }
+  }
+</script>
+
+<script>
+  const primaryInput = document.getElementById('id_endDate');
+  const secondaryInput = document.getElementById('id_hours');
+
+  function checkPrimaryInput() {
+    if (primaryInput.value.trim() === '') {
+      secondaryInput.disabled = false;
+    } else {
+      secondaryInput.disabled = true;
+      secondaryInput.value = '';
+    }
+  }
+
+  primaryInput.addEventListener('input', checkPrimaryInput);
+
+  window.addEventListener('load', checkPrimaryInput);
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            Date: "today",
+            //minDate: "today"
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+  if("{{object}}"){
+    document.getElementById("id_user").value = "{{object.user.id}}";
+  }else{
+    document.getElementById("id_user").value = "{{user.id}}";
+  }
+</script>
+{% endblock JSscripts %}

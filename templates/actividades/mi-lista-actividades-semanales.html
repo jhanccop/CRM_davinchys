@@ -1,0 +1,530 @@
+{% extends "actividades/base-actividades.html" %}
+
+{% load  static %}
+{% block title %} Actividades {% endblock title %}
+{% block main %} Actividades {% endblock main %}
+{% block appName %} Mis actividades {% endblock appName %}
+{% block Type %} Semanal {% endblock Type %}
+
+{% block panel-content %}
+
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>Semana {{ week_number }} - Actividades del {{ start_of_week|date:"d/m/Y" }} al
+                            {{end_of_week|date:"d/m/Y" }}</h6>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr class="pb-0 mb-0">
+                                        {% for day in week_days %}
+                                        <th class="text-center">
+                                            <p class="mb-0 text-dark">
+                                                {{ day|date:"l" }}
+                                            </p>
+                                            <p class="pt-0 mb-0 text-sm">
+                                                {{ day|date:"d/m/Y" }}
+                                            </p>
+                                            <p class="mb-0">
+                                                <button class="btn btn-outline-info mb-0 btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#actividadModal" data-date="{{ day|date:'Y-m-d' }}">
+                                                    Agregar
+                                                </button>
+                                            </p>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        {% for key,value in tasks_by_day.items %}
+                                        <td>
+
+                                            <ul class="list-group">
+                                                {% for i in value%}
+                                                <li
+                                                    class="list-group-item border-0 justify-content-between p-2 border-radius-lg bg-gray-200 mb-2">
+                                                    <div class="d-flex">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="d-flex flex-column">
+                                                                <h6 class="mb-0 text-dark text-sm">
+                                                                    {{i.get_task_display}}</h6>
+                                                                <p class="mb-0">
+                                                                    {{i.hours}} h
+                                                                </p>
+                                                                <span class="text-xs">
+                                                                    {{i.get_type_display}}
+                                                                </span>
+
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            class="d-flex align-items-center text-sm font-weight-bold ms-auto me-0">
+                                                            <a href="#" class="text-info"
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#editActivityModal"
+                                                                data-task-id="{{ i.id }}">
+                                                                <i class="fas fa-edit me-2 text-info"></i>
+                                                            </a>
+                                                            <a  href="#" class="text-primary" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#deleteActivityModal"
+                                                                data-task-id="{{ i.id }}">
+                                                                <i class="far fa-trash-alt"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </li>
+
+                                                {% empty %}
+                                                <p>Sin actividad</p>
+                                                {% endfor %}
+
+                                            </ul>
+
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+
+                                    <tr>
+                                        {% for key,value in daily_totals.items %}
+                                        <td>
+
+                                            <ul class="list-group">
+                                                <li
+                                                    class="list-group-item border-0 d-flex justify-content-between ps-0 border-radius-lg">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-0 text-dark text-sm">total: {{value.total}}
+                                                                hrs</h6>
+                                                            <p class="text-xs mb-0">Regular: {{value.hours}}, </p>
+                                                            <p class="text-xs mb-0">Hrs Extra: {{value.overtime}}</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+
+                                        </td>
+
+                                        {% endfor %}
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-3 col-6 text-center">
+                <div class="border border-light border-1 border-radius-lg py-3 bg-gradient-light">
+                    <h6 class="text-primary text-gradient mb-0">Total</h6>
+                    <h4 class="font-weight-bolder mb-0"><span id="state1" countto="23980">{{ total_hours|floatformat:1 }} h</span></h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6 text-center">
+                <div class="border border-light border-1 border-radius-md py-3 bg-gradient-light">
+                    <h6 class="text-primary text-gradient mb-0">Horas Regulares</h6>
+                    <h4 class="font-weight-bolder mb-0"><span id="state2" countto="2400">{{ total_reg|floatformat:1 }}
+                            h</span></h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6 text-center mt-4 mt-lg-0">
+                <div class="border border-light border-1 border-radius-md py-3 bg-gradient-light">
+                    <h6 class="text-primary text-gradient mb-0">Horas extra</h6>
+                    <h4 class="font-weight-bolder mb-0"><span id="state3" countto="48">{{ overtime|floatformat:1 }}
+                            h</span></h4>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6 text-center mt-4 mt-lg-0">
+                <div class="border border-light border-1 border-radius-md py-3 bg-gradient-light">
+                    <h6 class="text-primary text-gradient mb-0">Actividades</h6>
+                    <h4 class="font-weight-bolder mb-0"><span id="state4" countto="{{ total_activities }}">{{ total_activities }}</span></h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>Historial Semanal</h6>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Semana</th>
+                                        <th>Rango</th>
+                                        <th>Horas</th>
+                                        <th>Actividades</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for week in history %}
+                                    <tr>
+                                        <td>Semana {{ week.week_number }}</td>
+                                        <td>{{ week.start_date|date:"d/m" }} - {{ week.end_date|date:"d/m" }}</td>
+                                        <td>{{ week.total_hours }} h</td>
+                                        <td>{{ week.total_activities }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal para agregar actividad -->
+<div class="modal fade" id="actividadModal" tabindex="-1" aria-labelledby="actividadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actividadModalLabel">Agregar actividad</h5>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close"> 
+                    <i class="fas fa-times"></i> 
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'activities_app:create_task' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="date" id="selectedDate">
+
+                    <br>
+
+                    <div class="mb-3 input-group input-group-outline focused is-focused">
+                        <label class="form-label">Seleccione compañia</label>
+                        <select name="idTin" class="input-group-field form-control">
+                            <option class="ms-3" value="">---------</option>
+                            {% for choice in companies %}
+                            <option class="ms-3" value="{{ choice.id }}">{{ choice }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="mb-3 input-group input-group-outline focused is-focused">
+                                <label class="form-label">Tipo de jornada</label>
+                                <select name="type" id="tipoJornada" class="input-group-field form-control">
+                                    <option class="ms-3" value="">---------</option>
+                                    {% for choice in type_choices %}
+                                    <option class="ms-3" value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6">
+                            <div class="mb-3 input-group input-group-outline focused is-focused">
+                                <label class="form-label">Tipo de actividad</label>
+                                <select name="task" class="input-group-field form-control">
+                                    <option class="ms-3" value="">---------</option>
+                                    {% for choice in work_choices %}
+                                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 input-group input-group-outline focused is-focused">
+                        <label class="form-label">Comentarios (opcional)</label>
+                        <textarea name="activity" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="mb-3 input-group input-group-outline is-focused">
+                                <label class="form-label">Horas</label>
+                                <input type="number" name="hours" id="horas" class="form-control" min="0" max="24" step="0.5" value="8">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6">
+                            <div class="mb-3 input-group input-group-outline" id="horasExtraContainer">
+                                <label class="form-label">Horas extra</label>
+                                <input type="number" name="overTime" id="horasExtra" class="form-control" min="0" max="24" step="0.5" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 input-group input-group-outline focused is-focused" id="diasDescansoContainer">
+                        <label class="form-label">Dia de descanso</label>
+                        <select name="rest_day" id="diasDescanso" class="input-group-field form-control" disabled>
+                            <option class="ms-3" value=""></option>
+                            {% for choice in rest_days %}
+                            <option class="ms-3" value="{{ choice.0 }}">{{ choice }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar actividad -->
+<div class="modal fade" id="editActivityModal" tabindex="-1" aria-labelledby="editActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editActivityModalLabel">Editar Actividad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí via AJAX -->
+                <div id="editActivityFormContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para eliminar actividad -->
+<div class="modal fade" id="deleteActivityModal" tabindex="-1" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteActivityModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas eliminar esta actividad?</p>
+                <form id="deleteActivityForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn bg-gradient-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn bg-gradient-primary">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tipoJornada = document.getElementById('tipoJornada');
+        const horas = document.getElementById('horas');
+        const horasExtra = document.getElementById('horasExtra');
+        const diasDescanso = document.getElementById('diasDescanso');
+        const horasExtraContainer = document.getElementById('horasExtraContainer');
+        const diasDescansoContainer = document.getElementById('diasDescansoContainer');
+
+        function toggleFields() {
+            const selectedValue = tipoJornada.value;
+            const selectedText = tipoJornada.options[tipoJornada.selectedIndex].text.toLowerCase();
+
+            // Habilitar/deshabilitar horas extra
+            if (selectedText.includes('extra') || selectedText.includes('horas extra')) {
+                horas.value = '';
+                horasExtra.disabled = false;
+                horasExtraContainer.style.opacity = '1';
+            } else {
+                horasExtra.disabled = true;
+                horasExtra.value = '';
+                horasExtraContainer.style.opacity = '0.5';
+            }
+
+            // Habilitar/deshabilitar días de descanso
+            if (selectedText.includes('compensación') || selectedText.includes('compensacion')) {
+                diasDescanso.disabled = false;
+                diasDescansoContainer.style.opacity = '1';
+            } else {
+                diasDescanso.disabled = true;
+                diasDescanso.value = '';
+                diasDescansoContainer.style.opacity = '0.5';
+            }
+        }
+
+        // Ejecutar al cargar la página
+        toggleFields();
+
+        // Ejecutar cuando cambie la selección
+        tipoJornada.addEventListener('change', toggleFields);
+    });
+</script>
+
+
+<script>
+    // Declara las funciones en el ámbito global primero
+    let loadEditForm, setupDeleteForm;
+    
+    // Luego define la IIFE que asigna las funciones
+    (function() {
+        // Función para cargar el formulario de edición
+        loadEditForm = function(taskId) {
+            // Mostrar spinner de carga
+            const container = document.getElementById('editActivityFormContainer');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario...</p>
+                </div>
+            `;
+            
+            fetch(`/task/update/${taskId}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+                    
+                    // Configurar el formulario después de cargarlo
+                    const form = container.querySelector('form');
+                    if (form) {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            
+                            const formData = new FormData(form);
+                            
+                            fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                                },
+                                body: formData
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById('editActivityModal'));
+                                    if (modal) modal.hide();
+                                    location.reload();
+                                } else {
+                                    throw new Error('Error en la respuesta del servidor');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error al actualizar la actividad');
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar el formulario:', error);
+                    container.innerHTML = `
+                        <div class="alert alert-danger">
+                            Error al cargar el formulario: ${error.message}
+                            <button class="btn btn-secondary mt-2" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    `;
+                });
+        };
+    
+        // Función para configurar el formulario de eliminación
+        setupDeleteForm = function(taskId) {
+            const form = document.getElementById('deleteActivityForm');
+            if (form) {
+                form.action = `/task/delete/${taskId}/`;
+                
+                // Remover event listeners anteriores para evitar duplicados
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                
+                newForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    fetch(newForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(new FormData(newForm))
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteActivityModal'));
+                            if (modal) modal.hide();
+                            location.reload();
+                        } else {
+                            throw new Error('Error en la respuesta del servidor');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar la actividad');
+                    });
+                });
+            }
+        };
+    
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Configurar modal de edición - usando event delegation
+            document.addEventListener('click', function(e) {
+                // Botón de editar
+                if (e.target.closest('[data-bs-target="#editActivityModal"]')) {
+                    const button = e.target.closest('[data-bs-target="#editActivityModal"]');
+                    const taskId = button.getAttribute('data-task-id');
+                    if (taskId) {
+                        loadEditForm(taskId);
+                    }
+                }
+                
+                // Botón de eliminar
+                if (e.target.closest('[data-bs-target="#deleteActivityModal"]')) {
+                    const button = e.target.closest('[data-bs-target="#deleteActivityModal"]');
+                    const taskId = button.getAttribute('data-task-id');
+                    if (taskId) {
+                        setupDeleteForm(taskId);
+                    }
+                }
+            });
+    
+            // Limpiar contenido del modal de edición al cerrarse
+            const editModal = document.getElementById('editActivityModal');
+            if (editModal) {
+                editModal.addEventListener('hidden.bs.modal', function() {
+                    const container = document.getElementById('editActivityFormContainer');
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                });
+            }
+    
+            // Configurar modal de actividad (si existe)
+            const actividadModal = document.getElementById('actividadModal');
+            if (actividadModal) {
+                actividadModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const date = button.getAttribute('data-date');
+                    const dateInput = document.getElementById('selectedDate');
+                    if (dateInput) dateInput.value = date;
+                });
+            }
+        });
+    })();
+</script>
+
+
+
+{% endblock JSscripts %}

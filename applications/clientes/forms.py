@@ -8,26 +8,31 @@ class ClientForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = (
-            'tradeName',
             'ruc',
+            'tradeName',
             'brandName',
+            'typeClient',
+            'channel',
+            'languageContract',
+            'locationClient',
+
             'phoneNumber',
             'contact',
             'webPage',
             'email',
-            'typeClient',
-            'locationClient',
-            #'bankName',
-            #'account'
+
+            'legalJurisdiction',
+            'internationalBilling',
+            'electronicSignature'
         )
         widgets = {
-            'tradeName': forms.TextInput(
+            'ruc': forms.TextInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
                 }
             ),
-            'ruc': forms.TextInput(
+            'tradeName': forms.TextInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -39,24 +44,50 @@ class ClientForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'locationClient': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'state': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
             'typeClient': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
                 }
             ),
+            'channel': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'languageContract': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'locationClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+
+            'legalJurisdiction': forms.CheckboxInput(
+                attrs = {
+                    'class': 'form-check-input',
+                    'type': 'checkbox'
+                }
+            ),
+            'internationalBilling': forms.CheckboxInput(
+                attrs = {
+                    'class': 'form-check-input',
+                    'type': 'checkbox'
+                }
+            ),
+            'electronicSignature': forms.CheckboxInput(
+                attrs = {
+                    'class': 'form-check-input',
+                    'type': 'checkbox'
+                }
+            ),
+           
             'phoneNumber': forms.TextInput(
                 attrs = {
                     'placeholder': '',
@@ -80,16 +111,14 @@ class ClientForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            #'bankName': forms.Select(
-            #    attrs = {
-            #        'class': 'input-group-field form-control',
-            #    }
-            #),
-            #'account': forms.TextInput(
-            #    attrs = {
-            #        'placeholder': '',
-            #        'class': 'input-group-field form-control',
-            #    }
-            #),
+
         }
+    
+    def clean_ruc(self):
+        ruc = self.cleaned_data.get('ruc')
+        if ruc and len(ruc) != 11:
+            raise forms.ValidationError("El RUC debe tener exactamente 11 dígitos")
+        if ruc and not ruc.isdigit():
+            raise forms.ValidationError("El RUC debe contener solo números")
+        return ruc
 

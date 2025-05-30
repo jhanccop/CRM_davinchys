@@ -63,6 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ruc = models.CharField('RUC',blank = True, null=True)
     dni = models.CharField('DNI',blank = True, null=True)
     address = models.CharField('Direccion',blank = True, null=True)
+    startDate = models.DateField('Fecha de inicio',blank = True, null=True)
 
     position = models.CharField(
         'Tipo de usuario',

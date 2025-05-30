@@ -7,6 +7,7 @@ from .models import (
   Projects,
   Commissions,
   DailyTasks,
+  RestDays,
   EmailSent,
   TrafoTask,
   SuggestionBox
@@ -138,9 +139,7 @@ class DailyTaskForm (forms.ModelForm):
             'user',
             'date',
             'activity',
-            'is_overTime',
-            'startTime',
-            'endTime',
+            #'is_overTime',
             'trafoOrder',
             'commissions',
             'projects',
@@ -162,28 +161,14 @@ class DailyTaskForm (forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'is_overTime': forms.CheckboxInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'form-check-input',
-                    'type': 'checkbox',
-                    'onchange':"toggleDiv()"
-                }
-            ),
-            'startTime': forms.TimeInput(
-                attrs = {
-                    'placeholder': '',
-                    'type':"time",
-                    'class': 'form-control',
-                }
-            ),
-            'endTime': forms.TimeInput(
-                attrs = {
-                    'placeholder': '',
-                    'type':"time",
-                    'class': 'form-control',
-                }
-            ),
+            #'is_overTime': forms.CheckboxInput(
+            #    attrs = {
+            #        'placeholder': '',
+            #        'class': 'form-check-input',
+            #        'type': 'checkbox',
+            #        'onchange':"toggleDiv()"    }
+            #),
+            
             'trafoOrder': forms.Select(
                 attrs = {
                     'placeholder': '',
@@ -209,6 +194,98 @@ class DailyTaskForm (forms.ModelForm):
                 }
             ),
         }
+
+class RestDaysForm (forms.ModelForm):
+    class Meta:
+        model = RestDays
+        fields = [
+            'user',
+            'type',
+            'motive',
+            'hours',
+            'isCompensated',
+            'startDate',
+            'endDate',
+            'pdf_file'
+        ]   
+    
+        widgets = {
+            'type': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'onchange': "updateSelect()",
+                }
+            ),
+            'motive': forms.Textarea(
+                attrs = {
+                    'rows':2,
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'isCompensated': forms.CheckboxInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-check-input',
+                    'type': 'checkbox'
+                }
+            ),
+            'startDate': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'type':"date",
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'endDate': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'type':"date",
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'hours': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'type':"number",
+                    'class': 'form-control',
+                }
+            ),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                }
+            ),
+        }
+
+    def clean_pdf_file(self):
+        pdf_file = self.cleaned_data.get('pdf_file')
+        if pdf_file:
+            if not pdf_file.name.endswith('.pdf'):
+                raise forms.ValidationError("Archivos permitidos pdf")
+            if pdf_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return pdf_file
+    
+    def clean_endDate(self):
+        end_date = self.cleaned_data.get('endDate')
+        start_date = self.cleaned_data.get('startDate')
+        
+        # Verificamos que ambas fechas estén presentes
+        if end_date and start_date:
+            # Comprobamos que la fecha final sea mayor que la inicial
+            if end_date <= start_date:
+                raise forms.ValidationError('La fecha de término debe ser posterior a la fecha de inicio.')
+        
+        return end_date
+
+
 
 class QuoteTrafoForm(forms.ModelForm):
     class Meta:

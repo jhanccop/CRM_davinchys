@@ -25,6 +25,11 @@ urlpatterns = [
         views.ClientDeleteView.as_view(),
         name='cliente-eliminar',
     ),
+    path(
+        'clients/buscar-ruc/', 
+        views.buscar_ruc_sunat,
+        name='buscar_ruc',
+    ),
 
     
 ]
