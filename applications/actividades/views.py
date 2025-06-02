@@ -2,6 +2,7 @@ from datetime import date, timedelta, datetime
 from django.utils import timezone
 import json
 from decimal import Decimal
+import datetime
 
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -139,24 +140,41 @@ class DailyTaskReportView(AdminPermisoMixin,ListView):
 #    context_object_name = 'actividadesDiarias'
 #    model = DailyTasks
 
-from django.utils import timezone
-from datetime import timedelta
-from .models import DailyTasks
 
 class WeeklyTasksView(LoginRequiredMixin, TemplateView):
     template_name = 'actividades/mi-lista-actividades-semanales.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Obtener la semana actual
-        today = timezone.now().date()
+        dateSelected = self.request.GET.get("week", '')
 
-        print("----------------",today.weekday())
+        if dateSelected == "" or dateSelected == "current":
+            today = timezone.now().date()
+            year = today.year
+            start_of_week = today - timedelta(days=today.weekday())
+            end_of_week = start_of_week + timedelta(days=6)
 
-        start_of_week = today - timedelta(days=today.weekday())
-        end_of_week = start_of_week + timedelta(days=6)
-        
+            week = today.isocalendar()[1]
+            
+            # Generar días de la semana
+            week_days = [start_of_week + timedelta(days=i) for i in range(7)]
+            
+            # Obtener tareas del usuario para la semana actual
+            tasks = DailyTasks.objects.filter(
+                user=self.request.user,
+                date__range=[start_of_week, end_of_week]
+            ).order_by('date')
+
+        else:
+            year, week = int(dateSelected.split(" - ")[0]) , int(dateSelected.split(" - ")[1])
+
+            referencia = datetime.date(year, 1, 4)
+            año_iso, semana_iso, dia_semana = referencia.isocalendar()
+            lunes_semana_1 = referencia - datetime.timedelta(days=dia_semana - 1)
+            start_of_week = lunes_semana_1 + datetime.timedelta(weeks = week - 1)
+            end_of_week = start_of_week + datetime.timedelta(days=6)
+
+        currentWeek = timezone.now().date().isocalendar()[1]
         # Generar días de la semana
         week_days = [start_of_week + timedelta(days=i) for i in range(7)]
         
@@ -195,10 +213,12 @@ class WeeklyTasksView(LoginRequiredMixin, TemplateView):
         rest_days = RestDays.objects.getRestTimesNoCompensateById(self.request.user.id)
         
         context.update({
+            'weekList':[f"{year} - {i}" for i in range(1,currentWeek + 1)  ],
+            "weekSelected" : f"{year} - {week}",
             'week_days': week_days,
             'tasks_by_day': tasks_by_day,
             'daily_totals': daily_totals,
-            'week_number': today.isocalendar()[1],
+            'week_number': week,
             'start_of_week': start_of_week,
             'end_of_week': end_of_week,
             'total_reg': total_reg,

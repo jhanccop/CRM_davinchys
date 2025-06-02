@@ -9,7 +9,26 @@
 {% block panel-content %}
 
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-2">
+
+        <form action="" method="get" id="weekForm">
+            {% csrf_token %}
+            <input type="hidden" name="week" id="weekInput" value="{{ weekSelected }}">
+            
+            <div class="dropdown">
+                <button class="btn bg-gradient-primary dropdown-toggle" type="button" id="dropdownMenuButton"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    {{weekSelected}}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="#" data-week="current">Semana actual</a></li>
+                    {% for i in weekList %}
+                    <li><a class="dropdown-item" href="#" data-week="{{i}}">{{i}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </form>
+
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -55,7 +74,9 @@
                                                                 <h6 class="mb-0 text-dark text-sm">
                                                                     {{i.get_task_display}}</h6>
                                                                 <p class="mb-0">
-                                                                    {{i.hours}} h
+                                                                    {% if i.hours %} {{i.hours}} {% endif %}
+                                                                    {% if i.overTime %} {{i.overTime}} {% endif %}
+                                                                    h
                                                                 </p>
                                                                 <span class="text-xs">
                                                                     {{i.get_type_display}}
@@ -525,6 +546,16 @@
     })();
 </script>
 
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedWeek = this.dataset.week;
+                window.location.href = '?week=' + selectedWeek;
+            });
+        });
+    });
+</script>
 
 {% endblock JSscripts %}
