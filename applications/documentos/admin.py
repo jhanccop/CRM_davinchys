@@ -6,7 +6,34 @@ from import_export.admin import ImportExportModelAdmin
 from .models import (
   FinancialDocuments,
   OthersDocuments,
+  RawsFilesRHE
 )
+
+## ==================== MASIVO RawsFilesRHE =====================
+class RawsFilesRHEResource(resources.ModelResource):
+    class Meta:
+        model = RawsFilesRHE
+
+@admin.register(RawsFilesRHE)
+class RawsFilesRHEAdmin(ImportExportModelAdmin):
+    resource_class = RawsFilesRHEResource
+
+    def get_client_ruc(self, obj):
+        if obj.idClient:
+            return obj.idClient.ruc
+        return None
+    
+    list_display = (
+        'id',
+        'created',
+        'archivo',
+        'status',
+    )
+    
+    search_fields = ("id",'created',)
+    list_filter = ('created',)
+    #autocomplete_fields = ['idClient',]
+
 
 ## ==================== FinancialDocuments =====================
 class FinancialDocumentsResource(resources.ModelResource):

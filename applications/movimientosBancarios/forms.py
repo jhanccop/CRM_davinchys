@@ -559,3 +559,16 @@ class EditConciliationMovDocForm(forms.ModelForm):
         super(EditConciliationMovDocForm, self).__init__(*args, **kwargs)
         self.fields['idDoc'].queryset = FinancialDocuments.objects.filter(amount__gte = F('amountReconcilied'))
         #self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
+
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField(
+        label="Sellecionar archivo:",
+        widget=forms.ClearableFileInput(
+            attrs={
+                'class': 'form-control bg-gradient-secondary text-dark',
+                'type': 'file',
+                'id':"formFile"
+                }
+        )
+    )

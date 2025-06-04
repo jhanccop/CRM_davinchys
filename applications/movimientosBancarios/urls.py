@@ -73,5 +73,12 @@ urlpatterns = [
         views.AccountReportDetail.as_view(),
         name='reporte-de-cuentas-detalle',
     ),
+
+    # ============== UPLOAD EXCEL FILE MOVIMIENTOS =================
+    path(
+        'movimientosBancarios/subir-excel/', 
+        views.upload_file,
+        name='movimientos-subir-excel',
+    ),
     
 ]

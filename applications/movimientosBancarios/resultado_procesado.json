@@ -1,0 +1,80 @@
+{
+    "metadata": {
+        "total_registros": 3,
+        "campos": [
+            "Fecha de Emisión",
+            "Tipo Doc. Emitido",
+            "Nro. Doc. Emitido",
+            "Estado Doc. Emitido",
+            "Tipo de Doc. Emisor",
+            "Nro. Doc. Emisor",
+            "Apellidos y Nombres, Denominación o Razón Social del Emisor",
+            "Tipo de Renta",
+            "Gratuito",
+            "Descripción",
+            "Observación",
+            "Moneda de Operación",
+            "Renta Bruta",
+            "Impuesto a la Renta",
+            "Renta Neta",
+            "Monto Neto Pendiente de Pago"
+        ],
+        "anotaciones": "No hay anotaciones"
+    },
+    "data": [
+        {
+            "Fecha de Emisión": "07/04/2025", 
+            "Tipo Doc. Emitido": "RH", 
+            "Nro. Doc. Emitido": "E001-51", 
+            "Estado Doc. Emitido": "NO ANULADO", 
+            "Tipo de Doc. Emisor": "RUC", 
+            "Nro. Doc. Emisor": "10474308061", 
+            "Apellidos y Nombres, Denominación o Razón Social del Emisor": "RIVAS CHAMORRO JOSE ANTONIO",
+            "Tipo de Renta": "A",
+            "Gratuito": "NO",
+            "Descripción": "SERVICIO DE SUPERVISIÓN EN PRUEBAS A TRANSFORMADORES",
+            "Observación": "-",
+            "Moneda de Operación": "SOLES",
+            "Renta Bruta": "2768.46",
+            "Impuesto a la Renta": "0.00",
+            "Renta Neta": "2768.46",
+            "Monto Neto Pendiente de Pago": "0.00"
+        },
+        {
+            "Fecha de Emisión": "10/04/2025",
+            "Tipo Doc. Emitido": "RH",
+            "Nro. Doc. Emitido": "E001-32",
+            "Estado Doc. Emitido": "REVERTIDO",
+            "Tipo de Doc. Emisor": "RUC",
+            "Nro. Doc. Emisor": "10434919954",
+            "Apellidos y Nombres, Denominación o Razón Social del Emisor": "HANCCO PACCORI JOEL JAFET",
+            "Tipo de Renta": "A",
+            "Gratuito": "NO",
+            "Descripción": "SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN",
+            "Observación": "-",
+            "Moneda de Operación": "D�LARES DE NORTE AM�RICA",
+            "Renta Bruta": "3000.00",
+            "Impuesto a la Renta": "0.00",
+            "Renta Neta": "3000.00",
+            "Monto Neto Pendiente de Pago": "0.00"
+        },
+        {
+            "Fecha de Emisión": "14/04/2025",
+            "Tipo Doc. Emitido": "RH",
+            "Nro. Doc. Emitido": "E001-33",
+            "Estado Doc. Emitido": "NO ANULADO",
+            "Tipo de Doc. Emisor": "RUC",
+            "Nro. Doc. Emisor": "10434919954",
+            "Apellidos y Nombres, Denominación o Razón Social del Emisor": "HANCCO PACCORI JOEL JAFET",
+            "Tipo de Renta": "A",
+            "Gratuito": "NO",
+            "Descripción": "SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN",
+            "Observación": "-",
+            "Moneda de Operación": "D�LARES DE NORTE AM�RICA",
+            "Renta Bruta": "3000.00",
+            "Impuesto a la Renta": "0.00",
+            "Renta Neta": "3000.00",
+            "Monto Neto Pendiente de Pago": "0.00"
+        }
+    ]
+}

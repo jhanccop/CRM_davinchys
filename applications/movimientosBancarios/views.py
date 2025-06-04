@@ -47,7 +47,8 @@ from .forms import (
   ConciliationMovDocForm,
   ConciliationMovMovForm,
   EditConciliationMovMovForm,
-  EditConciliationMovDocForm
+  EditConciliationMovDocForm,
+  UploadFileForm,
 )
 
 # ================= MOVIMIENTOS ========================
@@ -226,3 +227,80 @@ class AccountReportDetail(AdminPermisoMixin,ListView):
     payload["conciliacion"] = BankMovements.objects.ConciliacionPorMontosPorCuentaPorIntervalo(intervalo = intervalDate, cuenta = int(pk))
     payload["bankMovements"] = BankMovements.objects.ListaMovimientosPorCuenta(intervalo = intervalDate, cuenta = int(pk))
     return payload
+  
+# ====================  DOCUMENTS UPLOAD ===========================
+def upload_file(request):
+  if request.method == 'POST':
+    form = UploadFileForm(request.POST, request.FILES)
+    if form.is_valid():
+      file = request.FILES['file']
+      
+      try:
+        df = pd.read_excel(file,header=None)
+
+        print(df)
+
+        accountNumber = df.iloc[0,1].split(" - ")[0]
+        idAccount = Account.objects.CuentasByNumber(accountNumber)
+        print(accountNumber,idAccount)
+
+        # SAVE FILENAME
+        DocumentsUploaded.objects.create(
+          idAccount=idAccount,
+          fileName=file,
+        )
+
+        idoc = DocumentsUploaded.objects.idLastDocument()
+
+        repReg = []
+
+        flag_read = False
+        lastBalance = 0
+        for index, row in df.iloc[::-1].iterrows():
+
+          if row[0] == "Fecha":
+            break;
+          else:
+            tipo = "0"
+            if row[3] >= 0:
+              tipo = "1"
+            dateR = "-".join(row[0].split("/")[::-1])
+            searchFlag = BankMovements.objects.BusquedaRegistros(idAccount=idAccount,balance=row[4],opNumber=row[6])
+
+            if not searchFlag:
+              lastBalance = row[4]
+              BankMovements.objects.create(
+                idDoc=idoc,
+                idAccount = idAccount,
+                date=dateR,
+                description=row[2],
+                amount=abs(row[3]),
+                balance=lastBalance,
+                opNumber=row[6],
+                transactionType=tipo
+              )
+              
+            else:
+              repReg.append(searchFlag)
+
+        obs = 'Datos importados exitosamente!' + ' con ' + str(len(repReg)) + ' coincidencias'
+      
+        # OBSERVATION FROM UPDATE FILES
+        docsUp = DocumentsUploaded.objects.get(id=idoc.id)
+        docsUp.observations=obs
+        docsUp.save()
+
+        # SAVE AMOUNT IN ACCOUNT MODEL
+        account = Account.objects.get(accountNumber=accountNumber)
+        account.observations=lastBalance
+        account.save()
+
+        messages.success(request, obs)
+
+        return redirect('/movimientosBancarios/subir-excel/')
+      except Exception as e:
+          messages.error(request, f'Error procesando el archivo: {e}')
+  else:
+    form = UploadFileForm()
+    docs = DocumentsUploaded.objects.ListaNArchivos(5)
+  return render(request, 'movimientosBancarios/upload.html', {'form':form,'docs':docs})

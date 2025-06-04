@@ -39,10 +39,33 @@
     <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
       Export CSV
     </a>
+
+
+    
+
     <div class="dropleft ms-3">
-      <a class="btn bg-gradient-dark" href="{% url 'documentos_app:documento-financiero-nuevo' %}">
-        NUEVO DOCUMENTO
-      </a>
+      <div class="dropdown">
+        <a href="#" class="btn bg-gradient-dark dropdown-toggle " data-bs-toggle="dropdown" id="navbarDropdownMenuLink2">
+          Nuevo documento
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
+          <li>
+            <a class="dropdown-item" href="{% url 'documentos_app:carga-doc-rhe' %}">
+              Factura XML
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'documentos_app:carga-doc-rhe' %}">
+              Masivo RHE
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'documentos_app:documento-financiero-nuevo' %}">
+              Manual
+            </a>
+          </li>
+        </ul>
+      </div>
       
     </div>
   </div>

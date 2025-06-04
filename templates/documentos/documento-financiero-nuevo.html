@@ -21,6 +21,20 @@
         <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
             <div class="multisteps-form__content">
+
+              <!-- Mensajes de alerta -->
+              {% if messages %}
+              <div class="alert-container">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <!-- FIN Mensajes de alerta -->
               
               <div class="row">
                 <div class="col-12 col-sm-12" hidden>
@@ -32,8 +46,33 @@
               </div>
               <br>
 
+              <!-- Nuevo campo para subir XML con botón de procesar -->
               <div class="row">
                 <div class="col-12 col-sm-12">
+                  <h6 class="mb-0">Archivo XML (para autocompletar):</h6>
+                  <div class="input-group input-group-outline">
+                    {{ form.xml_file }}
+                    <button type="button" class="btn btn-outline-primary mb-0" id="processXmlBtn">
+                      <i class="fas fa-cogs me-1"></i> Procesar y Completar
+                    </button>
+                  </div>
+                  <p class="text-sm mb-0">Sube un archivo XML para autocompletar los campos.</p>
+                  {% for error in form.xml_file.errors %}
+                  <p class="text-xs text-primary mb-0">
+                    {{ error|escape }}
+                  </p>
+                  {% endfor %}
+                </div>
+              </div>
+              <br>
+
+              <!-- Contenedor para mensajes de procesamiento -->
+              <div id="xmlProcessingMessage" class="alert alert-info" style="display: none;"></div>
+
+
+              <div class="row">
+                <div class="col-12 col-sm-12">
+                  <h6 class="mb-0">Documento girado a:</h6>
                   <div class="input-group input-group-outline">
                     {{ form.idTin }}
                   </div>
@@ -220,6 +259,24 @@
   </div>
 </div>
 
+<!-- Modal para mostrar alertas -->
+<div class="modal fade" id="xmlAlertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alerta de Documento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="xmlAlertModalBody">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock panel-content %}
 
@@ -332,6 +389,117 @@
         previewContainer.style.display = 'none';
       }
     });
+  });
+</script>
+
+<!-- JavaScript para manejar la carga del XML -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const processXmlBtn = document.getElementById('processXmlBtn');
+    const xmlFileInput = document.querySelector('input[type="file"][accept=".xml"]');
+    const processingMessage = document.getElementById('xmlProcessingMessage');
+    const form = document.getElementById('financialDocForm');
+
+    if (processXmlBtn && xmlFileInput) {
+      processXmlBtn.addEventListener('click', async function () {
+        if (!xmlFileInput.files || xmlFileInput.files.length === 0) {
+          showProcessingMessage('Por favor, selecciona un archivo XML primero', 'danger');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('xml_file', xmlFileInput.files[0]);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        formData.append('process_only', 'true');  // Bandera para indicar que solo queremos procesar
+
+        try {
+          showProcessingMessage('Procesando archivo XML...', 'info');
+
+          const response = await fetch('', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showProcessingMessage('XML procesado correctamente. Campos completados.', 'success');
+
+            // Autocompletar campos con los datos del XML
+            if (data.fields) {
+              for (const [fieldName, value] of Object.entries(data.fields)) {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                  field.value = value;
+
+                  // Disparar eventos change para campos select
+                  if (field.tagName === 'SELECT') {
+                    field.dispatchEvent(new Event('change'));
+                  }
+                }
+              }
+            }
+
+            // Mostrar alertas si existen
+            if (data.alerts && data.alerts.length > 0) {
+              showAlertsModal(data.alerts);
+            }
+          } else {
+            showProcessingMessage(data.error || 'Error al procesar el XML', 'danger');
+          }
+        } catch (error) {
+          showProcessingMessage('Error en la comunicación con el servidor', 'danger');
+          console.error('Error:', error);
+        }
+      });
+    }
+
+    function showProcessingMessage(message, type) {
+      if (!processingMessage) return;
+
+      processingMessage.textContent = message;
+      processingMessage.className = `alert alert-${type}`;
+      processingMessage.style.display = 'block';
+
+      // Ocultar después de 5 segundos (excepto para errores)
+      if (type !== 'danger') {
+        setTimeout(() => {
+          processingMessage.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    function showAlertsModal(alerts) {
+      const modalBody = document.getElementById('xmlAlertModalBody');
+      if (!modalBody) return;
+
+      modalBody.innerHTML = alerts.map(alert =>
+        `<div class="alert alert-warning">${alert}</div>`
+      ).join('');
+
+      // Mostrar el modal
+      const modal = new bootstrap.Modal(document.getElementById('xmlAlertModal'));
+      modal.show();
+    }
+
+    // Mostrar/ocultar campos según tipo de documento (existente)
+    const typeInvoiceSelect = document.getElementById('id_typeInvoice');
+    if (typeInvoiceSelect) {
+      typeInvoiceSelect.addEventListener('change', function () {
+        const type = this.value;
+        document.getElementById('detraction').style.display =
+          (type === '{{ FinancialDocuments.FACTURA }}') ? 'block' : 'none';
+        document.getElementById('shippingGuide').style.display =
+          (type === '{{ FinancialDocuments.FACTURA }}') ? 'block' : 'none';
+        document.getElementById('retention').style.display =
+          (type === '{{ FinancialDocuments.RHE }}') ? 'block' : 'none';
+      });
+
+      typeInvoiceSelect.dispatchEvent(new Event('change'));
+    }
   });
 </script>
 

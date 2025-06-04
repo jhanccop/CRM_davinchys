@@ -2,6 +2,7 @@ from model_utils.models import TimeStampedModel
 
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 
 from applications.cuentas.models import Tin
 from applications.clientes.models import Cliente
@@ -12,6 +13,42 @@ from .managers import (
 )
 
 # Create your models here.
+
+class RawsFilesRHE(TimeStampedModel):
+
+    # STATUS DOC
+    PROCESANDO = '0'
+    COMPLETADO = '1'
+    ERROR = '2'
+
+    ESTADOS_PROCESO = [
+        (PROCESANDO, 'Procesando'),
+        (COMPLETADO, 'Completado'),
+        (ERROR, 'Error'),
+    ]
+
+    status = models.CharField(
+        'Estado',
+        max_length = 1, 
+        choices = ESTADOS_PROCESO,
+        null=True,
+        blank=True
+    )
+
+
+    archivo = models.FileField(
+        upload_to='uploads/',
+        validators=[FileExtensionValidator(allowed_extensions=['txt'])]
+    )
+    procesado = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Archivo Original"
+        verbose_name_plural = "Archivos Originales"
+
+    def __str__(self):
+        return f"{self.archivo.name} - {self.created}"
+
 class FinancialDocuments(TimeStampedModel):
     
     # TYPES
@@ -30,6 +67,8 @@ class FinancialDocuments(TimeStampedModel):
 
     OTROS = "12"
 
+    BOLETA = '13'
+
     TYPE_INVOICE_CHOISES = [
         (FACTURA, "Factura"),
         (RHE, "RHE"),
@@ -44,7 +83,56 @@ class FinancialDocuments(TimeStampedModel):
         (LIQ, "Liquidacion"),
         (PERCEPCION, "percepcion"),
         (OTROS, "Otros"),
+        (BOLETA,"Boleta de venta"),
     ]
+    
+    typeInvoice = models.CharField(
+        'Tipo de Doc. Emisor',
+        max_length = 2, 
+        choices = TYPE_INVOICE_CHOISES,
+        null=True,
+        blank=True
+    )
+
+    # STATUS DOC
+    NOANULADO = '0'
+    ANULADO = '1'
+    REVERTIDO = '2'
+
+    DOC_STATUS_CHOICES = [
+        (NOANULADO, 'No Anulado'),
+        (ANULADO, 'Anulado'),
+        (REVERTIDO, 'Revertido'),
+    ]
+
+    doc_status = models.CharField(
+        'Estado Doc. Emitido',
+        max_length = 1, 
+        choices = DOC_STATUS_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    # DOC TYPE
+    RUC = '0'
+    TIN = '1'
+    DNI = '2'
+    CEX = '2'
+
+    DOC_EMISOR_CHOICES = [
+        (RUC, 'RUC'),
+        (TIN, 'DNI'),
+        (DNI, 'DNI'),
+        (CEX, 'Carnet de Extranjería'),
+    ]
+
+    doc_emisor = models.CharField(
+        'Tipo de Doc. Emisor',
+        max_length = 1, 
+        choices = DOC_EMISOR_CHOICES,
+        null=True,
+        blank=True
+    )
     
     # MONEDA
     SOLES = '0'
@@ -56,6 +144,14 @@ class FinancialDocuments(TimeStampedModel):
         (DOLARES, "USD"),
         (EUROS, "EUR"),
     ]
+
+    typeCurrency = models.CharField(
+        'Moneda de Operación',
+        max_length = 1, 
+        choices = TYPE_CURRENCY_CHOISES,
+        null = True,
+        blank = True
+    )
     
     # STATUS FACTURA / GUIA DE REMISION / RHE
     NOREQUIERE = '0'
@@ -133,21 +229,7 @@ class FinancialDocuments(TimeStampedModel):
     )
     idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
     idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
-
-    typeInvoice = models.CharField(
-        'Tipo de comprobante',
-        max_length = 2, 
-        choices = TYPE_INVOICE_CHOISES,
-        null=True,
-        blank=True
-    )
-    typeCurrency = models.CharField(
-        'Tipo de moneda',
-        max_length = 1, 
-        choices = TYPE_CURRENCY_CHOISES,
-        null = True,
-        blank = True
-    )
+    
     idInvoice = models.CharField(
         'Id de comprobante',
         max_length = 50,
@@ -200,11 +282,33 @@ class FinancialDocuments(TimeStampedModel):
     )
 
     amount = models.DecimalField(
-        'Monto', 
+        'Monto bruto', 
         max_digits = 10, 
         decimal_places = 2,
         default = 0
     )
+
+    incomeTax = models.DecimalField(
+        'Impuesto a la Renta', 
+        max_digits = 10, 
+        decimal_places = 2,
+        default = 0
+    )
+
+    netAmount = models.DecimalField(
+        'Monto neto', 
+        max_digits = 10, 
+        decimal_places = 2,
+        default = 0
+    )
+
+    pendingNetPayment = models.DecimalField(
+        'Monto Neto Pendiente de Pago', 
+        max_digits = 10, 
+        decimal_places = 2,
+        default = 0
+    )
+
     equivalentAmount = models.DecimalField(
         'Monto equivalente', 
         max_digits=10, 
@@ -212,14 +316,18 @@ class FinancialDocuments(TimeStampedModel):
         null=True,
         blank=True
     )
-    
+
     amountReconcilied = models.DecimalField(
         'Monto conciliado', 
         max_digits = 10, 
         decimal_places = 2,
         default = 0
     )
+    
+    
 
+
+    xml_file = models.FileField(upload_to='financialDocs_xlms/',null=True,blank=True)
     pdf_file = models.FileField(upload_to='financialDocs_pdfs/',null=True,blank=True)
 
     objects = FinancialDocumentsManager()

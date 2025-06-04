@@ -1,10 +1,32 @@
 # django
 from django import forms
+
+from django.core.exceptions import ValidationError
+import xml.etree.ElementTree as ET
+
 # local
 from .models import (
   FinancialDocuments,
-  OthersDocuments
+  OthersDocuments,
+  RawsFilesRHE
 )
+
+class UploadRHETextFileForm(forms.ModelForm):
+    class Meta:
+        model = RawsFilesRHE
+        fields = ['archivo']
+        widgets = {
+            'archivo': forms.FileInput(
+                attrs = {
+                    'accept': '.txt',
+                    'class': 'form-control text-dark',
+                    'type': 'file',
+                    'id':"formFile"
+                    }
+            ),
+            
+
+        }
 
 class FinancialDocumentsForm(forms.ModelForm):
     class Meta:
@@ -33,7 +55,8 @@ class FinancialDocumentsForm(forms.ModelForm):
             'description',
             
             'contabilidad',
-            'pdf_file'
+            'xml_file',
+            'pdf_file',
             
         ]
         widgets = {
@@ -146,9 +169,18 @@ class FinancialDocumentsForm(forms.ModelForm):
                     'accept':".pdf,.jpg,.jpeg,.png"
                 }
             ),
+            'xml_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"xml_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_xml_file",
+                    'accept':".xml"
+                }
+            ),
         }
         
-    def clean_amount(self):
+    """def clean_amount(self):
         amount = self.cleaned_data['amount']
         if not amount > 0:
             raise forms.ValidationError('Ingrese un monto mayor a cero')
@@ -161,11 +193,16 @@ class FinancialDocumentsForm(forms.ModelForm):
                 raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
             if pdf_file.size > 5*1024*1024:  # 5 MB limit
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
-        return pdf_file
+        return pdf_file"""
     
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(FinancialDocumentsForm, self).__init__(*args, **kwargs)
+
+        self.fields['xml_file'].widget.attrs.update({
+            'accept': '.xml',
+            'class': 'form-control'
+        })
 
         if self.request:
             self.fields['idTin'].initial = self.request.session['compania_id']

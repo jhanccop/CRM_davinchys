@@ -5,6 +5,10 @@ from . import views
 app_name = "documentos_app"
 
 urlpatterns = [
+    # ============== CARGA Y PROCESAMIENTO =================
+    path('documento/carga-doc-rhe/', views.UploadRHEFileView.as_view(), name='carga-doc-rhe'),
+    path('documento/procesamiento-doc-rhe/', views.ProcessRHEFileView.as_view(), name='procesamiento-doc-rhe'),
+
     # ============== DOCUMENTACION FINANCIERA =================
     path(
         'documento-financiero/', 
