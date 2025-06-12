@@ -21,20 +21,6 @@
         <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
           <div class=" border-radius-xl bg-white" data-animation="FadeIn">
             <div class="multisteps-form__content">
-
-              <!-- Mensajes de alerta -->
-              {% if messages %}
-              <div class="alert-container">
-                {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                  {{ message }}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
-              </div>
-              {% endif %}
-
-              <!-- FIN Mensajes de alerta -->
               
               <div class="row">
                 <div class="col-12 col-sm-12" hidden>
@@ -46,13 +32,34 @@
               </div>
               <br>
 
+              <!-- Contenedor para mensajes de procesamiento -->
+              <div id="xmlProcessingMessage" class="alert alert-info text-white" style="display: none;"></div>
+              
+              <!-- Modal para mostrar alertas -->
+              <div class="modal fade" id="xmlAlertModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Alerta de Documento</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="xmlAlertModalBody">
+                      <!-- Contenido dinámico -->
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Nuevo campo para subir XML con botón de procesar -->
               <div class="row">
                 <div class="col-12 col-sm-12">
                   <h6 class="mb-0">Archivo XML (para autocompletar):</h6>
                   <div class="input-group input-group-outline">
                     {{ form.xml_file }}
-                    <button type="button" class="btn btn-outline-primary mb-0" id="processXmlBtn">
+                    <button type="button" class="btn bg-gradient-info mb-0" id="processXmlBtn">
                       <i class="fas fa-cogs me-1"></i> Procesar y Completar
                     </button>
                   </div>
@@ -65,10 +72,6 @@
                 </div>
               </div>
               <br>
-
-              <!-- Contenedor para mensajes de procesamiento -->
-              <div id="xmlProcessingMessage" class="alert alert-info" style="display: none;"></div>
-
 
               <div class="row">
                 <div class="col-12 col-sm-12">
@@ -83,7 +86,7 @@
 
               <div class="row">
                 <div class="col-12 col-sm-12 mt-sm-0">
-                  <h6 class="mb-0">Documento:</h6>
+                  <h6 class="mb-0">Adjuntar pdf</h6>
                   <div class="input-group input-group-outline">
                     <div class="form-group w-100">
                       {{ form.pdf_file }}
@@ -118,6 +121,18 @@
               <br>
 
               <h6 class="font-weight-bolder">Informacion de documento</h6>
+
+              <div class="row">
+                <div class="col-12 col-sm-8">
+                  <p class="mb-0">Proveedor</p>
+                  <div class="input-group input-group-outline">
+                    {{ form.idClient }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
               <div class="row">
                 <div class="col-6 col-sm-3">
                   <div class="input-group input-group-outline focused is-focused">
@@ -139,6 +154,62 @@
                     {{ form.idInvoice }}
                   </div>
                 </div>
+
+                <div class="col-6 col-sm-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Moneda</label>
+                    {{ form.typeCurrency }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto neto</label>
+                    {{ form.netAmount }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Impuestos</label>
+                    {{ form.incomeTax }}
+                  </div>
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Monto total</label>
+                    {{ form.amount }}
+                  </div>
+                  {% for error in form.amount.errors %}
+                  <p class="text-xs text-primary font-weight-bolder">
+                    {{ error|escape }}
+                  </p>
+                  {% endfor %}
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-4 pt-2">
+                    <div class="form-check form-switch ms-auto is-filled">
+                        <label for="exampleFormControlInput1" class="form-label">Declarar?</label>
+                        {{ form.declareFlag }}
+                    </div>
+                </div>
+
+              </div>
+
+              <div class="row">
+                <div class="col-12 col-sm-12 mt-4 mt-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                    {{ form.description }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <h6 class="font-weight-bolder">Informacion de complementaria</h6>
+              <div class="row">
                 
                 <div class="col-6 col-sm-3 mt-3 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
@@ -146,37 +217,6 @@
                     {{ form.annotation }}
                   </div>
                 </div>
-              </div>
-
-              <br>
-
-              <div class="row">
-                <div class="col-6 col-sm-3 mt-sm-0" id="detraction" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Detracción:</label>
-                    {{ form.detraction }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-3 mt-sm-0" id="shippingGuide" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Guía de remisión:</label>
-                    {{ form.shippingGuide }}
-                  </div>
-                </div>
-
-                <div class="col-6 col-sm-3 mt-sm-0" id="retention" style="display:none">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Retención:</label>
-                    {{ form.retention }}
-                  </div>
-                </div>
-
-              </div>
-
-              <br>
-
-              <div class="row">
 
                 <div class="col-6 col-sm-3" id="month_dec">
                   <div class="input-group input-group-outline focused is-focused">
@@ -198,57 +238,53 @@
                     {{ form.contabilidad }}
                   </div>
                 </div>
-                
-              </div>
 
-              <br>
-
-              <div class="row">
-                <div class="col-12 col-sm-8">
-                  <p class="mb-0">Proveedor</p>
-                  <div class="input-group input-group-outline">
-                    {{ form.idClient }}
-                  </div>
-                </div>
-                
               </div>
 
               <br>
 
               <div class="row">
 
-                <div class="col-6 col-sm-2 mt-sm-0">
+                <div class="col-6 col-sm-3 mt-sm-0" id="detraction" style="display:none">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Moneda</label>
-                    {{ form.typeCurrency }}
+                    <label for="exampleFormControlInput1" class="form-label">Detracción:</label>
+                    {{ form.detraction }}
                   </div>
                 </div>
 
-                <div class="col-6 col-sm-2 mt-sm-0">
+                <div class="col-6 col-sm-3 mt-sm-0" id="shippingGuide" style="display:none">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto</label>
-                    {{ form.amount }}
+                    <label for="exampleFormControlInput1" class="form-label">Guía de remisión:</label>
+                    {{ form.shippingGuide }}
                   </div>
-                  {% for error in form.amount.errors %}
-                  <p class="text-xs text-primary font-weight-bolder mb-0">
-                    {{ error|escape }}
-                  </p>
-                  {% endfor %}
+                </div>
+
+                <div class="col-6 col-sm-3 mt-sm-0" id="retention" style="display:none">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Retención:</label>
+                    {{ form.retention }}
+                  </div>
                 </div>
                 
-                <div class="col-12 col-sm-8 mt-3 mt-sm-0">
+              </div>
+
+              <br>
+
+              <div class="row">
+                <div class="col-6 col-sm-8 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Descripción</label>
-                    {{ form.description }}
+                    <label for="exampleFormControlInput1" class="form-label">Descripcion corta</label>
+                    {{ form.shortDescription }}
                   </div>
                 </div>
               </div>
-              <br>
+
+              
 
               <div class="button-row d-flex mt-4">
                 <a class="btn bg-gradient-dark" href="{% url 'documentos_app:documento-financiero-lista'%}"> REGRESAR </a>
 
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit">CREAR DOCUMENTO</button>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" id="CREAR">CREAR DOCUMENTO</button>
               </div>
 
             </div>
@@ -283,43 +319,44 @@
 {% block JSscripts %}
 
 <script>
-  function toggleDiv() {
-    
-    let selected = document.getElementById("id_detraction").value;
-    let month_dec = document.getElementById("month_dec");
-    let year_dec = document.getElementById("year_dec");
 
-    month_dec.style.display = "inline-block";
-    year_dec.style.display = "inline-block";
-
-    if(Number(selected)== 1){
-      month_dec.style.display = "none";
-      year_dec.style.display = "none";
-    }
-
-  }
+  document.addEventListener('DOMContentLoaded', function() {
+      // Obtener el elemento select
+      const typeInvoiceSelect = document.querySelector('select[name="typeInvoice"]');
+      
+      // Asignar el evento change
+      if (typeInvoiceSelect) {
+          typeInvoiceSelect.addEventListener('change', toggleDivTypeInvoice);
+          
+          // Ejecutar la función al cargar para manejar el estado inicial
+          toggleDivTypeInvoice.call(typeInvoiceSelect);
+      }
+  });
 
   function toggleDivTypeInvoice() {
-    let selected = document.getElementById("id_typeInvoice").value;
-    let detraction = document.getElementById("detraction");
-    let shippingGuide = document.getElementById("shippingGuide");
-    let retention= document.getElementById("retention");
+      const selectedValue = this.value;
+      const detractionDiv = document.getElementById('detraction');
+      const shippingGuideDiv = document.getElementById('shippingGuide');
+      const retentionDiv = document.getElementById('retention');
+      
+      // Ocultar todos los campos primero
+      if (detractionDiv) detractionDiv.style.display = 'none';
+      if (shippingGuideDiv) shippingGuideDiv.style.display = 'none';
+      if (retentionDiv) retentionDiv.style.display = 'none';
 
-    detraction.style.display = "none";
-    shippingGuide.style.display = "none";
-    retention.style.display = "none";
-
-    switch(Number(selected)){
-      case 0:
-        detraction.style.display = "inline-block";
-        shippingGuide.style.display = "inline-block";
-        break;
-      case 1:
-      retention.style.display = "inline-block";
-        break;
-    }
+      console.log(selectedValue);
+      
+      // Mostrar los campos según la selección
+      if (selectedValue == "") {
+        console.log("selectedValue");
+      } else if (selectedValue == 0) {
+          if (detractionDiv) detractionDiv.style.display = 'block';
+          if (shippingGuideDiv) shippingGuideDiv.style.display = 'block';
+      } else if (selectedValue == 1) {
+          if (detractionDiv) detractionDiv.style.display = 'block';
+      }
+      
   }
-
 
 </script>
 
@@ -341,14 +378,22 @@
 
 <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
 <script type="text/javascript">
+
   if (document.getElementById('id_idClient')) {
     var element = document.getElementById('id_idClient');
-    const example = new Choices(element, {});
+    
+    // Solo inicializar Choices cuando el campo recibe foco
+    element.addEventListener('focus', function() {
+      if (!this._choicesInitialized) {
+        clientChoices = new Choices(this, {
+          removeItemButton: true,
+          shouldSort: false
+        });
+        this._choicesInitialized = true;
+      }
+    }, {once: true});
   }
-  if (document.getElementById('id_idBankMovements')) {
-    var element = document.getElementById('id_idBankMovements');
-    const example = new Choices(element, {});
-  }
+
 </script>
 
 <script>
@@ -392,7 +437,6 @@
   });
 </script>
 
-<!-- JavaScript para manejar la carga del XML -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const processXmlBtn = document.getElementById('processXmlBtn');
@@ -424,6 +468,7 @@
           });
 
           const data = await response.json();
+          console.log(data);
 
           if (data.success) {
             showProcessingMessage('XML procesado correctamente. Campos completados.', 'success');
@@ -441,6 +486,11 @@
                   }
                 }
               }
+            }
+
+            if (data.dup){
+              console.log("deshabilitar boton ");
+              document.getElementById('CREAR').disabled = true;
             }
 
             // Mostrar alertas si existen
@@ -461,7 +511,7 @@
       if (!processingMessage) return;
 
       processingMessage.textContent = message;
-      processingMessage.className = `alert alert-${type}`;
+      processingMessage.className = `alert alert-${type} text-white`;
       processingMessage.style.display = 'block';
 
       // Ocultar después de 5 segundos (excepto para errores)
@@ -474,32 +524,35 @@
 
     function showAlertsModal(alerts) {
       const modalBody = document.getElementById('xmlAlertModalBody');
-      if (!modalBody) return;
+      if (!modalBody) {
+        console.error('No se encontró el modal body');
+        return;
+      }
 
-      modalBody.innerHTML = alerts.map(alert =>
-        `<div class="alert alert-warning">${alert}</div>`
-      ).join('');
-
-      // Mostrar el modal
-      const modal = new bootstrap.Modal(document.getElementById('xmlAlertModal'));
-      modal.show();
-    }
-
-    // Mostrar/ocultar campos según tipo de documento (existente)
-    const typeInvoiceSelect = document.getElementById('id_typeInvoice');
-    if (typeInvoiceSelect) {
-      typeInvoiceSelect.addEventListener('change', function () {
-        const type = this.value;
-        document.getElementById('detraction').style.display =
-          (type === '{{ FinancialDocuments.FACTURA }}') ? 'block' : 'none';
-        document.getElementById('shippingGuide').style.display =
-          (type === '{{ FinancialDocuments.FACTURA }}') ? 'block' : 'none';
-        document.getElementById('retention').style.display =
-          (type === '{{ FinancialDocuments.RHE }}') ? 'block' : 'none';
+      // Limpiar contenido previo
+      modalBody.innerHTML = '';
+      
+      // Agregar cada alerta
+      alerts.forEach(alert => {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-warning text-white text-lg';
+        alertDiv.textContent = alert;
+        modalBody.appendChild(alertDiv);
       });
 
-      typeInvoiceSelect.dispatchEvent(new Event('change'));
+
+
+      // Mostrar el modal usando Bootstrap
+      const modalElement = document.getElementById('xmlAlertModal');
+      if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      } else {
+        console.error('No se encontró el elemento modal');
+      }
     }
+
+    
   });
 </script>
 

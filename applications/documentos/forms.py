@@ -51,8 +51,12 @@ class FinancialDocumentsForm(forms.ModelForm):
             'idClient',
             'typeCurrency',
             'amount',
+            'netAmount',
+            'incomeTax',
 
             'description',
+            'shortDescription',
+            'declareFlag',
             
             'contabilidad',
             'xml_file',
@@ -144,12 +148,35 @@ class FinancialDocumentsForm(forms.ModelForm):
                     'class': 'input-group-field form-control text-center',
                 }
             ),
+            'incomeTax': forms.NumberInput(
+                attrs = {
+                    'class': 'input-group-field form-control text-center',
+                }
+            ),
+            'netAmount': forms.NumberInput(
+                attrs = {
+                    'class': 'input-group-field form-control text-center',
+                }
+            ),
             # =======================
-            'description': forms.TextInput(
+            'description': forms.Textarea(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
+                    'rows':4
                 }
+            ),
+            'shortDescription': forms.TextInput(
+                attrs={
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'declareFlag': forms.CheckboxInput(
+                attrs={
+                    'type':'checkbox',
+                    'class': 'form-check-input',
+                },
             ),
 
             # =======================

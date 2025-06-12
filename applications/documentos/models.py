@@ -274,12 +274,21 @@ class FinancialDocuments(TimeStampedModel):
         null=True,
         blank=True
     )
-    description = models.CharField(
+
+    description = models.TextField(
         'Descripción',
-        max_length = 200, 
         null = True, 
         blank = True,
     )
+
+    shortDescription = models.CharField(
+        'Descripción corta',
+        max_length = 150,
+        null = True, 
+        blank = True,
+    )
+
+    declareFlag = models.BooleanField("Declaracion?",default=True)
 
     amount = models.DecimalField(
         'Monto bruto', 
@@ -289,7 +298,7 @@ class FinancialDocuments(TimeStampedModel):
     )
 
     incomeTax = models.DecimalField(
-        'Impuesto a la Renta', 
+        'Impuesto', 
         max_digits = 10, 
         decimal_places = 2,
         default = 0
@@ -324,9 +333,6 @@ class FinancialDocuments(TimeStampedModel):
         default = 0
     )
     
-    
-
-
     xml_file = models.FileField(upload_to='financialDocs_xlms/',null=True,blank=True)
     pdf_file = models.FileField(upload_to='financialDocs_pdfs/',null=True,blank=True)
 

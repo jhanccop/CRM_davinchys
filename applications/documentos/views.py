@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.db.models import Q
 from datetime import datetime
+import json
 
 from django.http import JsonResponse
 import xml.etree.ElementTree as ET
@@ -172,19 +173,23 @@ class ProcessRHEFileView(TemplateView):
             }
             
             try:
+                compania_id = self.request.session.get('compania_id')
+                tin = Tin.objects.get(id = compania_id)
+
                 financial_doc = FinancialDocuments(
-                    typeInvoice=FinancialDocuments.RHE,
-                    idInvoice=doc_emitido,
-                    idClient=cliente,
-                    doc_status=doc_status_map.get(item['Estado Doc. Emitido'], FinancialDocuments.NOANULADO),
-                    doc_emisor=FinancialDocuments.RUC,
-                    typeCurrency=currency_map.get(item['Moneda de Operación'], FinancialDocuments.SOLES),
-                    date=datetime.strptime(item['Fecha de Emisión'], '%d/%m/%Y').date(),
-                    description=item['Descripción'],
-                    amount=float(item['Renta Bruta']),
-                    incomeTax=float(item['Impuesto a la Renta']),
-                    netAmount=float(item['Renta Neta']),
-                    pendingNetPayment=float(item['Monto Neto Pendiente de Pago']),
+                    typeInvoice = FinancialDocuments.RHE,
+                    idInvoice = doc_emitido,
+                    idClient = cliente,
+                    idTin = tin,
+                    doc_status = doc_status_map.get(item['Estado_Doc_Emitido'], FinancialDocuments.NOANULADO),
+                    doc_emisor = FinancialDocuments.RUC,
+                    typeCurrency = currency_map.get(item['Moneda_de_Operación'], FinancialDocuments.SOLES),
+                    date = datetime.strptime(item['Fecha_de_Emisión'], '%d/%m/%Y').date(),
+                    description = item['Descripción'],
+                    amount = float(item['Renta_Bruta']),
+                    incomeTax = float(item['Impuesto_a_la_Renta']),
+                    netAmount = float(item['Renta_Neta']),
+                    pendingNetPayment = float(item['Monto_Neto_Pendiente_de_Pago']),
                     user=request.user
                 )
                 financial_doc.save()
@@ -198,7 +203,7 @@ class ProcessRHEFileView(TemplateView):
         rhe_file.save()
         
         messages.success(request, f"Se guardaron {saved_count} registros. {duplicates_count} duplicados omitidos.")
-        return redirect('documentos_app:carga-doc-rhe')
+        return redirect('documentos_app:documento-financiero-lista')
 
 # ================= DOCUMENTACION FINANCIEROS ========================
 class FinancialDocumentsListView(AdminClientsPermisoMixin,ListView):
@@ -247,100 +252,212 @@ class FinancialDocumentsCreateView(AdminClientsPermisoMixin,CreateView):
       return super().post(request, *args, **kwargs)
 
   def process_xml_only(self, request):
-      form = self.get_form()
-      form.is_valid()  # Ejecuta la validación para procesar el XML
+    form = self.get_form()
+    form.is_valid()  # Ejecuta la validación para procesar el XML
+    
+    response_data = {
+        'success': False,
+        'fields': {},
+        'alerts': []
+    }
       
-      response_data = {
-          'success': False,
-          'fields': {},
-          'alerts': []
-      }
-      
-      if 'xml_file' in request.FILES:
-          try:
-              xml_file = request.FILES['xml_file']
-              tree = ET.parse(xml_file)
-              root = tree.getroot()
-              
-              # Espacio de nombres (ajustar según tu XML)
-              ns = {'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
-                    'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
-                    'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
-                    'sac': 'urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1'
-                  }
-              
-              # Extraer datos del XML
-              fields = {}
-              invoice_id = root.find('.//cbc:ID', ns).text if root.find('.//cbc:ID', ns) is not None else None
-              issue_date = root.find('.//cbc:IssueDate', ns).text if root.find('.//cbc:IssueDate', ns) is not None else None
-              document_type = root.find('.//cbc:InvoiceTypeCode', ns).text if root.find('.//cbc:InvoiceTypeCode', ns) is not None else None
-              currency = root.find('.//cbc:DocumentCurrencyCode', ns).text if root.find('.//cbc:DocumentCurrencyCode', ns) is not None else None
-              total_amount = root.find('.//cbc:PayableAmount', ns).text if root.find('.//cbc:PayableAmount', ns) is not None else None
-              supplier_id = root.find('.//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID', ns).text if root.find('.//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID', ns) is not None else None
-              client_recept = root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID', ns).text if root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID', ns) is not None else None
+    if 'xml_file' in request.FILES:
+        try:
+            xml_file = request.FILES['xml_file']
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
 
-              
-              # Mapear campos
-              if invoice_id:
-                  fields['idInvoice'] = invoice_id
-                  # Verificar si ya existe
-                  if FinancialDocuments.objects.filter(idInvoice=invoice_id).exists():
-                      response_data['alerts'].append(f'Ya existe un documento con el ID {invoice_id}')
+            namespaces = {
+                'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+                'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
+                'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
+                'sac': 'urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1'
+            }
 
-              if client_recept:
-                  # Verificar si existe ruc receptor para evitar facturas de otras empresas
-                  idTin =  Tin.objects.filter(tin = client_recept).first()
+            # Extraer información general
+            general_info = {
+                'numero': root.find('.//cbc:ID', namespaces).text,
+                'fecha_emision': root.find('.//cbc:IssueDate', namespaces).text,
+                'hora_emision': root.find('.//cbc:IssueTime', namespaces).text,
+                'tipo_documento': {
+                    'codigo': root.find('.//cbc:InvoiceTypeCode', namespaces).text,
+                    'descripcion': 'Factura'
+                },
+                'moneda': root.find('.//cbc:DocumentCurrencyCode', namespaces).text,
+                'total_pagar': float(root.find('.//cbc:PayableAmount', namespaces).text),
+                'monto_letras': root.find('.//cbc:Note', namespaces).text.split('[')[-1].split(']')[0]
+            }
 
-                  if idTin:
+            # Extraer información del emisor
+            supplier = root.find('.//cac:AccountingSupplierParty/cac:Party', namespaces)
+            emisor = {
+                'ruc': supplier.find('.//cbc:ID', namespaces).text,
+                'razon_social': supplier.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces).text.strip(),
+                'direccion': {
+                    'calle': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip(),
+                    'distrito': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip(),
+                    'provincia': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'departamento': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'codigo_ubigeo': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip()
+                }
+            }
+
+            # Extraer información del cliente
+            customer = root.find('.//cac:AccountingCustomerParty/cac:Party', namespaces)
+            cliente = {
+                'ruc': customer.find('.//cbc:ID', namespaces).text,
+                'razon_social': customer.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces).text.strip(),
+                'direccion': {
+                    'calle': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip(),
+                    'distrito': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip(),
+                    'provincia': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'departamento': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'codigo_ubigeo': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip()
+                }
+            }
+
+            # Extraer totales
+            tax_total = root.find('.//cac:TaxTotal', namespaces)
+            monetary_total = root.find('.//cac:LegalMonetaryTotal', namespaces)
+            totales = {
+                'gravado': float(monetary_total.find('.//cbc:LineExtensionAmount', namespaces).text),
+                'igv': float(tax_total.find('.//cbc:TaxAmount', namespaces).text),
+                'total_venta': float(monetary_total.find('.//cbc:PayableAmount', namespaces).text)
+            }
+
+            # Extraer items
+            items = []
+            for item in root.findall('.//cac:InvoiceLine', namespaces):
+                item_data = {
+                    'id': int(item.find('.//cbc:ID', namespaces).text),
+                    'descripcion': item.find('.//cbc:Description', namespaces).text.strip(),
+                    'cantidad': float(item.find('.//cbc:InvoicedQuantity', namespaces).text),
+                    'unidad_medida': item.find('.//cbc:InvoicedQuantity', namespaces).attrib.get('unitCode'),
+                    'valor_unitario': float(item.find('.//cbc:PriceAmount', namespaces).text),
+                    'precio_referencia': float(item.find('.//cac:AlternativeConditionPrice/cbc:PriceAmount', namespaces).text),
+                    'igv': float(item.find('.//cac:TaxTotal/cbc:TaxAmount', namespaces).text),
+                    'valor_venta': float(item.find('.//cbc:LineExtensionAmount', namespaces).text)
+                }
+                items.append(item_data)
+
+            # Extraer información adicional
+            info_adicional = {
+                'forma_pago': root.find('.//cac:PaymentTerms/cbc:PaymentMeansID', namespaces).text,
+                'firma_digital': {
+                    'presente': True,
+                    'emisor': 'SUNAT'
+                },
+                'version_ubl': root.find('.//cbc:UBLVersionID', namespaces).text,
+                'customizacion': root.find('.//cbc:CustomizationID', namespaces).text
+            }
+
+            # Construir el JSON final
+            factura_json = {
+                'factura': {
+                    'informacion_general': general_info,
+                    'emisor': emisor,
+                    'cliente': cliente,
+                    'totales': totales,
+                    'items': items,
+                    'informacion_adicional': info_adicional
+                }
+            }
+
+
+            # COMPLETAR DATOS
+            fields = {}
+
+            client_recept = factura_json["factura"]["cliente"]["ruc"]
+
+            # Verificar si existe ruc receptor para evitar facturas de otras empresas
+            if client_recept:
+                idTin =  Tin.objects.filter(tin = client_recept).first()
+
+                if idTin:
                     fields['idTin'] = idTin.id
-                  else:
-                      response_data['alerts'].append(f'El RUC {client_recept} no pertenece al grupo empresarial ')
+                else:
+                    response_data['alerts'].append(f'El RUC {client_recept} no pertenece al grupo empresarial ')
+                    response_data['success'] = True
+                    return JsonResponse(response_data)
 
-              if issue_date:
-                  fields['date'] = issue_date
-              
-              if document_type:
-                  doc_type_mapping = {
-                      '01': FinancialDocuments.FACTURA,
-                      '03': FinancialDocuments.BOLETA,
-                      '07': FinancialDocuments.NOTACREDITO,
-                      '08': FinancialDocuments.NOTACREDITO
-                  }
-                  fields['typeInvoice'] = doc_type_mapping.get(document_type, FinancialDocuments.OTROS)
-              
-              if currency:
-                  currency_mapping = {
-                      'PEN': FinancialDocuments.SOLES,
-                      'USD': FinancialDocuments.DOLARES,
-                      'EUR': FinancialDocuments.EUROS
-                  }
-                  fields['typeCurrency'] = currency_mapping.get(currency, FinancialDocuments.SOLES)
-              
-              if total_amount:
-                  fields['amount'] = total_amount
-              
-              # Buscar cliente
-              if supplier_id:
-                  from applications.clientes.models import Cliente
-                  cliente = Cliente.objects.filter(ruc=supplier_id).first()
+            supplier_id = factura_json["factura"]["emisor"]["ruc"]
+            invoice_id = factura_json["factura"]["informacion_general"]["numero"]
 
-                  if cliente:
-                      print(supplier_id,cliente.id)
-                      fields['idClient'] = cliente.id
-                      if FinancialDocuments.objects.filter(idInvoice=invoice_id, idClient__ruc=supplier_id).exists():
-                          response_data['alerts'].append(
-                              f'¡Alerta! Ya existe un documento con ID {invoice_id} para el cliente {cliente.razon_social} (RUC: {supplier_id})'
-                          )
-              
-              response_data['success'] = True
-              response_data['fields'] = fields
-              
-          except ET.ParseError as e:
-              response_data['error'] = 'El archivo XML no es válido'
-          except Exception as e:
-              response_data['error'] = f'Error al procesar el XML: {str(e)}'
-      
-      return JsonResponse(response_data)
+            #  filtro, por id y por ruc para detectar duplicados
+            if supplier_id:
+                cliente = Cliente.objects.filter(ruc=supplier_id).first()
+
+                if cliente:
+                    fields['idClient'] = cliente.id
+                    fields['idInvoice'] = invoice_id
+                    if FinancialDocuments.objects.filter(idInvoice=invoice_id, idClient__ruc=supplier_id).exists():
+                        response_data['alerts'].append(
+                        f'¡Alerta! Ya existe un documento con ID {invoice_id} para el cliente {cliente.tradeName} (RUC: {supplier_id})'
+                        )
+                        response_data['dup'] = True
+                else:
+                    response_data['alerts'].append(
+                    f'¡No se encuentra al porveedor {cliente.tradeName} (RUC: {supplier_id})'
+                    )
+
+            issue_date = factura_json["factura"]["informacion_general"]["fecha_emision"]
+            document_type = factura_json["factura"]["informacion_general"]["tipo_documento"]["codigo"]
+
+            currency = factura_json["factura"]["informacion_general"]["moneda"]
+
+            total_gravado = factura_json["factura"]["totales"]["gravado"]
+            total_igv = factura_json["factura"]["totales"]["igv"]
+            total_amount = factura_json["factura"]["totales"]["total_venta"]
+
+            fields['date'] = issue_date
+            fields['netAmount'] = total_gravado
+            fields['incomeTax'] = total_igv
+            fields['amount'] = total_amount
+
+            output = ""
+
+            for item in factura_json["factura"]["items"]:
+                output += (
+                    f"ID: {item['id']}\n"
+                    f"  Descripción     : {item['descripcion']}\n"
+                    f"  Cantidad        : {item['cantidad']} {item['unidad_medida']}\n"
+                    f"  Valor unitario  : {item['valor_unitario']:.6f}\n"
+                    f"  Precio ref.     : {item['precio_referencia']:.6f}\n"
+                    f"  Valor venta     : {item['valor_venta']:.4f}\n"
+                    f"  IGV             : {item['igv']:.6f}\n"
+                    f"{'-' * 60}\n"
+                )
+
+            fields['description'] = output
+
+            if document_type:
+                doc_type_mapping = {
+                    '01': FinancialDocuments.FACTURA,
+                    '03': FinancialDocuments.BOLETA,
+                    '07': FinancialDocuments.NOTACREDITO,
+                    '08': FinancialDocuments.NOTACREDITO
+                }
+                fields['typeInvoice'] = doc_type_mapping.get(document_type, FinancialDocuments.OTROS)
+
+            if currency:
+                currency_mapping = {
+                    'PEN': FinancialDocuments.SOLES,
+                    'USD': FinancialDocuments.DOLARES,
+                    'EUR': FinancialDocuments.EUROS
+                }
+                fields['typeCurrency'] = currency_mapping.get(currency, FinancialDocuments.SOLES)
+            
+            
+            
+            response_data['success'] = True
+            response_data['fields'] = fields
+            
+        except ET.ParseError as e:
+            response_data['error'] = 'El archivo XML no es válido'
+        except Exception as e:
+            response_data['error'] = f'Error al procesar el XML: {str(e)}'
+    
+    return JsonResponse(response_data)
 
   def form_valid(self, form):
       xml_file = self.request.FILES.get('xml_file')

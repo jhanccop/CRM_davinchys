@@ -12,7 +12,11 @@
 <form method="post" class="mb-0">
     {% csrf_token %}
     <div class="form-group">
+      {% if duplicates %}
+        <button type="submit" class="btn btn-success" disabled>Guardar Registros</button>
+      {% else %}
         <button type="submit" class="btn btn-success">Guardar Registros</button>
+      {% endif %}
         <a href="{% url 'documentos_app:carga-doc-rhe' %}" class="btn btn-secondary">Regresar</a>
     </div>
 </form>
@@ -24,7 +28,7 @@
 
           <div class="card-header p-3 pb-0">
             <div class="d-flex justify-content-between align-items-center">
-                <span class="badge badge-warning text-lg"> {{ processed_data.metadata.total_registros }} Registros Duplicados </span> 
+                <span class="badge badge-warning"> {{ processed_data.metadata.total_registros }} Registros Duplicados </span> 
               
             </div>
           </div>
@@ -66,10 +70,10 @@
                         
                       </td>
                       <td>
-                        <p class="text-xs font-weight-bold mb-0">{{ t.Moneda_de_Operación }}</p>
-                        <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.Renta_Bruta }}</p>
-                        <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.Impuesto_a_la_Renta }} </p>
-                        <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.Renta_Neta }} </p>
+                        <p class="text-xs font-weight-bold mb-0">{{ t.data.Moneda_de_Operación }}</p>
+                        <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.data.Renta_Bruta }}</p>
+                        <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.data.Impuesto_a_la_Renta }} </p>
+                        <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.data.Renta_Neta }} </p>
                       </td>
 
                     </tr>
