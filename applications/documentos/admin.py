@@ -34,7 +34,6 @@ class RawsFilesRHEAdmin(ImportExportModelAdmin):
     list_filter = ('created',)
     #autocomplete_fields = ['idClient',]
 
-
 ## ==================== FinancialDocuments =====================
 class FinancialDocumentsResource(resources.ModelResource):
     class Meta:

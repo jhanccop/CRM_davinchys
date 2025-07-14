@@ -1,0 +1,69 @@
+{% extends "COMERCIAL/pettyCash/base-COMERCIAL.html" %}
+
+{% load  static %}
+{% block title %} Requerimientos {% endblock title %}
+{% block main %} Requerimientos {% endblock main %}
+{% block appName %} Caja chica {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container mt-4">
+    <h5>Detalle de caja chica {{ requirement.req }}</h5>
+
+    <div class="row">
+        <div class="col-12 col-lg-12">
+            <div class="card mb-4 h-100">
+                <div class="card-header pb-0">
+                    <h5>Información General</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Solicitante:</strong> {{ requirement.req.idPetitioner }}</p>
+                    <p><strong>Descripción:</strong> {{ requirement.req.description }}</p>
+                    <p><strong>Fecha creación:</strong> {{ requirement.req.created|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Monto total:</strong> 
+                        {{requirement.req.get_currency_display}} {{requirement.req.totalPrice}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header pb-0">
+            <h5>Items de caja chica</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-4">Descripción</th>
+                        <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Cantidad</th>
+                        <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 pe-4">Precio Unitario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in requirement.items %}
+                    <tr>
+                        <td class="text-sm text-start ps-4">{{ item.product }}</td>
+                        <td class="text-sm text-end">{{ item.quantity }}</td>
+                        <td class="text-sm text-end pe-4">{{ item.price }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No hay items registrados</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+{% endblock JSscripts %}

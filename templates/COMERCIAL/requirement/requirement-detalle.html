@@ -1,0 +1,97 @@
+{% extends "COMERCIAL/requirement/base-COMERCIAL.html" %}
+
+{% load  static %}
+{% block title %} Requerimientos {% endblock title %}
+{% block main %} Requerimientos {% endblock main %}
+{% block appName %} Requerimientos {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container mt-4">
+    <h5>Detalle del Requerimiento {{ requirement.req }}</h5>
+
+    <div class="row">
+        <div class="col-12 col-lg-6">
+            <div class="card mb-4 h-100">
+                <div class="card-header pb-0">
+                    <h5>Información General</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Solicitante:</strong> {{ requirement.req.idPetitioner }}</p>
+                    <p><strong>Descripción:</strong> {{ requirement.req.description }}</p>
+                    <p><strong>Fecha creación:</strong> {{ requirement.req.created|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Monto total:</strong> 
+                        {{requirement.req.get_currency_display}} {{requirement.req.totalPrice}}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header pb-0">
+                    <h5>Historial de Seguimiento</h5>
+                </div>
+
+                <div class="card-body p-3">
+                    <div class="timeline timeline-one-side">
+                        {% for track in requirement.track %}
+                        <div class="timeline-block mb-3">
+                            <span class="timeline-step">
+                                <i class="fas fa-bell text-success text-gradient text-lg"></i>
+                            </span>
+                            <div class="timeline-content">
+                                <h6 class="text-dark text-md font-weight-bold mb-0">{{ track.get_status_display }} - {{ track.get_area_display }}</h6>
+                                <p class="text-secondary font-weight-normal text-xs mt-1 mb-0"> {{ track.created|date:"d-M-Y H:i" }} </p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No hay historial de seguimiento</p>
+                        {% endfor %}
+                
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header pb-0">
+            <h5>Items del Requerimiento</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-4">Descripción</th>
+                        <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Cantidad</th>
+                        <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 pe-4">Precio Unitario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in requirement.items %}
+                    <tr>
+                        <td class="text-sm text-start ps-4">{{ item.product }}</td>
+                        <td class="text-sm text-end">{{ item.quantity }}</td>
+                        <td class="text-sm text-end pe-4">{{ item.price }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No hay items registrados</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+{% endblock JSscripts %}

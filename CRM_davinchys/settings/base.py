@@ -45,6 +45,11 @@ LOCAL_APPS = (
     'applications.movimientosBancarios',
     'applications.documentos',
 
+    'applications.COMERCIAL.quotes',
+    'applications.COMERCIAL.purchase',
+    'applications.COMERCIAL.sales',
+    'applications.COMERCIAL.suppliers',
+
     'multiselectfield',
     'import_export',
 

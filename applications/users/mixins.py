@@ -45,7 +45,7 @@ class AlmacenPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.SUPERVISOR_PRODUCCION):
+        if not check_ocupation_user(request.user.position, User.PRODUCCION):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -61,7 +61,7 @@ class VentasPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.SUPERVISOR_COMPRAS):
+        if not check_ocupation_user(request.user.position, User.VENTAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -79,7 +79,7 @@ class TrabajadorPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.TRABAJADOR):
+        if not check_ocupation_user(request.user.position, User.COMPRAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -95,7 +95,7 @@ class ComprasPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.SUPERVISOR_COMPRAS):
+        if not check_ocupation_user(request.user.position, User.COMPRAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -111,7 +111,7 @@ class ProduccionPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.SUPERVISOR_PRODUCCION):
+        if not check_ocupation_user(request.user.position, User.PRODUCCION):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -159,7 +159,7 @@ class ComprasProducciónPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user2(request.user.position, User.SUPERVISOR_PRODUCCION, User.SUPERVISOR_COMPRAS):
+        if not check_ocupation_user2(request.user.position, User.PRODUCCION, User.COMPRAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -175,7 +175,7 @@ class ComprasContabilidadPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user2(request.user.position, User.CONTABILIDAD, User.SUPERVISOR_COMPRAS):
+        if not check_ocupation_user2(request.user.position, User.CONTABILIDAD, User.COMPRAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -191,7 +191,7 @@ class TrabajadorComprasProducciónPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user3(request.user.position, User.SUPERVISOR_PRODUCCION, User.TRABAJADOR, User.SUPERVISOR_COMPRAS):
+        if not check_ocupation_user3(request.user.position, User.PRODUCCION, User.TRABAJADOR, User.COMPRAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -207,7 +207,7 @@ class AdminClientsPermisoMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user4(request.user.position, User.ADQUISICIONES, User.FINANZAS, User.TESORERIA, User.CONTABILIDAD):
+        if not check_ocupation_user4(request.user.position, User.COMPRAS, User.COMPRAS, User.COMPRAS, User.CONTABILIDAD):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(

@@ -6,31 +6,34 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 #
 from .managers import UserManager, DocsManager
 
+#
+from applications.cuentas.models import Tin
+
 class User(AbstractBaseUser, PermissionsMixin):
     # TIPO DE USUARIOS
-    ADMINISTRADOR = '0' # Joel, Gustavo, Jesus
-    CONTABILIDAD = '1' # Keren
-    SUPERVISOR_PRODUCCION = '2'
-    SUPERVISOR_COMPRAS = '3'
-    TRABAJADOR = '4'
-    ADQUISICIONES = '5' # Jose
-    FINANZAS = '6' # Gustavo
-    TESORERIA = '7'
-    CONSULTOREXTERNO = '8'
-    RECURSOSHUMANOS = '9'
+    ADMINISTRADOR = '0'
+    COMPRAS = '1'
+    VENTAS = '2'
+    PRODUCCION = '3'
+    GERENCIA = '4'
+    LOGISTICA = '5'
+    RECURSOSHUMANOS = '6'
+    CONSULTOREXTERNO = '7'
+    CONTABILIDAD = '8'
+    TI = '9'
     
     #
     ROLES_CHOICES = [
         (ADMINISTRADOR, 'Administrador'),
-        (CONTABILIDAD, 'Contabilidad'),
-        (SUPERVISOR_PRODUCCION, 'Supervisor producción'),
-        #(SUPERVISOR_COMPRAS, 'Supervisor compras'),
-        (TRABAJADOR, 'Trabajador'),
-        (ADQUISICIONES, 'Adquisiciones'),
-        (FINANZAS, 'Finanzas'),
-        (TESORERIA, 'Tesoreria'),
-        (CONSULTOREXTERNO, 'Consultor'),
+        (COMPRAS, 'Compras'),
+        (VENTAS, 'Ventas'),
+        (PRODUCCION, 'Producción'),
+        (GERENCIA, 'Gerencia'),
+        (LOGISTICA, 'Logística'),
         (RECURSOSHUMANOS, 'Recursos humanos'),
+        (CONSULTOREXTERNO, 'Consultor externo'),
+        (CONTABILIDAD, 'Contabilidad'),
+        (TI, 'TI'),
     ]
 
     # GENEROS
@@ -57,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique = True)
+    company = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField('Nombres', max_length=100)
     last_name = models.CharField('Apellidos', max_length=100, blank=True, null=True)
     phoneNumber = models.CharField('Telefono',blank = True, null=True)
@@ -95,6 +99,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     #
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    is_boss = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
 

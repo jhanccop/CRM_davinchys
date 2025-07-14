@@ -1,0 +1,355 @@
+<!-- templates/trafo_quote/create.html -->
+{% extends 'COMERCIAL/quotes/base-COMERCIAL.html' %}
+{% load static %}
+
+{% block title %} cotizaciones {% endblock title %}
+{% block main %} cotizaciones {% endblock main %}
+{% block appName %} {{compania_id}} {% endblock appName %}
+
+{% block panel-content %}
+<h5>Crear Nueva Cotización</h5>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="p-3 border-radius-xl bg-white" data-animation="FadeIn">
+        <h6 class="font-weight-bolder">Contización</h6>
+        <div class="multisteps-form__content">
+
+            <div class="row mt-3">
+                <div class="col-6 col-sm-3">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">RFQ number</label>
+                        {{ form.idQuote }}
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">F. pedido</label>
+                        {{ form.dateOrder }}
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">F. entrega</label>
+                        {{ form.deadline }}
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">Atención</label>
+                        {{ form.idAttendant }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12 col-sm-9">
+                    <label for="">Compañia</label>
+                    <div class="input-group input-group-outline">
+                        {{ form.idClient }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+
+                <div class="col-12 col-sm-3">
+                    <label for="">Método de pago</label>
+                    <div class="input-group input-group-outline">
+                        {{ form.payMethod }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-3">
+                    <label for="">Moneda</label>
+                    <div class="input-group input-group-outline">
+                        {{ form.currency }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-3">
+                    <label for="">Monto</label>
+                    <div class="input-group input-group-outline">
+                        {{ form.amount }}
+                    </div>
+                </div>
+                
+                <div class="col-12 col-sm-3 pt-4 mt-2">
+                    <div class="form-check form-switch ms-auto is-filled">
+                        <label for="exampleFormControlInput1" class="form-label">PO?</label>
+                        {{ form.poStatus }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12 col-sm-12 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                        {{ form.description }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'activities_app:cotizaciones-transformadores' %}">
+                    REGRESAR
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- {{ form.as_p }} -->
+
+    {{ trafos_formset.management_form }}
+    {% if trafos_formset.non_form_errors %}
+        <div class="alert alert-danger">
+            {{ trafos_formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% for form in trafos_formset %}
+    <div class="product-form mt-4">
+        <div class="p-3 border-radius-xl bg-white" data-animation="FadeIn">
+            <div class="multisteps-form__content">
+                <h6 class="font-weight-bolder">Productos</h6>
+                <div class="row mt-3">
+        
+                    <div class="col-8 col-sm-3">
+                    </div>
+
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Costo unitario</label>
+                            {{ form.unitCost }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Cantidad</label>
+                            {{ form.quantity }}
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-sm-3">
+                        <div class="form-check form-switch ms-auto is-filled">
+                        <label for="exampleFormControlInput1" class="form-label">PO?</label>
+                        {{ form.DELETE }}
+                    </div>
+                    </div>
+        
+                </div>
+        
+                <br>
+                <h6 class="font-weight-bolder">Características técnicas</h6>
+        
+                <div class="row mt-3">
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Capacidad</label>
+                            {{ form.KVA }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">HV TAP</label>
+                            {{ form.HVTAP }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">K Tap HV</label>
+                            {{ form.KTapHV }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">FIX HV</label>
+                            {{ form.FIXHV }}
+                        </div>
+                    </div>
+        
+                </div>
+        
+                <div class="row mt-3">
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">LV</label>
+                            {{ form.LV }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">HZ</label>
+                            {{ form.HZ }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">TYPE</label>
+                            {{ form.TYPE }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">MOUNTING TYPE</label>
+                            {{ form.MOUNTING }}
+                        </div>
+                    </div>
+        
+                </div>
+        
+                <div class="row mt-3">
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">COOLING</label>
+                            {{ form.COOLING }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">WINDING</label>
+                            {{ form.WINDING }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">INSULAT CLASS</label>
+                            {{ form.INSULAT }}
+                        </div>
+                    </div>
+        
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">CONNECTION</label>
+                            {{ form.CONNECTION }}
+                        </div>
+                    </div>
+        
+                </div>
+        
+                <div class="row mt-3">
+        
+                    <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">STANDARD</label>
+                            {{ form.STANDARD }}
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <button type="button" class="remove-form btn bg-gradient-primary">ELIMINAR</button>
+        
+            </div>
+        </div>
+        <!-- {{ form.as_p }} -->
+        <!-- <button type="button" class="remove-form">Remove</button> -->
+    </div>
+    {% endfor %}
+
+    <div class="text-end me-4">
+        <button class="btn bg-gradient-info" type="button" id="add-product">Add Product</button>
+        <button class="btn bg-gradient-success" type="submit">Submit</button>
+    </div>
+    
+</form>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addProductButton = document.getElementById('add-product');
+    const totalForms = document.getElementById('id_trafos-TOTAL_FORMS');
+    const formContainer = document.querySelector('form');
+    let formCount = parseInt(totalForms.value);
+
+    // Función para actualizar índices y nombres
+    function updateFormIndexes(form, index) {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.name) {
+                input.name = input.name.replace(/trafos-\d+-/, `trafos-${index}-`);
+                input.id = `id_${input.name}`;
+            }
+        });
+        
+        // Actualizar labels
+        const labels = form.querySelectorAll('label');
+        labels.forEach(label => {
+            if (label.htmlFor) {
+                const forValue = label.htmlFor.replace(/id_trafos-\d+-/, `id_trafos-${index}-`);
+                label.htmlFor = forValue;
+            }
+        });
+    }
+
+    // Clonar formulario
+    addProductButton.addEventListener('click', () => {
+        const template = document.querySelector('.product-form');
+        const newForm = template.cloneNode(true);
+        newForm.style.display = 'block'; // Asegurar que sea visible
+        
+        // Actualizar índices
+        updateFormIndexes(newForm, formCount);
+        
+        // Incrementar contador
+        formCount++;
+        totalForms.value = formCount;
+        
+        // Manejar botón eliminar
+        const removeButton = newForm.querySelector('.remove-form');
+        removeButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const deleteInput = newForm.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.value = 'on'; // Marcar para eliminar
+                newForm.style.display = 'none'; // Ocultar en lugar de eliminar
+            } else {
+                newForm.remove(); // Eliminar si es un nuevo form no guardado
+            }
+            formCount--;
+            totalForms.value = formCount;
+        });
+        
+        // Insertar antes del div de botones
+        const buttonsDiv = document.querySelector('.text-end');
+        formContainer.insertBefore(newForm, buttonsDiv);
+    });
+
+    // Manejar botones eliminar existentes
+    document.querySelectorAll('.remove-form').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('.product-form');
+            const deleteInput = form.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.value = 'on';
+                form.style.display = 'none';
+            } else {
+                form.remove();
+            }
+            formCount--;
+            totalForms.value = formCount;
+        });
+    });
+});
+
+
+</script>
+{% endblock JSscripts %}

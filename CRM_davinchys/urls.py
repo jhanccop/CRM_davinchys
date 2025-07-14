@@ -26,5 +26,11 @@ urlpatterns = [
     re_path('', include('applications.movimientosBancarios.urls')),
     # documentos app
     re_path('', include('applications.documentos.urls')),
+    # COMERCIAL - quotes app
+    re_path('', include('applications.COMERCIAL.quotes.urls')),
+    # COMERCIAL - purchase app
+    re_path('', include('applications.COMERCIAL.purchase.urls')),
+    # COMERCIAL - sales app
+    re_path('', include('applications.COMERCIAL.sales.urls')),
 ]
 

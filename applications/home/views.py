@@ -17,6 +17,7 @@ from applications.movimientos.models import DocumentsUploaded
 from applications.users.models import Documentations
 from applications.actividades.models import Trafos, RestDays, DailyTasks
 from applications.pedidos.models import PaymentRequest, RequestList
+from applications.COMERCIAL.purchase.models import RequestTracking
 
 # forms
 from applications.actividades.forms import TrafoForm
@@ -118,9 +119,10 @@ class PanelHomeView(LoginRequiredMixin,ListView):
 
         # Numero de requerimientos de compra o desembolsos pendientes por AREA O CARGO
         #payload["PaymentReq"] = PaymentRequest.objects.ListasPendientesPagoPorArea(area=userArea)
-        payload["PaymentReq"] = PaymentRequest.objects.getListOfPaymentRequestByArea(area=userArea)
+        #payload["PaymentReq"] = PaymentRequest.objects.getListOfPaymentRequestByArea(area=userArea)
+        payload["PaymentReq"] = RequestTracking.objects.getListRequestByArea(area=userArea)
 
-        # Lista de de pPERMISOS LABORALES SOLICITADOS AL AREA
+        # Lista de PERMISOS LABORALES SOLICITADOS AL AREA
         payload["RestDaysReq"] = RestDays.objects.getListOfRestPermitsByArea(area=userArea)
 
         # Mi Lista requerimientos de compra o desembolsos por mes y por usuario
