@@ -89,7 +89,6 @@ class FinancialDocumentsManager(models.Manager):
     
 class OthersDocumentsManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
-        print("5555",tipo)
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -106,7 +105,7 @@ class OthersDocumentsManager(models.Manager):
                 date__range = rangeDate,
                 idFinacialDocuments__idTin__id = compania_id
             ).order_by("date")
-            print("5555",tipo, result)
+
         else:
             result = self.filter(
                 date__range = rangeDate,

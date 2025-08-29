@@ -97,3 +97,7 @@ def buscar_ruc_sunat(request):
         'success': False, 
         'error': 'Método no permitido'
     })
+
+
+
+    

@@ -4,7 +4,7 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from .models import (
-    requirementsInvoice,
+    PurchaseOrderInvoice,
     requirements,
     RequestTracking,
     requirementItems,
@@ -12,24 +12,25 @@ from .models import (
     PettyCash,
     PettyCashItems,
 )
-## ==================== requirementsInvoice =====================
-class requirementsInvoiceResource(resources.ModelResource):
+## ==================== Invoice DE ORDENES DE COMPRA ======================
+class PurchaseOrderInvoiceResource(resources.ModelResource):
     class Meta:
-        model = requirementsInvoice
+        model = PurchaseOrderInvoice
 
-@admin.register(requirementsInvoice)
-class requirementsInvoiceAdmin(ImportExportModelAdmin):
-    resource_class = requirementsInvoiceResource
+@admin.register(PurchaseOrderInvoice)
+class PurchaseOrderInvoiceAdmin(ImportExportModelAdmin):
+    resource_class = PurchaseOrderInvoiceResource
 
-    def get_client_ruc(self, obj):
-        if obj.idClient:
-            return obj.idClient.ruc
+    def get_idSupplier_numberIdClient(self, obj):
+        if obj.idSupplier:
+            return obj.idSupplier.numberIdSupplier
         return None
     
     list_display = (
         'id',
         'date',
-        'get_client_ruc',
+        'idRequirement',
+        'get_idSupplier_numberIdClient',
         'typeInvoice',
         'idInvoice',
         'typeCurrency',
@@ -56,7 +57,8 @@ class requirementsAdmin(ImportExportModelAdmin):
         'created',
         'idPetitioner',
         'description',
-        'totalPrice'
+        'totalPrice',
+        'isPurchaseOrder'
     )
     search_fields = ('idPetitioner',)
     list_filter = ('idPetitioner',)
@@ -154,8 +156,7 @@ class requirementsQuotesAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'idRequirement',
-        'idProvider',
-        'idQuote',
+        'idSupplier',
     )
     search_fields = ('idRequirement',)
     list_filter = ('idRequirement',)

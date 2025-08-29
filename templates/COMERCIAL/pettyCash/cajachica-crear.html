@@ -1,4 +1,4 @@
-{% extends "COMERCIAL/pettyCash/base-COMERCIAL.html" %}
+{% extends "COMERCIAL/purchase/base-COMERCIAL.html" %}
 
 {% load  static %}
 {% block title %} Requerimientos {% endblock title %}
@@ -14,7 +14,7 @@
     
     <!-- Formulario principal del requerimiento -->
     <div class="card mb-4">
-        <div class="card-header pb-0">Datos del ingreso</div>
+        <div class="card-header pb-0">Descrición general</div>
         <div class="card-body">
 
             <div class="row" hidden>
@@ -51,7 +51,7 @@
     
     <!-- Formset para los items -->
     <div class="card mb-4">
-        <div class="card-header pb-0">Items del Requerimiento</div>
+        <div class="card-header pb-0">Items de de caja chica</div>
         <div class="card-body p-0">
             {{ item_formset.management_form }}
             
@@ -99,7 +99,7 @@
         </div>
     </div>
     
-    <button type="submit" class="btn btn-primary">Guardar Requerimiento</button>
+    <button type="submit" class="btn btn-primary">Guardar caja chica</button>
 </form>
 
 {% endblock panel-content %}

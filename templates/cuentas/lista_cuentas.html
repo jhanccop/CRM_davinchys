@@ -1,4 +1,4 @@
-{% extends "cuentas/base-cuentas.html" %}
+{% extends "cuentas/base-Dashboard.html" %}
 
 {% load  static %}
 {% block title %} Movimientos {% endblock title %}
@@ -37,7 +37,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for t in cuentas %}
+                    {% for t in cuentas.cuenta %}
                     <tr>
                       <td class="text-sm">{{ t.accountName }}</td>
                       <td class="text-start text-sm">{{ t.get_currency_display }}</td>

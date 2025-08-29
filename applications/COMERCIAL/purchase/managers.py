@@ -4,7 +4,7 @@ from datetime import date, timedelta, datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
 
-from django.db.models import Sum, Max, DateField,F, Q, Count, When, Value, Case, When, FloatField
+from django.db.models import Sum, Max, DateField,F, Q, CharField, When, Value, Case, When, FloatField
 from django.db.models import OuterRef, Subquery
 
 # ======================= REQUERIMIENTOS =======================
@@ -40,6 +40,45 @@ class requirementsManager(models.Manager):
 
     def obtenerRequerimientoPorId(self,id):
         return self.get(id = id)
+
+    def ListaOrdenesdeCompra(self,intervalo):
+        """
+            Lista de ordenes de compra
+        """
+
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        from applications.COMERCIAL.purchase.models import RequestTracking
+        last_tracking_subquery = RequestTracking.objects.filter(
+            idRequirement=OuterRef('pk')
+        ).order_by('-created').values('status', 'area')[:1]
+
+        STATE_CHOICES = RequestTracking.STATE_CHOICES
+
+        result = self.filter(
+            created__range=rangeDate,
+            isPurchaseOrder = True
+        ).annotate(
+            lastStatus=Subquery(last_tracking_subquery.values('status')),
+            lastArea=Subquery(last_tracking_subquery.values('area')),
+            lastStatusDisplay=Case(
+                *[When(lastStatus=status, then=Value(display)) 
+                for status, display in STATE_CHOICES],
+                default=Value(''),
+                output_field=CharField()
+            )
+        ).order_by('-created')
+
+        return result
 
 class requestTrackingManager(models.Manager):
     def obtenerTrackingPorIdRequerimiento(self,id):
@@ -78,8 +117,6 @@ class requestTrackingManager(models.Manager):
 class requirementItemsManager(models.Manager):
     def obtenerTrackingPorIdRequerimiento(self,id):
         return self.filter(idRequirement = id).order_by("-id")
-
-
 
 # ======================= CAJA CHICA =======================
 class PettyCashManager(models.Manager):

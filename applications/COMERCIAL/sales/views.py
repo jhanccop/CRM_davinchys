@@ -309,7 +309,6 @@ class IncomesCreateView(AdminClientsPermisoMixin,CreateView):
       return super().form_valid(form)
   
 class IncomesEditView(AdminClientsPermisoMixin,UpdateView):
-  print("editar")
   template_name = "COMERCIAL/sales/ventas-editar.html"
   model = Incomes
   form_class = IncomesForm
@@ -321,7 +320,6 @@ class IncomesDetailView(AdminClientsPermisoMixin,ListView):
   context_object_name = 'doc'
   
   def get_queryset(self,**kwargs):
-    print("detalle")
     pk = self.kwargs['pk']
     payload = {}
     document = Incomes.objects.DocumentosPorId(id = int(pk))
@@ -329,7 +327,6 @@ class IncomesDetailView(AdminClientsPermisoMixin,ListView):
     return payload
   
 class IncomesDeleteView(AdminClientsPermisoMixin,DeleteView):
-  print("eliminar")
   template_name = "COMERCIAL/sales/ventas-eliminar.html"
   model = Incomes
   success_url = reverse_lazy('ventas_app:ventas-lista')

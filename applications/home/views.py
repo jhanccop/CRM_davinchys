@@ -13,10 +13,10 @@ from django.views.generic import (
 from django.urls import reverse_lazy
 
 # models
-from applications.movimientos.models import DocumentsUploaded
-from applications.users.models import Documentations
+#from applications.movimientos.models import DocumentsUploaded
+#from applications.users.models import Documentations
 from applications.actividades.models import Trafos, RestDays, DailyTasks
-from applications.pedidos.models import PaymentRequest, RequestList
+#from applications.pedidos.models import PaymentRequest, RequestList
 from applications.COMERCIAL.purchase.models import RequestTracking
 
 # forms
@@ -30,6 +30,9 @@ from .forms import TrackingForm
 
 class HomeView(TemplateView):
     template_name = "home/home.html"
+
+class unauthorizedView(TemplateView):
+    template_name = "home/unauthorizedView.html"
 
 class EnterTrackingNumberView(ListView):
     template_name = "home/enter-tracking-number.html"
@@ -126,7 +129,7 @@ class PanelHomeView(LoginRequiredMixin,ListView):
         payload["RestDaysReq"] = RestDays.objects.getListOfRestPermitsByArea(area=userArea)
 
         # Mi Lista requerimientos de compra o desembolsos por mes y por usuario
-        payload["listPaymentReq"] = PaymentRequest.objects.getMyListPaymentRequestForMonth(userId,yearSelected,monthSelected)
+        #payload["listPaymentReq"] = PaymentRequest.objects.getMyListPaymentRequestForMonth(userId,yearSelected,monthSelected)
 
         # Mi Lista de PERMISOS LABORALES por mes y por usuario
         payload["listRestDayReq"] = RestDays.objects.getMyListRestDaysForMonth(userId,yearSelected,monthSelected)

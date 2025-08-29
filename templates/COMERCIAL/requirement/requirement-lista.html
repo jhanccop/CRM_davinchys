@@ -116,12 +116,33 @@
                       </td>
                       
                       <td class="text-sm">
-                        {%if t.lastArea == "0" %}
-                        <span class="badge badge-secondary">Usuario</span>
+                        {% if t.lastArea == "10" %} 
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Jefe de área - aprobado</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Jefe de área - rechazado</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Jefe de área - espera</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "4" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Gerencia</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Gerencia</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Gerencia</span>
+                          {% endif %}
+
                         {% elif t.lastArea == "1" %}
-                        <span class="badge badge-secondary">Jefe de área</span>
-                        {% elif t.lastArea == "2" %}
-                        <span class="badge badge-secondary">Gerencia</span>
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Compras</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Compras</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Compras</span>
+                          {% endif %}
+
                         {% elif t.lastArea == "3" %}
                         <span class="badge badge-secondary">Compras</span>
                         {% elif t.lastArea == "4" %}
@@ -150,7 +171,7 @@
                           <i class="fas fa-bars text-lg text-dark"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'compras_app:compras-editar' t.id %}"> Editar documento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'compras_app:edit_requirement' t.id %}"> Editar documento</a></li>
                           <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'compras_app:compras-eliminar' t.id %}">Eliminar documento</a></li>
                         </ul>
                       </td>
@@ -204,11 +225,6 @@
     });
   });
 
-</script>
-
-<script>
-  const $select = document.querySelector('#DocKword');
-  $select.value = "{{documentos.selected}}";
 </script>
 
 {% endblock JSscripts %}

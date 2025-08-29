@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('purchase', '0004_requesttracking_purchaseorder_requirements_and_more'),
-        ('suppliers', '0002_supplier_status_alter_contacto_last_name'),
+        ('stakeholders', '0001_initial'),
     ]
 
     operations = [
@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='requirementsinvoice',
             name='idSupplier',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='suppliers.supplier'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='stakeholders.supplier'),
         ),
         migrations.AddField(
             model_name='requirementsinvoice',
@@ -208,7 +208,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='requirementsquotes',
             name='idProvider',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='suppliers.supplier'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='stakeholders.supplier'),
         ),
         migrations.DeleteModel(
             name='Expenses',

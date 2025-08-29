@@ -38,17 +38,26 @@ LOCAL_APPS = (
     'applications.producto',
     'applications.clientes',
     'applications.cuentas',
-    'applications.pedidos',
+    #'applications.pedidos',
     'applications.personal',
     'applications.actividades',
-    'applications.movimientos',
-    'applications.movimientosBancarios',
-    'applications.documentos',
+    #'applications.movimientos',
+    #'applications.movimientosBancarios',
+    #'applications.documentos',
 
+    # AREA COMERCIAL
     'applications.COMERCIAL.quotes',
     'applications.COMERCIAL.purchase',
     'applications.COMERCIAL.sales',
-    'applications.COMERCIAL.suppliers',
+    'applications.COMERCIAL.stakeholders',
+
+    'applications.COMERCIAL.reports',
+
+    # AREA FINANCIERA
+    'applications.FINANCIERA.movimientosBancarios',
+    'applications.FINANCIERA.documentos',
+
+    'applications.LOGISTICA.transport',
 
     'multiselectfield',
     'import_export',

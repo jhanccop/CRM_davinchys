@@ -12,8 +12,8 @@ from applications.cuentas.models import Tin
 class User(AbstractBaseUser, PermissionsMixin):
     # TIPO DE USUARIOS
     ADMINISTRADOR = '0'
-    COMPRAS = '1'
-    VENTAS = '2'
+    COMERCIAL = '1'
+    FINANZAS = '2'
     PRODUCCION = '3'
     GERENCIA = '4'
     LOGISTICA = '5'
@@ -25,8 +25,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     #
     ROLES_CHOICES = [
         (ADMINISTRADOR, 'Administrador'),
-        (COMPRAS, 'Compras'),
-        (VENTAS, 'Ventas'),
+        (COMERCIAL, 'Comercial'),
+        (FINANZAS, 'Finanzas'),
         (PRODUCCION, 'Producción'),
         (GERENCIA, 'Gerencia'),
         (LOGISTICA, 'Logística'),

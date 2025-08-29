@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso no autorizado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .header {
+            background: #ff4757;
+            color: white;
+            padding: 30px 20px;
+        }
+        
+        .header i {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .content p {
+            color: #555;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: #3867d6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2a51b8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #3867d6;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5fe;
+        }
+        
+        .help-text {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .content p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Icono de prohibición -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+            <h1>Acceso no autorizado</h1>
+        </div>
+        
+        <div class="content">
+            <p>Lo sentimos, pero no tienes los permisos necesarios para acceder a esta sección.</p>
+            <p>Si crees que esto es un error, por favor contacta al administrador del sistema.</p>
+            
+            <div class="actions">
+                <a href="/" class="btn btn-primary">Volver al inicio</a>
+                <a href="/contacto" class="btn btn-secondary">Contactar con soporte</a>
+            </div>
+            
+            <div class="help-text">
+                <p>Código de error: 403 Forbidden</p>
+                <p>Si necesitas acceso, solicítalo a través del canal correspondiente.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

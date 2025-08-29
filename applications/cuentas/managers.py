@@ -22,8 +22,11 @@ class AccountManager(models.Manager):
     def CuentasByNumber(self,number):
         return self.get(accountNumber = number)
     
-    def CuentasByCajaChica(self,cajaChica):
-        return self.filter(cajaChica = cajaChica).order_by("id")
+    def CuentasByCajaChica(self,cajaChica, idCompany):
+        return self.filter(
+            cajaChica = cajaChica,
+            idTin = idCompany
+        ).order_by("id")
     
 
 class TinManager(models.Manager):

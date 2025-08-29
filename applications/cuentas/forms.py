@@ -11,7 +11,7 @@ class AccountForm(forms.ModelForm):
             'accountName',
             'accountNumber',
             'bankName',
-            'accountBalance',
+            'initialAccount',
             'currency',
             'description',
             'state'
@@ -35,7 +35,7 @@ class AccountForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'accountBalance': forms.NumberInput(
+            'initialAccount': forms.NumberInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

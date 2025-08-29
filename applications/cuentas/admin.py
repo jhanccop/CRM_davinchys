@@ -18,7 +18,7 @@ class AccountAdmin(ImportExportModelAdmin):
         'accountName',
         'accountNumber',
         'nickName',
-        'accountBalance',
+        'initialAccount',
         'currency',
         'state'
     )

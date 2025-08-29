@@ -1,0 +1,48 @@
+{% extends "FINANCIERA/documentos/base-Dashboard.html" %}
+
+{% load  static %}
+{% block title %} Finanzas {% endblock title %}
+{% block main %} Financiera {% endblock main %}
+{% block appName %} Documentos{% endblock appName %}
+{% block Type %} Eliminar {% endblock Type %}
+
+{% block panel-content %}
+
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-dark shadow-dark border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> ELIMINAR DOCUMENTO FINANCIERO </h6>
+        </div>
+      </div>
+      <div class="card-body">
+        <h6 class="mb-3">¿Esta seguro de eliminar el documento?</h6>
+        <ul>
+          <li>Doc de referencia: <span class="font-weight-bold">{{object.idFinacialDocuments}}</span></li>
+          <li>Id: <span class="font-weight-bold">{{object.idOtherDocument}}</span></li>
+          <li>Descripción: <span class="font-weight-bold">{{object.description}}</span></li>
+        </ul>
+        <div class="d-flex">
+          <a href="{% url 'documentos_app:documento-generico-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
+              class="fas fa-undo-alt"></i> Volver</a>
+        
+          <form class="cell medium-5 ms-auto" action="{% url 'documentos_app:documento-generico-eliminar' object.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar Documetno</button>
+          </form>
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

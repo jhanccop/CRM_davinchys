@@ -4,8 +4,8 @@ from datetime import date, timedelta, datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
 
-from django.db.models import Sum, Max, DateField,F, Q, Count, When, Value, Case, When, FloatField
-
+from django.db.models import Sum, Max, CharField,F, Q, Count, When, Value, Case, When, FloatField
+from django.db.models import OuterRef, Subquery
 
 class IncomesManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
@@ -88,3 +88,42 @@ class IncomesManager(models.Manager):
     def DocumentosPorRUC(self,ruc):
        return self.filter(idClient__ruc = ruc).order_by("created")
     
+class quotesManager(models.Manager):
+    def ListaPOs(self,intervalo):
+        """
+            Lista de PO
+        """
+
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        from applications.COMERCIAL.sales.models import QuoteTracking
+        last_tracking_subquery = QuoteTracking.objects.filter(
+            idquote=OuterRef('pk')
+        ).order_by('-created').values('status', 'area')[:1]
+
+        STATE_CHOICES = QuoteTracking.STATE_CHOICES
+
+        result = self.filter(
+            created__range=rangeDate,
+            isPO = True
+        ).annotate(
+            lastStatus=Subquery(last_tracking_subquery.values('status')),
+            lastArea=Subquery(last_tracking_subquery.values('area')),
+            lastStatusDisplay=Case(
+                *[When(lastStatus=status, then=Value(display)) 
+                for status, display in STATE_CHOICES],
+                default=Value(''),
+                output_field=CharField()
+            )
+        ).order_by('-created')
+
+        return result

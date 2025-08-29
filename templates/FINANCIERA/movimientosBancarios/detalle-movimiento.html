@@ -1,0 +1,212 @@
+{% extends "FINANCIERA/movimientosBancarios/base-Dashboard.html" %}
+
+{% load  static %}
+{% block title %} Finanzas {% endblock title %}
+{% block main %} Finanzas {% endblock main %}
+{% block appName %} Movimiento {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row">
+  <div class="col-md-12 col-lg-10 col-sm-10 mx-auto">
+      <div class="card my-sm-5">
+        <div class="card-header text-center">
+          <div class="row justify-content-between">
+            <div class="col-md-4 text-start">
+              <img class="mb-2 w-25 p-2" src="{% static 'assets/img/money-transfer.png' %}" alt="Logo">
+              <h6>
+                {{mov.bankMovement.idAccount.accountName}}
+              </h6>
+              <p class="d-block text-dark">{{mov.bankMovement.idAccount}} </p>
+            </div>
+            <div class="col-lg-8 col-md-7 text-md-end text-start mt-5">
+              <h6 class="d-block mt-2 mb-0">
+                {% if mov.bankMovement.transactionType == "0" %}
+                <span class="text-primary">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amount|floatformat:"2g"}}</span>
+                {% else %}
+                <span class="text-success">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amount|floatformat:"2g"}}</span>
+                {% endif %}
+              </h6>
+              <p class="text-dark text-sm">{{mov.bankMovement.description}} -> {{mov.bankMovement.originDestination}}<br>
+                {{mov.bankMovement.justification}}<br>
+                {{mov.bankMovement.date}}<br>
+                nOp: {{mov.bankMovement.opNumber}}
+              </p>
+            </div>
+          </div>
+          <br>
+          <div class="row justify-content-md-between">
+            <div class="col-md-4 mt-auto">
+              <h6 class="mb-0 text-start text-secondary font-weight-normal">
+                Porcentaje conciliado
+              </h6>
+              <h5 class="text-start mb-0">
+                <span> {{mov.bankMovement.per|floatformat:2 }} </span> %
+              </h5>
+            </div>
+            <div class="col-lg-5 col-md-7 mt-auto">
+              <div class="row mt-md-5 mt-4 text-md-end text-start">
+                <div class="col-md-6">
+                  <h6 class="text-secondary font-weight-normal mb-0">M. conciliado total:</h6>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-dark mb-0">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amountReconcilied}}</h6>
+                </div>
+              </div>
+              <div class="row text-md-end text-start">
+                <div class="col-md-6">
+                  <h6 class="text-secondary font-weight-normal mb-0">Pendiente:</h6>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-dark mb-0"> {{mov.bankMovement.idAccount.get_currency_display }} <span> {{mov.bankMovement.diff|floatformat:2 }}  </span> </h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body pb-0">
+          <div class="row">
+            <div class="col-12">
+              <div class="table-responsive">
+                <table class="table text-right">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="pe-2 text-start ps-2">Mov/Doc</th>
+                      <th scope="col" class="pe-2 text-start ps-2">Fecha</th>
+                      <th scope="col" class="pe-2">Descripción</th>
+                      <th scope="col" class="pe-2 text-end">M. Origen</th>
+                      <th scope="col" class="pe-2 text-end">M. Equivalente</th>
+                      <th scope="col" class="pe-2 text-end">M. Conciliado</th>
+                      <th scope="col" class="pe-2 text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in mov.bankMovement.mov_origen.all %}
+                    <tr class="">
+                    {% if i.type == "0" %}
+                      
+                      <td class="text-start align-middle text-sm text-info">
+                        <a href="{% url 'documentos_app:documento-financiero-detalle' i.idDoc.id %}"> <u> {{ i.idDoc.idInvoice }} </u> </a> 
+                      </td>
+                      
+                      <td class="text-start align-middle text-sm text-info">
+                        {{ i.idDoc.date|date:"d-m-Y" }}
+                      </td>
+                      
+                      <td class="text-start align-middle text-sm text-info">
+                        {{i.idDoc.idClient}} <br> {{i.idDoc.description}}
+                      </td>
+                      
+                      <td class="ps-4 align-middle text-end text-sm text-info">
+                        {{i.idDoc.get_typeCurrency_display}} {{ i.idDoc.amount|floatformat:"2g"}}
+                      </td>
+
+                      <td class="ps-4 align-middle text-end text-sm text-dark">
+                        {{i.idDoc.get_typeCurrency_display}}  {{ i.equivalentAmount|floatformat:"3g"}}
+                      </td>
+
+                      <td class="ps-4 align-middle text-end text-sm text-dark">
+                        {{mov.bankMovement.idAccount.get_currency_display }} {{ i.amountReconcilied|floatformat:"2g"}}
+                      </td>
+                      
+                      <td class="text-end align-middle">
+                        {% if i.idDoc.pdf_file %}
+                        <a href="/media/{{i.idDoc.pdf_file}}">
+                          <i class="far fa-file-pdf text-info text-lg"></i>
+                        </a>
+                        {% else %}
+                        --
+                        {% endif %}
+                        &nbsp;
+                        <a href="{% url 'movimientosBancarios_app:editar-movimiento-con-documento' i.id %}">
+                          <i class="far fa-edit text-dark text-lg"></i>
+                        </a>
+                        &nbsp;
+                        <a href="{% url 'movimientosBancarios_app:eliminar-conciliacion' i.id %}">
+                          <i class="far fa-trash-alt text-primary text-lg"></i>
+                        </a>
+                      </td>
+
+                    {% else %}
+
+                      <td class="text-start align-middle text-sm text-dark">
+                        <a href="{% url 'movimientosBancarios_app:movimientos-detalle' i.id %}"> <u> nOP: {{ i.idMovArrival.opNumber }} <br> {{ i.idMovArrival.idAccount.nickName }}</u></a>
+                      </td>
+                      
+                      <td class="text-start align-middle text-sm text-dark">
+                        {{ i.idMovArrival.date|date:"d-m-Y" }}
+                      </td>
+                      
+                      <td class="text-start align-middle text-sm text-dark">
+                        {{ i.idMovArrival.description }} <br> {{ i.idMovArrival.originDestination }} 
+                      </td>
+                      
+                      <td class="ps-4 align-middle text-end text-sm text-dark">
+                        {{i.idMovArrival.idAccount.get_currency_display}} {{ i.idMovArrival.amount|floatformat:"2g"}}
+                      </td>
+                      
+                      <td class="ps-4 align-middle text-end text-sm text-dark">
+                        {{i.idMovArrival.idAccount.get_currency_display}} {{ i.equivalentAmount|floatformat:"2g"}}
+                      </td>
+
+                      <td class="ps-4 align-middle text-end text-sm text-dark">
+                        {{i.idMovOrigin.idAccount.get_currency_display}} {{ i.amountReconcilied|floatformat:"3g"}}
+                      </td>
+                      
+                      <td class="text-end align-middle">
+                        <a href="{% url 'movimientosBancarios_app:editar-movimiento-con-movimiento' i.id %}">
+                          <i class="far fa-edit text-dark text-lg"></i>
+                        </a>
+                        &nbsp;
+                        <a href="{% url 'movimientosBancarios_app:eliminar-conciliacion' i.id %}">
+                          <i class="far fa-trash-alt text-primary text-lg"></i>
+                        </a>
+                      </td>
+                    
+                    {% endif %}
+                    </tr>
+
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                      <th class="h6 ps-4">Total</th>
+                      <th class="h6 ps-4 text-end">{{mov.bankMovement.idAccount.get_currency_display }} {{mov.bankMovement.amountReconcilied}}</th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div style="display: flex; justify-content: space-between; width: 100%; margin: 0 auto;">
+            <div style="display: flex; gap: 10px;">
+              <a class="btn bg-gradient-info" href="{% url 'movimientosBancarios_app:conciliar-movimiento-con-documento' mov.bankMovement.id %}">Agregar Documento</a>
+              &nbsp;
+              <a class="btn bg-gradient-dark" href="{% url 'movimientosBancarios_app:conciliar-movimiento-con-movimiento' mov.bankMovement.id %}">Agregar Movimiento</a>
+            </div>
+            <div>
+              <a class="btn bg-gradient-primary" href="{% url 'movimientosBancarios_app:lista-movimientos' %}">Ir a Movimientos</a>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    
+  </div>
+</div>
+
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

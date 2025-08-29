@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 
 from applications.users.mixins import (
-  AdminClientsPermisoMixin,
+  FinanzasMixin,
   AdminPermisoMixin
 )
 from django.views.generic import (
@@ -17,23 +17,29 @@ from .models import Account
 
 from .forms import AccountForm, SelectTinForm
 
-class AccountListView(AdminClientsPermisoMixin,ListView):
+class AccountListView(FinanzasMixin,ListView):
     template_name = "cuentas/lista_cuentas.html"
     context_object_name = 'cuentas'
     model = Account
     ordering = ["accountName"]
 
-class AccountCreateView(AdminPermisoMixin,CreateView):
+    def get_queryset(self):
+        idCompany=self.request.user.company
+        payload = {}
+        payload['cuenta'] = Account.objects.CuentasByCajaChica(cajaChica = False, idCompany = idCompany)
+        return payload
+
+class AccountCreateView(FinanzasMixin,CreateView):
     template_name = "cuentas/crear_cuentas.html"
     model = Account
     form_class = AccountForm
     success_url = reverse_lazy('cuentas_app:cuenta-lista')
 
-class AccountDeleteView(AdminPermisoMixin,DeleteView):
+class AccountDeleteView(FinanzasMixin,DeleteView):
     model = Account
     success_url = reverse_lazy('cuentas_app:cuenta-lista')
 
-class AccountUpdateView(AdminPermisoMixin,UpdateView):
+class AccountUpdateView(FinanzasMixin,UpdateView):
     template_name = "cuentas/editar_cuentas.html"
     model = Account
     form_class = AccountForm

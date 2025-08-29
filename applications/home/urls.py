@@ -12,6 +12,11 @@ urlpatterns = [
         name='home',
     ),
     path(
+        'unauthorized-page/', 
+        views.unauthorizedView.as_view(),
+        name='unauthorized',
+    ),
+    path(
         'quote-with-us/', 
         views.QuoteView.as_view(),
         name='quote-with-us',

@@ -66,16 +66,16 @@ class Account(TimeStampedModel):
 
     idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
 
-    accountBalance = models.DecimalField(
-        'Monto en sistema',
+    initialAccount = models.DecimalField(
+        'Monto inicial',
         max_digits=10, 
         decimal_places=2,
         blank=True,
         null=True
     )
 
-    lastUpdateCRM = models.DateTimeField(
-        'Actualización CRM',
+    initalDate = models.DateTimeField(
+        'Fecha inicial',
     )
 
     currency = models.CharField(

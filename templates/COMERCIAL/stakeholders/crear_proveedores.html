@@ -1,0 +1,273 @@
+{% extends "COMERCIAL/stakeholders/base-proveedores.html" %}
+
+{% load static %}
+{% block title %} Personas {% endblock title %}
+{% block main %} Personas {% endblock main %}
+{% block appName %} Clientes {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="row min-vh-80">
+  <div class="col-lg-8 col-md-10 col-12 m-auto">
+
+    <div class="card">
+      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+        <div class="bg-gradient-primary shadow-secondary border-radius-lg pt-3 pb-2">
+          <h6 class="text-center text-white"> AGREGAR NUEVO PROVEEDOR </h6>
+        </div>
+      </div>
+      <div class="card-body pb-0">
+        <form class="" method="POST">{% csrf_token %}
+
+          <div id="alert-container"></div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="input-group input-group-outline focused is-focused">
+                <label for="exampleFormControlInput1" class="form-label">{{ form.numberIdSupplier.label }}</label>
+                  {{ form.numberIdSupplier }}
+              </div>
+              {% if form.ruc.errors %}
+              <div class="text-danger small">
+                {{ form.numberIdSupplier.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-2">
+              <a id="btn-buscar-ruc" class="btn btn-outline-dark search-btn">
+                <i class="fas fa-search text-lg"></i>
+              </a>
+              <div class="loading-spinner search-btn" id="loading-spinner"></div>
+            </div>
+          </div>
+
+          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+
+            <div class="multisteps-form__content">
+              <h6 class="font-weight-bolder">Informacion porveedor</h6>
+
+              <div class="row">
+
+                <div class="col-12 col-sm-6">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Razón social</label>
+                    {{ form.tradeName }}
+                  </div>
+                </div>
+
+                <div class="col-12 col-sm-6 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Marca</label>
+                    {{ form.brandName }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+              <h6 class="font-weight-bolder">Información adicional</h6>
+
+              <div class="row">
+                <div class="col-6 col-sm-3">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">{{ form.typeClient.label }}</label>
+                    {{ form.location }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">{{ form.channel.label }}</label>
+                    {{ form.status }}
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Número de contacto</label>
+                    {{ form.phoneNumber }}
+                  </div>
+                </div>
+
+                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Correo</label>
+                    {{ form.email }}
+                  </div>
+                </div>
+
+                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                  <div class="input-group input-group-outline focused is-focused">
+                    <label for="exampleFormControlInput1" class="form-label">Página web</label>
+                    {{ form.webPage }}
+                  </div>
+                </div>
+                
+              </div>
+
+              <div class="button-row d-flex mt-4">
+                <a class="btn bg-gradient-dark" href="{% url 'stakeholders_app:proveedor-lista' %}"> REGRESAR </a>
+                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">AGREGAR
+                  PROVEEDOR</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{{object}}
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const btnBuscar = document.getElementById('btn-buscar-ruc');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const rucInput = document.getElementById('id_numberIdSupplier');
+    const alertContainer = document.getElementById('alert-container');
+
+    // Función para mostrar alertas
+    function showAlert(message, type = 'primary') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-custom text-white`;
+      alertDiv.innerHTML = `
+              ${message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alertDiv);
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 10000);
+    }
+
+    // Función para validar RUC
+    function validarRuc(ruc) {
+      if (!ruc) {
+        showAlert('Por favor ingrese un RUC');
+        return false;
+      }
+      if (ruc.length !== 11) {
+        showAlert('El RUC debe tener exactamente 11 dígitos');
+        return false;
+      }
+      if (!/^\d+$/.test(ruc)) {
+        showAlert('El RUC debe contener solo números');
+        return false;
+      }
+      return true;
+    }
+
+    // Función para llenar formulario con datos
+    function llenarFormulario(datos) {
+      document.getElementById('id_tradeName').value = datos.razon_social || '';
+      //document.getElementById('id_ruc').value = datos.ruc || '';
+      document.getElementById('id_brandName').value = datos.nombre_comercial || '';
+
+      // Habilitar campos para edición
+      const campos = ['tradeName', 'brandName'];
+      campos.forEach(campo => {
+        const input = document.getElementById(`id_${campo}`);
+        if (input) {
+          input.removeAttribute('readonly');
+          input.classList.remove('field-readonly');
+        }
+      });
+    }
+
+    // Función para limpiar formulario
+    function limpiarFormulario() {
+      const campos = [
+        'tradeName', 'brandName'
+      ];
+
+      campos.forEach(campo => {
+        const input = document.getElementById(`id_${campo}`);
+        if (input) {
+          input.value = '';
+          input.setAttribute('readonly', 'readonly');
+          input.classList.add('field-readonly');
+        }
+      });
+    }
+
+    // Event listener para el botón de búsqueda
+    btnBuscar.addEventListener('click', function () {
+      const ruc = rucInput.value.trim();
+
+      if (!validarRuc(ruc)) {
+        return;
+      }
+
+      // Mostrar loading
+      btnBuscar.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+
+      // Realizar consulta AJAX
+      fetch(`comercial/proveedores/buscar-ruc/?ruc=${ruc}`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json',
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          if (data.success) {
+            llenarFormulario(data.data);
+            showAlert('Datos cargados correctamente desde SUNAT', 'success');
+          } else {
+            showAlert(data.error || 'Error al consultar SUNAT', 'warning');
+            limpiarFormulario();
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('Error de conexión. Intente nuevamente', 'danger');
+          limpiarFormulario();
+        })
+        .finally(() => {
+          // Ocultar loading
+          btnBuscar.style.display = 'block';
+          loadingSpinner.style.display = 'none';
+        });
+
+
+    });
+
+    // Permitir búsqueda con Enter en el campo RUC
+    rucInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btnBuscar.click();
+      }
+    });
+
+    // Limpiar formulario cuando se modifica el RUC
+    rucInput.addEventListener('input', function () {
+      if (this.value.length < 11) {
+        limpiarFormulario();
+      }
+    });
+
+    // Inicializar campos como readonly
+    limpiarFormulario();
+  });
+</script>
+
+{% endblock JSscripts %}

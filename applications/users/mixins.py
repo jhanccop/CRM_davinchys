@@ -6,12 +6,8 @@ from django.views.generic import View
 #
 from .models import User
 
-
 def check_ocupation_user(position, user_position):
-    #
-    
     if (position == User.ADMINISTRADOR or position == user_position):
-        
         return True
     else:
         return False
@@ -50,6 +46,57 @@ class AlmacenPermisoMixin(LoginRequiredMixin):
             return HttpResponseRedirect(
                 reverse(
                     'users_app:user-login'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+# =========================== PERMISOS AREA COMERCIAL ===========================
+class ComercialMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user(request.user.position, User.COMERCIAL):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:unauthorized'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+# =========================== PERMISOS AREA FINANZAS ===========================
+class FinanzasMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user(request.user.position, User.FINANZAS):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:unauthorized'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+# =========================== PERMISOS COMERCIAL Y FINANZAS ===========================
+class ComercialFinanzasMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user2(request.user.position, User.COMERCIAL, User.FINANZAS):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:unauthorized'
                 )
             )
         return super().dispatch(request, *args, **kwargs)

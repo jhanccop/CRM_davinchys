@@ -560,7 +560,6 @@ class EditConciliationMovDocForm(forms.ModelForm):
         self.fields['idDoc'].queryset = FinancialDocuments.objects.filter(amount__gte = F('amountReconcilied'))
         #self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
 
-
 class UploadFileForm(forms.Form):
     file = forms.FileField(
         label="Sellecionar archivo:",
@@ -572,3 +571,4 @@ class UploadFileForm(forms.Form):
                 }
         )
     )
+

@@ -5,15 +5,16 @@ from django.urls import path, re_path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     re_path('', include('applications.home.urls')),
     # users app
     re_path('', include('applications.users.urls')),
     # producto app
     re_path('', include('applications.producto.urls')),
     # venta app
-    re_path('', include('applications.clientes.urls')),
+    #re_path('', include('applications.clientes.urls')),
     # orders app
-    re_path('', include('applications.pedidos.urls')),
+    #re_path('', include('applications.pedidos.urls')),
     # cuentas app
     re_path('', include('applications.cuentas.urls')),
     # personal app
@@ -21,16 +22,32 @@ urlpatterns = [
     # actividades app
     re_path('', include('applications.actividades.urls')),
     # movimientos app
-    re_path('', include('applications.movimientos.urls')),
+    #re_path('', include('applications.movimientos.urls')),
     # movimientosBancarios app
-    re_path('', include('applications.movimientosBancarios.urls')),
+    #re_path('', include('applications.movimientosBancarios.urls')),
     # documentos app
-    re_path('', include('applications.documentos.urls')),
+    #re_path('', include('applications.documentos.urls')),
+
+    # COMERCIAL - reports app
+    re_path('', include('applications.COMERCIAL.reports.urls')),
+
     # COMERCIAL - quotes app
     re_path('', include('applications.COMERCIAL.quotes.urls')),
     # COMERCIAL - purchase app
     re_path('', include('applications.COMERCIAL.purchase.urls')),
     # COMERCIAL - sales app
     re_path('', include('applications.COMERCIAL.sales.urls')),
+    # COMERCIAL - stakeholders app
+    re_path('', include('applications.COMERCIAL.stakeholders.urls')),
+
+    # FINANCIERA - documentos app
+    re_path('', include('applications.FINANCIERA.documentos.urls')),
+    # FINANCIERA - movimientosBancarios app
+    re_path('', include('applications.FINANCIERA.movimientosBancarios.urls')),
+    # FINANCIERA - reportes app
+    re_path('', include('applications.FINANCIERA.reports.urls')),
+
+    # LOGISTICA - transport app
+    re_path('', include('applications.LOGISTICA.transport.urls')),
 ]
 
