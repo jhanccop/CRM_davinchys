@@ -5,7 +5,9 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator
 
 from applications.cuentas.models import Tin
-from applications.COMERCIAL.stakeholders.models import client
+from applications.COMERCIAL.stakeholders.models import client, supplier
+from applications.COMERCIAL.purchase.models import requirements
+from applications.COMERCIAL.sales.models import quotes
 
 from .managers import (
     FinancialDocumentsManager,
@@ -48,6 +50,26 @@ class RawsFilesRHE(TimeStampedModel):
         return f"{self.archivo.name} - {self.created}"
 
 class FinancialDocuments(TimeStampedModel):
+
+    # TYPES MOVEMENT
+    EGRESO = '0'
+    INGRESO = '1'
+
+    TYPE_MOVEMENT_CHOISES = [
+        (EGRESO, "Egreso"),
+        (INGRESO, "Ingreso"),
+    ]
+
+    typeMovement = models.CharField(
+        'Tipo movimiento',
+        max_length = 1, 
+        choices = TYPE_MOVEMENT_CHOISES,
+        null=True,
+        blank=True
+    )
+
+    idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
+    idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True)
     
     # TYPES
     FACTURA = '0'
@@ -62,9 +84,7 @@ class FinancialDocuments(TimeStampedModel):
     BOLETOAEREO = '9'
     LIQ = '10'
     PERCEPCION = '11'
-
     OTROS = "12"
-
     BOLETA = '13'
 
     TYPE_INVOICE_CHOISES = [
@@ -226,6 +246,7 @@ class FinancialDocuments(TimeStampedModel):
         blank=True
     )
     idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
+    idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True)
     idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True)
     
     idInvoice = models.CharField(

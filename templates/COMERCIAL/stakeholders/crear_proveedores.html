@@ -70,13 +70,13 @@
               <div class="row">
                 <div class="col-6 col-sm-3">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">{{ form.typeClient.label }}</label>
+                    <label for="exampleFormControlInput1" class="form-label">{{ form.location.label }}</label>
                     {{ form.location }}
                   </div>
                 </div>
                 <div class="col-6 col-sm-3 mt-3 mt-sm-0">
                   <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">{{ form.channel.label }}</label>
+                    <label for="exampleFormControlInput1" class="form-label">{{ form.status.label }}</label>
                     {{ form.status }}
                   </div>
                 </div>
@@ -178,6 +178,14 @@
       //document.getElementById('id_ruc').value = datos.ruc || '';
       document.getElementById('id_brandName').value = datos.nombre_comercial || '';
 
+      let status = "1";
+      console.log(datos.estado);
+      if(datos.estado == "ACTIVO") {
+        status = "0";
+      };
+      
+      document.getElementById('id_status').value = status || '';
+
       // Habilitar campos para edición
       const campos = ['tradeName', 'brandName'];
       campos.forEach(campo => {
@@ -218,7 +226,7 @@
       loadingSpinner.style.display = 'block';
 
       // Realizar consulta AJAX
-      fetch(`comercial/proveedores/buscar-ruc/?ruc=${ruc}`, {
+      fetch(`/comercial/buscar-ruc/?ruc=${ruc}`, {
         method: 'GET',
         headers: {
           'X-Requested-With': 'XMLHttpRequest',

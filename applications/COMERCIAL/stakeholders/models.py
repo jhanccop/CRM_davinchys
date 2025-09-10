@@ -65,7 +65,7 @@ class supplier(models.Model):
         ]
     
     tradeName = models.CharField('Razon Social',blank = True, null=True)
-    numberIdSupplier = models.CharField('Numero de proveedor',blank = True, null=True, unique=True)
+    numberIdSupplier = models.CharField('Numero de proveedor', unique=True)
     typeDocument = models.CharField(
         'Tipo de documento',
         max_length=1, 
@@ -78,6 +78,7 @@ class supplier(models.Model):
         'Por origen',
         max_length=1, 
         choices=LOCATION_CHOISES,
+        default="0",
         null=True,
         blank=True
     )
@@ -193,6 +194,7 @@ class client(models.Model):
         'Por origen',
         max_length=1, 
         choices=LOCATION_CHOISES,
+        default="1",
         null=True,
         blank=True
     )

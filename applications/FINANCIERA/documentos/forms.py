@@ -48,7 +48,7 @@ class FinancialDocumentsForm(forms.ModelForm):
             'month_dec',
             'year_dec',
 
-            'idClient',
+            'idSupplier',
             'typeCurrency',
             'amount',
             'netAmount',
@@ -131,7 +131,7 @@ class FinancialDocumentsForm(forms.ModelForm):
                 }
             ),
             # =======================
-            'idClient': forms.Select(
+            'idSupplier': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

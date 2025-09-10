@@ -303,12 +303,12 @@ def consultar_ruc_selenium(ruc, headless=True):
         return resultado
 
 # Ejemplo de uso
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # Necesitas tener chromedriver instalado
     # pip install selenium
     # También puedes usar webdriver-manager para instalar automáticamente:
     # pip install webdriver-manager
     
     #ruc_ejemplo = "20100047218"  # BCP
-    ruc_ejemplo = "20613820001"
-    resultado = consultar_ruc_selenium(ruc_ejemplo, headless=True)  # headless=False para ver el navegador
+#    ruc_ejemplo = "20613820001"
+#    resultado = consultar_ruc_selenium(ruc_ejemplo, headless=True)  # headless=False para ver el navegador

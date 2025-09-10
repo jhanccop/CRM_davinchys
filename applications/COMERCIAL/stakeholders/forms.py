@@ -78,8 +78,8 @@ class clientForm(forms.ModelForm):
     
     def clean_numberIdClient(self):
         ruc = self.cleaned_data.get('numberIdClient')
-        if ruc and len(ruc) != 11:
-            raise forms.ValidationError("El RUC debe tener exactamente 11 dígitos")
+        #if ruc and len(ruc) != 11:
+        #    raise forms.ValidationError("El RUC debe tener exactamente 11 dígitos")
         if ruc and not ruc.isdigit():
             raise forms.ValidationError("El RUC debe contener solo números")
         return ruc
@@ -160,8 +160,8 @@ class supplierForm(forms.ModelForm):
     
     def clean_numberIdSupplier(self):
         ruc = self.cleaned_data.get('numberIdSupplier')
-        if ruc and len(ruc) != 11:
-            raise forms.ValidationError("El TIN debe tener exactamente 11 dígitos")
+        #if ruc and len(ruc) != 11:
+        #    raise forms.ValidationError("El TIN debe tener exactamente 11 dígitos")
         if ruc and not ruc.isdigit():
             raise forms.ValidationError("El TIN debe contener solo números")
         return ruc

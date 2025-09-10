@@ -175,6 +175,14 @@
       document.getElementById('id_tradeName').value = datos.razon_social || '';
       //document.getElementById('id_ruc').value = datos.ruc || '';
       document.getElementById('id_brandName').value = datos.nombre_comercial || '';
+      
+      let status = "1";
+      console.log(datos.estado);
+      if(datos.estado == "ACTIVO") {
+        status = "0";
+      };
+      
+      document.getElementById('id_status').value = status || '';
 
       // Habilitar campos para edición
       const campos = ['tradeName', 'brandName'];
@@ -216,7 +224,7 @@
       loadingSpinner.style.display = 'block';
 
       // Realizar consulta AJAX
-      fetch(`/comercial/clientes/buscar-ruc/?ruc=${ruc}`, {
+      fetch(`/comercial/buscar-ruc/?ruc=${ruc}`, {
         method: 'GET',
         headers: {
           'X-Requested-With': 'XMLHttpRequest',

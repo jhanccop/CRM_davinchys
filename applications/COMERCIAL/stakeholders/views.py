@@ -34,11 +34,12 @@ class ClientCreateView(ComercialFinanzasMixin,CreateView):
     template_name = "COMERCIAL/stakeholders/crear_clientes.html"
     model = client
     form_class = clientForm
-    #success_url = reverse_lazy('clients_app:cliente-lista')
+    success_url = reverse_lazy('stakeholders_app:cliente-lista')
 
     def form_valid(self, form):
         self.object = form.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
+        #return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
+        return HttpResponseRedirect(self.get_success_url())
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -63,7 +64,7 @@ class ClientUpdateView(ComercialFinanzasMixin,UpdateView):
         context['btn_text'] = 'Actualizar'
         return context
 
-def cliente_buscar_ruc_sunat(request):
+def buscar_ruc_sunat(request):
     """Vista AJAX para buscar datos de RUC en SUNAT"""
     if request.method == 'GET':
         ruc = request.GET.get('ruc', '').strip()
@@ -110,11 +111,12 @@ class SupplierCreateView(ComercialFinanzasMixin,CreateView):
     template_name = "COMERCIAL/stakeholders/crear_proveedores.html"
     model = supplier
     form_class = supplierForm
-    #success_url = reverse_lazy('clients_app:cliente-lista')
+    success_url = reverse_lazy('stakeholders_app:proveedor-lista')
 
     def form_valid(self, form):
         self.object = form.save()
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
+        #return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
+        return HttpResponseRedirect(self.get_success_url())
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -138,39 +140,3 @@ class SupplierUpdateView(ComercialFinanzasMixin,UpdateView):
         context['title'] = 'Editar Empresa'
         context['btn_text'] = 'Actualizar'
         return context
-
-def proveedor_buscar_ruc_sunat(request):
-    """Vista AJAX para buscar datos de RUC en SUNAT"""
-    if request.method == 'GET':
-        ruc = request.GET.get('ruc', '').strip()
-        
-        if not ruc:
-            return JsonResponse({
-                'success': False, 
-                'error': 'RUC es requerido'
-            })
-        
-        if len(ruc) != 11 or not ruc.isdigit():
-            return JsonResponse({
-                'success': False, 
-                'error': 'RUC debe tener 11 dígitos numéricos'
-            })
-        
-        # Consultar en SUNAT
-        datos = consultar_ruc_selenium(ruc, headless=True) # no poner FALSE EN PRODUCCION
-        
-        if datos:
-            return JsonResponse({
-                'success': True,
-                'data': datos
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': 'No se encontraron datos para el RUC ingresado'
-            })
-    
-    return JsonResponse({
-        'success': False, 
-        'error': 'Método no permitido'
-    })

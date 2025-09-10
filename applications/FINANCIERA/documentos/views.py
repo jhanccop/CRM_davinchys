@@ -86,8 +86,8 @@ class ProcessRHEFileView(TemplateView):
             
             # Verificar si existe en FinancialDocuments
             existing = FinancialDocuments.objects.filter(
-                Q(idInvoice=doc_emitido) & 
-                Q(idClient__ruc=doc_emisor)
+                Q(idInvoice = doc_emitido) & 
+                Q(idClient__numberIdClient = doc_emisor)
             ).first()
             
             if existing:
@@ -144,7 +144,7 @@ class ProcessRHEFileView(TemplateView):
             # Verificar si ya existe
             existing = FinancialDocuments.objects.filter(
                 Q(idInvoice=doc_emitido) & 
-                Q(idClient__ruc=doc_emisor)
+                Q(idClient__numberIdClient=doc_emisor)
             ).first()
             
             if existing:
@@ -153,8 +153,8 @@ class ProcessRHEFileView(TemplateView):
                 
             # Obtener cliente por RUC
             try:
-                cliente = cliente.objects.get(ruc=doc_emisor)
-            except Cliente.DoesNotExist:
+                cliente_obj = client.objects.get(numberIdClient=doc_emisor)
+            except client.DoesNotExist:
                 cliente = None
                 
             # Mapear datos al modelo

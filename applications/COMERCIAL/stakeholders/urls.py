@@ -30,10 +30,11 @@ urlpatterns = [
         views.ClientDeleteView.as_view(),
         name='cliente-eliminar',
     ),
+    
     path(
-        'comercial/clientes/buscar-ruc/', 
-        views.cliente_buscar_ruc_sunat,
-        name='cliente-buscar_ruc',
+        'comercial/buscar-ruc/', 
+        views.buscar_ruc_sunat,
+        name='buscar_ruc',
     ),
 
     # ============================ proveedores ============================
@@ -56,11 +57,6 @@ urlpatterns = [
         'comercial/proveedores/eliminar/<pk>/', 
         views.SupplierDeleteView.as_view(),
         name='proveedor-eliminar',
-    ),
-    path(
-        'comercial/proveedores/buscar-ruc/', 
-        views.proveedor_buscar_ruc_sunat,
-        name='proveedor-buscar_ruc',
     ),
 
     
