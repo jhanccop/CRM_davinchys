@@ -1,0 +1,401 @@
+{% extends 'COMERCIAL/sales/base-quotes.html' %}
+{% load static %}
+
+{% block title %} Cotizaciones {% endblock title %}
+{% block main %} Cotizaciones {% endblock main %}
+{% block appName %} Nuevo {% endblock appName %}
+
+{% block panel-content %}
+
+<div class="container">
+    
+    <form id="quoteForm" method="post">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-4">
+
+                <div class="card mb-4">
+                    
+                    <div class="card-body">
+
+                        <h5>Información de la Cotización</h5>
+
+                        <div class="row">
+                            <div class="col-8 col-sm-8" >
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">Cia Ejecutora</label>
+                                    {{ form.idTinExecuting }}
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 text-end">
+                                <div class="form-check">
+                                    {{ form.isPO }}
+                                    <label class="custom-control-label" for="customCheck1">{{ form.isPO.label }}</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6" hidden>
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.idTinReceiving.label }}</label>
+                                    {{ form.idTinReceiving }}
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-12">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.idClient.label }}</label>
+                                    {{ form.idClient }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+                        <div class="row">
+                            <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.dateOrder.label }}</label>
+                                    {{ form.dateOrder }}
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.deadline.label }}</label>
+                                    {{ form.deadline }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+                        <div class="row">
+                            <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.payMethod.label }}</label>
+                                    {{ form.payMethod }}
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.currency.label }}</label>
+                                    {{ form.currency }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+                        <div class="row">
+                            <div class="col-6 col-sm-6 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.amount.label }}</label>
+                                    {{ form.amount }}
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.initialAmount.label }}</label>
+                                    {{ form.initialAmount }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+                        <div class="row">
+                            <div class="col-12 col-sm-12 mt-3 mt-sm-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label for="exampleFormControlInput1" class="form-label">{{ form.shortDescription.label }}</label>
+                                    {{ form.shortDescription }}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5> Transformador</h5>
+
+                        <div id="trafoFormContainer">
+                            
+                            <div class="row">
+                                <div class="col-12 col-sm-6" hidden>
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.idTrafoQuote.label }}</label>
+                                        {{ trafo_form.idTrafoQuote }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.serialNumber.label }}</label>
+                                        {{ trafo_form.serialNumber }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.quantity.label }}</label>
+                                        {{ trafo_form.quantity }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.unitCost.label }}</label>
+                                        {{ trafo_form.unitCost }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div class="row">
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.KVA.label }}</label>
+                                        {{ trafo_form.KVA }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.KTapHV.label }}</label>
+                                        {{ trafo_form.KTapHV }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.HVTAP.label }}</label>
+                                        {{ trafo_form.HVTAP }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.LV.label }}</label>
+                                        {{ trafo_form.LV }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div class="row">
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.FIXHV.label }}</label>
+                                        {{ trafo_form.FIXHV }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.HZ.label }}</label>
+                                        {{ trafo_form.HZ }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.TYPE.label }}</label>
+                                        {{ trafo_form.TYPE }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.MOUNTING.label }}</label>
+                                        {{ trafo_form.MOUNTING }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div class="row">
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.COOLING.label }}</label>
+                                        {{ trafo_form.COOLING }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.WINDING.label }}</label>
+                                        {{ trafo_form.WINDING }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.INSULAT.label }}</label>
+                                        {{ trafo_form.INSULAT }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.CONNECTION.label }}</label>
+                                        {{ trafo_form.CONNECTION }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div class="row">
+                                <div class="col-6 col-sm-3">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label for="exampleFormControlInput1" class="form-label">{{ trafo_form.STANDARD.label }}</label>
+                                        {{ trafo_form.STANDARD }}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <button type="button" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+                            Agregar Transformador
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Transformadores Agregados</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped" id="trafosTable">
+                    <thead>
+                        <tr>
+                            <th>Serial</th>
+                            <th>KVA</th>
+                            <th>Cantidad</th>
+                            <th>Costo Unitario</th>
+                            <th>Subtotal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los transformadores se agregarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Crear Cotización</button>
+    </form>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+jQuery(document).ready(function($){
+    let trafos = [];
+    
+    // Función para agregar transformador
+    $('#addTrafoBtn').click(function() {
+        // Validar campos requeridos
+        const serialNumber = $('#id_serialNumber').val();
+        const quantity = $('#id_quantity').val();
+        const unitCost = $('#id_unitCost').val();
+        const kva = $('#id_KVA').val();
+        
+        if (!serialNumber || !quantity || !unitCost || !kva) {
+            alert('Por favor, completa todos los campos obligatorios: Serial, KVA, Cantidad y Costo Unitario');
+            return;
+        }
+        
+        // Crear objeto con los datos del transformador
+        const trafoData = {
+            serialNumber: serialNumber,
+            quantity: parseInt(quantity),
+            unitCost: parseFloat(unitCost),
+            KVA: kva,
+            KTapHV: $('#id_KTapHV').val(),
+            HVTAP: $('#id_HVTAP').val(),
+            LV: $('#id_LV').val(),
+            FIXHV: $('#id_FIXHV').val(),
+            HZ: $('#id_HZ').val(),
+            TYPE: $('#id_TYPE').val(),
+            MOUNTING: $('#id_MOUNTING').val(),
+            COOLING: $('#id_COOLING').val(),
+            WINDING: $('#id_WINDING').val(),
+            INSULAT: $('#id_INSULAT').val(),
+            CONNECTION: $('#id_CONNECTION').val(),
+            STANDARD: $('#id_STANDARD').val()
+        };
+        
+        console.log('Datos del transformador:', trafoData);
+        
+        // Agregar a la tabla
+        addTrafoToTable(trafoData);
+        
+        // Agregar al array para envío posterior
+        trafos.push(trafoData);
+        
+        // Limpiar formulario
+        $('.trafo-field').val('');
+        
+        console.log('Transformadores agregados:', trafos);
+    });
+    
+    function addTrafoToTable(trafoData) {
+        const subtotal = trafoData.quantity * trafoData.unitCost;
+        
+        // Obtener el texto del option seleccionado para KVA
+        const kvaText = $('#id_KVA option[value="' + trafoData.KVA + '"]').text() || trafoData.KVA;
+        
+        const row = `
+            <tr data-trafo-index="${trafos.length}">
+                <td>${trafoData.serialNumber}</td>
+                <td>${kvaText}</td>
+                <td>${trafoData.quantity}</td>
+                <td>$${trafoData.unitCost.toFixed(2)}</td>
+                <td>$${subtotal.toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger remove-trafo" data-index="${trafos.length}">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+        
+        $('#trafosTable tbody').append(row);
+    }
+    
+    // Eliminar transformador de la tabla
+    $(document).on('click', '.remove-trafo', function() {
+        const index = $(this).data('index');
+        
+        // Remover del array
+        trafos.splice(index, 1);
+        
+        // Remover de la tabla
+        $(this).closest('tr').remove();
+        
+        // Actualizar índices en la tabla
+        $('#trafosTable tbody tr').each(function(i) {
+            $(this).attr('data-trafo-index', i);
+            $(this).find('.remove-trafo').attr('data-index', i);
+        });
+        
+        console.log('Transformadores después de eliminar:', trafos);
+    });
+    
+    // Al enviar el formulario principal, incluir los transformadores
+    $('#quoteForm').on('submit', function(e) {
+        if (trafos.length === 0) {
+            alert('Debe agregar al menos un transformador');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Agregar los transformadores como campo oculto
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'trafos_data',
+            value: JSON.stringify(trafos)
+        }).appendTo(this);
+    });
+});
+</script>
+
+<script>
+    document.getElementById("id_idTinReceiving").value = "{{user.company.id}}";
+</script>
+
+{% endblock JSscripts %}

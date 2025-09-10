@@ -7,7 +7,7 @@ from django.views.generic import View
 from .models import User
 
 def check_ocupation_user(position, user_position):
-    if (position == User.ADMINISTRADOR or position == user_position):
+    if (position == User.ADMINISTRADOR or position == user_position or position == User.CEOGLOBAL):
         return True
     else:
         return False
@@ -16,7 +16,7 @@ def check_ocupation_user(position, user_position):
 def check_ocupation_user2(position, user_position, user_position2):
     #
     
-    if (position == User.ADMINISTRADOR or position == user_position or position == user_position2):
+    if (position == User.ADMINISTRADOR or position == User.CEOGLOBAL or position == user_position or position == user_position2):
         
         return True
     else:
@@ -93,6 +93,23 @@ class ComercialFinanzasMixin(LoginRequiredMixin):
             return self.handle_no_permission()
         #
         if not check_ocupation_user2(request.user.position, User.COMERCIAL, User.FINANZAS):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:unauthorized'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
+    
+# =========================== PERMISOS LOGISTICA Y FINANZAS ===========================
+class LogisticaMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user(request.user.position, User.LOGISTICA):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(

@@ -55,5 +55,6 @@ class DashboardView(ComercialMixin,ListView):
     payload["intervalDate"] = intervalDate
     payload["requerimientos"] = requerimiento
     payload["pedidos"] = pedido
+    
     return payload
 

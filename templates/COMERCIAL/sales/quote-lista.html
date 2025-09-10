@@ -1,4 +1,4 @@
-{% extends "COMERCIAL/sales/base-COMERCIAL.html" %}
+{% extends "COMERCIAL/sales/base-quotes.html" %}
 
 {% load  static %}
 {% block title %} Ventas {% endblock title %}
@@ -13,12 +13,12 @@
     <div class="nav-wrapper position-relative end-0">
       <ul class="nav nav-pills nav-fill p-1">
         <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
-          <a class="nav-link mb-0 px-0 py-1  text-white" href="{% url 'ventas_app:ventas-lista' %}">
+          <a class="nav-link mb-0 px-0 py-1  text-white" href="">
             <span class="ms-1">VENTAS</span>
           </a>
         </li>
         <li class="nav-item" role="presentation">
-          <a class="nav-link mb-0 px-0 py-1" href="{% url 'compras_app:compras-lista' %}">
+          <a class="nav-link mb-0 px-0 py-1" href="">
             <span class="ms-1">COMPRAS</span>
           </a>
         </li>
@@ -49,7 +49,7 @@
             </a>
           </li>
           <li>
-            <a class="dropdown-item" href="{% url 'ventas_app:ventas-nuevo' %}">
+            <a class="dropdown-item" href="">
               Manual
             </a>
           </li>

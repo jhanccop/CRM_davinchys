@@ -1,0 +1,243 @@
+{% extends "COMERCIAL/sales/base-quotes.html" %}
+
+{% load  static %}
+{% block title %} Ventas {% endblock title %}
+{% block main %} Ventas {% endblock main %}
+{% block appName %} Cotizaciones {% endblock appName %}
+{% block Type %} Detalle - Item {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header con navegación -->
+            <div class="d-flex justify-content-between align-items-center">
+                
+                <div>
+                    <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id %}" 
+                       class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
+                    </a>
+                    <a href="{% url 'ventas_app:editar-item' object.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i> Editar
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Información Principal -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-gradient-secondary text-white p-3">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="fas fa-info-circle me-2"></i>Información Básica
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Número de Serie</small>
+                                <h4 class="fw-bold text-primary">{{ object.serialNumber|default:"N/A" }}</h4>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Cantidad</small>
+                                        <p class="fw-bold fs-5 text-success">{{ object.quantity|default:0 }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Costo Unitario</small>
+                                        <p class="fw-bold fs-5 text-danger">{{ object.idTrafoQuote.get_currency_display }} {{ object.unitCost|floatformat:2|default:"0.00" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones Técnicas -->
+                <div class="col-lg-8 col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-gradient-secondary p-3">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="fas fa-cogs me-2"></i>Especificaciones Técnicas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Capacidad kVA</small>
+                                        <p class="fw-bold">{{ object.get_KVA_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">HV TAP</small>
+                                        <p class="fw-bold">{{ object.get_HVTAP_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">K Tap HV</small>
+                                        <p class="fw-bold">{{ object.get_KTapHV_display|default:"N/A" }}</p>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-4">
+                                    
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">FIX HV</small>
+                                        <p class="fw-bold">{{ object.get_FIXHV_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">LV</small>
+                                        <p class="fw-bold">{{ object.get_LV_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Frecuencia (HZ)</small>
+                                        <p class="fw-bold">{{ object.get_HZ_display|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Tipo</small>
+                                        <p class="fw-bold">{{ object.get_TYPE_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Montaje</small>
+                                        <p class="fw-bold">{{ object.get_MOUNTING_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Enfriamiento</small>
+                                        <p class="fw-bold">{{ object.get_COOLING_display|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Características Adicionales -->
+                <div class="col-lg-6 col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-gradient-secondary p-3">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="fas fa-sliders-h me-2"></i>Características Eléctricas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Devanado</small>
+                                        <p class="fw-bold">{{ object.get_WINDING_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Clase de Aislamiento</small>
+                                        <p class="fw-bold">{{ object.get_INSULAT_display|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Conexión</small>
+                                        <p class="fw-bold">{{ object.get_CONNECTION_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Estándar</small>
+                                        <p class="fw-bold">{{ object.get_STANDARD_display|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de la Cotización -->
+                <div class="col-lg-6 col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-gradient-secondary p-3">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>Información de Cotización
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Cotización Asociada</small>
+                                        <p class="fw-bold">
+                                            <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id %}" 
+                                            class="text-decoration-none">
+                                                QUO-{{ object.idTrafoQuote.id }}
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <small class="text-muted">Fecha de Creación</small>
+                                        <p class="fw-bold">{{ object.created|date:"d/m/Y H:i" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Cliente</small>
+                                {% if object.idTrafoQuote.idClient %}
+                                <a href="{% url 'stakeholders_app:cliente-detalle' object.idTrafoQuote.idClient.id %}">
+                                    <p class="fw-bold">{{ object.idTrafoQuote.idClient|default:"" }}</p>
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Descripción</small>
+                                <p class="fw-bold">{{ object.idTrafoQuote.shortDescription|default:"Sin descripción" }}</p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-gradient-secondary p-3">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="fas fa-history me-2"></i>Metadata
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="info-item mb-2">
+                                        <small class="text-muted">Creado el</small>
+                                        <p class="fw-bold">{{ object.created|date:"d/m/Y H:i" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-item mb-2">
+                                        <small class="text-muted">Última modificación</small>
+                                        <p class="fw-bold">{{ object.modified|date:"d/m/Y H:i" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-item mb-2">
+                                        <small class="text-muted">ID del Transformador</small>
+                                        <p class="fw-bold">TRA-{{ object.id }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

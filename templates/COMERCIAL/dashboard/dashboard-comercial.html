@@ -13,15 +13,22 @@
     <h2 class="text-2xl font-semibold mb-1">Panel Comercial</h2>
     <p class="text-sm text-gray-500 mb-0">Visión general de compras</p>
     <p class="text-sm text-gray-500 mb-0">ventas, pagos y cobranzas</p>
-</div>
+  </div>
 
   <div class="col-lg-4 col-md-5 mb-4">
     <div class="card mb-0">
       <div class="card-body p-3 mb-0">
-        <h6 class="mb-0">Accesos Rápidos</h6>
-        <div class="align-items-center mb-0">
-          <a href="" class="btn bg-gradient-info btn-sm mb-2 w-100">Nuevo pedido</a>
-          <a href="" class="btn bg-gradient-info btn-sm w-100">Conciliaciones</a>
+        <h6 class="mb-0">Acciones Urgentes</h6>
+        <div class="align-items-center mb-0 mt-2">
+
+          <a type="button" class="btn btn-primary w-100" href="{% url 'compras_app:list_requirement' %}">
+            <span>Cotizaciones por aprobar</span>
+            <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
+          </a>
+          <a type="button" class="btn btn-primary w-100 mb-0" href="{% url 'compras_app:list_requirement' %}">
+            <span>Adquisiones por aprobar</span>
+            <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
+          </a>
         </div>
       </div>
     </div>
@@ -32,11 +39,11 @@
       <div class="card-body p-3 mb-0">
         <h6 class="mb-0 ">Filtro por fecha</h6>
         <form method="GET" class="">{% csrf_token %}
-            <div class="input-group input-group-outline mb-2">
-              <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
-                placeholder="today" id="dateKword" name="dateKword">
-            </div>
-            <button class="btn bg-gradient-primary mb-0 w-100" type="submit"> Filtrar </button>
+          <div class="input-group input-group-outline mb-2">
+            <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
+              placeholder="today" id="dateKword" name="dateKword">
+          </div>
+          <button class="btn bg-gradient-primary mb-0 w-100" type="submit"> Filtrar </button>
         </form>
       </div>
     </div>

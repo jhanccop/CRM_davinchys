@@ -5,7 +5,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
 
 from django.db.models import Sum, Max, CharField,F, Q, Count, When, Value, Case, When, FloatField
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Prefetch
 
 class IncomesManager(models.Manager):
     def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
@@ -126,4 +126,107 @@ class quotesManager(models.Manager):
             )
         ).order_by('-created')
 
+        return result
+
+    def ListaCotizacionesPorRuc(self, intervalo, company):
+        from .models import Trafos, QuoteTracking
+        Intervals = intervalo.split(' to ')
+        intervals = [datetime.strptime(dt, "%Y-%m-%d") for dt in Intervals]
+
+        # Creación de rango de fechas
+        rangeDate = [intervals[0] - timedelta(days=1), None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days=1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days=1)
+
+        # Subconsulta para obtener el último QuoteTraking de cada cotización
+        last_tracking_subquery = QuoteTracking.objects.filter(
+            idquote = OuterRef('pk')
+        ).order_by('-created')
+
+        # Prefetch para optimizar la carga de los productos Trafos
+        trafos_prefetch = Prefetch(
+            'trafo_Quote',
+            queryset=Trafos.objects.all(),
+            to_attr='productos'
+        )
+
+        # Consulta principal con annotate para el último tracking y prefetch para los trafos
+        result = self.filter(
+            created__range = rangeDate,
+            idTinReceiving__id = company
+        ).order_by("-id").annotate(
+            ultimo_evento = Subquery(last_tracking_subquery.values('status')[:1]),
+            ultimo_evento_fecha=Subquery(last_tracking_subquery.values('created')[:1]),
+            ultimo_evento_display=Case(
+                *[When(quotetracking__status=value, then=Value(display)) 
+                for value, display in QuoteTracking.STATE_CHOICES],
+                default=Value('Desconocido'),
+                output_field=CharField()
+            ),
+            ultimo_area_display=Case(
+                *[When(quotetracking__area=value, then=Value(display)) 
+                for value, display in QuoteTracking.AREAS_TRACKING_CHOICES],
+                default=Value('Desconocido'),
+                output_field=CharField()
+            )
+        ).prefetch_related(trafos_prefetch)
+
+        return result
+    
+    def ListaPOPorRuc(self, intervalo, company, isPO):
+        from .models import Trafos, QuoteTracking
+        Intervals = intervalo.split(' to ')
+        intervals = [datetime.strptime(dt, "%Y-%m-%d") for dt in Intervals]
+
+        # Creación de rango de fechas
+        rangeDate = [intervals[0] - timedelta(days=1), None]
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days=1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days=1)
+
+        # Subconsulta para obtener el último QuoteTraking de cada cotización
+        last_tracking_subquery = QuoteTracking.objects.filter(
+            idquote = OuterRef('pk')
+        ).order_by('-created')
+
+        # Prefetch para optimizar la carga de los productos Trafos
+        trafos_prefetch = Prefetch(
+            'trafo_Quote',
+            queryset=Trafos.objects.all(),
+            to_attr='productos'
+        )
+
+        # Consulta principal con annotate para el último tracking y prefetch para los trafos
+        result = self.filter(
+            created__range = rangeDate,
+            idTinReceiving__id = company,
+            isPO = isPO
+        ).order_by("-id").annotate(
+            ultimo_evento = Subquery(last_tracking_subquery.values('status')[:1]),
+            ultimo_evento_fecha=Subquery(last_tracking_subquery.values('created')[:1]),
+            ultimo_evento_display=Case(
+                *[When(quotetracking__status=value, then=Value(display)) 
+                for value, display in QuoteTracking.STATE_CHOICES],
+                default=Value('Desconocido'),
+                output_field=CharField()
+            ),
+            ultimo_area_display=Case(
+                *[When(quotetracking__area=value, then=Value(display)) 
+                for value, display in QuoteTracking.AREAS_TRACKING_CHOICES],
+                default=Value('Desconocido'),
+                output_field=CharField()
+            )
+        ).prefetch_related(trafos_prefetch)
+
+        return result
+    
+
+class QuoteTrackingManager(models.Manager):
+    def UltimoEstadoTracking(self,idQuote):
+        result = self.filter(
+            idquote__id = idQuote
+        ).last()
         return result

@@ -1,0 +1,157 @@
+{% extends "COMERCIAL/sales/base-quotes.html" %}
+
+{% load  static %}
+{% block title %} Ventas {% endblock title %}
+{% block main %} Ventas {% endblock main %}
+{% block appName %} Cotizaciones {% endblock appName %}
+{% block Type %} Editar -Item {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="card">
+    <div class="card-body">
+
+        <h5> Transformador</h5>
+
+        <form id="quoteForm" method="post">
+        {% csrf_token %}
+
+            <div id="trafoFormContainer">
+
+                <div class="row">
+                    <div class="col-12 col-sm-6" hidden>
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.idTrafoQuote.label }}</label>
+                            {{ form.idTrafoQuote }}
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.serialNumber.label }}</label>
+                            {{ form.serialNumber }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.quantity.label }}</label>
+                            {{ form.quantity }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.unitCost.label }}</label>
+                            {{ form.unitCost }}
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.KVA.label }}</label>
+                            {{ form.KVA }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.KTapHV.label }}</label>
+                            {{ form.KTapHV }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.HVTAP.label }}</label>
+                            {{ form.HVTAP }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.LV.label }}</label>
+                            {{ form.LV }}
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.FIXHV.label }}</label>
+                            {{ form.FIXHV }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.HZ.label }}</label>
+                            {{ form.HZ }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.TYPE.label }}</label>
+                            {{ form.TYPE }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.MOUNTING.label }}</label>
+                            {{ form.MOUNTING }}
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.COOLING.label }}</label>
+                            {{ form.COOLING }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.WINDING.label }}</label>
+                            {{ form.WINDING }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.INSULAT.label }}</label>
+                            {{ form.INSULAT }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.CONNECTION.label }}</label>
+                            {{ form.CONNECTION }}
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">{{ form.STANDARD.label }}</label>
+                            {{ form.STANDARD }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+            Actualizar Transformador
+        </button>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

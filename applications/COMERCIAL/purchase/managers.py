@@ -38,6 +38,33 @@ class requirementsManager(models.Manager):
 
         return result
 
+    def ListaRequerimientosForBoss(self,intervalo):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        from applications.COMERCIAL.purchase.models import RequestTracking
+        last_tracking_subquery = RequestTracking.objects.filter(
+            idRequirement=OuterRef('pk')
+        ).order_by('-created').values('status', 'area')[:1]
+
+        # Consulta principal que obtiene los requirements con su último estado y área
+        result = self.filter(
+            created__range=rangeDate,
+        ).annotate(
+            lastStatus=Subquery(last_tracking_subquery.values('status')),
+            lastArea=Subquery(last_tracking_subquery.values('area'))
+        ).order_by('-created')
+            
+        return result
+
     def obtenerRequerimientoPorId(self,id):
         return self.get(id = id)
 
@@ -79,6 +106,37 @@ class requirementsManager(models.Manager):
         ).order_by('-created')
 
         return result
+
+    # ========================== MANAGER LOGISTICOS ==========================
+
+    def ListaRequerimientosPorArea(self,intervalo,idArea):
+        Intervals = intervalo.split(' to ')
+        intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
+
+        # =========== Creacion de rango de fechas ===========
+        rangeDate = [intervals[0] - timedelta(days = 1),None]
+        
+        if len(intervals) == 1:
+            rangeDate[1] = intervals[0] + timedelta(days = 1)
+        else:
+            rangeDate[1] = intervals[1] + timedelta(days = 1)
+
+        from applications.COMERCIAL.purchase.models import RequestTracking
+        last_tracking_subquery = RequestTracking.objects.filter(
+            idRequirement=OuterRef('pk')
+        ).order_by('-created').values('status', 'area')[:1]
+
+        # Consulta principal que obtiene los requirements con su último estado y área
+        result = self.filter(
+            created__range = rangeDate,
+            idPetitioner__company__id = idArea
+        ).annotate(
+            lastStatus=Subquery(last_tracking_subquery.values('status')),
+            lastArea=Subquery(last_tracking_subquery.values('area'))
+        ).order_by('-created')
+            
+        return result
+    
 
 class requestTrackingManager(models.Manager):
     def obtenerTrackingPorIdRequerimiento(self,id):

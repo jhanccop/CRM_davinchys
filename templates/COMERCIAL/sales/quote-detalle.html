@@ -1,0 +1,149 @@
+{% extends "COMERCIAL/sales/base-quotes.html" %}
+
+{% load  static %}
+{% block title %} Ventas {% endblock title %}
+{% block main %} Ventas {% endblock main %}
+{% block appName %} Cotizaciones {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th colspan="2" class="text-center">
+                                        Cotización QUO-{{ quote.id }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td width="40%" class="text-muted">Cliente</td>
+                                    <td class="fw-bold text-primary">{{quote.idClient}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Cia Receptora</td>
+                                    <td class="fw-bold">{{quote.idTinReceiving.tinName}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Delegado a</td>
+                                    <td class="fw-bold text-dark">{{quote.idTinExecuting.tinName}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Es PO?</td>
+                                    <td class="fw-bold text-dark">
+                                        {% if quote.isPO %}
+                                        <span class="badge badge-success">PO</span>
+                                        {% else %}
+                                        <span class="badge badge-primary">no PO</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Monto</td>
+                                    <td class="fw-bold text-dark">{{ quote.get_currency_display }}
+                                        {{quote.amount|floatformat:2}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Fecha Solicitud</td>
+                                    <td class="fw-bold text-success">{{quote.dateOrder}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Fecha Entrega</td>
+                                    <td class="fw-bold text-danger">{{quote.deadline}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Descripción</td>
+                                    <td class="fw-bold text-dark">{{quote.shortDescription}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+
+                <div class="card-body">
+                    <h5>Seguimiento</h5>
+                    <ul class="list-group">
+                        {% for track in tracking %}
+                        <li class="list-group-item">
+                            {{ track.get_status_display }} -
+                            {{ track.get_area_display }} -
+                            {{ track.created|date:"d/m/Y H:i" }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body p-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Lista de transformadores</h5>
+                <a class="btn bg-gradient-secondary" href="{% url 'ventas_app:crear-item' quote.id %}">
+                    <i class="fas fa-plus me-2"></i> Añadir item
+                </a>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Serial</th>
+                        <th>KVA</th>
+                        <th>KTapHV</th>
+                        <th>HVTAP</th>
+                        <th>LV</th>
+                        <th>Cantidad</th>
+                        <th>Costo Unitario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trafo in trafos %}
+                    <tr>
+                        <td>{{ trafo.serialNumber }}</td>
+                        <td class="text-end">{{ trafo.get_KVA_display }}</td>
+                        <td class="text-end">{{ trafo.get_KTapHV_display }}</td>
+                        <td class="text-end">{{ trafo.get_HVTAP_display }}</td>
+                        <td class="text-end">{{ trafo.get_LV_display }}</td>
+                        <td class="text-end">{{ trafo.quantity }}</td>
+                        <td class="text-end">{{ trafo.unitCost }}</td>
+                        <td>
+                            <a href="{% url 'ventas_app:detalle-item' trafo.id %}">
+                                <i class="far fa-eye text-info text-lg"></i>
+                            </a>
+                            &emsp;
+                            <a href="{% url 'ventas_app:editar-item' trafo.id %}">
+                                <i class="far fa-edit text-dark text-lg"></i>
+                            </a>
+                            &emsp;
+                            <a href="{% url 'ventas_app:eliminar-item' trafo.id %}">
+                                <i class="far fa-trash-alt text-primary text-lg"></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

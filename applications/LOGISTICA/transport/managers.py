@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import timedelta, datetime
 
+from django.db.models import OuterRef, Subquery
+
 class ContainerManager(models.Manager):
     def ListaContainer(self,idTin,intervalo):
         """
@@ -19,6 +21,9 @@ class ContainerManager(models.Manager):
 
         result = self.filter(
             created__range=rangeDate,
-            idQuote__idTin = idTin
+            idQuote__idTinReceiving = idTin
         )
         return result
+
+    
+    

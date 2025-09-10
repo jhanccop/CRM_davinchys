@@ -33,7 +33,7 @@
         class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 bg-gradient-dark"
         id="sidenav-main">
         <div class="sidenav-header">
-            <a class="navbar-brand m-0" href="{% url 'home_app:index' %}">
+            <a class="navbar-brand m-0" href=" ">
                 <img src="{% static 'assets/img/logo-ct.png' %}" class="navbar-brand-img h-100" alt="main_logo">
                 <span class="ms-1 font-weight-bold text-white"> </span>
             </a>
@@ -79,6 +79,19 @@
                                 <a class="nav-link text-white" href="{% url 'activities_app:proyecto-lista' %}">
                                     <span class="sidenav-mini-icon"> OC </span>
                                     <span class="sidenav-normal  ms-2  ps-1"> Ordenes de compra </span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white " href="{% url 'ventas_app:cotizaciones-lista' %}">
+                                    <span class="sidenav-mini-icon"> CO </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> Cotizaciones </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{% url 'ventas_app:po-lista' %}">
+                                    <span class="sidenav-mini-icon"> PO </span>
+                                    <span class="sidenav-normal  ms-2  ps-1"> PO </span>
                                 </a>
                             </li>
 
@@ -238,11 +251,11 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                         <li class="breadcrumb-item text-sm">
-                            <a class="text-dark" href="{% url 'home_app:index' %}">
+                            <a class="text-dark" href=" ">
                                 <i class="fas fa-home text-md"></i>
                             </a>
                         </li>
-                        <li class="breadcrumb-item text-sm "><a class="text-dark" href="{% url 'home_app:index' %}">Principal</a></li>
+                        <li class="breadcrumb-item text-sm "><a class="text-dark" href=" ">Principal</a></li>
                         <li class="breadcrumb-item text-sm" aria-current="page">{% block main %} {% endblock main %}</li>
                         <li class="breadcrumb-item text-sm" aria-current="page">{% block appName %} {% endblock appName %}</li>
                         <li class="breadcrumb-item text-sm" aria-current="page">{% block Type %} {% endblock Type %}</li>

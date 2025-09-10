@@ -69,31 +69,6 @@ from .forms import (
 from django.forms import inlineformset_factory
 
 # ==================== DASHBOARD COMERCIAL ====================
-class DashboardView(AdminClientsPermisoMixin,ListView):
-  template_name = "COMERCIAL/dashboard/dashboard-comercial.html"
-  context_object_name = 'documentos'
-
-  def get_queryset(self,**kwargs):
-    #compania_id = self.request.session.get('compania_id')
-    user = self.request.user
-
-    intervalDate = self.request.GET.get("dateKword", '')
-    if intervalDate == "today" or intervalDate =="":
-      intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
-
-    requerimiento = requirements.objects.ListaOrdenesdeCompra(
-      intervalo = intervalDate,
-      )
-
-    pedido = quotes.objects.ListaPOs(
-      intervalo = intervalDate,
-      )
-  
-    payload = {}
-    payload["intervalDate"] = intervalDate
-    payload["requerimientos"] = requerimiento
-    payload["pedidos"] = pedido
-    return payload
 
 class NewQuoteRequirementCreateView(AdminClientsPermisoMixin,CreateView):
     """
@@ -139,15 +114,23 @@ class RequirementListView(LoginRequiredMixin,ListView):
     if intervalDate == "today" or intervalDate =="":
       intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
 
-
     documentation = requirements.objects.ListaRequerimientosPorUsuario(
       intervalo = intervalDate,
       idPetitioner = user.id
       )
-  
+    
+    allDocumentation = []
+
+    isBoss = self.request.user.is_boss
+    if isBoss:
+        allDocumentation = requirements.objects.ListaRequerimientosForBoss(
+        intervalo = intervalDate,
+        )
+
     payload = {}
     payload["intervalDate"] = intervalDate
     payload["documentation"] = documentation
+    payload["allDocumentation"] = allDocumentation
     
     return payload
 
@@ -567,7 +550,7 @@ class PurchaseListView(LoginRequiredMixin,ListView):
 
 # ==================== TRACKING REQUERIMIENTOS ====================
 class RequestTrackingCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'COMERCIAL/requirement/request-tracking-crear.html'
+    template_name = 'COMERCIAL/purchase/request-tracking-crear.html'
     model = RequestTracking
     form_class = RequestTrackingForm
     success_url = reverse_lazy('compras_app:list_requirement')

@@ -16,6 +16,11 @@ urlpatterns = [
         name='cliente-nuevo',
     ),
     path(
+        'comercial/clientes/detalle/<pk>/', 
+        views.ClientDetailView.as_view(),
+        name='cliente-detalle',
+    ),
+    path(
         'comercial/clientes/editar_cliente/<pk>/', 
         views.ClientUpdateView.as_view(),
         name='cliente-editar',

@@ -28,7 +28,7 @@ class ContainerAdmin(ImportExportModelAdmin):
         'idQuote',
         'idRequirement',
         'containerName',
-        'message',
+        'shortDescription',
     )
     
     search_fields = ("id",'idQuote',)

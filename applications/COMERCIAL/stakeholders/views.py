@@ -25,6 +25,11 @@ class ClientListView(ComercialFinanzasMixin,ListView):
     context_object_name = 'clientes'
     model = client
 
+class ClientDetailView(ComercialFinanzasMixin,DeleteView):
+    template_name = "COMERCIAL/stakeholders/cliente-detalle.html"
+    context_object_name = 'clientes'
+    model = client
+
 class ClientCreateView(ComercialFinanzasMixin,CreateView):
     template_name = "COMERCIAL/stakeholders/crear_clientes.html"
     model = client

@@ -1,12 +1,17 @@
 from datetime import date, timedelta
+import json
 
 from django.contrib import messages
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from applications.users.mixins import (
-  AdminPermisoMixin,
-  AdminClientsPermisoMixin
+  ComercialMixin,
+  ComercialFinanzasMixin
 )
 
+from django.forms import inlineformset_factory
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 import xml.etree.ElementTree as ET
@@ -18,12 +23,15 @@ from django.views.generic import (
     ListView,
     UpdateView,
     DeleteView,
-    TemplateView,
+    View,
     FormView,
 )
 
 from .models import (
   Incomes,
+  quotes,
+  Trafos,
+  QuoteTracking
 )
 
 from applications.cuentas.models import (
@@ -35,11 +43,16 @@ from applications.clientes.models import (
 )
 
 from .forms import (
-  IncomesForm
+  IncomesForm,
+  quotesForm,
+  TrafoForm,
+  TrafoItemForm
   )
 
-class IncomesListView(AdminClientsPermisoMixin,ListView):
-  template_name = "COMERCIAL/sales/ventas-lista.html"
+TrafosFormSet = inlineformset_factory(quotes, Trafos, form=TrafoForm, extra=1)
+
+class QuotesListView(ComercialMixin,ListView):
+  template_name = "COMERCIAL/sales/quote-lista.html"
   context_object_name = 'documentos'
 
   def get_queryset(self,**kwargs):
@@ -66,7 +79,7 @@ class IncomesListView(AdminClientsPermisoMixin,ListView):
     
     return payload
 
-class IncomesCreateView(AdminClientsPermisoMixin,CreateView):
+class IncomesCreateView(ComercialMixin,CreateView):
   template_name = "COMERCIAL/sales/ventas-nuevo.html"
   model = Incomes
   form_class = IncomesForm
@@ -308,13 +321,13 @@ class IncomesCreateView(AdminClientsPermisoMixin,CreateView):
           
       return super().form_valid(form)
   
-class IncomesEditView(AdminClientsPermisoMixin,UpdateView):
+class IncomesEditView(ComercialMixin,UpdateView):
   template_name = "COMERCIAL/sales/ventas-editar.html"
   model = Incomes
   form_class = IncomesForm
   success_url = reverse_lazy('ventas_app:ventas-lista')
 
-class IncomesDetailView(AdminClientsPermisoMixin,ListView):
+class IncomesDetailView(ComercialMixin,ListView):
   
   template_name = "COMERCIAL/sales/ventas-detalle.html"
   context_object_name = 'doc'
@@ -326,7 +339,203 @@ class IncomesDetailView(AdminClientsPermisoMixin,ListView):
     payload["document"] = document
     return payload
   
-class IncomesDeleteView(AdminClientsPermisoMixin,DeleteView):
+class IncomesDeleteView(ComercialMixin,DeleteView):
   template_name = "COMERCIAL/sales/ventas-eliminar.html"
   model = Incomes
   success_url = reverse_lazy('ventas_app:ventas-lista')
+
+# ================= COTIZACIONES ========================
+
+class QuoteCreateView(ComercialFinanzasMixin,CreateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote-crear.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['trafo_form'] = TrafoForm()
+        return context
+    
+    @transaction.atomic
+    def form_valid(self, form):
+        # Guardar la cotización
+        self.object = form.save()
+        
+        # Obtener transformadores del campo oculto
+        trafos_json = self.request.POST.get('trafos_data', '[]')
+        trafos_data = json.loads(trafos_json)
+        
+        # Crear los transformadores asociados
+        for trafo_data in trafos_data:
+            trafo = Trafos(
+                idTrafoQuote=self.object,
+                serialNumber=trafo_data.get('serialNumber'),
+                quantity=trafo_data.get('quantity'),
+                unitCost=trafo_data.get('unitCost'),
+                KVA=trafo_data.get('KVA'),
+                KTapHV=trafo_data.get('KTapHV'),
+                HVTAP=trafo_data.get('HVTAP'),
+                LV=trafo_data.get('LV'),
+                FIXHV=trafo_data.get('FIXHV'),
+                HZ=trafo_data.get('HZ'),
+                TYPE=trafo_data.get('TYPE'),
+                MOUNTING=trafo_data.get('MOUNTING'),
+                COOLING=trafo_data.get('COOLING'),
+                WINDING=trafo_data.get('WINDING'),
+                INSULAT=trafo_data.get('INSULAT'),
+                CONNECTION=trafo_data.get('CONNECTION'),
+                STANDARD=trafo_data.get('STANDARD')
+            )
+            trafo.save()
+        
+        # Crear registro de tracking
+        QuoteTracking.objects.create(
+            idquote=self.object,
+            status=QuoteTracking.CREADO,
+            area=QuoteTracking.TECHNICIAN
+        )
+        
+        messages.success(self.request, 'Cotización creada exitosamente.')
+        return super().form_valid(form)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AddTrafoToQuoteView(ComercialFinanzasMixin,View):
+    def post(self, request, *args, **kwargs):
+        form = TrafoForm(request.POST)
+        
+        if form.is_valid():
+            # Obtener datos limpios pero excluir idTrafoQuote si existe
+            trafo_data = form.cleaned_data.copy()
+            
+            # Asegurarse de que no se guarde idTrafoQuote en la sesión
+            trafo_data.pop('idTrafoQuote', None)
+            
+            # Inicializar la lista de transformadores en la sesión si no existe
+            if 'current_quote_trafos' not in request.session:
+                request.session['current_quote_trafos'] = []
+            
+            # Agregar el nuevo transformador (sin idTrafoQuote)
+            request.session['current_quote_trafos'].append(trafo_data)
+            request.session.modified = True
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Transformador agregado correctamente.'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            })
+
+class QuoteDetailView(ComercialFinanzasMixin,DetailView):
+    model = quotes
+    template_name = 'COMERCIAL/sales/quote-detalle.html'
+    context_object_name = 'quote'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['trafos'] = self.object.trafo_Quote.all().order_by("-created")
+        context['tracking'] = QuoteTracking.objects.filter(idquote=self.object)
+        return context
+
+class TrafoQuoteListView(ComercialFinanzasMixin,ListView):
+    template_name = 'COMERCIAL/sales/lista-cotizaciones.html'
+    context_object_name = 'quotes'
+    
+    def get_queryset(self,**kwargs):
+        compania_id = self.request.user.company.id
+        intervalDate = self.request.GET.get("dateKword", '')
+        if intervalDate == "today" or intervalDate =="":
+            intervalDate = str(date.today() - timedelta(days = 90)) + " to " + str(date.today())
+
+        Quotes = quotes.objects.ListaCotizacionesPorRuc(intervalo = intervalDate, company = compania_id)
+        
+        payload = {}
+        payload["intervalDate"] = intervalDate
+        payload["listQuotes"] = Quotes
+        return payload
+
+class QuoteUpdateView(ComercialFinanzasMixin,UpdateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote-editar.html'
+    context_object_name = 'quote'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+    
+    #def get_success_url(self):
+    #    return reverse_lazy('ventas_app:detalle-cotizacion', kwargs={'pk': self.object.id})
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Cotización actualizada exitosamente.')
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['trafos'] = self.object.trafo_Quote.all()
+        return context
+
+class QuoteDeleteView(ComercialFinanzasMixin,DeleteView):
+    model = quotes
+    template_name = 'COMERCIAL/sales/quote-eliminar.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+
+
+class TrafoPoListView(ComercialFinanzasMixin,ListView):
+    template_name = 'COMERCIAL/sales/lista-po.html'
+    context_object_name = 'quotes'
+    
+    def get_queryset(self,**kwargs):
+        compania_id = self.request.user.company.id
+        intervalDate = self.request.GET.get("dateKword", '')
+        if intervalDate == "today" or intervalDate =="":
+            intervalDate = str(date.today() - timedelta(days = 90)) + " to " + str(date.today())
+
+        Quotes = quotes.objects.ListaPOPorRuc(intervalo = intervalDate, company = compania_id, isPO = True)
+        
+        payload = {}
+        payload["intervalDate"] = intervalDate
+        payload["listQuotes"] = Quotes
+        return payload
+
+# ================= ITEMS ========================
+class CreateTrafoItemView(ComercialFinanzasMixin,CreateView):
+    model = Trafos
+    form_class = TrafoItemForm
+    template_name = 'COMERCIAL/sales/crear-item.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pk'] = self.kwargs["pk"]
+        return context
+
+    def get_success_url(self, **kwargs):
+        idOr = self.kwargs["pk"]
+        #idTrafo = Trafos.objects.get(id = idOr)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idOr})
+    
+class UpdateTrafoItemView(ComercialFinanzasMixin,UpdateView):
+    model = Trafos
+    form_class = TrafoForm
+    template_name = 'COMERCIAL/sales/editar-item.html'
+
+    def get_success_url(self, **kwargs):
+        idOr = self.kwargs["pk"]
+        idTrafo = Trafos.objects.get(id = idOr)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idTrafo.idTrafoQuote.id})
+
+class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
+    model = Trafos
+    template_name = 'COMERCIAL/sales/eliminar-item.html'
+    #success_url = reverse_lazy('ventas_app:ventas-lista')
+
+    def get_success_url(self, **kwargs):
+        idOr = self.kwargs["pk"]
+        idTrafo = Trafos.objects.get(id = idOr)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idTrafo.idTrafoQuote.id})
+
+class DetailTrafoItemView(ComercialFinanzasMixin,DetailView):
+    model = Trafos
+    template_name = 'COMERCIAL/sales/detalle-item.html'
+    #context_object_name = 'quote'

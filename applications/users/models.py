@@ -19,7 +19,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     LOGISTICA = '5'
     RECURSOSHUMANOS = '6'
     CONSULTOREXTERNO = '7'
-    CONTABILIDAD = '8'
+    CEOGLOBAL = '8'
     TI = '9'
     
     #
@@ -32,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         (LOGISTICA, 'Logística'),
         (RECURSOSHUMANOS, 'Recursos humanos'),
         (CONSULTOREXTERNO, 'Consultor externo'),
-        (CONTABILIDAD, 'Contabilidad'),
+        (CEOGLOBAL, 'CEO general'),
         (TI, 'TI'),
     ]
 
@@ -70,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     startDate = models.DateField('Fecha de inicio',blank = True, null=True)
 
     position = models.CharField(
-        'Tipo de usuario',
+        'Area',
         max_length=1, 
         choices=ROLES_CHOICES, 
         blank=True

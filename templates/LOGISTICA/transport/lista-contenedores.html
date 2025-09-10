@@ -1,8 +1,8 @@
 {% extends "LOGISTICA/transport/base-transporte.html" %}
 
 {% load  static %}
-{% block title %} Requerimientos {% endblock title %}
-{% block main %} Requerimientos {% endblock main %}
+{% block title %} Logística {% endblock title %}
+{% block main %} Logística {% endblock main %}
 {% block appName %} Requerimientos {% endblock appName %}
 {% block Type %} Lista {% endblock Type %}
 
@@ -14,11 +14,10 @@
             Export CSV
         </a>
 
-
         <div class="dropleft ms-3">
             <div class="dropdown">
-                <a href="{% url 'compras_app:create_requirement' %}" class="btn bg-gradient-dark">
-                    Nuevo requerimiento
+                <a href="" class="btn bg-gradient-dark">
+                    Solicitar nuevo contenedor
                 </a>
             </div>
         </div>
@@ -74,7 +73,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for t in documentos.documentation %}
+                            {% for t in data.contenedor %}
                             <tr>
                                 <td class="text-sm">
                                     <div class="d-flex flex-column justify-content-center">
@@ -85,89 +84,46 @@
                                 <td class="text-sm">
                                     <div class="d-flex flex-column justify-content-center">
                                         <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                                            <h6 class="mb-0 text-sm">REQ-{{t.id}} </h6>
+                                            <h6 class="mb-0 text-sm">CON-{{t.id}} </h6>
                                         </a>
                                     </div>
                                 </td>
 
                                 <td class="text-sm">
                                     <div class="d-flex flex-column justify-content-center">
-                                        <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}
-                                        </p>
-                                    </div>
-                                </td>
-
-                                <td class="text-sm text-end">
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <p class="text-sm font-weight-normal text-secondary mb-0">
-                                            {{t.get_currency_display}} {{ t.totalPrice }}</p>
+                                        <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                                            <h6 class="mb-0 text-sm">QUO-{{t.idQuote.id}} </h6>
+                                        </a>
                                     </div>
                                 </td>
 
                                 <td class="text-sm">
-                                    {% if t.lastArea == "10" %}
-                                    {%if t.lastStatus == "2" %}
-                                    <span class="badge badge-success">Jefe de área - aprobado</span>
-                                    {% elif t.lastStatus == "3" %}
-                                    <span class="badge badge-primary">Jefe de área - rechazado</span>
-                                    {% else %}
-                                    <span class="badge badge-secondary">Jefe de área - espera</span>
-                                    {% endif %}
-
-                                    {% elif t.lastArea == "4" %}
-                                    {%if t.lastStatus == "2" %}
-                                    <span class="badge badge-success">Gerencia</span>
-                                    {% elif t.lastStatus == "3" %}
-                                    <span class="badge badge-primary">Gerencia</span>
-                                    {% else %}
-                                    <span class="badge badge-secondary">Gerencia</span>
-                                    {% endif %}
-
-                                    {% elif t.lastArea == "1" %}
-                                    {%if t.lastStatus == "2" %}
-                                    <span class="badge badge-success">Compras</span>
-                                    {% elif t.lastStatus == "3" %}
-                                    <span class="badge badge-primary">Compras</span>
-                                    {% else %}
-                                    <span class="badge badge-secondary">Compras</span>
-                                    {% endif %}
-
-                                    {% elif t.lastArea == "3" %}
-                                    <span class="badge badge-secondary">Compras</span>
-                                    {% elif t.lastArea == "4" %}
-                                    <span class="badge badge-secondary">Contabilidad</span>
-                                    {% elif t.lastArea == "5" %}
-                                    <span class="badge badge-secondary">Finanzas</span>
-                                    {% endif %}
-
-                                    {%if t.lastStatus == "1" %}
-                                    <span class="badge badge-secondary">Recibido</span>
-                                    {% elif t.lastStatus == "2" %}
-                                    <span class="badge badge-success">Aprobado</span>
-                                    {% elif t.lastStatus == "3" %}
-                                    <span class="badge badge-secondary">Rechazado</span>
-                                    {% elif t.lastStatus == "4" %}
-                                    <span class="badge badge-warning">Observado</span>
-                                    {% elif t.lastStatus == "5" %}
-                                    <span class="badge badge-success">Completado</span>
-                                    {% endif %}
-
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                                            <h6 class="mb-0 text-sm">OC-{{t.idRequirement.id}} </h6>
+                                        </a>
+                                    </div>
                                 </td>
 
-                                <td>
-                                    <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard"
-                                        data-bs-toggle="dropdown" data-bs-placement="left" aria-expanded="false">
-                                        <i class="fas fa-bars text-lg text-dark"></i>
+                                <td class="text-sm">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.shortDescription|default:"-" }}
+                                        </p>
+                                    </div>
+                                </td>
+
+                                <td class="text-end">
+                                    <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
+                                        <i class="far fa-eye text-info text-lg"></i>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
-                                        aria-labelledby="dropdownMarketingCard" style="">
-                                        <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                                                href="{% url 'compras_app:edit_requirement' t.id %}"> Editar
-                                                documento</a></li>
-                                        <li><a class="dropdown-item border-radius-md font-weight-bold text-primary"
-                                                href="{% url 'compras_app:compras-eliminar' t.id %}">Eliminar
-                                                documento</a></li>
-                                    </ul>
+                                    &emsp;
+                                    <a href="{% url 'stakeholders_app:cliente-editar' t.id %}">
+                                        <i class="far fa-edit text-dark text-lg"></i>
+                                    </a>
+                                    &emsp;
+                                    <a href="{% url 'stakeholders_app:cliente-eliminar' t.id %}">
+                                        <i class="far fa-trash-alt text-primary text-lg"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -178,8 +134,6 @@
         </div>
     </div>
 </div>
-
-{{documentos}}
 
 {% endblock panel-content %}
 

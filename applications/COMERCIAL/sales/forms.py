@@ -3,8 +3,12 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import (
-  Incomes
+  Incomes,
+  Trafos,
+  quotes,
 )
+from django.forms import inlineformset_factory
+from applications.users.models import User
 
 class IncomesForm(forms.ModelForm):
     class Meta:
@@ -196,3 +200,366 @@ class IncomesForm(forms.ModelForm):
 
         if self.request:
             self.fields['idTin'].initial = self.request.session['compania_id']
+
+# =========================== TRAFO QUOTES ===========================
+
+class quotesForm(forms.ModelForm):
+    class Meta:
+        model = quotes
+        fields = (
+            'idTinReceiving',
+            'idTinExecuting',
+            'idClient',
+
+            'dateOrder',
+            'deadline',
+
+            'currency',
+            'initialAmount',
+            'amount',
+            'payMethod',
+            
+            'shortDescription',
+            'isPO',
+        )
+        
+        widgets = {
+            'idTinReceiving': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idTinExecuting': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'dateOrder': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'type': 'date',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'deadline': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'type': 'date',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'shortDescription': forms.Textarea(
+                attrs = {
+                    'rows':2,
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'isPO': forms.CheckboxInput(
+                attrs={
+                    'type':'checkbox',
+                    'class': 'form-check-input',
+                },
+            ),
+            'currency': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'initialAmount': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'amount': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'payMethod': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+        }
+
+    #def __init__(self, *args, **kwargs):
+    #    super(quotesForm, self).__init__(*args, **kwargs)
+    #    self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
+
+class TrafoForm(forms.ModelForm):
+    class Meta:
+        model = Trafos
+        exclude = ['idTrafoQuote']
+        fields = (
+            #'idTrafoQuote',
+            'serialNumber',
+
+            #'provider',
+            'quantity',
+            'unitCost',
+
+            'KVA',
+            'HVTAP',
+            'KTapHV',
+            'LV',
+            
+            'FIXHV',
+            'HZ',
+            'TYPE',
+            'MOUNTING',
+
+            'COOLING',
+            'WINDING',
+            'INSULAT',
+            'CONNECTION',
+
+            'STANDARD',
+
+        )
+        widgets = {
+            'serialNumber': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'unitCost': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'quantity': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KVA': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HVTAP': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KTapHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'FIXHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'LV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HZ': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'TYPE': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'MOUNTING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'COOLING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'WINDING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'INSULAT': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'CONNECTION': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'STANDARD': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'description': forms.Textarea(
+                attrs = {
+                    'placeholder': '',
+                    'rows': '3',
+                    'class': 'input-group-field form-control',
+                }
+            )
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Opcional: hacer que el campo esté completamente ausente del formulario
+        if 'idTrafoQuote' in self.fields:
+            del self.fields['idTrafoQuote']
+
+class TrafoItemForm(forms.ModelForm):
+    class Meta:
+        model = Trafos
+        fields = (
+            'idTrafoQuote',
+            'serialNumber',
+
+            #'provider',
+            'quantity',
+            'unitCost',
+
+            'KVA',
+            'HVTAP',
+            'KTapHV',
+            'LV',
+            
+            'FIXHV',
+            'HZ',
+            'TYPE',
+            'MOUNTING',
+
+            'COOLING',
+            'WINDING',
+            'INSULAT',
+            'CONNECTION',
+
+            'STANDARD',
+
+        )
+        widgets = {
+            'idTrafoQuote': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'serialNumber': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'unitCost': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'quantity': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KVA': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HVTAP': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KTapHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'FIXHV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'LV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HZ': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'TYPE': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'MOUNTING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'COOLING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'WINDING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'INSULAT': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'CONNECTION': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'STANDARD': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'description': forms.Textarea(
+                attrs = {
+                    'placeholder': '',
+                    'rows': '3',
+                    'class': 'input-group-field form-control',
+                }
+            )
+        }
+
+TrafosFormSet = inlineformset_factory(
+    quotes,
+    Trafos,
+    form=TrafoForm,
+    extra=1,
+    can_delete=True,
+    fields='__all__'
+)

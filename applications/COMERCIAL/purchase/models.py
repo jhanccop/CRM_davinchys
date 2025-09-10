@@ -5,7 +5,6 @@ from model_utils.models import TimeStampedModel
 from django.db import models
 from django.conf import settings
 from applications.cuentas.models import Tin # COMPAÑIAS PROPIETARIAS
-#from applications.COMERCIAL.suppliers.models import supplier # PROVEEDORES
 from applications.COMERCIAL.stakeholders.models import supplier # PROVEEDORES
 
 from .managers import (
@@ -71,20 +70,21 @@ class requirements(TimeStampedModel):
 class RequestTracking(TimeStampedModel):
     """ Modelo de seguimiento de requerimientos """
     # AREAS DE REQUERIMIENTO
-    USER = '0'
-    AREAMANAGER = '10'
+
+    COMERCIAL = '1'
+    FINANZAS = '2'
+    PRODUCCION = '3'
     GERENCIA = '4'
-    COMPRAS = '1'
-    CONTABILIDAD = '8'
-    FINANZAS = '5'
+    LOGISTICA = '5'
+    RECURSOSHUMANOS = '6'
 
     AREAS_TRACKING_CHOICES = [
-        (USER, 'Usuario'),
-        (AREAMANAGER, 'Area Manager'),
-        (GERENCIA, 'Gerencia'),
-        (COMPRAS, 'Compras'),
-        (CONTABILIDAD, 'Contabilidad'),
+        (COMERCIAL, 'Comercial'),
         (FINANZAS, 'Finanzas'),
+        (PRODUCCION, 'Producción'),
+        (GERENCIA, 'Gerencia'),
+        (LOGISTICA, 'Logistica'),
+        (RECURSOSHUMANOS, 'Recursos humanos'),
     ]
 
     # ESTADOS DE REQUERIMIENTO
@@ -152,9 +152,36 @@ class RequestTracking(TimeStampedModel):
         return f"{self.idRequirement} | {self.get_status_display()} | {self.get_area_display()}"
 
 class requirementItems(TimeStampedModel):
-    idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_requirement")
-    quantity = models.PositiveIntegerField('Cantidad', null=True, blank=True)
 
+    ARTICULO = '0'
+    TRANSFORMADOR = '1'
+    CONTENEDOR = '2'
+    ADUANA = "3"
+
+    TYPES_CHOICES = [
+        (ARTICULO, 'Articulo'),
+        (TRANSFORMADOR, 'Transformador'),
+        (CONTENEDOR, 'Contenedor'),
+        (ADUANA, 'Aduana'),
+    ]
+
+    type = models.CharField(
+        'Tipo',
+        max_length = 1, 
+        choices = TYPES_CHOICES,
+        null = True,
+        blank = True
+    )
+
+    from applications.COMERCIAL.sales.models import Trafos # Transformadores a cotizar
+    idTrafos = models.ForeignKey(Trafos, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_trafos")
+
+    from applications.LOGISTICA.transport.models import Container
+    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_container")
+
+    idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_requirement")
+    
+    quantity = models.PositiveIntegerField('Cantidad', null=True, blank=True)
     price = models.DecimalField(
         'Precio unitario', 
         max_digits=10, 
@@ -285,7 +312,7 @@ class QuoteSuppliers(TimeStampedModel):
     """ Envio de contizaciones """
     
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
-    idProvider = models.ManyToManyField(supplier)
+    idProvider = models.ManyToManyField(supplier, related_name="quote_supplier")
     message = models.TextField(
         'Mensaje',
         null = True,

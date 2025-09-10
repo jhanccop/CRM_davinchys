@@ -2,7 +2,7 @@ from model_utils.models import TimeStampedModel
 from django.db import models
 
 from applications.COMERCIAL.purchase.models import requirements
-from applications.COMERCIAL.sales.models import quotes
+
 
 from .managers import (
     ContainerManager,
@@ -10,7 +10,7 @@ from .managers import (
 
 class Container(TimeStampedModel): 
     """ Contenedores """
-    
+    from applications.COMERCIAL.sales.models import quotes
     idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True)
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
     
@@ -21,8 +21,8 @@ class Container(TimeStampedModel):
         blank=True
     )
 
-    message = models.TextField(
-        'Mensaje',
+    shortDescription = models.TextField(
+        'Descripción corta',
         null = True,
         blank = True
     )

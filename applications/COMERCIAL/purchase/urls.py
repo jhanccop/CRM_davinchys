@@ -5,9 +5,9 @@ app_name = "compras_app"
 
 urlpatterns = [
     # ==================== DASHBOARD PRINCIPAL ====================
-    path('comercial/dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    #path('comercial/dashboard/', views.DashboardView.as_view(), name='dashboard'),
     #path('comercial/ordenes-compra/cotizar-con-proveedores/<pk>/', views.QuoteWithSuppliers.as_view(), name='cotizar-con-proveedores'),
-    path('comercial/ordenes-compra/nueva-cotizacion/<pk>/', views.NewQuoteRequirementCreateView.as_view(), name='nueva_cotizacion_id'),
+    #path('comercial/ordenes-compra/nueva-cotizacion/<pk>/', views.NewQuoteRequirementCreateView.as_view(), name='nueva_cotizacion_id'),
     #path('comercial/ordenes-compra/nuevo-voucher/<pk>/', views.NewVoucherRequirementCreateView.as_view(), name='nueva_cotizacion_id'),
 
     # ==================== REQUERIMIENTOS ====================
@@ -18,9 +18,10 @@ urlpatterns = [
     path('comercial/requirement/editar/<pk>/', views.RequirementEditView.as_view(), name='edit_requirement'),
     path('comercial/requirement/delete/<pk>/', views.RequirementDeleteView.as_view(), name='delete_requirement'),
 
+    #path('comercial/requirement/trackin/<pk>/', views.RequirementDeleteView.as_view(), name='delete_requirement'),
+
     # ==================== ORDENES DE COMPRA ====================
     path('comercial/ordenes-compra/lista/', views.PurchaseOrderListView.as_view(), name='lista_ordenescompra'),
-
 
     # ==================== INVOICES COMPRA ====================
     path('comercial/compras/lista/', views.PurchaseListView.as_view(), name='lista_compras'),

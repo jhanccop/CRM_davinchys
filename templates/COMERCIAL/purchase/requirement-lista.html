@@ -10,8 +10,8 @@
 
 <!-- ================ BODY ================= -->
 <div class="row">
-  <div class="col-lg-6 col-md-6">
-    <div class="nav-wrapper position-relative end-0">
+  <div class="col-lg-6 col-md-12">
+    <div class="nav-wrapper">
       <ul class="nav nav-pills nav-fill p-1">
         <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
           <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'compras_app:list_requirement' %}">
@@ -26,8 +26,145 @@
       </ul>
     </div>
   </div>
+
+  <div class="col-lg-6 col-md-12">
+    <form method="GET" class="">{% csrf_token %}
+      <div class="d-flex align-items-center">
+        <div class="input-group input-group-outline">
+          <input class="form-control datetimepicker text-center text-dark pt-n4" value="{{documentos.intervalDate}}"
+            placeholder="today" id="dateKword" name="dateKword">
+        </div>
+        &emsp;
+        <div class="pt-3 pb-0">
+          <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
 </div>
 
+{% if user.is_boss %}
+<div class="row mb-4">
+  
+  <div class="col-12">
+      <div class="card">
+          <div class="card-header pb-0 ">
+            <div class="row align-middle align-items-center">
+              <div class="col-lg-6 col-md-3">
+                <h5 class="mb-0">Historial de requerimientos</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-0 px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-flush mb-0 align-items-center" id="datatable-boss">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto total</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
+                      <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in documentos.allDocumentation %}
+                    <tr>
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                            <h6 class="mb-0 text-sm">REQ-{{t.id}} {{t.idPetitioner}}</h6>
+                          </a>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                        </div>
+                      </td>
+
+                      <td class="text-sm text-end">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        {% if t.lastArea == "10" %} 
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Jefe de área - aprobado</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Jefe de área - rechazado</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Jefe de área - espera</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "4" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Gerencia</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Gerencia</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Gerencia</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "1" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Compras</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Compras</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Compras</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "3" %}
+                        <span class="badge badge-secondary">Compras</span>
+                        {% elif t.lastArea == "4" %}
+                        <span class="badge badge-secondary">Contabilidad</span>
+                        {% elif t.lastArea == "5" %}
+                        <span class="badge badge-secondary">Finanzas</span>
+                        {% endif %}
+
+                        {%if t.lastStatus == "1" %}
+                        <span class="badge badge-secondary">Recibido</span>
+                        {% elif t.lastStatus == "2" %}
+                        <span class="badge badge-success">Aprobado</span>
+                        {% elif t.lastStatus == "3" %}
+                        <span class="badge badge-secondary">Rechazado</span>
+                        {% elif t.lastStatus == "4" %}
+                        <span class="badge badge-warning">Observado</span>
+                        {% elif t.lastStatus == "5" %}
+                        <span class="badge badge-success">Completado</span>
+                        {% endif %}
+
+                      </td>
+
+                      <td>
+                        <a href="{% url 'compras_app:crear_log_requirement' t.id %}">
+                          <i class="far fa-thumbs-up text-lg text-success"></i> <i class="far fa-thumbs-down text-lg text-primary"></i>
+                        </a>
+
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endif %}
 
 <div class="row">
   <div class="col-lg-6 col-12 d-flex ms-auto ">
@@ -54,22 +191,6 @@
             <div class="row align-middle align-items-center">
               <div class="col-lg-6 col-md-3">
                 <h5 class="mb-0">Mi lista de requerimientos</h5>
-              </div>
-              <div class="col-lg-6 col-md-9">
-                <form method="GET" class="">{% csrf_token %}
-                  <div class="d-flex align-items-center">
-
-                    <div class="input-group input-group-outline">
-                      <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
-                        placeholder="today" id="dateKword" name="dateKword">
-                    </div>
-                    &emsp; 
-                    <div class="pt-3 pb-0">
-                      <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
-                    </div>
-                    
-                  </div>
-                </form>
               </div>
             </div>
           </div>
@@ -224,6 +345,19 @@
       dataTableclientes.export(data);
     });
   });
+
+</script>
+
+<script>
+  /* PROYECTOS */
+  '{% if user.is_boss %}'
+
+  const dataTableBoss= new simpleDatatables.DataTable("#datatable-boss", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+  '{% endif %}'
 
 </script>
 

@@ -6,9 +6,11 @@ from applications.cuentas.models import Tin, Account # COMPAÑIAS PROPIETARIAS
 from applications.clientes.models import Cliente
 from applications.COMERCIAL.stakeholders.models import client # Clientes
 
+
 from .managers import (
     IncomesManager,
     quotesManager,
+    QuoteTrackingManager
 )
 
 class quotes(TimeStampedModel):
@@ -16,7 +18,8 @@ class quotes(TimeStampedModel):
         COTIZACIONES DE FABRICACION
     """
     idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True,related_name="quote_client")
-    idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
+    idTinReceiving = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_receiving")
+    idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
     shortDescription = models.CharField(
         'Descripción',
         max_length = 100,
@@ -61,6 +64,12 @@ class quotes(TimeStampedModel):
         blank = True
     )
 
+    dateOrder = models.DateField(
+        'Fecha de solicitud',
+        null=True,
+        blank=True
+    )
+
     deadline = models.DateField(
         'Fecha de entrega',
         null=True,
@@ -100,6 +109,8 @@ class Trafos(TimeStampedModel):
     """
         Catalogo de Transformadores
     """
+    from applications.LOGISTICA.transport.models import Container
+    
     KVA_CHOICES = (
         ('0', '15'),
         ('1', '30'),
@@ -203,6 +214,7 @@ class Trafos(TimeStampedModel):
     id = models.AutoField(primary_key=True)
 
     idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "trafo_Quote")
+    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name = "container")
 
     KVA = models.CharField(
         'kVA CAPACITY',
@@ -336,27 +348,37 @@ class Trafos(TimeStampedModel):
         verbose_name_plural = 'Trafos'
 
     def __str__(self):
-        return f"{self.get_KVA_display()} | {self.get_LV_display()}"
+        return f"{self.serialNumber} | {self.get_KVA_display()} | {self.get_LV_display()}"
 
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """
     # AREAS DE REQUERIMIENTO
-    DOCUMENTAL = '0'
-    TECHNICIAN = '1'
+    CLIENTE = '0'
+    COMERCIAL = '1'
+    FINANZAS = '2'
+    PRODUCCION = '3'
+    GERENCIA = '4'
+    LOGISTICA = '5'
 
     AREAS_TRACKING_CHOICES = [
-        (DOCUMENTAL, 'Area Documentaria'),
-        (TECHNICIAN, 'Area Técnica'),
+        (CLIENTE, 'Cliente'),
+        (COMERCIAL, 'Comercial - documentos'),
+        (PRODUCCION, 'Producción - técnico'),
+        (FINANZAS, 'Finanzas'),
+        (GERENCIA, 'Gerencia'),
+        (LOGISTICA, 'Logistica'),
     ]
 
-    # ESTADOS DE REQUERIMIENTO
-    CREADO = '0'
-    RECIBIDO = '1'
-    APROBADO = '2'
-    RECHAZADO = '3'
-    OBSERVADO = '4'
+    # ESTADOS DE REQUERIMIENTO - COMERCIAL fINANZAS 
+    ESPERA = '0'
+    RECIBIDO = '1'  #ROJO
+    APROBADO = '2'  #verde
+    RECHAZADO = '3' # GRIS
+    OBSERVADO = '4' # GRIS
 
-    # ESTADO OREDEN DE COMPRA
+    PO = '13'
+
+    # ESTADO ORDEN DE COMPRA
     SOLICITADO = '5'    # APROBADA PPOR TODAS LAS INSTACIAS LISTAS PARA ADQUIRIR
     PRODUCCION = '6'
     CONTROLDECALIDAD = '7'
@@ -368,7 +390,7 @@ class QuoteTracking(TimeStampedModel):
     COMPLETADO = '12'
     
     STATE_CHOICES = [
-        (CREADO, 'Creado'),
+        (ESPERA, 'Creado'),
         (RECIBIDO, 'Recibido'),
         (APROBADO, 'Aprobado'),
         (RECHAZADO, 'Rechazado'),
@@ -404,14 +426,14 @@ class QuoteTracking(TimeStampedModel):
         blank = True
     )
 
-    #objects = requestTrackingManager()
+    objects = QuoteTrackingManager()
 
     class Meta:
         verbose_name = 'seguimiento de requerimiento'
         verbose_name_plural = 'seguimientos de requerimientos'
     
     def __str__(self):
-        return f"{self.idRequirement} | {self.get_status_display()} | {self.get_area_display()}"
+        return f"{self.idquote} | {self.get_status_display()} | {self.get_area_display()}"
 
 class POvouchers(TimeStampedModel): 
     """
@@ -684,7 +706,6 @@ class POinvoice(TimeStampedModel):
     def __str__(self):
         return f"{self.idQuote} | {self.idTin} | {self.idClient}"
 
-
 class Incomes(TimeStampedModel):
 
     # STATUS DOC
@@ -861,7 +882,7 @@ class Incomes(TimeStampedModel):
         blank=True
     )
     idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
-    idClient = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)
+    idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True)
     
     idInvoice = models.CharField(
         'Id de comprobante',

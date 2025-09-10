@@ -9,15 +9,52 @@ from .models import (
   Container,
 )
 
+from applications.COMERCIAL.purchase.models import requirements
+
 from applications.users.mixins import (
-  AdminPermisoMixin,
+  LogisticaMixin,
   AdminClientsPermisoMixin
 )
 
-# ==================== CONTENEDORES ====================
-class ContainerListView(AdminClientsPermisoMixin,ListView):
-  template_name = "LOGISTICA/transport/lista-contenedores.html"
+# ==================== REQUERIMIENTOS LOGISTICOS ====================
+class LogisticRequirementListView(LogisticaMixin,ListView):
+  template_name = "LOGISTICA/transport/logistica-requirement-lista.html"
   context_object_name = 'documentos'
+
+  def get_queryset(self,**kwargs):
+    #compania_id = self.request.session.get('compania_id')
+    user = self.request.user
+
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
+
+    areaDocumentation = requirements.objects.ListaRequerimientosPorArea(
+      intervalo = intervalDate,
+      idArea = user.company.id
+      )
+    
+    bossDocumentation = []
+
+    isBoss = self.request.user.is_boss
+    if isBoss:
+        bossDocumentation = requirements.objects.ListaRequerimientosForBoss(
+        intervalo = intervalDate,
+        )
+
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    payload["documentation"] = areaDocumentation
+    payload["allDocumentation"] = bossDocumentation
+    
+    return payload
+
+
+
+# ==================== CONTENEDORES ====================
+class ContainerListView(LogisticaMixin,ListView):
+  template_name = "LOGISTICA/transport/lista-contenedores.html"
+  context_object_name = 'data'
 
   def get_queryset(self,**kwargs):
     idTin = self.request.user.company

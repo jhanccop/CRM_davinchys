@@ -306,7 +306,7 @@
             </div>
 
             <div class="ms-auto text-center bg-white text-dark text-lg"style="width: 30%; border: 1px solid #000; border-radius: 10px; padding: 10px;">
-                <form id="monthSelectForm" method="GET" action="{% url 'home_app:index' %}">
+                <form id="monthSelectForm" method="GET" action=" ">
                     <select class="form-control" name="Kword" id="Kword" placeholder="Este mes">
                         {% for month in data.listMonths %}
                         <option value="{{month}}" {% if month == data.monthSelected %}selected{% endif %}>{{month}}</option>

@@ -45,12 +45,19 @@
               {% for t in clientes %}
               <tr class="mb-0 pb-0">
                 <td class="text-sm mb-0 ">
-                  {{ t.tradeName }}
+                  <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
+                    {{ t.tradeName }}
+                  </a>
+                  
                   <p class=" mb-0 text-dark font-weight-bolder">{{ t.numberIdClient }}</p>
                 </td>
                 <td class="text-start text-sm text-uppercase">{{ t.get_status_display }}</td>
                 <td class="text-start text-sm text-uppercase">{{ t.get_location_display }}</td>
                 <td class="text-end">
+                  <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
+                    <i class="far fa-eye text-info text-lg"></i>
+                  </a>
+                  &emsp;
                   <a href="{% url 'stakeholders_app:cliente-editar' t.id %}">
                     <i class="far fa-edit text-dark text-lg"></i>
                   </a>

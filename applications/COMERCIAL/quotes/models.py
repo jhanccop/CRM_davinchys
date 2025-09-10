@@ -378,7 +378,6 @@ def create_initial_quote_tracking(sender, instance, created, **kwargs):
     El estado inicial será 'Recibido' (0).
     """
 
-    print("***************---------")
     if created:
         QuoteTraking.objects.create(
             idTrafoQuote=instance,
