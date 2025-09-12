@@ -7,7 +7,8 @@ from django.db.models.functions import TruncDate,LastValue,Abs, TruncMonth
 from django.db.models import Sum, Max, DateField,F, Q, Count, When, Value, Case, When, FloatField
 
 class FinancialDocumentsManager(models.Manager):
-    def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
+    def ListaDocumentosPorTipo(self,intervalo,tipoD, tipoM,compania_id):
+
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -19,10 +20,38 @@ class FinancialDocumentsManager(models.Manager):
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
 
-        if tipo == 5:
+        if tipoD == 5 and tipoM == 2:
             result = self.filter(
                 date__range = rangeDate,
                 idTin__id = compania_id
+            ).annotate(
+                per=Case(
+                    When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
+                    default=(F("amountReconcilied") * 100) / F("amount"),
+                    output_field=FloatField()
+                ),
+                #per = (F("amountReconcilied")/F("amount")) * 100,
+            ).order_by("date")
+
+        elif tipoD == 5 :
+            result = self.filter(
+                date__range = rangeDate,
+                idTin__id = compania_id,
+                expenseFlag = not bool(tipoM)
+            ).annotate(
+                per=Case(
+                    When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
+                    default=(F("amountReconcilied") * 100) / F("amount"),
+                    output_field=FloatField()
+                ),
+                #per = (F("amountReconcilied")/F("amount")) * 100,
+            ).order_by("date")
+
+        elif tipoM == 2:
+            result = self.filter(
+                date__range = rangeDate,
+                idTin__id = compania_id,
+                typeInvoice = str(tipoD),
             ).annotate(
                 per=Case(
                     When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
@@ -35,7 +64,8 @@ class FinancialDocumentsManager(models.Manager):
             result = self.filter(
                 date__range = rangeDate,
                 idTin__id = compania_id,
-                typeInvoice = str(tipo)
+                typeInvoice = str(tipoD),
+                expenseFlag = not bool(tipoM)
             ).annotate(
                 per=Case(
                     When(amount=0, then=Value(0)),  # Si amount es 0, devuelve 0
@@ -88,8 +118,8 @@ class FinancialDocumentsManager(models.Manager):
        return self.filter(idClient__ruc = ruc).order_by("created")
     
 class OthersDocumentsManager(models.Manager):
-    def ListaDocumentosPorTipo(self,intervalo,tipo,compania_id):
-        print("5555",tipo)
+    def ListaDocumentosPorTipo(self,intervalo,tipoD,compania_id):
+        
         Intervals = intervalo.split(' to ')
         intervals = [ datetime.strptime(dt,"%Y-%m-%d") for dt in Intervals]
 
@@ -101,17 +131,17 @@ class OthersDocumentsManager(models.Manager):
         else:
             rangeDate[1] = intervals[1] + timedelta(days = 1)
 
-        if tipo == 5:
+        if tipoD == 5:
             result = self.filter(
                 date__range = rangeDate,
                 idFinacialDocuments__idTin__id = compania_id
             ).order_by("date")
-            print("5555",tipo, result)
+            print("5555",tipoD, result)
         else:
             result = self.filter(
                 date__range = rangeDate,
                 idFinacialDocuments__idTin__id = compania_id,
-                typeDoc = str(tipo)
+                typeDoc = str(tipoD)
             ).order_by("date")
 
         return result

@@ -40,9 +40,6 @@
       Export CSV
     </a>
 
-
-    
-
     <div class="dropleft ms-3">
       <div class="dropdown">
         <a href="#" class="btn bg-gradient-dark dropdown-toggle " data-bs-toggle="dropdown" id="navbarDropdownMenuLink2">
@@ -73,15 +70,28 @@
       <div class="card">
           <div class="card-header pb-0 ">
             <div class="row align-middle align-items-center">
-              <div class="col-lg-6 col-md-3">
+              <div class="col-lg-4 col-md-3">
                 <h5 class="mb-0">Documentos</h5>
                 <p class="pt-0">FINANCIEROS</p>
               </div>
-              <div class="col-lg-6 col-md-9">
+              <div class="col-lg-8 col-md-9">
                 <form method="GET" class="">{% csrf_token %}
                   <div class="d-flex align-items-center">
 
-                    <div class="input-group input-group-outline is-valid">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Tipo</label>
+                      
+                      <select class="form-control" name="TypKword" id="TypKword">
+                        <option value="0">Egreso</option>
+                        <option value="1">Ingreso</option>
+                        <option value="2" selected>Todo</option>
+                      </select>
+                      
+                    </div>
+                    &emsp;
+
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Documento</label>
                       
                       <select class="form-control" name="DocKword" id="DocKword">
                         <option value="0">Factura</option>
@@ -94,7 +104,8 @@
                       
                     </div>
                     &emsp;
-                    <div class="input-group input-group-outline">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Rango</label>
                       <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
                         placeholder="today" id="dateKword" name="dateKword">
                     </div>
@@ -116,6 +127,7 @@
                       <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Proveedor</th>
                       <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
                       <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
                       <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
@@ -126,7 +138,7 @@
                     <tr>
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.year_dec }} - {{ t.month_dec }}</h6>
+                          <h6 class="mb-0 text-sm">{{ t.year_dec |default:"-"}} - {{ t.month_dec |default:"-"}}</h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
                         </div>
                       </td>
@@ -134,14 +146,21 @@
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
                           <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-financiero-detalle' t.id %}">{{t.idInvoice}}</a></h6>
-                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.shortDescription|default:"-" }}</p>
                         </div>
                       </td>
 
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.idClient.ruc }}</h6>
+                          <h6 class="mb-0 text-sm">{{ t.idClient.numberIdClient }}</h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idClient.tradeName }}</p>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.idSupplier.numberIdSupplier }}</h6>
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idSupplier.tradeName }}</p>
                         </div>
                       </td>
                       
@@ -229,8 +248,11 @@
 </script>
 
 <script>
-  const $select = document.querySelector('#DocKword');
-  $select.value = "{{documentos.selected}}";
+  const $selectDoc = document.querySelector('#DocKword');
+  $selectDoc.value = "{{documentos.selected}}";
+
+  const $selectType = document.querySelector('#TypKword');
+  $selectType.value = "{{documentos.selectedM}}";
 </script>
 
 {% endblock JSscripts %}

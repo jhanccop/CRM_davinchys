@@ -51,23 +51,6 @@ class RawsFilesRHE(TimeStampedModel):
 
 class FinancialDocuments(TimeStampedModel):
 
-    # TYPES MOVEMENT
-    EGRESO = '0'
-    INGRESO = '1'
-
-    TYPE_MOVEMENT_CHOISES = [
-        (EGRESO, "Egreso"),
-        (INGRESO, "Ingreso"),
-    ]
-
-    typeMovement = models.CharField(
-        'Tipo movimiento',
-        max_length = 1, 
-        choices = TYPE_MOVEMENT_CHOISES,
-        null=True,
-        blank=True
-    )
-
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
     idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True)
     
@@ -246,6 +229,7 @@ class FinancialDocuments(TimeStampedModel):
         blank=True
     )
     idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
+    
     idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True)
     idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True)
     
@@ -308,6 +292,7 @@ class FinancialDocuments(TimeStampedModel):
     )
 
     declareFlag = models.BooleanField("Declaracion?",default=True)
+    expenseFlag = models.BooleanField("Egreso?",default=True)
 
     amount = models.DecimalField(
         'Monto bruto', 

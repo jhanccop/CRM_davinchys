@@ -48,21 +48,28 @@ class FinancialDocumentsAdmin(ImportExportModelAdmin):
             return obj.idClient.numberIdClient
         return None
     
+    def get_supplier_ruc(self, obj):
+        if obj.idSupplier:
+            return obj.idSupplier.numberIdSupplier
+        return None
+    
     list_display = (
         'id',
         'date',
         'get_client_ruc',
+        'get_supplier_ruc',
         'typeInvoice',
         'idInvoice',
         'typeCurrency',
+        'expenseFlag',
         'amount',
         'amountReconcilied',
         'description',
     )
     
-    search_fields = ("id",'idInvoice',)
-    list_filter = ('idInvoice','idClient')
-    autocomplete_fields = ['idClient',]
+    search_fields = ("id",'idInvoice','expenseFlag')
+    list_filter = ('idInvoice','expenseFlag')
+    autocomplete_fields = ['idClient','idSupplier']
 
 ## ==================== OthersDocuments =====================
 class OthersDocumentsResource(resources.ModelResource):

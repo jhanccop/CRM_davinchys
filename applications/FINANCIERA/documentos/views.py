@@ -35,7 +35,7 @@ from .models import (
   RawsFilesRHE,
 )
 
-from applications.COMERCIAL.stakeholders.models import client
+from applications.COMERCIAL.stakeholders.models import client, supplier
 from applications.cuentas.models import Tin
 
 from .forms import (
@@ -87,7 +87,7 @@ class ProcessRHEFileView(TemplateView):
             # Verificar si existe en FinancialDocuments
             existing = FinancialDocuments.objects.filter(
                 Q(idInvoice = doc_emitido) & 
-                Q(idClient__numberIdClient = doc_emisor)
+                Q(idSupplier__numberIdSupplier = doc_emisor)
             ).first()
             
             if existing:
@@ -133,9 +133,10 @@ class ProcessRHEFileView(TemplateView):
         rhe_file = RawsFilesRHE.objects.get(id=rhe_file_id)
         processed_data = self.process_text_file(rhe_file.archivo)
         
-        # Guardar los datos en FinancialDocuments
         saved_count = 0
         duplicates_count = 0
+        errors_count = 0
+        errors_list = []
         
         for item in processed_data['data']:
             doc_emitido = item['Nro_Doc_Emitido']
@@ -144,64 +145,82 @@ class ProcessRHEFileView(TemplateView):
             # Verificar si ya existe
             existing = FinancialDocuments.objects.filter(
                 Q(idInvoice=doc_emitido) & 
-                Q(idClient__numberIdClient=doc_emisor)
+                Q(idSupplier__numberIdSupplier=doc_emisor)
             ).first()
             
             if existing:
                 duplicates_count += 1
                 continue
                 
-            # Obtener cliente por RUC
+            # Obtener proveedor por RUC
             try:
-                cliente_obj = client.objects.get(numberIdClient=doc_emisor)
-            except client.DoesNotExist:
-                cliente = None
+                proveedor = supplier.objects.get(numberIdSupplier=doc_emisor)
                 
-            # Mapear datos al modelo
-            doc_status_map = {
-                'NO ANULADO': FinancialDocuments.NOANULADO,
-                'ANULADO': FinancialDocuments.ANULADO,
-                'REVERTIDO': FinancialDocuments.REVERTIDO
-            }
-            
-            currency_map = {
-                'SOLES': FinancialDocuments.SOLES,
-                'DÓLARES DE NORTE AMÉRICA': FinancialDocuments.DOLARES,
-                'Dï¿½LARES DE NORTE AMï¿½RICA': FinancialDocuments.DOLARES,
-                'EUROS': FinancialDocuments.EUROS
-            }
-            
-            try:
-                compania_id = self.request.session.get('compania_id')
-                tin = Tin.objects.get(id = compania_id)
+                # Mapear datos al modelo
+                doc_status_map = {
+                    'NO ANULADO': FinancialDocuments.NOANULADO,
+                    'ANULADO': FinancialDocuments.ANULADO,
+                    'REVERTIDO': FinancialDocuments.REVERTIDO
+                }
+                
+                currency_map = {
+                    'SOLES': FinancialDocuments.SOLES,
+                    'DÓLARES DE NORTE AMÉRICA': FinancialDocuments.DOLARES,
+                    'Dï¿½LARES DE NORTE AMï¿½RICA': FinancialDocuments.DOLARES,
+                    'EUROS': FinancialDocuments.EUROS
+                }
+                
+                try:
+                    compania_id = self.request.user.company.id
+                    tin = Tin.objects.get(id=compania_id)
 
-                financial_doc = FinancialDocuments(
-                    typeInvoice = FinancialDocuments.RHE,
-                    idInvoice = doc_emitido,
-                    idClient = cliente,
-                    idTin = tin,
-                    doc_status = doc_status_map.get(item['Estado_Doc_Emitido'], FinancialDocuments.NOANULADO),
-                    doc_emisor = FinancialDocuments.RUC,
-                    typeCurrency = currency_map.get(item['Moneda_de_Operación'], FinancialDocuments.SOLES),
-                    date = datetime.strptime(item['Fecha_de_Emisión'], '%d/%m/%Y').date(),
-                    description = item['Descripción'],
-                    amount = float(item['Renta_Bruta']),
-                    incomeTax = float(item['Impuesto_a_la_Renta']),
-                    netAmount = float(item['Renta_Neta']),
-                    pendingNetPayment = float(item['Monto_Neto_Pendiente_de_Pago']),
-                    user=request.user
-                )
-                financial_doc.save()
-                saved_count += 1
+                    financial_doc = FinancialDocuments(
+                        typeInvoice=FinancialDocuments.RHE,
+                        idInvoice=doc_emitido,
+                        idSupplier=proveedor,
+                        idTin=tin,
+                        doc_status=doc_status_map.get(item['Estado_Doc_Emitido'], FinancialDocuments.NOANULADO),
+                        doc_emisor=FinancialDocuments.RUC,
+                        typeCurrency=currency_map.get(item['Moneda_de_Operación'], FinancialDocuments.SOLES),
+                        date=datetime.strptime(item['Fecha_de_Emisión'], '%d/%m/%Y').date(),
+                        description=item['Descripción'],
+                        amount=float(item['Renta_Bruta']),
+                        incomeTax=float(item['Impuesto_a_la_Renta']),
+                        netAmount=float(item['Renta_Neta']),
+                        pendingNetPayment=float(item['Monto_Neto_Pendiente_de_Pago']),
+                        user=request.user
+                    )
+                    financial_doc.save()
+                    saved_count += 1
+                    
+                except Exception as e:
+                    errors_count += 1
+                    errors_list.append(f"Error al guardar documento {doc_emitido}: {str(e)}")
+                    
+            except supplier.DoesNotExist:
+                errors_count += 1
+                errors_list.append(f"Proveedor con RUC {doc_emisor} no encontrado para documento {doc_emitido}")
+                continue
+                
             except Exception as e:
-                print(f"Error al guardar documento {doc_emitido}: {str(e)}")
+                errors_count += 1
+                errors_list.append(f"Error al buscar proveedor {doc_emisor}: {str(e)}")
+                continue
         
         # Actualizar estado del archivo original
         rhe_file.status = RawsFilesRHE.COMPLETADO
         rhe_file.procesado = True
         rhe_file.save()
         
-        messages.success(request, f"Se guardaron {saved_count} registros. {duplicates_count} duplicados omitidos.")
+        # Mostrar mensajes con resumen
+        if saved_count > 0:
+            messages.success(request, f"Se guardaron {saved_count} registros correctamente.")
+        if duplicates_count > 0:
+            messages.warning(request, f"{duplicates_count} registros duplicados omitidos.")
+        if errors_count > 0:
+            messages.error(request, f"{errors_count} errores encontrados durante el procesamiento.")
+            request.session['processing_errors'] = errors_list[:10]
+        
         return redirect('documentos_app:documento-financiero-lista')
 
 # ================= DOCUMENTACION FINANCIEROS ========================
@@ -210,25 +229,31 @@ class FinancialDocumentsListView(FinanzasMixin,ListView):
   context_object_name = 'documentos'
 
   def get_queryset(self,**kwargs):
-    compania_id = self.request.session.get('compania_id')
-    selectedType = self.request.GET.get("DocKword", '')
+    compania_id = self.request.user.company.id
+    docSelected = self.request.GET.get("DocKword", '')
+    typeSelected = self.request.GET.get("TypKword", '')
 
     intervalDate = self.request.GET.get("dateKword", '')
     if intervalDate == "today" or intervalDate =="":
       intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
 
-    if selectedType == "Todo" or selectedType == None or selectedType =="" :
-      selectedType = 5
+    if typeSelected == "Todo" or typeSelected == None or typeSelected =="" :
+      typeSelected = 2
+
+    if docSelected == "Todo" or docSelected == None or docSelected =="" :
+      docSelected = 5
 
     documentation = FinancialDocuments.objects.ListaDocumentosPorTipo(
       intervalo = intervalDate,
-      tipo = int(selectedType),
+      tipoD = int(docSelected),
+      tipoM = int(typeSelected),
       compania_id = compania_id
       )
   
     payload = {}
     payload["intervalDate"] = intervalDate
-    payload["selected"] = selectedType
+    payload["selected"] = docSelected
+    payload["selectedM"] = typeSelected
     payload["documentation"] = documentation
     
     return payload

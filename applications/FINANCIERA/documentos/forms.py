@@ -49,6 +49,7 @@ class FinancialDocumentsForm(forms.ModelForm):
             'year_dec',
 
             'idSupplier',
+            'idClient',
             'typeCurrency',
             'amount',
             'netAmount',
@@ -57,6 +58,7 @@ class FinancialDocumentsForm(forms.ModelForm):
             'description',
             'shortDescription',
             'declareFlag',
+            'expenseFlag',
             
             'contabilidad',
             'xml_file',
@@ -137,6 +139,12 @@ class FinancialDocumentsForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+            'idClient': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
             'typeCurrency': forms.Select(
                 attrs = {
                     'placeholder': '',
@@ -178,7 +186,12 @@ class FinancialDocumentsForm(forms.ModelForm):
                     'class': 'form-check-input',
                 },
             ),
-
+            'expenseFlag': forms.CheckboxInput(
+                attrs={
+                    'type':'checkbox',
+                    'class': 'form-check-input',
+                },
+            ),
             # =======================
             'contabilidad': forms.Select(
                 attrs = {

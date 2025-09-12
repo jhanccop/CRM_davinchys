@@ -58,7 +58,6 @@ class MovimientosListView(FinanzasMixin,ListView):
   context_object_name = 'movimientos'
 
   def get_queryset(self,**kwargs):
-    #compania_id = self.request.session.get('compania_id')
     compania_id = self.request.user.company.id
     selectedAccount = self.request.GET.get("AccountKword", '')
     intervalDate = self.request.GET.get("dateKword", '')

@@ -123,12 +123,27 @@
               <h6 class="font-weight-bolder">Informacion de documento</h6>
 
               <div class="row">
-                <div class="col-12 col-sm-8">
-                  <p class="mb-0">Proveedor</p>
+                <div class="col-6 col-sm-3 mt-sm-4 pt-2">
+                  <div class="form-check form-switch ms-auto is-filled">
+                    <label for="exampleFormControlInput1" class="form-label">Egreso?</label>
+                    {{ form.expenseFlag }}
+                  </div>
+                </div>
+              
+                <div class="col-12 col-sm-8" id="supplierField" style="display:block">
+                  <p class="mb-0"> Proveedor </p>
+                  <div class="input-group input-group-outline">
+                    {{ form.idSupplier }}
+                  </div>
+                </div>
+              
+                <div class="col-12 col-sm-8" id="clientField" style="display:none">
+                  <p class="mb-0"> Cliente </p>
                   <div class="input-group input-group-outline">
                     {{ form.idClient }}
                   </div>
                 </div>
+
               </div>
 
               <br>
@@ -319,7 +334,6 @@
 {% block JSscripts %}
 
 <script>
-
   document.addEventListener('DOMContentLoaded', function() {
       // Obtener el elemento select
       const typeInvoiceSelect = document.querySelector('select[name="typeInvoice"]');
@@ -343,12 +357,9 @@
       if (detractionDiv) detractionDiv.style.display = 'none';
       if (shippingGuideDiv) shippingGuideDiv.style.display = 'none';
       if (retentionDiv) retentionDiv.style.display = 'none';
-
-      console.log(selectedValue);
       
       // Mostrar los campos según la selección
       if (selectedValue == "") {
-        console.log("selectedValue");
       } else if (selectedValue == 0) {
           if (detractionDiv) detractionDiv.style.display = 'block';
           if (shippingGuideDiv) shippingGuideDiv.style.display = 'block';
@@ -394,6 +405,47 @@
     }, {once: true});
   }
 
+  if (document.getElementById('id_idSupplier')) {
+    var element = document.getElementById('id_idSupplier');
+    
+    // Solo inicializar Choices cuando el campo recibe foco
+    element.addEventListener('focus', function() {
+      if (!this._choicesInitialized) {
+        clientChoices = new Choices(this, {
+          removeItemButton: true,
+          shouldSort: false
+        });
+        this._choicesInitialized = true;
+      }
+    }, {once: true});
+  }
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Referencias a los elementos del DOM
+    const expenseFlag = document.getElementById('id_expenseFlag');
+    const supplierField = document.getElementById('supplierField');
+    const clientField = document.getElementById('clientField');
+
+    // Función para actualizar la interfaz según el estado del checkbox
+    function updateUI() {
+      if (expenseFlag.checked) {
+        if (supplierField) supplierField.style.display = 'block';
+        if (clientField) clientField.style.display = 'none';
+      } else {
+        if (supplierField) supplierField.style.display = 'none';
+        if (clientField) clientField.style.display = 'block';
+      }
+    }
+
+    // Inicializar la interfaz
+    updateUI();
+
+    // Añadir event listener para cambios en el checkbox
+    expenseFlag.addEventListener('change', updateUI);
+  });
 </script>
 
 <script>

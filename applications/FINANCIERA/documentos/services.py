@@ -65,19 +65,19 @@ def procesar_datos(texto):
         return {"error": f"Error al procesar los datos: {str(e)}"}
 
 # Datos de entrada
-TEXTO_EJEMPLO = """Fecha de Emisión|Tipo Doc. Emitido|Nro. Doc. Emitido|Estado Doc. Emitido|Tipo de Doc. Emisor|Nro. Doc. Emisor|Apellidos y Nombres, Denominación o Razón Social del Emisor|Tipo de Renta|Gratuito|Descripción|Observación|Moneda de Operación|Renta Bruta|Impuesto a la Renta|Renta Neta|Monto Neto Pendiente de Pago|
-07/04/2025|RH|E001-51|NO ANULADO|RUC|10474308061|RIVAS CHAMORRO JOSE ANTONIO                                                                         |A|NO|SERVICIO DE SUPERVISIÓN EN PRUEBAS A TRANSFORMADORES |- |SOLES|2768.46|0.00|2768.46|0.00|
-10/04/2025|RH|E001-32|REVERTIDO|RUC|10434919954|HANCCO PACCORI JOEL JAFET                                                                           |A|NO|SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN |- |Dï¿½LARES DE NORTE AMï¿½RICA|3000.00|0.00|3000.00|0.00|
-14/04/2025|RH|E001-33|NO ANULADO|RUC|10434919954|HANCCO PACCORI JOEL JAFET                                                                           |A|NO|SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN |- |Dï¿½LARES DE NORTE AMï¿½RICA|3000.00|0.00|3000.00|0.00|"""
+#TEXTO_EJEMPLO = """Fecha de Emisión|Tipo Doc. Emitido|Nro. Doc. Emitido|Estado Doc. Emitido|Tipo de Doc. Emisor|Nro. Doc. Emisor|Apellidos y Nombres, Denominación o Razón Social del Emisor|Tipo de Renta|Gratuito|Descripción|Observación|Moneda de Operación|Renta Bruta|Impuesto a la Renta|Renta Neta|Monto Neto Pendiente de Pago|
+#07/04/2025|RH|E001-51|NO ANULADO|RUC|10474308061|RIVAS CHAMORRO JOSE ANTONIO                                                                         |A|NO|SERVICIO DE SUPERVISIÓN EN PRUEBAS A TRANSFORMADORES |- |SOLES|2768.46|0.00|2768.46|0.00|
+#10/04/2025|RH|E001-32|REVERTIDO|RUC|10434919954|HANCCO PACCORI JOEL JAFET                                                                           |A|NO|SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN |- |Dï¿½LARES DE NORTE AMï¿½RICA|3000.00|0.00|3000.00|0.00|
+#14/04/2025|RH|E001-33|NO ANULADO|RUC|10434919954|HANCCO PACCORI JOEL JAFET                                                                           |A|NO|SERVICIO DE PROGRAMACIÓN DE SISTEMA INFORMÁTICO Y DE AUTOMATIZACIÓN |- |Dï¿½LARES DE NORTE AMï¿½RICA|3000.00|0.00|3000.00|0.00|"""
 
 # Procesamiento y salida
-if __name__ == "__main__":
-    resultado = procesar_datos(TEXTO_EJEMPLO)
+#if __name__ == "__main__":
+#    resultado = procesar_datos(TEXTO_EJEMPLO)
     
     # Convertir a JSON con formato legible y asegurando caracteres Unicode
-    json_resultado = json.dumps(resultado, indent=4, ensure_ascii=False)
+#    json_resultado = json.dumps(resultado, indent=4, ensure_ascii=False)
     
-    print(json_resultado)
+#    print(json_resultado)
     
     # Opcional: Guardar en un archivo
     #with open('resultado_procesado.json', 'w', encoding='utf-8') as f:
