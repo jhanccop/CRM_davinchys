@@ -313,16 +313,16 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
             }
 
             # Extraer información del emisor
-            supplier = root.find('.//cac:AccountingSupplierParty/cac:Party', namespaces)
+            supplierV = root.find('.//cac:AccountingSupplierParty/cac:Party', namespaces)
             emisor = {
-                'ruc': supplier.find('.//cbc:ID', namespaces).text,
-                'razon_social': supplier.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces).text.strip(),
+                'ruc': supplierV.find('.//cbc:ID', namespaces).text,
+                'razon_social': supplierV.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces).text.strip(),
                 'direccion': {
-                    'calle': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip(),
-                    'distrito': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip(),
-                    'provincia': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
-                    'departamento': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
-                    'codigo_ubigeo': supplier.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip()
+                    'calle': supplierV.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip(),
+                    'distrito': supplierV.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip(),
+                    'provincia': supplierV.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'departamento': supplierV.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
+                    'codigo_ubigeo': supplierV.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip()
                 }
             }
 
@@ -400,7 +400,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 if idTin:
                     fields['idTin'] = idTin.id
                 else:
-                    response_data['alerts'].append(f'El RUC {client_recept} no pertenece al grupo empresarial ')
+                    response_data['alerts'].append(f'Factura emitida a otra compañia. RUC {client_recept}')
                     response_data['success'] = True
                     return JsonResponse(response_data)
 
@@ -409,19 +409,20 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
 
             #  filtro, por id y por ruc para detectar duplicados
             if supplier_id:
-                cliente = cliente.objects.filter(ruc=supplier_id).first()
+                supplierO = supplier.objects.filter(numberIdSupplier=supplier_id).first()
+                print("******",supplierO)
 
-                if cliente:
-                    fields['idClient'] = cliente.id
+                if supplierO:
+                    fields['idSupplier'] = supplierO.id
                     fields['idInvoice'] = invoice_id
-                    if FinancialDocuments.objects.filter(idInvoice=invoice_id, idClient__ruc=supplier_id).exists():
+                    if FinancialDocuments.objects.filter(idInvoice=invoice_id, idSupplier__numberIdSupplier=supplier_id).exists():
                         response_data['alerts'].append(
-                        f'¡Alerta! Ya existe un documento con ID {invoice_id} para el cliente {cliente.tradeName} (RUC: {supplier_id})'
+                        f'¡Alerta! Ya existe un documento con ID {invoice_id} para el proveedor {supplierO.tradeName} (RUC: {supplier_id})'
                         )
                         response_data['dup'] = True
                 else:
                     response_data['alerts'].append(
-                    f'¡No se encuentra al porveedor {cliente.tradeName} (RUC: {supplier_id})'
+                    f'¡No se encuentra al proveedor {supplierO.tradeName} (RUC: {supplier_id})'
                     )
 
             issue_date = factura_json["factura"]["informacion_general"]["fecha_emision"]

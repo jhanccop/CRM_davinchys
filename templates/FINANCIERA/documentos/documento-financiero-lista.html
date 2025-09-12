@@ -145,7 +145,13 @@
                       
                       <td class="text-sm">
                         <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-financiero-detalle' t.id %}">{{t.idInvoice}}</a></h6>
+                          <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-financiero-detalle' t.id %}">
+                            {{t.idInvoice}}
+                            {% if t.doc_status == "2" %}
+                            <span class="badge badge-danger">{{t.get_doc_status_display|default:""}}</span>
+                            
+                            {% endif %}
+                          </a></h6>
                           <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.shortDescription|default:"-" }}</p>
                         </div>
                       </td>
