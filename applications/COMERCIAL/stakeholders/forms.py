@@ -165,3 +165,4 @@ class supplierForm(forms.ModelForm):
         if ruc and not ruc.isdigit():
             raise forms.ValidationError("El TIN debe contener solo números")
         return ruc
+    

@@ -6,13 +6,14 @@ from django.db.models import Q
 from datetime import datetime
 import json
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 import xml.etree.ElementTree as ET
 
 from applications.users.mixins import (
   AdminPermisoMixin,
   AdminClientsPermisoMixin, # Adquisiciones, Finanzas, Tesoreria, contabilidad y administrador
-  FinanzasMixin
+  FinanzasMixin,
+  ComercialFinanzasMixin
 )
 
 
@@ -44,8 +45,10 @@ from .forms import (
   UploadRHETextFileForm,
 )
 
+from applications.COMERCIAL.stakeholders.forms import supplierForm
+
 # ================= CARGA MASIVA RHE ========================
-class UploadRHEFileView(FormView):
+class UploadRHEFileView(ComercialFinanzasMixin,FormView):
     template_name = 'FINANCIERA/documentos/procesar_RHE.html'
     form_class = UploadRHETextFileForm
     success_url = reverse_lazy('documentos_app:procesamiento-doc-rhe')
@@ -60,9 +63,9 @@ class UploadRHEFileView(FormView):
         self.request.session['rhe_file_id'] = rhe_file.id
         return super().form_valid(form)
 
-class ProcessRHEFileView(TemplateView):
+class ProcessRHEFileView(ComercialFinanzasMixin,TemplateView):
     template_name = 'FINANCIERA/documentos/resultsRHE.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         rhe_file_id = self.request.session.get('rhe_file_id')
@@ -76,8 +79,9 @@ class ProcessRHEFileView(TemplateView):
         processed_data = self.process_text_file(rhe_file.archivo)
         context['processed_data'] = processed_data
         
-        # Verificar duplicados
+        # Verificar duplicados y proveedores faltantes
         duplicates = []
+        missing_suppliers = []
         errors = []
         
         for item in processed_data['data']:
@@ -95,16 +99,38 @@ class ProcessRHEFileView(TemplateView):
                     'data': item,
                     'existing': existing
                 })
+            else:
+                # Verificar si el proveedor existe
+                try:
+                    supplier.objects.get(numberIdSupplier=doc_emisor)
+                except supplier.DoesNotExist:
+                    # Si no existe, agregar a la lista de proveedores faltantes
+                    if doc_emisor not in [s['doc_emisor'] for s in missing_suppliers]:
+                        missing_suppliers.append({
+                            'doc_emisor': doc_emisor,
+                            'razon_social': item.get('Apellidos_y_Nombres_Denominación_o_Razón_Social_del_Emisor', ''),
+                            'count': 1
+                        })
+                    else:
+                        # Incrementar contador si ya existe
+                        for s in missing_suppliers:
+                            if s['doc_emisor'] == doc_emisor:
+                                s['count'] += 1
+                                break
         
         context['duplicates'] = duplicates
+        context['missing_suppliers'] = missing_suppliers
         context['errors'] = errors
         context['rhe_file_id'] = rhe_file_id
+        context['has_missing_suppliers'] = len(missing_suppliers) > 0
+        
+        # Guardar datos procesados en sesión para uso posterior
+        self.request.session['processed_data'] = processed_data
         
         return context
     
     def process_text_file(self, file):
         lines = file.read().decode('utf-8').splitlines()
-        #headers = lines[0].split('|')
         headers = [h.replace(' ', '_').replace('.', '').replace(',', '') for h in lines[0].split('|')]
         data = []
         
@@ -126,102 +152,139 @@ class ProcessRHEFileView(TemplateView):
         }
     
     def post(self, request, *args, **kwargs):
-        rhe_file_id = request.session.get('rhe_file_id')
-        if not rhe_file_id:
-            return redirect('documentos_app:carga-doc-rhe')
-            
-        rhe_file = RawsFilesRHE.objects.get(id=rhe_file_id)
-        processed_data = self.process_text_file(rhe_file.archivo)
-        
-        saved_count = 0
-        duplicates_count = 0
-        errors_count = 0
-        errors_list = []
-        
-        for item in processed_data['data']:
-            doc_emitido = item['Nro_Doc_Emitido']
-            doc_emisor = item['Nro_Doc_Emisor']
-            
-            # Verificar si ya existe
-            existing = FinancialDocuments.objects.filter(
-                Q(idInvoice=doc_emitido) & 
-                Q(idSupplier__numberIdSupplier=doc_emisor)
-            ).first()
-            
-            if existing:
-                duplicates_count += 1
-                continue
-                
-            # Obtener proveedor por RUC
-            try:
-                proveedor = supplier.objects.get(numberIdSupplier=doc_emisor)
-                
-                # Mapear datos al modelo
-                doc_status_map = {
-                    'NO ANULADO': FinancialDocuments.NOANULADO,
-                    'ANULADO': FinancialDocuments.ANULADO,
-                    'REVERTIDO': FinancialDocuments.REVERTIDO
-                }
-                
-                currency_map = {
-                    'SOLES': FinancialDocuments.SOLES,
-                    'DÓLARES DE NORTE AMÉRICA': FinancialDocuments.DOLARES,
-                    'Dï¿½LARES DE NORTE AMï¿½RICA': FinancialDocuments.DOLARES,
-                    'EUROS': FinancialDocuments.EUROS
-                }
-                
-                try:
-                    compania_id = self.request.user.company.id
-                    tin = Tin.objects.get(id=compania_id)
 
-                    financial_doc = FinancialDocuments(
-                        typeInvoice=FinancialDocuments.RHE,
-                        idInvoice=doc_emitido,
-                        idSupplier=proveedor,
-                        idTin=tin,
-                        doc_status=doc_status_map.get(item['Estado_Doc_Emitido'], FinancialDocuments.NOANULADO),
-                        doc_emisor=FinancialDocuments.RUC,
-                        typeCurrency=currency_map.get(item['Moneda_de_Operación'], FinancialDocuments.SOLES),
-                        date=datetime.strptime(item['Fecha_de_Emisión'], '%d/%m/%Y').date(),
-                        description=item['Descripción'],
-                        amount=float(item['Renta_Bruta']),
-                        incomeTax=float(item['Impuesto_a_la_Renta']),
-                        netAmount=float(item['Renta_Neta']),
-                        pendingNetPayment=float(item['Monto_Neto_Pendiente_de_Pago']),
-                        user=request.user
-                    )
-                    financial_doc.save()
-                    saved_count += 1
-                    
-                except Exception as e:
-                    errors_count += 1
-                    errors_list.append(f"Error al guardar documento {doc_emitido}: {str(e)}")
-                    
-            except supplier.DoesNotExist:
-                errors_count += 1
-                errors_list.append(f"Proveedor con RUC {doc_emisor} no encontrado para documento {doc_emitido}")
-                continue
+        try:
+            rhe_file_id = request.session.get('rhe_file_id')
+            if not rhe_file_id:
+                messages.error(request, "No se encontró el archivo para procesar")
+                return redirect('documentos_app:carga-doc-rhe')
+            
+            # Verificar si hay proveedores faltantes
+            processed_data = request.session.get('processed_data', {})
+            missing_suppliers = []
+            
+            for item in processed_data.get('data', []):
+                doc_emisor = item['Nro_Doc_Emisor']
+                try:
+                    supplier.objects.get(numberIdSupplier=doc_emisor)
+                except supplier.DoesNotExist:
+                    if doc_emisor not in missing_suppliers:
+                        missing_suppliers.append(doc_emisor)
+            
+            # Si hay proveedores faltantes, redirigir a la vista de creación
+            if missing_suppliers:
+                request.session['missing_suppliers'] = missing_suppliers
+                request.session['pending_rhe_file_id'] = rhe_file_id
+                return redirect('stakeholders_app:proveedor-crear-rhe')
+            
+            try:
+                rhe_file = RawsFilesRHE.objects.get(id=rhe_file_id)
+                processed_data = self.process_text_file(rhe_file.archivo)
                 
+                saved_count = 0
+                duplicates_count = 0
+                errors_count = 0
+                errors_list = []
+                
+                for item in processed_data['data']:
+                    doc_emitido = item['Nro_Doc_Emitido']
+                    doc_emisor = item['Nro_Doc_Emisor']
+                    
+                    # Verificar si ya existe
+                    existing = FinancialDocuments.objects.filter(
+                        Q(idInvoice=doc_emitido) & 
+                        Q(idSupplier__numberIdSupplier=doc_emisor)
+                    ).first()
+                    
+                    if existing:
+                        duplicates_count += 1
+                        continue
+                        
+                    # Obtener proveedor por RUC
+                    try:
+                        proveedor = supplier.objects.get(numberIdSupplier=doc_emisor)
+                        
+                        # Mapear datos al modelo
+                        doc_status_map = {
+                            'NO ANULADO': FinancialDocuments.NOANULADO,
+                            'ANULADO': FinancialDocuments.ANULADO,
+                            'REVERTIDO': FinancialDocuments.REVERTIDO
+                        }
+                        
+                        currency_map = {
+                            'SOLES': FinancialDocuments.SOLES,
+                            'DÓLARES DE NORTE AMÉRICA': FinancialDocuments.DOLARES,
+                            'Dï¿½LARES DE NORTE AMï¿½RICA': FinancialDocuments.DOLARES,
+                            'EUROS': FinancialDocuments.EUROS
+                        }
+                        
+                        try:
+                            compania_id = self.request.user.company.id
+                            tin = Tin.objects.get(id=compania_id)
+
+                            financial_doc = FinancialDocuments(
+                                typeInvoice=FinancialDocuments.RHE,
+                                idInvoice=doc_emitido,
+                                idSupplier=proveedor,
+                                idTin=tin,
+                                doc_status=doc_status_map.get(item['Estado_Doc_Emitido'], FinancialDocuments.NOANULADO),
+                                doc_emisor=FinancialDocuments.RUC,
+                                typeCurrency=currency_map.get(item['Moneda_de_Operación'], FinancialDocuments.SOLES),
+                                date=datetime.strptime(item['Fecha_de_Emisión'], '%d/%m/%Y').date(),
+                                description=item['Descripción'],
+                                amount=float(item['Renta_Bruta']),
+                                incomeTax=float(item['Impuesto_a_la_Renta']),
+                                netAmount=float(item['Renta_Neta']),
+                                pendingNetPayment=float(item['Monto_Neto_Pendiente_de_Pago']),
+                                user=request.user
+                            )
+                            financial_doc.save()
+                            saved_count += 1
+                            
+                        except Exception as e:
+                            errors_count += 1
+                            errors_list.append(f"Error al guardar documento {doc_emitido}: {str(e)}")
+                            
+                    except supplier.DoesNotExist:
+                        errors_count += 1
+                        errors_list.append(f"Proveedor con RUC {doc_emisor} no encontrado para documento {doc_emitido}")
+                        continue
+                        
+                    except Exception as e:
+                        errors_count += 1
+                        errors_list.append(f"Error al buscar proveedor {doc_emisor}: {str(e)}")
+                        continue
+                
+                # Actualizar estado del archivo original
+                rhe_file.status = RawsFilesRHE.COMPLETADO
+                rhe_file.procesado = True
+                rhe_file.save()
+                
+                # Limpiar sesión
+                if 'processed_data' in request.session:
+                    del request.session['processed_data']
+                if 'missing_suppliers' in request.session:
+                    del request.session['missing_suppliers']
+                if 'pending_rhe_file_id' in request.session:
+                    del request.session['pending_rhe_file_id']
+                
+                # Mostrar mensajes con resumen
+                if saved_count > 0:
+                    messages.success(request, f"Se guardaron {saved_count} registros correctamente.")
+                if duplicates_count > 0:
+                    messages.warning(request, f"{duplicates_count} registros duplicados omitidos.")
+                if errors_count > 0:
+                    messages.error(request, f"{errors_count} errores encontrados durante el procesamiento.")
+                    request.session['processing_errors'] = errors_list[:10]
+
             except Exception as e:
-                errors_count += 1
-                errors_list.append(f"Error al buscar proveedor {doc_emisor}: {str(e)}")
-                continue
-        
-        # Actualizar estado del archivo original
-        rhe_file.status = RawsFilesRHE.COMPLETADO
-        rhe_file.procesado = True
-        rhe_file.save()
-        
-        # Mostrar mensajes con resumen
-        if saved_count > 0:
-            messages.success(request, f"Se guardaron {saved_count} registros correctamente.")
-        if duplicates_count > 0:
-            messages.warning(request, f"{duplicates_count} registros duplicados omitidos.")
-        if errors_count > 0:
-            messages.error(request, f"{errors_count} errores encontrados durante el procesamiento.")
-            request.session['processing_errors'] = errors_list[:10]
-        
-        return redirect('documentos_app:documento-financiero-lista')
+                messages.error(request, f"Error al procesar el archivo: {str(e)}")
+            
+            return redirect('documentos_app:documento-financiero-lista')
+
+        except Exception as e:
+            messages.error(request, f"Error inesperado: {str(e)}")
+            return redirect('documentos_app:carga-doc-rhe')
 
 # ================= DOCUMENTACION FINANCIEROS ========================
 class FinancialDocumentsListView(FinanzasMixin,ListView):

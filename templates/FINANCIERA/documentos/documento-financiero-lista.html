@@ -32,6 +32,31 @@
   </div>
 </div>
 
+<!-- ================ MENSAJES DE PROCESAMIENTO DE RHE MASIVO ================= -->
+<!-- En tu base.html o en el template específico -->
+{% if messages %}
+<div class="messages-container bg-gradient-success">
+    {% for message in messages %}
+      {% if message.tags == "success" %}
+      <div class="alert alert-success text-white" role="alert">
+          <strong>Success!</strong> {{ message }}
+      </div>
+
+      {% elif messages.tags == "warning" %}
+      <div class="alert alert-warning text-white" role="alert">
+          <strong>Warning!</strong> {{ message }}
+      </div>
+
+      {% elif messages.tags == "error" %}
+      <div class="alert alert-primary text-white" role="alert">
+          <strong>Warning!</strong> {{ message }}
+      </div>
+      {% endif %}
+    {% endfor %}
+</div>
+
+{% endif %}
+
 <!-- ================ BODY ================= -->
 
 <div class="row">
@@ -259,6 +284,17 @@
 
   const $selectType = document.querySelector('#TypKword');
   $selectType.value = "{{documentos.selectedM}}";
+</script>
+
+<script>
+  // Cerrar mensajes automáticamente después de 5 segundos
+  setTimeout(function () {
+    var alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function (alert) {
+      var bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    });
+  }, 10000);
 </script>
 
 {% endblock JSscripts %}

@@ -120,6 +120,27 @@ class SupplierCreateView(ComercialFinanzasMixin,CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context['title'] = 'Crear Empresa'
+        context['btn_text'] = 'Guardar'
+        return context
+    
+class SupplierCreateViewRHE(ComercialFinanzasMixin,CreateView):
+    template_name = "COMERCIAL/stakeholders/crear_proveedores.html"
+    model = supplier
+    form_class = supplierForm
+    success_url = reverse_lazy('documentos_app:procesamiento-doc-rhe')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        #return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '//'))
+        return HttpResponseRedirect(self.get_success_url())
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ruc'] = self.request.GET.get('ruc', '')
+        context['razon_social'] = self.request.GET.get('razon_social', '')
+        
         context['title'] = 'Crear Empresa'
         context['btn_text'] = 'Guardar'
         return context

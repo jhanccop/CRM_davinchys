@@ -1,0 +1,119 @@
+{% extends "FINANCIERA/documentos/base-Dashboard.html" %}
+
+{% load  static %}
+{% block title %} Finanzas {% endblock title %}
+{% block main %} Financiera {% endblock main %}
+{% block appName %} Documentos {% endblock appName %}
+{% block Type %} Error en el archivo RHE {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Verificación Manual de Archivo RHE</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'documentos_app:process-rhe-file' %}?file_id={{ rhe_file.id }}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-sync"></i> Reprocesar
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información del archivo -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Información del Archivo</h5>
+                            <table class="table table-sm">
+                                <tr><th>Nombre:</th><td>{{ file_metadata.nombre }}</td></tr>
+                                <tr><th>Tamaño:</th><td>{{ file_metadata.tamaño }}</td></tr>
+                                <tr><th>Fecha de subida:</th><td>{{ file_metadata.fecha_subida }}</td></tr>
+                                <tr><th>Estado:</th><td>{{ file_metadata.estado }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Estadísticas</h5>
+                            <table class="table table-sm">
+                                <tr><th>Total registros:</th><td>{{ processed_data.metadata.total_registros }}</td></tr>
+                                <tr><th>Campos por registro:</th><td>{{ processed_data.metadata.campos|length }}</td></tr>
+                                <tr><th>Líneas procesadas:</th><td>{{ processed_data.metadata.lineas_procesadas }}</td></tr>
+                                <tr><th>Errores de formato:</th><td>{{ processed_data.metadata.lineas_con_errores }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa del contenido -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Vista Previa del Contenido (Primeras 20 líneas)</h5>
+                            <pre class="bg-light p-3 border">{{ file_content_preview }}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Datos procesados -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>Datos Procesados (Primeros 100 registros)</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            {% for header in processed_data.metadata.campos %}
+                                            <th>{{ header }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in processed_data.data %}
+                                        <tr class="{% if 'ERROR' in item %}table-danger{% endif %}">
+                                            <td>{{ forloop.counter }}</td>
+                                            {% for header in processed_data.metadata.campos %}
+                                            <td>
+                                                {% if header in item %}
+                                                    {{ item|get_item:header|truncatechars:50 }}
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="file_id" value="{{ rhe_file.id }}">
+                        <button type="submit" name="action" value="reprocess" 
+                                class="btn btn-primary">
+                            <i class="fas fa-sync"></i> Reprocesar Archivo
+                        </button>
+                        <button type="submit" name="action" value="download_errors" 
+                                class="btn btn-warning">
+                            <i class="fas fa-download"></i> Descargar Reporte de Errores
+                        </button>
+                    </form>
+                    <a href="{% url 'documentos_app:documento-financiero-lista' %}" 
+                       class="btn btn-secondary float-right">
+                        <i class="fas fa-arrow-left"></i> Volver a la lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

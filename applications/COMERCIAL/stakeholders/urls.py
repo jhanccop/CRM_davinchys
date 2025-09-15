@@ -58,6 +58,8 @@ urlpatterns = [
         views.SupplierDeleteView.as_view(),
         name='proveedor-eliminar',
     ),
-
-    
+    path(
+        'comercial/proveedor/crear-rhe/',
+        views.SupplierCreateViewRHE.as_view(),
+        name='proveedor-nuevo-rhe'),
 ]

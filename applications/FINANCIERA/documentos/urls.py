@@ -8,7 +8,7 @@ urlpatterns = [
     # ============== CARGA Y PROCESAMIENTO =================
     path('finanzas/documento/carga-doc-rhe/', views.UploadRHEFileView.as_view(), name='carga-doc-rhe'),
     path('finanzas/documento/procesamiento-doc-rhe/', views.ProcessRHEFileView.as_view(), name='procesamiento-doc-rhe'),
-
+    #path('rhe-verification/', views.RHEFileVerificationView.as_view(), name='rhe-verification'),
     # ============== DOCUMENTACION FINANCIERA =================
     path(
         'finanzas/lista-documentos/', 

@@ -128,7 +128,6 @@
 
 {% block JSscripts %}
 
-
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const btnBuscar = document.getElementById('btn-buscar-ruc');
@@ -274,8 +273,13 @@
     });
 
     // Inicializar campos como readonly
-    limpiarFormulario();
+    //limpiarFormulario();
   });
+</script>
+
+<script>
+  document.getElementById('id_numberIdSupplier').value = '{{ruc}}' || '';
+  document.getElementById('id_tradeName').value = '{{razon_social}}' || '';
 </script>
 
 {% endblock JSscripts %}
