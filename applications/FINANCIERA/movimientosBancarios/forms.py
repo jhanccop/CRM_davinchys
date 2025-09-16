@@ -309,11 +309,15 @@ class ConciliationMovDocForm(forms.ModelForm):
         #return con_Amount
 
     def __init__(self, *args, **kwargs):
-        self.company_id = kwargs.pop('company_id', None)
+        #self.company_id = kwargs.pop('company_id', None)
+        #print("*************",self.request.user.company.id,kwargs.pop('company_id', None))
+        #self.company_id = self.request.user.company.id
+        company_id = kwargs.pop('company_id', None)
+        
         super(ConciliationMovDocForm, self).__init__(*args, **kwargs)
         self.fields['idDoc'].queryset = FinancialDocuments.objects.filter(
             amount__gt = F('amountReconcilied'),
-            idTin = self.company_id
+            idTin = company_id
             )
         #self.fields['idDocs'].queryset = Documents.objects.exclude(docs__isnull = False)
 

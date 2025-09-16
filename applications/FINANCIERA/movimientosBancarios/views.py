@@ -163,7 +163,8 @@ class ConciliarMovimientoConDocumentoCreateView(FinanzasMixin,CreateView):
   def get_form_kwargs(self):
         # Obtén los kwargs que normalmente se pasan al formulario
         kwargs = super().get_form_kwargs()
-        company_id = self.request.session.get('compania_id')
+        #company_id = self.request.session.get('compania_id')
+        company_id = self.request.user.company.id
         kwargs['company_id'] = company_id
         return kwargs
 
