@@ -361,7 +361,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 'sac': 'urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1'
             }
 
-            # Extraer información general
+            # Extraer información general (sin cambios)
             general_info = {
                 'numero': root.find('.//cbc:ID', namespaces).text,
                 'fecha_emision': root.find('.//cbc:IssueDate', namespaces).text,
@@ -375,7 +375,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 'monto_letras': root.find('.//cbc:Note', namespaces).text.split('[')[-1].split(']')[0]
             }
 
-            # Extraer información del emisor
+            # Extraer información del emisor (sin cambios)
             supplierV = root.find('.//cac:AccountingSupplierParty/cac:Party', namespaces)
             emisor = {
                 'ruc': supplierV.find('.//cbc:ID', namespaces).text,
@@ -389,20 +389,53 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 }
             }
 
-            # Extraer información del cliente
+            # Extraer información del cliente - VERSIÓN MEJORADA
             customer = root.find('.//cac:AccountingCustomerParty/cac:Party', namespaces)
             cliente = {
                 'ruc': customer.find('.//cbc:ID', namespaces).text,
                 'razon_social': customer.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces).text.strip(),
                 'direccion': {
-                    'calle': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip(),
-                    'distrito': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip(),
-                    'provincia': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
-                    'departamento': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip(),
-                    'codigo_ubigeo': customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip()
+                    'calle': '',
+                    'distrito': '',
+                    'provincia': '',
+                    'departamento': '',
+                    'codigo_ubigeo': ''
                 }
             }
 
+            # Buscar dirección en diferentes ubicaciones posibles
+            address_elements = [
+                # Primera ubicación: AccountingCustomerParty
+                customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces),
+                customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces),
+                customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces),
+                customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces),
+                
+                # Segunda ubicación: SellerSupplierParty (para el segundo XML)
+                root.find('.//cac:SellerSupplierParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line', namespaces),
+                root.find('.//cac:SellerSupplierParty/cac:Party/cac:PostalAddress/cbc:District', namespaces),
+                root.find('.//cac:SellerSupplierParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity', namespaces),
+                root.find('.//cac:SellerSupplierParty/cac:Party/cac:PostalAddress/cbc:ID', namespaces)  # Para código ubigeo
+            ]
+
+            # Si no hay dirección en AccountingCustomerParty, buscar en SellerSupplierParty
+            if not customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress', namespaces):
+                seller_address = root.find('.//cac:SellerSupplierParty/cac:Party/cac:PostalAddress', namespaces)
+                if seller_address is not None:
+                    cliente['direccion']['calle'] = seller_address.find('.//cac:AddressLine/cbc:Line', namespaces).text.strip() if seller_address.find('.//cac:AddressLine/cbc:Line', namespaces) is not None else ''
+                    cliente['direccion']['distrito'] = seller_address.find('.//cbc:District', namespaces).text.strip() if seller_address.find('.//cbc:District', namespaces) is not None else ''
+                    cliente['direccion']['provincia'] = seller_address.find('.//cbc:CountrySubentity', namespaces).text.strip() if seller_address.find('.//cbc:CountrySubentity', namespaces) is not None else ''
+                    cliente['direccion']['departamento'] = seller_address.find('.//cbc:CountrySubentity', namespaces).text.strip() if seller_address.find('.//cbc:CountrySubentity', namespaces) is not None else ''
+                    cliente['direccion']['codigo_ubigeo'] = seller_address.find('.//cbc:ID', namespaces).text.strip() if seller_address.find('.//cbc:ID', namespaces) is not None else ''
+            else:
+                # Usar la dirección original de AccountingCustomerParty
+                cliente['direccion']['calle'] = customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces).text.strip() if customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cac:AddressLine/cbc:Line', namespaces) is not None else ''
+                cliente['direccion']['distrito'] = customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces).text.strip() if customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:District', namespaces) is not None else ''
+                cliente['direccion']['provincia'] = customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip() if customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces) is not None else ''
+                cliente['direccion']['departamento'] = customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces).text.strip() if customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentity', namespaces) is not None else ''
+                cliente['direccion']['codigo_ubigeo'] = customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces).text.strip() if customer.find('.//cac:PartyLegalEntity/cac:RegistrationAddress/cbc:CountrySubentityCode', namespaces) is not None else ''
+
+            # Resto del código sin cambios...
             # Extraer totales
             tax_total = root.find('.//cac:TaxTotal', namespaces)
             monetary_total = root.find('.//cac:LegalMonetaryTotal', namespaces)
@@ -450,43 +483,85 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 }
             }
 
-
+            # Resto del procesamiento sin cambios...
             # COMPLETAR DATOS
             fields = {}
 
             client_recept = factura_json["factura"]["cliente"]["ruc"]
+            supplier_id = factura_json["factura"]["emisor"]["ruc"]
+            temp = {}
 
+            fields['expenseFlag'] = True
+
+            print("factura_json", factura_json)
+            
             # Verificar si existe ruc receptor para evitar facturas de otras empresas
             if client_recept:
-                idTin =  Tin.objects.filter(tin = client_recept).first()
+                idTinR = Tin.objects.filter(tin=client_recept).first()
+                idTinE = Tin.objects.filter(tin=supplier_id).first()
+                
+                if idTinR and idTinR.id == self.request.user.company.id:
+                    fields['idTin'] = idTinR.id
 
-                if idTin:
-                    fields['idTin'] = idTin.id
+                elif idTinE and idTinE.id == self.request.user.company.id:
+                    fields['idTin'] = idTinE.id
+
+                    print("change")
+
+                    temp = supplier_id
+                    supplier_id = client_recept
+                    client_recept = temp
+                    fields['expenseFlag'] = False
+
                 else:
-                    response_data['alerts'].append(f'Factura emitida a otra compañia. RUC {client_recept}')
+                    response_data['alerts'].append(f'La factura no corresponde a tu razon social {self.request.user.company}. La factura fue emitida a {client_recept}')
                     response_data['success'] = True
                     return JsonResponse(response_data)
-
-            supplier_id = factura_json["factura"]["emisor"]["ruc"]
+                
+            #supplier_id = factura_json["factura"]["emisor"]["ruc"]
             invoice_id = factura_json["factura"]["informacion_general"]["numero"]
 
-            #  filtro, por id y por ruc para detectar duplicados
-            if supplier_id:
-                supplierO = supplier.objects.filter(numberIdSupplier=supplier_id).first()
-                print("******",supplierO)
+            # filtro, por id y por ruc para detectar duplicados
+            if fields['expenseFlag']:
+                print("EGRESO",fields)
+                if supplier_id:
+                    supplierO = supplier.objects.filter(numberIdSupplier=supplier_id).first()
 
-                if supplierO:
-                    fields['idSupplier'] = supplierO.id
-                    fields['idInvoice'] = invoice_id
-                    if FinancialDocuments.objects.filter(idInvoice=invoice_id, idSupplier__numberIdSupplier=supplier_id).exists():
+                    if supplierO:
+                        fields['idSupplier'] = supplierO.id
+                        fields['idInvoice'] = invoice_id
+                        if FinancialDocuments.objects.filter(idInvoice=invoice_id, idSupplier__numberIdSupplier=supplier_id).exists():
+                            response_data['alerts'].append(
+                            f'¡Alerta! Ya existe un documento con ID {invoice_id} para el proveedor {supplierO.tradeName} (RUC: {supplier_id})'
+                            )
+                            response_data['dup'] = True
+                    else:
                         response_data['alerts'].append(
-                        f'¡Alerta! Ya existe un documento con ID {invoice_id} para el proveedor {supplierO.tradeName} (RUC: {supplier_id})'
+                        f'¡No se encuentra al proveedor con RUC: {supplier_id}'
                         )
-                        response_data['dup'] = True
-                else:
-                    response_data['alerts'].append(
-                    f'¡No se encuentra al proveedor {supplierO.tradeName} (RUC: {supplier_id})'
-                    )
+            else:
+                print("INGRESO",fields)
+
+                print(supplier_id)
+                if supplier_id:
+                    supplierO = client.objects.filter(numberIdClient=supplier_id).first()
+
+                    if supplierO:
+                        fields['idClient'] = supplierO.id
+                        fields['idInvoice'] = invoice_id
+                        if FinancialDocuments.objects.filter(idInvoice=invoice_id, idClient__numberIdClient=supplier_id).exists():
+                            response_data['alerts'].append(
+                            f'¡Alerta! Ya existe un documento con ID {invoice_id} para el cliente {supplierO.tradeName} (RUC: {supplier_id})'
+                            )
+                            response_data['dup'] = True
+                    else:
+                        response_data['alerts'].append(
+                        f'¡No se encuentra al cliente con RUC: {supplier_id})'
+                        )
+            
+
+            # ==================== SI FACTURA EMITIDA ====================
+
 
             issue_date = factura_json["factura"]["informacion_general"]["fecha_emision"]
             document_type = factura_json["factura"]["informacion_general"]["tipo_documento"]["codigo"]
@@ -501,6 +576,8 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
             fields['netAmount'] = total_gravado
             fields['incomeTax'] = total_igv
             fields['amount'] = total_amount
+
+            
 
             output = ""
 
@@ -534,8 +611,6 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                     'EUR': FinancialDocuments.EUROS
                 }
                 fields['typeCurrency'] = currency_mapping.get(currency, FinancialDocuments.SOLES)
-            
-            
             
             response_data['success'] = True
             response_data['fields'] = fields

@@ -352,7 +352,7 @@ class FinancialDocuments(TimeStampedModel):
         verbose_name_plural = 'Documentos financieros'
 
     def __str__(self):
-        return f"{self.idInvoice} | {self.get_month_dec_display()}-{self.year_dec} | {self.get_typeCurrency_display()} {self.amount} [{self.get_typeCurrency_display()} {self.amountReconcilied}] "
+        return f"{self.idInvoice} | {self.date} | {self.idSupplier} | {self.get_typeCurrency_display()} {self.amount}  / {self.get_typeCurrency_display()} {self.amountReconcilied} "
         #return f"{self.idInvoice}"
     
 class OthersDocuments(TimeStampedModel):

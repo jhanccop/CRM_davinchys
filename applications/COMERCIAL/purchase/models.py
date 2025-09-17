@@ -176,8 +176,8 @@ class requirementItems(TimeStampedModel):
     from applications.COMERCIAL.sales.models import Trafos # Transformadores a cotizar
     idTrafos = models.ForeignKey(Trafos, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_trafos")
 
-    from applications.LOGISTICA.transport.models import Container
-    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_container")
+    #from applications.LOGISTICA.transport.models import Container
+    #idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_container")
 
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_requirement")
     
