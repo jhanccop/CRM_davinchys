@@ -129,7 +129,7 @@ class quotesManager(models.Manager):
         return result
 
     def ListaCotizacionesPorRuc(self, intervalo, company):
-        from .models import Trafos, QuoteTracking
+        from .models import Items, QuoteTracking
         Intervals = intervalo.split(' to ')
         intervals = [datetime.strptime(dt, "%Y-%m-%d") for dt in Intervals]
 
@@ -142,22 +142,23 @@ class quotesManager(models.Manager):
 
         # Subconsulta para obtener el último QuoteTraking de cada cotización
         last_tracking_subquery = QuoteTracking.objects.filter(
-            idquote = OuterRef('pk')
+            idquote=OuterRef('pk')
         ).order_by('-created')
 
-        # Prefetch para optimizar la carga de los productos Trafos
-        trafos_prefetch = Prefetch(
-            'trafo_Quote',
-            queryset=Trafos.objects.all(),
-            to_attr='productos'
+        # CORRECCIÓN: Usar el related_name correcto
+        # En tu modelo Items, el related_name es "item_Quote" para idTrafoQuote
+        items_prefetch = Prefetch(
+            'item_Quote',  # ← Este es el related_name correcto
+            queryset=Items.objects.select_related('idTrafo'),  # Optimizar con select_related
+            to_attr='items'
         )
 
-        # Consulta principal con annotate para el último tracking y prefetch para los trafos
+        # Consulta principal con annotate para el último tracking y prefetch para los items
         result = self.filter(
-            created__range = rangeDate,
-            idTinReceiving__id = company
+            created__range=rangeDate,
+            idTinReceiving__id=company
         ).order_by("-id").annotate(
-            ultimo_evento = Subquery(last_tracking_subquery.values('status')[:1]),
+            ultimo_evento=Subquery(last_tracking_subquery.values('status')[:1]),
             ultimo_evento_fecha=Subquery(last_tracking_subquery.values('created')[:1]),
             ultimo_evento_display=Case(
                 *[When(quotetracking__status=value, then=Value(display)) 
@@ -171,7 +172,7 @@ class quotesManager(models.Manager):
                 default=Value('Desconocido'),
                 output_field=CharField()
             )
-        ).prefetch_related(trafos_prefetch)
+        ).prefetch_related(items_prefetch).distinct()  # Agregar distinct para evitar duplicados
 
         return result
     

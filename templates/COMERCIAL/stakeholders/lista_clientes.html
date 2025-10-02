@@ -1,80 +1,83 @@
-{% extends "COMERCIAL/stakeholders/base-clientes.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Clientes {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Clientes{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
-<div class="row my-2">
-  <div class="col-12">
-    <div class="card my-4">
+<div class="container-fluid">
+  <div class="row my-2">
+    <div class="col-12">
+      <div class="card my-4">
 
-      <div class="card-header p-3 pb-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <h6 class="mb-0 text-uppercase">Lista de clientes</h6>
-          <span class="d-flex align-items-center">
-            <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center"
-              data-type="csv" type="button">
-              <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
-              <span class="btn-inner--text">Descargar</span>
-            </a>
-            <a class="btn btn-primary btn-sm  mb-0 ms-2 align-items-center justify-content-center"
-              href="{% url 'stakeholders_app:cliente-nuevo' %}">
-              <span class="btn-inner--icon"><i class="fas fa-plus text-md"></i></span>
-              <span class="btn-inner--text">NUEVO</span>
-            </a>
-          </span>
+        <div class="card-header p-3 pb-0">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-uppercase">Lista de clientes</h6>
+            <span class="d-flex align-items-center">
+              <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center"
+                data-type="csv" type="button">
+                <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
+                <span class="btn-inner--text">Descargar</span>
+              </a>
+              <a class="btn btn-primary btn-sm  mb-0 ms-2 align-items-center justify-content-center"
+                href="{% url 'stakeholders_app:cliente-nuevo' %}">
+                <span class="btn-inner--icon"><i class="fas fa-plus text-md"></i></span>
+                <span class="btn-inner--text">NUEVO</span>
+              </a>
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div class="card-body pt-0 px-0 pb-2">
-        <div class="table-responsive p-0">
-          <table class="table align-items-canter mb-0" id="datatable-clientes">
-            <thead>
-              <tr>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social / Id</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Estado</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Origen</th>
-                <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in clientes %}
-              <tr class="mb-0 pb-0">
-                <td class="text-sm mb-0 ">
-                  <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
-                    {{ t.tradeName }}
-                  </a>
-                  
-                  <p class=" mb-0 text-dark font-weight-bolder">{{ t.numberIdClient }}</p>
-                </td>
-                <td class="text-start text-sm text-uppercase">{{ t.get_status_display }}</td>
-                <td class="text-start text-sm text-uppercase">{{ t.get_location_display }}</td>
-                <td class="text-end">
-                  <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
-                    <i class="far fa-eye text-info text-lg"></i>
-                  </a>
-                  &emsp;
-                  <a href="{% url 'stakeholders_app:cliente-editar' t.id %}">
-                    <i class="far fa-edit text-dark text-lg"></i>
-                  </a>
-                  &emsp;
-                  <a href="{% url 'stakeholders_app:cliente-eliminar' t.id %}">
-                    <i class="far fa-trash-alt text-primary text-lg"></i>
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-canter mb-0" id="datatable-clientes">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Razón Social / Id</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Estado</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Origen</th>
+                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in clientes %}
+                <tr class="mb-0 pb-0">
+                  <td class="text-sm mb-0 ">
+                    <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
+                      {{ t.tradeName|default:"-" }}
+                    </a>
+                    
+                    <p class=" mb-0 text-dark font-weight-bolder">{{ t.numberIdClient|default:"-" }}</p>
+                  </td>
+                  <td class="text-start text-sm text-uppercase">{{ t.get_status_display|default:"-" }}</td>
+                  <td class="text-start text-sm text-uppercase">{{ t.get_location_display|default:"-" }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'stakeholders_app:cliente-detalle' t.id %}">
+                      <i class="far fa-eye text-info text-lg"></i>
+                    </a>
+                    &emsp;
+                    <a href="{% url 'stakeholders_app:cliente-editar' t.id %}">
+                      <i class="far fa-edit text-dark text-lg"></i>
+                    </a>
+                    &emsp;
+                    <a href="{% url 'stakeholders_app:cliente-eliminar' t.id %}">
+                      <i class="far fa-trash-alt text-primary text-lg"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 
 {% endblock panel-content %}
 

@@ -1,0 +1,364 @@
+{% extends "COMERCIAL/purchase/base-COMERCIAL.html" %}
+
+{% load  static %}
+{% block title %} Comercial {% endblock title %}
+{% block main %} Comercial {% endblock main %}
+{% block appName %} Requerimientos - logístico {% endblock appName %}
+{% block Type %} Lista {% endblock Type %}
+
+{% block panel-content %}
+
+<!-- ================ BODY ================= -->
+<div class="row">
+  <div class="col-lg-6 col-md-12">
+    <div class="nav-wrapper">
+      <ul class="nav nav-pills nav-fill p-1">
+        <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+          <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'compras_app:list_requirement' %}">
+            <span class="ms-1">REQUERIMIENTOS</span>
+          </a>
+        </li>
+        <li class="nav-item " role="presentation">
+          <a class="nav-link mb-0 px-0 py-1" href="{% url 'compras_app:lista_cajachica' %}">
+            <span class="ms-1">CAJA CHICA</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-6 col-md-12">
+    <form method="GET" class="">{% csrf_token %}
+      <div class="d-flex align-items-center">
+        <div class="input-group input-group-outline">
+          <input class="form-control datetimepicker text-center text-dark pt-n4" value="{{documentos.intervalDate}}"
+            placeholder="today" id="dateKword" name="dateKword">
+        </div>
+        &emsp;
+        <div class="pt-3 pb-0">
+          <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% if user.is_boss %}
+<div class="row mb-4">
+  
+  <div class="col-12">
+      <div class="card">
+          <div class="card-header pb-0 ">
+            <div class="row align-middle align-items-center">
+              <div class="col-lg-6 col-md-3">
+                <h5 class="mb-0">Historial de requerimientos</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-0 px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-flush mb-0 align-items-center" id="datatable-boss">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto total</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
+                      <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in documentos.allDocumentation %}
+                    <tr>
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                            <h6 class="mb-0 text-sm">REQ-{{t.id}} {{t.idPetitioner}}</h6>
+                          </a>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                        </div>
+                      </td>
+
+                      <td class="text-sm text-end">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        {% if t.lastArea == "10" %} 
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Jefe de área - aprobado</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Jefe de área - rechazado</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Jefe de área - espera</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "4" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Gerencia</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Gerencia</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Gerencia</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "1" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Compras</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Compras</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Compras</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "3" %}
+                        <span class="badge badge-secondary">Compras</span>
+                        {% elif t.lastArea == "4" %}
+                        <span class="badge badge-secondary">Contabilidad</span>
+                        {% elif t.lastArea == "5" %}
+                        <span class="badge badge-secondary">Finanzas</span>
+                        {% endif %}
+
+                        {%if t.lastStatus == "1" %}
+                        <span class="badge badge-secondary">Recibido</span>
+                        {% elif t.lastStatus == "2" %}
+                        <span class="badge badge-success">Aprobado</span>
+                        {% elif t.lastStatus == "3" %}
+                        <span class="badge badge-secondary">Rechazado</span>
+                        {% elif t.lastStatus == "4" %}
+                        <span class="badge badge-warning">Observado</span>
+                        {% elif t.lastStatus == "5" %}
+                        <span class="badge badge-success">Completado</span>
+                        {% endif %}
+
+                      </td>
+
+                      <td>
+                        <a href="{% url 'compras_app:crear_log_requirement' t.id %}">
+                          <i class="far fa-thumbs-up text-lg text-success"></i> <i class="far fa-thumbs-down text-lg text-primary"></i>
+                        </a>
+
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-lg-6 col-12 d-flex ms-auto ">
+    <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+      Export CSV
+    </a>
+
+
+    <div class="dropleft ms-3">
+      <div class="dropdown">
+        <a href="{% url 'compras_app:create_requirement' %}" class="btn bg-gradient-dark">
+            Nuevo requerimiento
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  
+  <div class="col-12">
+      <div class="card">
+          <div class="card-header pb-0 ">
+            <div class="row align-middle align-items-center">
+              <div class="col-lg-6 col-md-3">
+                <h5 class="mb-0">Lista de requerimientos - logística</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-0 px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                  <thead class="thead-light">
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto total</th>
+                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
+                      <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for t in documentos.documentation %}
+                    <tr>
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+                        </div>
+                      </td>
+
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                            <h6 class="mb-0 text-sm">REQ-{{t.id}} </h6>
+                          </a>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                        </div>
+                      </td>
+
+                      <td class="text-sm text-end">
+                        <div class="d-flex flex-column justify-content-center">
+                          <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
+                        </div>
+                      </td>
+                      
+                      <td class="text-sm">
+                        {% if t.lastArea == "10" %} 
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Jefe de área - aprobado</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Jefe de área - rechazado</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Jefe de área - espera</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "4" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Gerencia</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Gerencia</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Gerencia</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "1" %}
+                          {%if t.lastStatus == "2" %}
+                          <span class="badge badge-success">Compras</span>
+                          {% elif t.lastStatus == "3" %}
+                          <span class="badge badge-primary">Compras</span>
+                          {% else %}
+                          <span class="badge badge-secondary">Compras</span>
+                          {% endif %}
+
+                        {% elif t.lastArea == "3" %}
+                        <span class="badge badge-secondary">Compras</span>
+                        {% elif t.lastArea == "4" %}
+                        <span class="badge badge-secondary">Contabilidad</span>
+                        {% elif t.lastArea == "5" %}
+                        <span class="badge badge-secondary">Finanzas</span>
+                        {% endif %}
+
+                        {%if t.lastStatus == "1" %}
+                        <span class="badge badge-secondary">Recibido</span>
+                        {% elif t.lastStatus == "2" %}
+                        <span class="badge badge-success">Aprobado</span>
+                        {% elif t.lastStatus == "3" %}
+                        <span class="badge badge-secondary">Rechazado</span>
+                        {% elif t.lastStatus == "4" %}
+                        <span class="badge badge-warning">Observado</span>
+                        {% elif t.lastStatus == "5" %}
+                        <span class="badge badge-success">Completado</span>
+                        {% endif %}
+
+                      </td>
+
+                      <td>
+                        <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
+                          aria-expanded="false">
+                          <i class="fas fa-bars text-lg text-dark"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'compras_app:edit_requirement' t.id %}"> Editar Requerimiento</a></li>
+                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'compras_app:delete_requirement' t.id %}">Eliminar Requerimiento</a></li>
+                        </ul>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* PROYECTOS */
+  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "documentos",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTableclientes.export(data);
+    });
+  });
+
+</script>
+
+<script>
+  /* PROYECTOS */
+  '{% if user.is_boss %}'
+
+  const dataTableBoss= new simpleDatatables.DataTable("#datatable-boss", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 10
+  });
+  '{% endif %}'
+
+</script>
+
+{% endblock JSscripts %}

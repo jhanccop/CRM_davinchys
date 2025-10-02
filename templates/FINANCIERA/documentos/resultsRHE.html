@@ -1,13 +1,14 @@
-{% extends "FINANCIERA/documentos/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Finanzas {% endblock title %}
-{% block main %} Financiera {% endblock main %}
-{% block appName %} Resultado {% endblock appName %}
-{% block Type %} Procesamiento RHE {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Documentos{% endblock %}
+{% block navbar_Type %} RHE Resultados {% endblock %}
 
 {% block panel-content %}
 
+<div class="container-fluid">
 {% if error %}
 <div class="alert alert-danger">
     <h4>Error General:</h4>
@@ -15,194 +16,194 @@
 </div>
 {% endif %}
 
-<h4>Resultado de procesamiento de Archivo RHE</h4>
-<form method="post" class="mb-0">
-    {% csrf_token %}
-    <div class="form-group">
-      {% if duplicates or has_missing_suppliers %}
-        <button type="submit" class="btn btn-success" disabled>Guardar Registros</button>
-      {% else %}
-        <button type="submit" class="btn btn-success">Guardar Registros</button>
-      {% endif %}
-      
-      <a href="{% url 'documentos_app:carga-doc-rhe' %}" class="btn btn-secondary">Regresar</a>
+  <h4>Resultado de procesamiento de Archivo RHE</h4>
+  <form method="post" class="mb-0">
+      {% csrf_token %}
+      <div class="form-group">
+        {% if duplicates or has_missing_suppliers %}
+          <button type="submit" class="btn btn-success" disabled>Guardar Registros</button>
+        {% else %}
+          <button type="submit" class="btn btn-success">Guardar Registros</button>
+        {% endif %}
+        
+        <a href="{% url 'documentos_app:carga-doc-rhe' %}" class="btn btn-secondary">Regresar</a>
+      </div>
+  </form>
+
+  {% if missing_suppliers %}
+  <div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header p-3 pb-0">
+              <div class="d-flex justify-content-between align-items-center">
+                  <span class="badge badge-danger"> {{ missing_suppliers|length }} Proveedores No Encontrados </span> 
+              </div>
+            </div>
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th class="">RUC</th>
+                        <th class="">Razón Social</th>
+                        <th class="">Documentos Relacionados</th>
+                        <th class="">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for supplier in missing_suppliers %}
+                      <tr>
+                        <td class="text-sm align-items-center">{{ supplier.doc_emisor }}</td>
+                        <td class="text-start text-sm">{{ supplier.razon_social }}</td>
+                        <td class="text-start text-sm">{{ supplier.count }} documento(s)</td>
+                        <td>
+                          <a href="{% url 'stakeholders_app:proveedor-nuevo-rhe' %}?ruc={{ supplier.doc_emisor }}&razon_social={{ supplier.razon_social|urlencode }}" 
+                            class="btn btn-sm btn-outline-primary">
+                              Crear Proveedor
+                          </a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
-
-{% if missing_suppliers %}
-<div class="row mt-4">
-  <div class="col-12">
-      <div class="card">
-          <div class="card-header p-3 pb-0">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="badge badge-danger"> {{ missing_suppliers|length }} Proveedores No Encontrados </span> 
-            </div>
-          </div>
-          <div class="card-body pt-0 px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="">RUC</th>
-                      <th class="">Razón Social</th>
-                      <th class="">Documentos Relacionados</th>
-                      <th class="">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for supplier in missing_suppliers %}
-                    <tr>
-                      <td class="text-sm align-items-center">{{ supplier.doc_emisor }}</td>
-                      <td class="text-start text-sm">{{ supplier.razon_social }}</td>
-                      <td class="text-start text-sm">{{ supplier.count }} documento(s)</td>
-                      <td>
-                        <a href="{% url 'stakeholders_app:proveedor-nuevo-rhe' %}?ruc={{ supplier.doc_emisor }}&razon_social={{ supplier.razon_social|urlencode }}" 
-                           class="btn btn-sm btn-outline-primary">
-                            Crear Proveedor
-                        </a>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
   </div>
-</div>
-{% endif %}
+  {% endif %}
 
-{% if duplicates %}
-<div class="row">
-  <div class="col-12">
-      <div class="card">
+  {% if duplicates %}
+  <div class="row">
+    <div class="col-12">
+        <div class="card">
 
-          <div class="card-header p-3 pb-0">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="badge badge-warning"> {{ processed_data.metadata.total_registros }} Registros Duplicados </span> 
-              
+            <div class="card-header p-3 pb-0">
+              <div class="d-flex justify-content-between align-items-center">
+                  <span class="badge badge-warning"> {{ processed_data.metadata.total_registros }} Registros Duplicados </span> 
+                
+              </div>
             </div>
-          </div>
 
-          <div class="card-body pt-0 px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-canter mb-0" id="datatable">
-                  <thead>
-                    <tr>
-                      <th class="">F. Emisión</th>
-                      <th class="">Doc Emitido</th>
-                      <th class="">Información general</th>
-                      <th class="">Montos</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for t in duplicates %}
-                    <tr>
-                      <td class="text-sm align-items-center">{{ t.data.Fecha_de_Emisión }}</td>
-                      <td class="text-start text-sm">
-                        {{ t.data.Tipo_Doc_Emitido }}  {{ t.data.Nro_Doc_Emitido }} <br>
-                        {% if t.data.Estado_Doc_Emitido == "NO ANULADO" %}
-                        <span class="badge badge-success">{{ t.data.Estado_Doc_Emitido }}</span>
-                        {% else %}
-                        <span class="badge badge-warning">{{ t.data.Estado_Doc_Emitido }} </span>
-                        {% endif %}
-                      </td>
-                      
-                      <td class="text-start text-sm">
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.data.Tipo_de_Doc_Emisor }}  {{ t.data.Nro_Doc_Emisor }}
-                        </p>
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.data.Apellidos_y_Nombres_Denominación_o_Razón_Social_del_Emisor }}
-                        </p>
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.data.Descripción }}
-                        </p>
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                  <table class="table align-items-canter mb-0" id="datatable">
+                    <thead>
+                      <tr>
+                        <th class="">F. Emisión</th>
+                        <th class="">Doc Emitido</th>
+                        <th class="">Información general</th>
+                        <th class="">Montos</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for t in duplicates %}
+                      <tr>
+                        <td class="text-sm align-items-center">{{ t.data.Fecha_de_Emisión }}</td>
+                        <td class="text-start text-sm">
+                          {{ t.data.Tipo_Doc_Emitido }}  {{ t.data.Nro_Doc_Emitido }} <br>
+                          {% if t.data.Estado_Doc_Emitido == "NO ANULADO" %}
+                          <span class="badge badge-success">{{ t.data.Estado_Doc_Emitido }}</span>
+                          {% else %}
+                          <span class="badge badge-warning">{{ t.data.Estado_Doc_Emitido }} </span>
+                          {% endif %}
+                        </td>
                         
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">{{ t.data.Moneda_de_Operación }}</p>
-                        <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.data.Renta_Bruta }}</p>
-                        <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.data.Impuesto_a_la_Renta }} </p>
-                        <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.data.Renta_Neta }} </p>
-                      </td>
+                        <td class="text-start text-sm">
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.data.Tipo_de_Doc_Emisor }}  {{ t.data.Nro_Doc_Emisor }}
+                          </p>
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.data.Apellidos_y_Nombres_Denominación_o_Razón_Social_del_Emisor }}
+                          </p>
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.data.Descripción }}
+                          </p>
+                          
+                        </td>
+                        <td>
+                          <p class="text-xs font-weight-bold mb-0">{{ t.data.Moneda_de_Operación }}</p>
+                          <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.data.Renta_Bruta }}</p>
+                          <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.data.Impuesto_a_la_Renta }} </p>
+                          <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.data.Renta_Neta }} </p>
+                        </td>
 
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
-  </div>
-</div>
-{% else %}
-
-<div class="row mt-4">
-  <div class="col-12">
-      <div class="card">
-
-          <div class="card-header p-3 pb-0">
-            <div class="d-flex justify-content-between align-items-center ">
-              <span class="badge badge-success text-lg"> {{ processed_data.metadata.total_registros }} Registros Nuevos </span> 
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
             </div>
-          </div>
-
-          <div class="card-body pt-0 px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-canter mb-0" id="datatable-new">
-                  <thead>
-                    <tr>
-                      <th class="">F. Emisión</th>
-                      <th class="">Doc Emitido</th>
-                      <th class="">Información general</th>
-                      <th class="">Montos</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for t in processed_data.data %}
-                    <tr>
-                      <td class="text-sm align-items-center">{{ t.Fecha_de_Emisión }}</td>
-                      <td class="text-start text-sm">
-                        {{ t.Tipo_Doc_Emitido }}  {{ t.Nro_Doc_Emitido }} <br>
-                        {% if t.Estado_Doc_Emitido == "NO ANULADO" %}
-                        <span class="badge badge-success">{{ t.Estado_Doc_Emitido }}</span>
-                        {% else %}
-                        <span class="badge badge-warning">{{ t.Estado_Doc_Emitido }} </span>
-                        {% endif %}
-                      </td>
-                      
-                      <td class="text-start text-sm">
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.Tipo_de_Doc_Emisor }}  {{ t.Nro_Doc_Emisor }}
-                        </p>
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.Apellidos_y_Nombres_Denominación_o_Razón_Social_del_Emisor }}
-                        </p>
-                        <p class="text-xs font-weight-bold mb-0">
-                            {{ t.Descripción }}
-                        </p>
-                        
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">{{ t.Moneda_de_Operación }}</p>
-                        <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.Renta_Bruta }}</p>
-                        <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.Impuesto_a_la_Renta }} </p>
-                        <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.Renta_Neta }} </p>
-                      </td>
-
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
+        </div>
+    </div>
   </div>
+  {% else %}
+
+  <div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-header p-3 pb-0">
+              <div class="d-flex justify-content-between align-items-center ">
+                <span class="badge badge-success text-lg"> {{ processed_data.metadata.total_registros }} Registros Nuevos </span> 
+              </div>
+            </div>
+
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                  <table class="table align-items-canter mb-0" id="datatable-new">
+                    <thead>
+                      <tr>
+                        <th class="">F. Emisión</th>
+                        <th class="">Doc Emitido</th>
+                        <th class="">Información general</th>
+                        <th class="">Montos</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for t in processed_data.data %}
+                      <tr>
+                        <td class="text-sm align-items-center">{{ t.Fecha_de_Emisión }}</td>
+                        <td class="text-start text-sm">
+                          {{ t.Tipo_Doc_Emitido }}  {{ t.Nro_Doc_Emitido }} <br>
+                          {% if t.Estado_Doc_Emitido == "NO ANULADO" %}
+                          <span class="badge badge-success">{{ t.Estado_Doc_Emitido }}</span>
+                          {% else %}
+                          <span class="badge badge-warning">{{ t.Estado_Doc_Emitido }} </span>
+                          {% endif %}
+                        </td>
+                        
+                        <td class="text-start text-sm">
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.Tipo_de_Doc_Emisor }}  {{ t.Nro_Doc_Emisor }}
+                          </p>
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.Apellidos_y_Nombres_Denominación_o_Razón_Social_del_Emisor }}
+                          </p>
+                          <p class="text-xs font-weight-bold mb-0">
+                              {{ t.Descripción }}
+                          </p>
+                          
+                        </td>
+                        <td>
+                          <p class="text-xs font-weight-bold mb-0">{{ t.Moneda_de_Operación }}</p>
+                          <p class="text-xs font-weight-bold mb-0">R Bruta: {{ t.Renta_Bruta }}</p>
+                          <p class="text-xs font-weight-bold mb-0">Imp Renta: {{ t.Impuesto_a_la_Renta }} </p>
+                          <p class="text-xs font-weight-bold mb-0">R Neta: {{ t.Renta_Neta }} </p>
+                        </td>
+
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  {% endif %}
+
 </div>
-{% endif %}
-
-
 
 {% endblock panel-content %}
 

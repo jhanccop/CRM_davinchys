@@ -6,6 +6,8 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+from django.shortcuts import render
+
 from applications.users.mixins import (
   ComercialMixin,
   ComercialFinanzasMixin
@@ -30,8 +32,9 @@ from django.views.generic import (
 from .models import (
   Incomes,
   quotes,
-  Trafos,
-  QuoteTracking
+  #Trafos,
+  QuoteTracking,
+  Items
 )
 
 from applications.cuentas.models import (
@@ -42,14 +45,14 @@ from applications.clientes.models import (
   Cliente,
 )
 
+from applications.COMERCIAL.stakeholders.models import client
+from applications.PRODUCTION.models import Trafos
+
 from .forms import (
   IncomesForm,
   quotesForm,
-  TrafoForm,
-  TrafoItemForm
+  ItemForm
   )
-
-TrafosFormSet = inlineformset_factory(quotes, Trafos, form=TrafoForm, extra=1)
 
 class QuotesListView(ComercialMixin,ListView):
   template_name = "COMERCIAL/sales/quote-lista.html"
@@ -230,7 +233,7 @@ class IncomesCreateView(ComercialMixin,CreateView):
 
             #  filtro, por id y por ruc para detectar duplicados
             if supplier_id:
-                cliente = Cliente.objects.filter(ruc=supplier_id).first()
+                cliente = client.objects.filter(ruc=supplier_id).first()
 
                 if cliente:
                     fields['idClient'] = cliente.id
@@ -346,7 +349,7 @@ class IncomesDeleteView(ComercialMixin,DeleteView):
 
 # ================= COTIZACIONES ========================
 
-class QuoteCreateView(ComercialFinanzasMixin,CreateView):
+class QuoteCreateViewV1(ComercialFinanzasMixin,CreateView):
     model = quotes
     form_class = quotesForm
     template_name = 'COMERCIAL/sales/quote-crear.html'
@@ -436,7 +439,7 @@ class QuoteDetailView(ComercialFinanzasMixin,DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['trafos'] = self.object.trafo_Quote.all().order_by("-created")
+        context['trafos'] = self.object.item_Quote.all().order_by("-created")
         context['tracking'] = QuoteTracking.objects.filter(idquote=self.object)
         return context
 
@@ -473,14 +476,13 @@ class QuoteUpdateView(ComercialFinanzasMixin,UpdateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['trafos'] = self.object.trafo_Quote.all()
+        context['trafos'] = self.object.item_Quote.all()
         return context
 
 class QuoteDeleteView(ComercialFinanzasMixin,DeleteView):
     model = quotes
     template_name = 'COMERCIAL/sales/quote-eliminar.html'
     success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-
 
 class TrafoPoListView(ComercialFinanzasMixin,ListView):
     template_name = 'COMERCIAL/sales/lista-po.html'
@@ -499,43 +501,141 @@ class TrafoPoListView(ComercialFinanzasMixin,ListView):
         payload["listQuotes"] = Quotes
         return payload
 
-# ================= ITEMS ========================
-class CreateTrafoItemView(ComercialFinanzasMixin,CreateView):
-    model = Trafos
-    form_class = TrafoItemForm
-    template_name = 'COMERCIAL/sales/crear-item.html'
-
+# ======================================
+class QuoteCreateView(ComercialFinanzasMixin, CreateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote_create.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pk'] = self.kwargs["pk"]
+        context['trafos'] = Trafos.objects.all()
         return context
-
-    def get_success_url(self, **kwargs):
-        idOr = self.kwargs["pk"]
-        #idTrafo = Trafos.objects.get(id = idOr)
-        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idOr})
     
-class UpdateTrafoItemView(ComercialFinanzasMixin,UpdateView):
-    model = Trafos
-    form_class = TrafoForm
-    template_name = 'COMERCIAL/sales/editar-item.html'
+    @transaction.atomic
+    def form_valid(self, form):
+        # Guardar la cotización primero
+        self.object = form.save(commit=False)
+        
+        # Procesar el monto total desde el frontend
+        items_data = self.request.POST.get('items_data', '[]')
+        total_amount = 0
+        
+        try:
+            import json
+            items_list = json.loads(items_data)
+            
+            # Calcular el monto total
+            for item_data in items_list:
+                quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
+                total_amount += quantity * unit_cost
+            
+            # Asignar el monto total a la cotización
+            self.object.amount = total_amount
+            self.object.save()
+            
+            # Crear items y secuenciales
+            for item_data in items_list:
+                trafo_id = int(item_data.get('trafo_id'))
+                #quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
 
-    def get_success_url(self, **kwargs):
-        idOr = self.kwargs["pk"]
-        idTrafo = Trafos.objects.get(id = idOr)
-        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idTrafo.idTrafoQuote.id})
+                seq_counter = 1  # Contador global para secuenciales únicos
+                try:
+                    trafo = Trafos.objects.get(id=trafo_id)
+                    
+                    # Crear un item por cada unidad
+                    for i in range(quantity):
+                        
+                        # CORRECCIÓN: Pasar las instancias de los objetos, no solo los IDs
+                        item = Items.objects.create(
+                            idTrafoQuote=self.object,  # Instancia de quotes
+                            idTrafo=trafo,            # Instancia de Trafos
+                            seq=seq_counter,          # Secuencial único global
+                            #quantity=1,               # Cada item representa 1 unidad
+                            unitCost=unit_cost
+                        )
+                        
+                        seq_counter += 1
+                        
+                except Trafos.DoesNotExist:
+                    print("ERROR: No se encontró el trafo con ID:", trafo_id)
+                    continue
+                except Exception as e:
+                    print("ERROR al crear item:", str(e))
+                    continue
+             
+            # Crear registro en el tracking
+            tracking = QuoteTracking.objects.create(
+                idquote=self.object,
+                status=QuoteTracking.ESPERA,  # Estado inicial: Creado
+                area=QuoteTracking.COMERCIAL  # Área inicial: Comercial
+            )
+            
+            return super().form_valid(form)
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            print("ERROR en procesamiento JSON:", str(e))
+            form.add_error(None, 'Error al procesar los items de la cotización: ' + str(e))
+            return self.form_invalid(form)
+        except Exception as e:
+            print("ERROR general:", str(e))
+            form.add_error(None, 'Error general: ' + str(e))
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        print("*** Formulario inválido")
+        # Recargar los trafos en el contexto para el template
+        context = self.get_context_data()
+        context['form'] = form
+        return render(self.request, self.template_name, context)
 
-class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
-    model = Trafos
-    template_name = 'COMERCIAL/sales/eliminar-item.html'
-    #success_url = reverse_lazy('ventas_app:ventas-lista')
+# ================= ITEMS ========================
 
-    def get_success_url(self, **kwargs):
-        idOr = self.kwargs["pk"]
-        idTrafo = Trafos.objects.get(id = idOr)
-        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':idTrafo.idTrafoQuote.id})
+class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
+    template_name = "COMERCIAL/sales/crear-item.html"
+    model = Items
+    form_class = ItemForm
+
+    def get_context_data(self,**kwargs):
+        pk = self.kwargs['pk']
+        context = super().get_context_data(**kwargs)
+        context['pk'] = pk
+        return context
+    
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':pk})
+
+class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
+    template_name = "COMERCIAL/sales/crear-item.html"
+    model = Items
+    form_class = ItemForm
+
+    def get_context_data(self,**kwargs):
+        pk = self.kwargs['pk']
+        context = super().get_context_data(**kwargs)
+        context['pk'] = pk
+        return context
+    
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        item = Items.objects.get(id = pk)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
 
 class DetailTrafoItemView(ComercialFinanzasMixin,DetailView):
-    model = Trafos
+    model = Items
     template_name = 'COMERCIAL/sales/detalle-item.html'
     #context_object_name = 'quote'
+
+class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
+    model = Items
+    template_name = 'COMERCIAL/sales/eliminar-item.html'
+    #success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        item = Items.objects.get(id = pk)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})

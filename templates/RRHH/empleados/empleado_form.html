@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Empleados{% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Registrar{% endif %} {% endblock %}
+
+{% block panel-content %} 
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">
+                                {% if object %}Editar Empleado{% else %}Nuevo Empleado{% endif %}
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'rrhh_app:empleados-list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.user.field.required %} required{% endif %}">
+                                    <label class="form-label">{{ form.user.label }}</label>
+                                    {{ form.user }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.departamento.field.required %}required{% endif %}">
+                                    <label class="form-label">{{ form.departamento.label }}</label>
+                                    {{ form.departamento }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.fecha_contratacion.label }}</label>
+                                    {{ form.fecha_contratacion }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.tipo_contrato.label }}</label>
+                                    {{ form.tipo_contrato }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.moneda.label }}</label>
+                                    {{ form.moneda }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.salario_base.label }}</label>
+                                    {{ form.salario_base }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.fecha_nacimiento.label }}</label>
+                                    {{ form.fecha_nacimiento }}
+                                    
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.telefono.label }}</label>
+                                    {{ form.telefono }}
+                                    
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check form-switch my-4 ps-5 is-focused">
+                                    <label class="form-label">{{ form.activo.label }}</label>
+                                    {{ form.activo }}
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.direccion.label }}</label>
+                                    {{ form.direccion }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn bg-gradient-dark">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if object %}Actualizar{% else %}Crear{% endif %} Empleado
+                                </button>
+                                <a href="{% url 'rrhh_app:empleados-list' %}" class="btn btn-outline-secondary">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+{% endblock JSscripts %}

@@ -1,10 +1,10 @@
-{% extends "FINANCIERA/documentos/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Finanzas {% endblock title %}
-{% block main %} Financiera {% endblock main %}
-{% block appName %} Documentos {% endblock appName %}
-{% block Type %} Detalle {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Documentos{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
 
 {% block panel-content %}
 

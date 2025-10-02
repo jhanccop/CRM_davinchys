@@ -1,14 +1,14 @@
-{% extends "COMERCIAL/stakeholders/base-clientes.html" %}
+{% extends "base.html" %}
 
 {% load static %}
-{% block title %} Personas {% endblock title %}
-{% block main %} Personas {% endblock main %}
-{% block appName %} Clientes {% endblock appName %}
-{% block Type %} Detalle {% endblock Type %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Clientes{% endblock %}
+{% block navbar_Type %}Destalle{% endblock %}
 
 {% block panel-content %}
 
-<div class="container">
+<div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center">
         
         <a href="{% url 'stakeholders_app:cliente-lista' %}" class="btn btn-secondary btn-sm">Lista de clientes</a>

@@ -11,7 +11,7 @@ from applications.users.mixins import (
 )
 
 from django.shortcuts import redirect
-from django.forms import formset_factory
+from django.forms import formset_factory, BaseFormSet
 from django.db import transaction
 
 from django.urls import reverse_lazy, reverse
@@ -25,7 +25,6 @@ from django.views.generic import (
     ListView,
     UpdateView,
     DeleteView,
-    TemplateView,
     FormView,
 )
 
@@ -51,6 +50,10 @@ from applications.clientes.models import (
   Cliente,
 )
 
+from applications.COMERCIAL.stakeholders.models import client
+
+from applications.users.models import User
+
 from applications.FINANCIERA.documentos.models import (
   FinancialDocuments,
 )
@@ -63,7 +66,7 @@ from .forms import (
   PettyCashForm,
   PettyCashItemForm,
   PurchaseOrderInvoiceForm,
-  requirementsInvoiceForm
+  requirementsInvoiceForm,
   )
 
 from django.forms import inlineformset_factory
@@ -134,18 +137,34 @@ class RequirementListView(LoginRequiredMixin,ListView):
     
     return payload
 
+class BaseRequirementItemFormSet(BaseFormSet):
+    """Formset personalizado que pasa el request a cada formulario"""
+    
+    def get_form_kwargs(self, index):
+        """Retorna kwargs para cada formulario individual"""
+        kwargs = super().get_form_kwargs(index)
+        # Pasamos el request si está disponible
+        if hasattr(self, 'request') and self.request:
+            kwargs['request'] = self.request
+        return kwargs
+
 class RequirementCreateView(LoginRequiredMixin, CreateView):
     model = requirements
     form_class = RequirementsForm
-    template_name = 'COMERCIAL/purchase/requirement-crear.html'
+    template_name = 'COMERCIAL/purchase/requirement_form.html'
     success_url = reverse_lazy('compras_app:list_requirement')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['item_formset'] = RequirementItemFormSet(self.request.POST)
+            item_formset = RequirementItemFormSet(self.request.POST)
         else:
-            context['item_formset'] = RequirementItemFormSet()
+            item_formset = RequirementItemFormSet()
+        
+        # Asignamos el request al formset DESPUÉS de crearlo
+        item_formset.request = self.request
+        context['item_formset'] = item_formset
+        
         return context
 
     def form_valid(self, form):
@@ -175,15 +194,17 @@ class RequirementCreateView(LoginRequiredMixin, CreateView):
                 quantity=item_data.get('quantity'),
                 #currency=item_data.get('currency'),
                 price=item_data.get('price'),
-                product=item_data.get('product')
+                product=item_data.get('product'),
+                type=item_data.get('type')
             )
 
 # Creamos el formset para los items
 RequirementItemFormSet = formset_factory(
     RequirementItemForm, 
+    formset=BaseRequirementItemFormSet, 
     extra=1, 
     can_delete=True,
-    can_order=False
+    can_order=False,
 )
 
 # Creamos el inlineformset para los items de requerimiento (para edición)
@@ -213,7 +234,7 @@ class RequirementDetailView(LoginRequiredMixin, ListView):
 class RequirementEditView(LoginRequiredMixin, UpdateView):
     model = requirements
     form_class = RequirementsForm
-    template_name = 'COMERCIAL/purchase/requirement-editar.html'
+    template_name = 'COMERCIAL/purchase/requirement_form.html'
     success_url = reverse_lazy('compras_app:list_requirement')
 
     def get_context_data(self, **kwargs):
@@ -236,11 +257,42 @@ class RequirementEditView(LoginRequiredMixin, UpdateView):
             return self.form_invalid(form)
 
 class RequirementDeleteView(LoginRequiredMixin,DeleteView):
-  
   template_name = "COMERCIAL/purchase/requirement-eliminar.html"
   model = requirements
   success_url = reverse_lazy('compras_app:list_requirement')
 
+# ============== REQUERIMIENTOS LOGISTICOS =================
+class LogisticRequirementListView(LoginRequiredMixin,ListView):
+  template_name = "COMERCIAL/purchase/logistic-requirement-lista.html"
+  context_object_name = 'documentos'
+
+  def get_queryset(self,**kwargs):
+    #compania_id = self.request.session.get('compania_id')
+    user = self.request.user
+
+    intervalDate = self.request.GET.get("dateKword", '')
+    if intervalDate == "today" or intervalDate =="":
+      intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
+
+    documentation = requirements.objects.ListaRequerimientosPorArea(
+      intervalo = intervalDate,
+      idArea = user.position
+      )
+    
+    allDocumentation = []
+
+    isBoss = self.request.user.is_boss
+    if isBoss:
+        allDocumentation = requirements.objects.ListaRequerimientosForBoss(
+        intervalo = intervalDate,
+        )
+
+    payload = {}
+    payload["intervalDate"] = intervalDate
+    payload["documentation"] = documentation
+    payload["allDocumentation"] = allDocumentation
+    
+    return payload
 
 # ==================== ORDENES DE COMPRA ====================
 class PurchaseOrderListView(ComercialMixin, ListView):
@@ -428,7 +480,7 @@ class PurchaseInvoiceCreateView(AdminClientsPermisoMixin,CreateView):
 
                 #  filtro, por id y por ruc para detectar duplicados
                 if supplier_id:
-                    cliente = Cliente.objects.filter(ruc=supplier_id).first()
+                    cliente = client.objects.filter(ruc=supplier_id).first()
 
                     if cliente:
                         fields['idClient'] = cliente.id
@@ -588,7 +640,7 @@ class PettyCashListView(LoginRequiredMixin,ListView):
 class PettyCashCreateView(LoginRequiredMixin, CreateView):
     model = PettyCash
     form_class = PettyCashForm
-    template_name = 'COMERCIAL/pettyCash/cajachica-crear.html'
+    template_name = 'COMERCIAL/pettyCash/cajachica_form.html'
     success_url = reverse_lazy('compras_app:lista_cajachica')
     
     def get_context_data(self, **kwargs):
@@ -691,11 +743,6 @@ class requirementsInvoiceCreateView(AdminClientsPermisoMixin,CreateView):
   model = requirementsInvoice
   form_class = requirementsInvoiceForm
   success_url = reverse_lazy('compras_app:compras-lista')
-
-  def get_form_kwargs(self):
-    kwargs = super().get_form_kwargs()
-    kwargs['request'] = self.request
-    return kwargs
   
   def post(self, request, *args, **kwargs):
       # Verificar si es una solicitud AJAX para solo procesar el XML
@@ -837,7 +884,7 @@ class requirementsInvoiceCreateView(AdminClientsPermisoMixin,CreateView):
 
             #  filtro, por id y por ruc para detectar duplicados
             if supplier_id:
-                cliente = Cliente.objects.filter(ruc=supplier_id).first()
+                cliente = client.objects.filter(ruc=supplier_id).first()
 
                 if cliente:
                     fields['idClient'] = cliente.id
@@ -927,7 +974,7 @@ class requirementsInvoiceCreateView(AdminClientsPermisoMixin,CreateView):
           instance = form.save()
           
       return super().form_valid(form)
-  
+
 class requirementsInvoiceEditView(AdminClientsPermisoMixin,UpdateView):
   template_name = "COMERCIAL/purchase/compras-editar.html"
   model = requirementsInvoice

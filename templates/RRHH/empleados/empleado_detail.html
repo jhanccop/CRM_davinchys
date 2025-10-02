@@ -1,0 +1,159 @@
+{% extends "RRHH/base-rrhh.html" %}
+
+{% load  static %}
+{% block title %} RRHH {% endblock title %}
+{% block main %} RRHH {% endblock main %}
+{% block appName %} Empleados {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Detalle del Empleado</h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'rrhh_app:empleados-list' %}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Volver
+                            </a>
+                            <a href="{% url 'rrhh_app:empleado-update' object.id %}" class="btn bg-gradient-dark">
+                                <i class="fas fa-edit me-2"></i>Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-primary">Información Personal</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td class="text-bold">Nombre completo:</td>
+                                        <td>{{ object.user.get_full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Email:</td>
+                                        <td>{{ object.user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Teléfono:</td>
+                                        <td>{{ object.telefono|default:"No especificado" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Fecha nacimiento:</td>
+                                        <td>{{ object.fecha_nacimiento|date:"d/m/Y"|default:"No especificada" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Dirección:</td>
+                                        <td>{{ object.direccion|default:"No especificada"|linebreaks }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-primary">Información Laboral</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td class="text-bold">Departamento:</td>
+                                        <td>{{ object.departamento.nombre|default:"Sin departamento" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Fecha contratación:</td>
+                                        <td>{{ object.fecha_contratacion|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Tipo de contrato:</td>
+                                        <td><span class="badge bg-gradient-dark">{{ object.get_tipo_contrato_display }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Salario base:</td>
+                                        <td><span class="font-weight-bold">{{ object.get_moneda_display }} {{ object.salario_base|floatformat:"2g" }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Estado:</td>
+                                        <td>
+                                            <span class="badge {% if object.activo %}bg-gradient-success{% else %}bg-gradient-secondary{% endif %}">
+                                                {{ object.activo|yesno:"Activo,Inactivo" }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contactos de Emergencia -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-uppercase text-primary mb-0">Contactos de Emergencia</h6>
+                                <a href="{% url 'rrhh_app:contacto-create' %}" class="btn btn-sm bg-gradient-dark">
+                                    <i class="fas fa-plus me-1"></i>Agregar Contacto
+                                </a>
+                            </div>
+                            
+                            {% if object.contactos_emergencia.all %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Relación</th>
+                                            <th>Teléfono</th>
+                                            <th>Email</th>
+                                            <th>Tipo</th>
+                                            <th class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for contacto in object.contactos_emergencia.all %}
+                                        <tr>
+                                            <td>{{ contacto.nombre }}</td>
+                                            <td>{{ contacto.relacion }}</td>
+                                            <td>{{ contacto.telefono }}</td>
+                                            <td>{{ contacto.email|default:"-" }}</td>
+                                            <td>
+                                                <span class="badge {% if contacto.principal %}bg-gradient-info{% else %}bg-gradient-secondary{% endif %}">
+                                                    {{ contacto.principal|yesno:"Principal,Secundario" }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'rrhh_app:contacto-update' contacto.id %}" class="btn btn-sm btn-outline-dark me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'rrhh_app:contacto-delete' contacto.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No hay contactos de emergencia registrados.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

@@ -1,0 +1,305 @@
+{% extends 'COMERCIAL/sales/base-quotes.html' %}
+{% load static %}
+
+{% block title %} Cotizaciones {% endblock title %}
+{% block main %} Cotizaciones {% endblock main %}
+{% block appName %} Nuevo {% endblock appName %}
+
+{% block panel-content %}
+<div class="container mt-4">
+    <h4>Crear Nueva Cotización</h4>
+    
+    <form id="quote-form" method="post">
+        {% csrf_token %}
+        
+        <!-- Formulario principal de la cotización -->
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h5>Información General</h5>
+            </div>
+            <div class="card-body pt-0">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.idClient.id_for_label }}">Cliente</label>
+                            {{ form.idClient }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.idTinReceiving.id_for_label }}">Empresa Receptora</label>
+                            {{ form.idTinReceiving }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.idTinExecuting.id_for_label }}">Empresa Ejecutora</label>
+                            {{ form.idTinExecuting }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.shortDescription.id_for_label }}">Descripción corta</label>
+                            {{ form.shortDescription }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.currency.id_for_label }}">Moneda</label>
+                            {{ form.currency }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.initialAmount.id_for_label }}">Monto Inicial</label>
+                            {{ form.initialAmount }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.dateOrder.id_for_label }}">Fecha de Solicitud</label>
+                            {{ form.dateOrder }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.deadline.id_for_label }}">Fecha de Entrega</label>
+                            {{ form.deadline }}
+                        </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.payMethod.id_for_label }}">Método de Pago</label>
+                            {{ form.payMethod }}
+                        </div>
+                        <div class="form-check">
+                            {{ form.isPO }}
+                            <label class="form-check-label" for="{{ form.isPO.id_for_label }}">Es PO?</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario para agregar productos -->
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h5>Modelos de Transformadores</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label" for="id_trafo">Transformador</label>
+                            <select id="id_trafo" class="form-control trafo-select">
+                                <option value="">Seleccionar transformador</option>
+                                {% for trafo in trafos %}
+                                <option value="{{ trafo.id }}">{{ trafo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label" for="id_quantity">Cantidad</label>
+                            <input type="number" id="id_quantity" class="form-control quantity-input" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label" for="id_unit_cost">Costo Unitario</label>
+                            <input type="number" id="id_unit_cost" class="form-control unit-cost-input" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="button" id="add-item" class="btn btn-primary btn-block">Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de productos agregados -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Productos en Lista</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Transformador</th>
+                                <th>Cantidad</th>
+                                <th>Costo Unitario</th>
+                                <th>Subtotal</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-tbody">
+                            <!-- Los items se agregarán aquí dinámicamente -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                                <td><strong id="total-amount">0.00</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campo oculto para enviar los datos de los items -->
+        <input type="hidden" name="items_data" id="items-data">
+
+        <div class="form-group">
+            <button type="submit" class="btn bg-gradient-success">Crear Cotización</button>
+            <a href="{% url 'ventas_app:cotizaciones-lista' %}" class="btn bg-gradient-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+// Usar jQuery en modo compatibilidad
+jQuery(document).ready(function($) {
+    var items = [];
+    var itemCounter = 0;
+
+    // Función para agregar item a la tabla
+    $('#add-item').on('click', function() {
+        var trafoSelect = $('#id_trafo');
+        var quantityInput = $('#id_quantity');
+        var unitCostInput = $('#id_unit_cost');
+        
+        var trafoId = trafoSelect.val();
+        var trafoText = trafoSelect.find('option:selected').text();
+        var quantity = parseInt(quantityInput.val());
+        var unitCost = parseFloat(unitCostInput.val());
+        
+        if (!trafoId || isNaN(quantity) || quantity <= 0 || isNaN(unitCost) || unitCost <= 0) {
+            alert('Por favor complete todos los campos correctamente');
+            return;
+        }
+        
+        // Agregar item al array
+        var item = {
+            id: itemCounter++,
+            trafo_id: trafoId,
+            trafo_text: trafoText,
+            quantity: quantity,
+            unit_cost: unitCost,
+            subtotal: quantity * unitCost
+        };
+        
+        items.push(item);
+        
+        // Actualizar tabla
+        updateTable();
+        
+        // Limpiar formulario
+        quantityInput.val('1');
+        unitCostInput.val('');
+        unitCostInput.focus();
+    });
+
+    // Función para actualizar la tabla y el total
+    function updateTable() {
+        var tbody = $('#items-tbody');
+        var totalAmountElement = $('#total-amount');
+        var itemsDataElement = $('#items-data');
+        
+        // Limpiar tabla
+        tbody.empty();
+        
+        var totalAmount = 0;
+        
+        // Llenar tabla
+        $.each(items, function(index, item) {
+            var row = $('<tr class = "mb-0"></tr>');
+            row.append($('<td class = "mb-0"></td>').text(item.trafo_text));
+            row.append($('<td class = "mb-0"></td>').text(item.quantity));
+            row.append($('<td class = "mb-0"></td>').text(item.unit_cost.toFixed(2)));
+            row.append($('<td class = "mb-0"></td>').text(item.subtotal.toFixed(2)));
+            
+            var removeButton = $('<button type="button" class="btn btn-primary btn-sm">Eliminar</button>');
+            removeButton.on('click', function() {
+                removeItem(item.id);
+            });
+            
+            var actionsTd = $('<td></td>').append(removeButton);
+            row.append(actionsTd);
+            
+            tbody.append(row);
+            
+            totalAmount += item.subtotal;
+        });
+        
+        // Actualizar total
+        totalAmountElement.text(totalAmount.toFixed(2));
+        
+        // Actualizar campo oculto con datos JSON
+        var itemsData = [];
+        $.each(items, function(index, item) {
+            itemsData.push({
+                trafo_id: item.trafo_id,
+                quantity: item.quantity,
+                unit_cost: item.unit_cost
+            });
+        });
+        
+        itemsDataElement.val(JSON.stringify(itemsData));
+        
+        // Actualizar el campo amount del formulario principal si es necesario
+        var amountField = $('[name="amount"]');
+        if (amountField.length > 0) {
+            amountField.val(totalAmount);
+        }
+    }
+
+    // Función para eliminar item
+    function removeItem(itemId) {
+        var newItems = [];
+        $.each(items, function(index, item) {
+            if (item.id !== itemId) {
+                newItems.push(item);
+            }
+        });
+        items = newItems;
+        updateTable();
+    }
+
+    // Validación antes de enviar el formulario
+    $('#quote-form').on('submit', function(e) {
+        if (items.length === 0) {
+            e.preventDefault();
+            alert('Debe agregar al menos un producto a la cotización');
+            return false;
+        }
+        
+        // Validar que todos los campos requeridos estén llenos
+        var requiredFields = $('#quote-form').find('select[required], input[required]');
+        var valid = true;
+        
+        requiredFields.each(function() {
+            if (!$(this).val()) {
+                valid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        if (!valid) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos requeridos');
+            return false;
+        }
+        
+        return true;
+    });
+
+    // Limpiar validación cuando se modifique un campo
+    $('select, input').on('change', function() {
+        $(this).removeClass('is-invalid');
+    });
+});
+</script>
+
+<script>
+    document.getElementById("id_idTinReceiving").value = "{{user.company.id}}";
+</script>
+
+{% endblock JSscripts %}

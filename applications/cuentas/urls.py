@@ -6,22 +6,22 @@ app_name = "cuentas_app"
 
 urlpatterns = [
     path(
-        'accounts/seleccionar-empresa/', 
+        'finanzas/seleccionar-empresa/', 
         views.SelectTinView.as_view(),
         name='seleccionar-empresa',
     ),
     path(
-        'accounts/lista/', 
+        'finanzas/cuentas-bancarias/', 
         views.AccountListView.as_view(),
         name='cuentas-lista',
     ),
     path(
-        'accounts/agregar_cuenta/', 
+        'finanzas/cuentas-bancarias/nuevo/', 
         views.AccountCreateView.as_view(),
         name='cuentas-add',
     ),
     path(
-        'accounts/editar_cuenta/<pk>/', 
+        'finanzas/cuentas-bancarias/nuevo/<pk>/', 
         views.AccountUpdateView.as_view(),
         name='cuentas-editar',
     ),

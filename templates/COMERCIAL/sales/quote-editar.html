@@ -1,176 +1,170 @@
 {% extends "COMERCIAL/sales/base-quotes.html" %}
 {% load static %}
 
-{% block title %} Editar Cotización {% endblock title %}
+{% block title %} Ventas {% endblock title %}
 {% block main %} Ventas {% endblock main %}
 {% block appName %} Cotizaciones {% endblock appName %}
 {% block Type %} Editar {% endblock Type %}
 
 {% block panel-content %}
 
-<div class="row">
-    <div class="col-12 col-md-5">
-        <div class="card">
-            <div class="card-header bg-gradient-secondary text-white p-3">
-                <h5 class="card-title mb-0 text-white">
-                    <i class="fas fa-edit me-2"></i>Editar Cotización QUO-{{ quote.id }}
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <label class="form-label">{{ form.isPO.label }}</label>
-                                {{ form.isPO }}
+<div class="container">
+    <div class="row">
+        <!-- Columna izquierda - Formulario de edición -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white p-3">
+                    <h6 class="card-title mb-0 text-center text text-white">
+                        <i class="fas fa-edit me-2"></i>Editar Cotización QUO-{{ quote.id }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="form-check form-switch">
+                            {{ form.isPO }}
+                            <label class="form-check-label" for="{{ form.isPO.id_for_label }}">
+                                {% if quote.isPO %}
+                                <span class="badge badge-success">PO</span>
+                                {% else %}
+                                <span class="badge badge-primary">No PO</span>
+                                {% endif %}
+                            </label>
+                        </div>
+
+                        <!-- Cliente -->
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <div class="form-label">{{ form.idClient.label }}</div>
+                            {{ form.idClient }}
+                        </div>
+                        
+                        <!-- Empresas -->
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <div class="form-label">{{ form.idTinReceiving.label }}</div>
+                            {{ form.idTinReceiving }}
+                        </div>
+
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <div class="form-label">{{ form.idTinExecuting.label }}</div>
+                            {{ form.idTinExecuting }}
+                        </div>
+
+                        <!-- Información financiera -->
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <div class="form-label">{{ form.currency.label }}</div>
+                                    {{ form.currency }}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <div class="form-label">{{ form.amount.label }}</div>
+                                    {{ form.amount }}
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="input-group input-group-outline focused is-focused" hidden>
-                                <label class="form-label">{{ form.idTinReceiving.label }}</label>
-                                {{ form.idTinReceiving }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.idTinExecuting.label }}</label>
-                                {{ form.idTinExecuting }}
-                            </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <div class="form-label">{{ form.payMethod.label }}</div>
+                            {{ form.payMethod }}
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.idClient.label }}</label>
-                                {{ form.idClient }}
-                            </div>
-                        </div>
-                    </div>
+                        <!-- Fechas -->
 
-                    <div class="row mt-3">
-                        <div class="col-md-4">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.currency.label }}</label>
-                                {{ form.currency }}
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <div class="form-label">{{ form.dateOrder.label }}</div>
+                                    {{ form.dateOrder }}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <div class="form-label">{{ form.deadline.label }}</div>
+                                    {{ form.deadline }}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.amount.label }}</label>
-                                {{ form.amount }}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.payMethod.label }}</label>
-                                {{ form.payMethod }}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.dateOrder.label }}</label>
-                                {{ form.dateOrder }}
-                            </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <div class="form-label">{{ form.shortDescription.label }}</div>
+                            {{ form.shortDescription }}
                         </div>
-                        <div class="col-md-6">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.deadline.label }}</label>
-                                {{ form.deadline }}
-                            </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'ventas_app:cotizaciones-lista' %}" class="btn bg-gradient-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn bg-gradient-success">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="input-group input-group-outline focused is-focused mt-3">
-                        <label class="form-label">{{ form.shortDescription.label }}</label>
-                        {{ form.shortDescription }}
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="{% url 'ventas_app:cotizaciones-lista' %}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i>Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Guardar Cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-md-7 mx-auto">
-        <div class="card">
-            <div class="card-header bg-gradient-secondary p-3">
-                <h5 class="card-title mb-0 text-white">Transformadores de esta cotización</h5>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Serial</th>
-                            <th>KVA</th>
-                            <th>Cantidad</th>
-                            <th>Costo Unitario</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for trafo in trafos %}
-                        <tr>
-                            <td class="text-end">{{ trafo.serialNumber }}</td>
-                            <td class="text-end">{{ trafo.get_KVA_display }}</td>
-                            <td class="text-end">{{ trafo.quantity }}</td>
-                            <td class="text-end">{{ trafo.unitCost|floatformat:2 }}</td>
-                            <td class="text-center">
-                                <a href="{% url 'ventas_app:editar-item' trafo.id %}">
-                                    <i class="far fa-edit text-dark text-lg"></i>
-                                </a>
-                                <a href="{% url 'ventas_app:eliminar-item' trafo.id %}">
-                                    <i class="far fa-trash-alt text-primary text-lg"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-3">
-                                No hay transformadores en esta cotización
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                    </form>
+                </div>
             </div>
         </div>
 
-    </div>
+        <!-- Columna derecha - Lista de transformadores -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white d-flex justify-content-between p-3 pb-0">
+                    <h6 class="card-title text-white mb-0">Lista de Transformadores</h6>
+                    <a class="btn btn-success btn-sm" href="{% url 'ventas_app:crear-item' quote.id %}">
+                        <i class="fas fa-plus me-1"></i> Añadir Item
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-end">Serial</th>
+                                    <th class="text-end">KVA</th>
+                                    <th class="text-end">Costo Unitario</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trafo in trafos %}
+                                <tr>
+                                    <td class="text-end">{{ trafo }}</td>
+                                    <td class="text-end">{{ trafo.idTrafo.get_KVA_display }}</td>
+                                    <td class="text-end">{{ trafo.unitCost|floatformat:2 }}</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            
+                                            <a href="{% url 'ventas_app:editar-item' trafo.id %}" title="Editar">
+                                                <i class="far fa-edit text-dark text-lg"></i>
+                                            </a>
+                                            &ensp;
+                                            <a href="{% url 'ventas_app:eliminar-item' trafo.id %}" title="Eliminar">
+                                                <i class="far fa-trash-alt text-primary text-lg"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                                        No hay transformadores en esta cotización
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
+            
+        </div>
+    </div>
 </div>
-
 
 {% endblock panel-content %}
 
 {% block JSscripts %}
-<script>
-    // Inicializar selects con Select2 si es necesario
-    $(document).ready(function() {
-        $('select').select2({
-            theme: 'bootstrap-5'
-        });
-        
-        // Formato de fechas
-        $('input[type="date"]').each(function() {
-            if (this.value) {
-                this.value = this.value.split('T')[0];
-            }
-        });
-    });
-</script>
 {% endblock JSscripts %}

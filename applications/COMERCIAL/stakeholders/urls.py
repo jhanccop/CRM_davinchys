@@ -6,7 +6,7 @@ app_name = "stakeholders_app"
 urlpatterns = [
     # ============================ clientes ============================
     path(
-        'comercial/clientes/lista/', 
+        'comercial/clientes/', 
         views.ClientListView.as_view(),
         name='cliente-lista',
     ),
@@ -39,7 +39,7 @@ urlpatterns = [
 
     # ============================ proveedores ============================
     path(
-        'comercial/proveedores/lista/', 
+        'comercial/proveedores/', 
         views.SupplierListView.as_view(),
         name='proveedor-lista',
     ),

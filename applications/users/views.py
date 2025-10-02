@@ -60,19 +60,20 @@ class LoginUser(FormView):
     #template_name = 'users/login.html'
     template_name = 'users/login_creative.html'
     form_class = LoginForm
-    #success_url = reverse_lazy('home_app:index')
+    success_url = reverse_lazy('home_app:bienvenida')
 
-    def get_success_url(self):
-        # Obtener el usuario autenticado
-        pos = self.request.user.position
+
+
+    #def get_success_url(self):
+    #    pos = self.request.user.position
         
         # Redirigir según el grupo/rol del usuario
-        if pos == User.FINANZAS or pos == User.ADMINISTRADOR:
-            return reverse_lazy('finanzas_reports_app:reporte-de-cuentas')
-        elif pos == User.COMERCIAL or pos == User.ADMINISTRADOR:
-            return reverse_lazy('comercial_reports_app:dashboard')
-        else:
-            return reverse_lazy('home_app:index')
+    #    if pos == User.FINANZAS or pos == User.ADMINISTRADOR:
+    #        return reverse_lazy('finanzas_reports_app:reporte-de-cuentas')
+    #    elif pos == User.COMERCIAL or pos == User.ADMINISTRADOR:
+    #        return reverse_lazy('comercial_reports_app:dashboard')
+    #    else:
+    #        return reverse_lazy('home_app:index')
 
     def form_valid(self, form):
         user = authenticate(

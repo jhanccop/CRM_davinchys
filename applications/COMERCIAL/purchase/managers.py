@@ -129,7 +129,7 @@ class requirementsManager(models.Manager):
         # Consulta principal que obtiene los requirements con su último estado y área
         result = self.filter(
             created__range = rangeDate,
-            idPetitioner__company__id = idArea
+            idPetitioner__position = idArea
         ).annotate(
             lastStatus=Subquery(last_tracking_subquery.values('status')),
             lastArea=Subquery(last_tracking_subquery.values('area'))

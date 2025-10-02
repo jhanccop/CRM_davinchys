@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Documentos Genericos{% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Registrar{% endif %} {% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="row">
+    <div class="col-lg-10 col-12 mx-auto position-relative">
+        <div class="card">
+        <div class="card-header p-3 pt-2 pb-0">
+            <div class="icon icon-lg icon-shape bg-gradient-secondary shadow text-center border-radius-xl mt-n4 float-start">
+            <i class="fas fa-file-invoice opacity-10"></i>
+            </div>
+            
+        </div>
+        <div class="card-body pt-0 pb-0">
+            <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
+            <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+                <div class="multisteps-form__content">
+                
+                <div class="row">
+                    <div class="col-12 col-sm-12" hidden>
+                    <div class="input-group input-group-outline">
+                        <label for="exampleFormControlInput1" class="form-label">user</label>
+                        {{ form.user }}
+                    </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div class="col-12 col-sm-12 mt-sm-0">
+                    <h6 class="mb-0">Documento:</h6>
+                    <div class="input-group input-group-outline">
+                        <div class="form-group w-100">
+                        {{ form.pdf_file }}
+                        </div>
+                    </div>
+                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                    {% for error in form.pdf_file.errors %}
+                    <p class="text-xs text-primary mb-0">
+                        {{ error|escape }}
+                    </p>
+                    {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Contenedor para la vista previa -->
+                <div class="preview-container my-4 text-center" style="display: none;">
+                    <h6>Vista previa</h6>
+                
+                    <!-- Para imágenes -->
+                    <div id="image-preview" style="max-width: 100%; max-height: 400px; display: none;">
+                    <img id="preview-img" src="" alt="Vista previa" style="max-width: 100%; max-height: 400px;">
+                    </div>
+                
+                    <!-- Para PDFs -->
+                    <div id="pdf-preview" style="width: 100%; height: 500px; display: none;">
+                    <object id="pdf-object" data="" type="application/pdf" width="100%" height="100%">
+                        <p>Tu navegador no puede mostrar PDFs. <a id="pdf-download-link" href="" target="_blank">Descargar PDF</a></p>
+                    </object>
+                    </div>
+                </div>
+
+                <h6 class="font-weight-bolder">Informacion de documento</h6>
+                <div class="row">
+                    <div class="col-6 col-sm-3">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">F. emisión</label>
+                        {{ form.date }}
+                    </div>
+                    </div>
+
+                    <div class="col-6 col-sm-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">Tipo de Documento</label>
+                        {{ form.typeDoc }}
+                    </div>
+                    </div>
+                    
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">Id Documento</label>
+                        {{ form.idOtherDocument }}
+                    </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="row">
+                    <div class="col-12 col-sm-12 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                        <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                        {{ form.description }}
+                    </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                    <p class="mb-0">Documento de referencia</p>
+                    <div class="input-group input-group-outline">
+                        {{ form.idFinacialDocuments }}
+                    </div>
+                    </div>
+                    
+                </div>
+
+
+                <div class="button-row d-flex mt-4">
+                    <a class="btn bg-gradient-dark" href="{% url 'documentos_app:documento-generico-lista'%}"> REGRESAR </a>
+
+                    <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="update">CREAR DOCUMENTO</button>
+                </div>
+
+                </div>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  function toggleDiv() {
+    
+    let selected = document.getElementById("id_detraction").value;
+    let month_dec = document.getElementById("month_dec");
+    let year_dec = document.getElementById("year_dec");
+
+    month_dec.style.display = "inline-block";
+    year_dec.style.display = "inline-block";
+
+    if(Number(selected)== 1){
+      month_dec.style.display = "none";
+      year_dec.style.display = "none";
+    }
+
+  }
+
+  function toggleDivTypeInvoice() {
+    let selected = document.getElementById("id_typeInvoice").value;
+    let detraction = document.getElementById("detraction");
+    let shippingGuide = document.getElementById("shippingGuide");
+    let retention= document.getElementById("retention");
+
+    detraction.style.display = "none";
+    shippingGuide.style.display = "none";
+    retention.style.display = "none";
+
+    switch(Number(selected)){
+      case 0:
+        detraction.style.display = "inline-block";
+        shippingGuide.style.display = "inline-block";
+        break;
+      case 1:
+      retention.style.display = "inline-block";
+        break;
+    }
+  }
+
+
+</script>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //noCalendar: true,
+            maxDate: "today"
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+  document.getElementById("id_user").value = "{{user.id}}";
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+  if (document.getElementById('id_idFinacialDocuments')) {
+    var element = document.getElementById('id_idFinacialDocuments');
+    const example = new Choices(element, {});
+  }
+  if (document.getElementById('id_idBankMovements')) {
+    var element = document.getElementById('id_idBankMovements');
+    const example = new Choices(element, {});
+  }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('id_pdf_file');
+    const previewContainer = document.querySelector('.preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    const pdfPreview = document.getElementById('pdf-preview');
+    const pdfObject = document.getElementById('pdf-object');
+    const pdfLink = document.getElementById('pdf-download-link');
+
+    fileInput.addEventListener('change', function () {
+      // Ocultar previsualizaciones anteriores
+      imagePreview.style.display = 'none';
+      pdfPreview.style.display = 'none';
+
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        const fileURL = URL.createObjectURL(file);
+        const fileType = file.type;
+
+        // Mostrar el contenedor de previsualización
+        previewContainer.style.display = 'block';
+
+        if (fileType.startsWith('image/')) {
+          // Es una imagen
+          previewImg.src = fileURL;
+          imagePreview.style.display = 'block';
+        } else if (fileType === 'application/pdf') {
+          // Es un PDF
+          pdfObject.data = fileURL;
+          pdfLink.href = fileURL;
+          pdfPreview.style.display = 'block';
+        }
+      } else {
+        // No hay archivo seleccionado
+        previewContainer.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+{% endblock JSscripts %}

@@ -169,6 +169,7 @@ class requirementItems(TimeStampedModel):
         'Tipo',
         max_length = 1, 
         choices = TYPES_CHOICES,
+        default= "0",
         null = True,
         blank = True
     )

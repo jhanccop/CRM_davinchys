@@ -1,241 +1,242 @@
-{% extends "FINANCIERA/documentos/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Finanzas {% endblock title %}
-{% block main %} Financiera {% endblock main %}
-{% block appName %} Documentos {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Documentos{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
-<div class="row">
-  <div class="col-lg-6 col-md-6">
-    <div class="nav-wrapper position-relative end-0">
-      <ul class="nav nav-pills nav-fill p-1">
-        <li class="nav-item " role="presentation">
-          <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientosBancarios_app:lista-movimientos' %}">
-            <span class="ms-1">Movimientos</span>
-          </a>
-        </li>
-        <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
-          <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'documentos_app:documento-financiero-lista' %}">
-            <span class="ms-1">Documentos financieros</span>
-          </a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link mb-0 px-0 py-1" href="{% url 'documentos_app:documento-generico-lista' %}">
-            <span class="ms-1">Documentos genéricos</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- ================ MENSAJES DE PROCESAMIENTO DE RHE MASIVO ================= -->
-<!-- En tu base.html o en el template específico -->
-{% if messages %}
-<div class="messages-container bg-gradient-success">
-    {% for message in messages %}
-      {% if message.tags == "success" %}
-      <div class="alert alert-success text-white" role="alert">
-          <strong>Success!</strong> {{ message }}
-      </div>
-
-      {% elif messages.tags == "warning" %}
-      <div class="alert alert-warning text-white" role="alert">
-          <strong>Warning!</strong> {{ message }}
-      </div>
-
-      {% elif messages.tags == "error" %}
-      <div class="alert alert-primary text-white" role="alert">
-          <strong>Warning!</strong> {{ message }}
-      </div>
-      {% endif %}
-    {% endfor %}
-</div>
-
-{% endif %}
-
-<!-- ================ BODY ================= -->
-
-<div class="row">
-  <div class="col-lg-6 col-12 d-flex ms-auto ">
-    <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
-      Export CSV
-    </a>
-
-    <div class="dropleft ms-3">
-      <div class="dropdown">
-        <a href="#" class="btn bg-gradient-dark dropdown-toggle " data-bs-toggle="dropdown" id="navbarDropdownMenuLink2">
-          Nuevo documento
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
-          
-          <li>
-            <a class="dropdown-item" href="{% url 'documentos_app:carga-doc-rhe' %}">
-              Masivo RHE
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-6 col-md-6">
+      <div class="nav-wrapper position-relative end-0">
+        <ul class="nav nav-pills nav-fill p-1">
+          <li class="nav-item " role="presentation">
+            <a class="nav-link mb-0 px-0 py-1" href="{% url 'movimientosBancarios_app:lista-movimientos' %}">
+              <span class="ms-1">Movimientos</span>
             </a>
           </li>
-          <li>
-            <a class="dropdown-item" href="{% url 'documentos_app:documento-financiero-nuevo' %}">
-              Manual
+          <li class="nav-item bg-gradient-secondary border-radius-lg" role="presentation">
+            <a class="nav-link mb-0 px-0 py-1 text-white" href="{% url 'documentos_app:documento-financiero-lista' %}">
+              <span class="ms-1">Documentos financieros</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link mb-0 px-0 py-1" href="{% url 'documentos_app:documento-generico-lista' %}">
+              <span class="ms-1">Documentos genéricos</span>
             </a>
           </li>
         </ul>
       </div>
-      
+    </div>
+  </div>
+
+  <!-- ================ MENSAJES DE PROCESAMIENTO DE RHE MASIVO ================= -->
+  <!-- En tu base.html o en el template específico -->
+  {% if messages %}
+  <div class="messages-container bg-gradient-success">
+      {% for message in messages %}
+        {% if message.tags == "success" %}
+        <div class="alert alert-success text-white" role="alert">
+            <strong>Success!</strong> {{ message }}
+        </div>
+
+        {% elif messages.tags == "warning" %}
+        <div class="alert alert-warning text-white" role="alert">
+            <strong>Warning!</strong> {{ message }}
+        </div>
+
+        {% elif messages.tags == "error" %}
+        <div class="alert alert-primary text-white" role="alert">
+            <strong>Warning!</strong> {{ message }}
+        </div>
+        {% endif %}
+      {% endfor %}
+  </div>
+
+  {% endif %}
+
+  <!-- ================ BODY ================= -->
+
+  <div class="row">
+    <div class="col-lg-6 col-12 d-flex ms-auto ">
+      <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+        Export CSV
+      </a>
+
+      <div class="dropleft ms-3">
+        <div class="dropdown">
+          <a href="#" class="btn bg-gradient-dark dropdown-toggle " data-bs-toggle="dropdown" id="navbarDropdownMenuLink2">
+            Nuevo documento
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
+            
+            <li>
+              <a class="dropdown-item" href="{% url 'documentos_app:carga-doc-rhe' %}">
+                Masivo RHE
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'documentos_app:documento-financiero-nuevo' %}">
+                Manual
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header pb-0 ">
+              <div class="row align-middle align-items-center">
+                <div class="col-lg-4 col-md-3">
+                  <h5 class="mb-0">Documentos</h5>
+                  <p class="pt-0">FINANCIEROS</p>
+                </div>
+                <div class="col-lg-8 col-md-9">
+                  <form method="GET" class="">{% csrf_token %}
+                    <div class="d-flex align-items-center">
+
+                      <div class="input-group input-group-outline is-focused">
+                        <label class="form-label">Tipo</label>
+                        
+                        <select class="form-control" name="TypKword" id="TypKword">
+                          <option value="0">Egreso</option>
+                          <option value="1">Ingreso</option>
+                          <option value="2" selected>Todo</option>
+                        </select>
+                        
+                      </div>
+                      &emsp;
+
+                      <div class="input-group input-group-outline is-focused">
+                        <label class="form-label">Documento</label>
+                        
+                        <select class="form-control" name="DocKword" id="DocKword">
+                          <option value="0">Factura</option>
+                          <option value="1">RHE</option>
+                          <option value="2">PL</option>
+                          <option value="3">Comprobante Davinchy</option>
+                          <option value="4">NC</option>
+                          <option value="5" selected>Todo</option>
+                        </select>
+                        
+                      </div>
+                      &emsp;
+                      <div class="input-group input-group-outline is-focused">
+                        <label class="form-label">Rango</label>
+                        <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
+                          placeholder="today" id="dateKword" name="dateKword">
+                      </div>
+                      &emsp; 
+                      <div class="pt-3 pb-0">
+                        <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+                      </div>
+                      
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                  <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+                    <thead class="thead-light">
+                      <tr>
+                        <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
+                        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
+                        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Proveedor</th>
+                        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
+                        <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
+                        <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for t in documentos.documentation %}
+                      <tr>
+                        <td class="text-sm">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ t.year_dec |default:"-"}} - {{ t.month_dec |default:"-"}}</h6>
+                            <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
+                          </div>
+                        </td>
+                        
+                        <td class="text-sm">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-financiero-detalle' t.id %}">
+                              {{t.idInvoice}}
+                              {% if t.doc_status == "2" %}
+                              <span class="badge badge-danger">{{t.get_doc_status_display|default:""}}</span>
+                              
+                              {% endif %}
+                            </a></h6>
+                            <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.shortDescription|default:"-" }}</p>
+                          </div>
+                        </td>
+
+                        <td class="text-sm">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ t.idClient.numberIdClient }}</h6>
+                            <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idClient.tradeName }}</p>
+                          </div>
+                        </td>
+
+                        <td class="text-sm">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">{{ t.idSupplier.numberIdSupplier }}</h6>
+                            <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idSupplier.tradeName }}</p>
+                          </div>
+                        </td>
+                        
+                        <td class="text-sm">
+                          <div class="w-100">
+                            <span class="me-2 text-md font-weight-bold text-info"> {{t.get_typeCurrency_display}} {{ t.amount|floatformat:"2g" }}</span>
+                            
+                            <div class="d-flex align-items-center mb-0">
+                              <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied|floatformat:"2g" }}</span>
+                              <span class="ms-auto text-sm font-weight-normal">{{ t.per|floatformat:0 }}%</span>
+                            </div>
+                            <div>
+                              <div class="progress progress-md w-100">
+                                <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td class="text-sm">
+                          <div class="d-flex flex-column justify-content-center">
+                          {% for i in t.doc_conciliation.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i.idMovOrigin.idAccount.get_currency_display}} {{i.amountReconcilied}} | {{i.idMovOrigin.idAccount.nickName}} | {{i.idMovOrigin.description}} {{i.idMovOrigin.originDestination}} </p> {% endfor %}
+                          </div>
+                        </td>
+
+                        <td>
+                          <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
+                            aria-expanded="false">
+                            <i class="fas fa-bars text-lg text-dark"></i>
+                          </a>
+                          <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
+                            <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'documentos_app:documento-financiero-editar' t.id %}"> Editar documento</a></li>
+                            <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'documentos_app:documento-financiero-eliminar' t.id %}">Eliminar documento</a></li>
+                          </ul>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
     </div>
   </div>
 </div>
-
-<div class="row">
-  
-  <div class="col-12">
-      <div class="card">
-          <div class="card-header pb-0 ">
-            <div class="row align-middle align-items-center">
-              <div class="col-lg-4 col-md-3">
-                <h5 class="mb-0">Documentos</h5>
-                <p class="pt-0">FINANCIEROS</p>
-              </div>
-              <div class="col-lg-8 col-md-9">
-                <form method="GET" class="">{% csrf_token %}
-                  <div class="d-flex align-items-center">
-
-                    <div class="input-group input-group-outline is-focused">
-                      <label class="form-label">Tipo</label>
-                      
-                      <select class="form-control" name="TypKword" id="TypKword">
-                        <option value="0">Egreso</option>
-                        <option value="1">Ingreso</option>
-                        <option value="2" selected>Todo</option>
-                      </select>
-                      
-                    </div>
-                    &emsp;
-
-                    <div class="input-group input-group-outline is-focused">
-                      <label class="form-label">Documento</label>
-                      
-                      <select class="form-control" name="DocKword" id="DocKword">
-                        <option value="0">Factura</option>
-                        <option value="1">RHE</option>
-                        <option value="2">PL</option>
-                        <option value="3">Comprobante Davinchy</option>
-                        <option value="4">NC</option>
-                        <option value="5" selected>Todo</option>
-                      </select>
-                      
-                    </div>
-                    &emsp;
-                    <div class="input-group input-group-outline is-focused">
-                      <label class="form-label">Rango</label>
-                      <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
-                        placeholder="today" id="dateKword" name="dateKword">
-                    </div>
-                    &emsp; 
-                    <div class="pt-3 pb-0">
-                      <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
-                    </div>
-                    
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="card-body pt-0 px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table table-flush mb-0 align-items-center" id="datatable-move">
-                  <thead class="thead-light">
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Cliente</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Proveedor</th>
-                      <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Monto</th>
-                      <th class="text-uppercase text-info text-xs font-weight-bolder opacity-7 ps-2">Movimientos</th>
-                      <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for t in documentos.documentation %}
-                    <tr>
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.year_dec |default:"-"}} - {{ t.month_dec |default:"-"}}</h6>
-                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.date|date:'d-m-Y' }}</p>
-                        </div>
-                      </td>
-                      
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm"><a href="{% url 'documentos_app:documento-financiero-detalle' t.id %}">
-                            {{t.idInvoice}}
-                            {% if t.doc_status == "2" %}
-                            <span class="badge badge-danger">{{t.get_doc_status_display|default:""}}</span>
-                            
-                            {% endif %}
-                          </a></h6>
-                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.shortDescription|default:"-" }}</p>
-                        </div>
-                      </td>
-
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.idClient.numberIdClient }}</h6>
-                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idClient.tradeName }}</p>
-                        </div>
-                      </td>
-
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{ t.idSupplier.numberIdSupplier }}</h6>
-                          <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idSupplier.tradeName }}</p>
-                        </div>
-                      </td>
-                      
-                      <td class="text-sm">
-                        <div class="w-100">
-                          <span class="me-2 text-md font-weight-bold text-info"> {{t.get_typeCurrency_display}} {{ t.amount|floatformat:"2g" }}</span>
-                          
-                          <div class="d-flex align-items-center mb-0">
-                            <span class="me-2 text-sm font-weight-bold text-dark">{{ t.amountReconcilied|floatformat:"2g" }}</span>
-                            <span class="ms-auto text-sm font-weight-normal">{{ t.per|floatformat:0 }}%</span>
-                          </div>
-                          <div>
-                            <div class="progress progress-md w-100">
-                              <div class="progress-bar bg-dark" role="progressbar" style="width: {{ t.per|floatformat:0 }}%;"></div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td class="text-sm">
-                        <div class="d-flex flex-column justify-content-center">
-                         {% for i in t.doc_conciliation.all %}<p class="text-sm font-weight-normal text-secondary mb-0">{{i.idMovOrigin.idAccount.get_currency_display}} {{i.amountReconcilied}} | {{i.idMovOrigin.idAccount.nickName}} | {{i.idMovOrigin.description}} {{i.idMovOrigin.originDestination}} </p> {% endfor %}
-                        </div>
-                      </td>
-
-                      <td>
-                        <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown" data-bs-placement="left"
-                          aria-expanded="false">
-                          <i class="fas fa-bars text-lg text-dark"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light" aria-labelledby="dropdownMarketingCard" style="">
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-dark" href="{% url 'documentos_app:documento-financiero-editar' t.id %}"> Editar documento</a></li>
-                          <li><a class="dropdown-item border-radius-md font-weight-bold text-primary" href="{% url 'documentos_app:documento-financiero-eliminar' t.id %}">Eliminar documento</a></li>
-                        </ul>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
-  </div>
-</div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}

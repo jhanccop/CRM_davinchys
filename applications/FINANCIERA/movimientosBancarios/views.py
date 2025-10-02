@@ -79,7 +79,7 @@ class MovimientosListView(FinanzasMixin,ListView):
     return payload
 
 class MovimientosEditView(FinanzasMixin,UpdateView):
-  template_name = "FINANCIERA/movimientosBancarios/editar-movimientos.html"
+  template_name = "FINANCIERA/movimientosBancarios/movimiento-form.html"
   model = BankMovements
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientosBancarios_app:lista-movimientos')
@@ -93,7 +93,7 @@ class MovimientosEditView(FinanzasMixin,UpdateView):
     return kwargs
 
 class MovimientosCreateView(FinanzasMixin,CreateView):
-  template_name = "FINANCIERA/movimientosBancarios/crear-movimientos.html"
+  template_name = "FINANCIERA/movimientosBancarios/movimiento-form.html"
   model = BankMovements
   form_class = BankMovementsForm
   success_url = reverse_lazy('movimientosBancarios_app:lista-movimientos')

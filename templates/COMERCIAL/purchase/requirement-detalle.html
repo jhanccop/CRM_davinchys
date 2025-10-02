@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/purchase/base-COMERCIAL.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Requerimientos {% endblock appName %}
-{% block Type %} Detalle {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Requerimientos{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
 
 {% block panel-content %}
 

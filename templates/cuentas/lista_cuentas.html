@@ -1,66 +1,64 @@
-{% extends "cuentas/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Movimientos {% endblock title %}
-{% block main %} Movimientos {% endblock main %}
-{% block appName %} Cuentas {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Cuentas{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
-<div class="row">
-  <div class="col-12">
-      <div class="card">
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+        <div class="card">
 
-          <div class="card-header p-3 pb-0">
-            <div class="d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 text-uppercase">Lista de cuentas</h6>
-              <span class="d-flex align-items-center">
-                <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center"
-                  data-type="csv" type="button">
-                  <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
-                  <span class="btn-inner--text">Descargar</span>
-                </a>
-              </span>
-            </div>
-          </div>
-
-          <div class="card-body pt-0 px-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-canter mb-0" id="datatable-clientes">
-                  <thead>
-                    <tr>
-                      <th class="">Nombre de cuenta</th>
-                      <th class="">Moneda</th>
-                      <th class="">Monto</th>
-                      <th class="">Razon social asociado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for t in cuentas.cuenta %}
-                    <tr>
-                      <td class="text-sm">{{ t.accountName }}</td>
-                      <td class="text-start text-sm">{{ t.get_currency_display }}</td>
-
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">{{ t.accountBalance }}</p>
-                        <p class="text-xs text-secondary mb-0">{{ t.lastUpdateCRM | date:'d-m-Y h:i' }} </p>
-                      </td>
-
-                      <td class="text-sm">{{ t.idTin }}</td>
-
-
-
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+            <div class="card-header p-3 pb-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-uppercase">Lista de cuentas</h6>
+                <span class="d-flex align-items-center">
+                  <a class="export btn btn-primary btn-sm btn mb-0 ms-2 btn-sm align-items-center justify-content-center"
+                    data-type="csv" type="button">
+                    <span class="btn-inner--icon"><i class="fas fa-cloud-download-alt text-md"></i></span>
+                    <span class="btn-inner--text">Descargar</span>
+                  </a>
+                </span>
               </div>
-          </div>
-      </div>
+            </div>
+
+            <div class="card-body pt-0 px-0 pb-2">
+                <div class="table-responsive p-0">
+                  <table class="table align-items-canter mb-0" id="datatable-clientes">
+                    <thead>
+                      <tr>
+                        <th class="">Nombre de cuenta</th>
+                        <th class="">Moneda</th>
+                        <th class="">Monto</th>
+                        <th class="">Razon social asociado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for t in cuentas.cuenta %}
+                      <tr>
+                        <td class="text-sm">{{ t.accountName }}</td>
+                        <td class="text-start text-sm">{{ t.get_currency_display }}</td>
+
+                        <td>
+                          <p class="text-xs font-weight-bold mb-0">{{ t.accountBalance }}</p>
+                          <p class="text-xs text-secondary mb-0">{{ t.lastUpdateCRM | date:'d-m-Y h:i' }} </p>
+                        </td>
+
+                        <td class="text-sm">{{ t.idTin }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
 </div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}

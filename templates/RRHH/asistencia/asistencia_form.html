@@ -1,0 +1,131 @@
+<!-- templates/rh/asistencia_form.html -->
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Asistencia{% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Registrar{% endif %} {% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">
+                                <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+                                {% if object %}Editar {% else %}Registrar {% endif %}
+                            </h5>
+                            <p class="mb-0">Tipos de jornada</p>
+                            <ul>
+                                <li>Jornada regular de 8:00 - 18:00</li>
+                                <li>Horas extra 1 (HE1) de 18:00 - 21:59</li>
+                                <li>Horas extra 2 (HE1) de 22:00 - 05:59</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'rrhh_app:asistencia-list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="alert-text">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.empleado.field.required %}is-filled{% endif %}">
+                                    <label class="form-label">{{ form.empleado.label }}</label>
+                                    {{ form.empleado }}
+                                </div>
+                            </div>
+                            <div class="col-md-2 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.fecha.field.required %}is-filled{% endif %}">
+                                    <label class="form-label">{{ form.fecha.label }}</label>
+                                    {{ form.fecha }}
+                                </div>
+                            </div>
+                            <div class="col-md-2 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.hora_final.field.required %}is-filled{% endif %}">
+                                    <label class="form-label">{{ form.hora_inicio.label }}</label>
+                                    {{ form.hora_inicio }}
+                                </div>
+                            </div>
+                            <div class="col-md-2 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.hora_final.field.required %}is-filled{% endif %}">
+                                    <label class="form-label">{{ form.hora_final.label }}</label>
+                                    {{ form.hora_final }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.ubicacion.label }}</label>
+                                    {{ form.ubicacion }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="row">
+                            <div class="col-12 mt-0 pt-0">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.observaciones.label }}</label>
+                                    {{ form.observaciones }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn bg-gradient-dark">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if object %}Actualizar{% else %}Registrar{% endif %} Asistencia
+                                </button>
+                                <a href="{% url 'rrhh_app:asistencia-list' %}" class="btn btn-outline-secondary">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+
+<script>
+    // Configuración del datepicker para rango de fechas
+  if (document.querySelector('.datetimepicker')) {
+      flatpickr('.datetimepicker', {
+          allowInput: true,
+          dateFormat: "Y-m-d",
+      });
+  }
+</script>
+
+{% endblock JSscripts %}

@@ -1,0 +1,131 @@
+{% extends "LOGISTICA/transport/base-transporte.html" %}
+
+{% load static %}
+{% block title %} Catálogo {% endblock title %}
+{% block main %} Catálogo {% endblock main %}
+{% block appName %} Transformadores {% endblock appName %}
+{% block Type %} Detalle {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="card">
+    <div class="card-header pb-0">
+        <div class="card-title">
+            <h4 class="card-label">Detalle del modelo {{ trafo }}</h4>
+        </div>
+        <div class="card-toolbar">
+            <a href="{% url 'produccion_app:trafos-lista' %}" class="btn bg-gradient-secondary me-3">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'produccion_app:trafos-editar' trafo.pk %}" class="btn bg-gradient-info me-3">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'produccion_app:trafos-eliminar' trafo.pk %}" class="btn bg-gradient-primary">
+                <i class="fas fa-trash"></i> Eliminar
+            </a>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="40%">Id:</th>
+                            <td>{{ trafo.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Proveedor:</th>
+                            <td>{{ trafo.idSupplier|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Capacidad kVA:</th>
+                            <td>{{ trafo.get_KVA_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tap HV:</th>
+                            <td>{{ trafo.get_HVTAP_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>K Tap HV:</th>
+                            <td>{{ trafo.get_KTapHV_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>FIX HV:</th>
+                            <td>{{ trafo.get_FIXHV_display|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="40%">LV:</th>
+                            <td>{{ trafo.get_LV_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Frecuencia:</th>
+                            <td>{{ trafo.get_HZ_display }} Hz</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo de Fase:</th>
+                            <td>{{ trafo.get_TYPE_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Montaje:</th>
+                            <td>{{ trafo.get_MOUNTING_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Enfriamiento:</th>
+                            <td>{{ trafo.get_COOLING_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Devanado:</th>
+                            <td>{{ trafo.get_WINDING_display|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="20%">Clase de Aislamiento:</th>
+                            <td>{{ trafo.get_INSULAT_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Conexión:</th>
+                            <td>{{ trafo.get_CONNECTION_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Estándar:</th>
+                            <td>{{ trafo.get_STANDARD_display|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Creado por:</th>
+                            <td>{{ trafo.idUser }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha creación:</th>
+                            <td>{{ trafo.created }}</td>
+                        </tr>
+                        <tr>
+                            <th>Última modificación:</th>
+                            <td>{{ trafo.modified }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

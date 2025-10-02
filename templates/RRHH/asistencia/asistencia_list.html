@@ -1,0 +1,309 @@
+<!-- templates/RRHH/asistencia/asistencia_list.html -->
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Asistencia{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %}
+
+<!-- ================ FILTROS ================= -->
+
+<div class="row">
+  <div class="col-12">
+    <div class="card p-4">
+        <h6>Filtros de Búsqueda</h6>
+        <form method="GET" class="row g-3 align-items-end">
+          {% csrf_token %}
+          
+          <div class="col-lg-3 col-md-6">
+            <div class="input-group input-group-outline is-focused">
+                <label class="form-label">Rango de Fechas</label>
+                <input class="form-control datetimepicker text-center" 
+                     value="{{ fecha_rango_actual }}"
+                     placeholder="Seleccionar rango" 
+                     id="fecha_rango" name="fecha_rango">
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-6">
+            <div class="input-group input-group-outline is-focused">
+                <label class="form-label">Empleado</label>
+              <select class="form-control" name="empleado" id="empleado">
+                <option value="">Todos</option>
+                {% for empleado in empleados %}
+                <option value="{{ empleado.id }}" {% if empleado_actual == empleado.id|stringformat:"s" %}selected{% endif %}>
+                  {{ empleado }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-6">
+            <div class="input-group input-group-outline is-focused">
+                <label class="form-label">Estado</label>
+              <select class="form-control" name="estado" id="estado">
+                <option value="">Todos</option>
+                {% for estado_key, estado_value in view.model.TIPO_ESTADOS %}
+                <option value="{{ estado_key }}" {% if estado_actual == estado_key %}selected{% endif %}>
+                  {{ estado_value }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          
+          <div class="col-lg-2 col-md-6">
+            <div class="input-group input-group-outline is-focused">
+                <label class="form-label">Jornada</label>
+              <select class="form-control" name="jornada" id="jornada">
+                <option value="">Todas</option>
+                {% for jornada_key, jornada_value in view.model.TIPO_JORNADA %}
+                <option value="{{ jornada_key }}" 
+                        {% if jornada_actual == jornada_key %}selected{% endif %}>
+                  {{ jornada_value }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6 d-flex gap-2">
+            
+            <button class="btn bg-gradient-dark w-50" type="submit"> 
+              <i class="fas fa-search me-2"></i>Buscar
+            </button>
+            <a href="{% url 'rrhh_app:asistencia-list' %}" class="btn bg-gradient-secondary w-50">
+              <i class="fas fa-refresh me-2"></i>Limpiar
+            </a>
+          </div>
+        </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================ ESTADÍSTICAS ================= -->
+<div class="row mt-4">
+  <div class="col-xl-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-body p-3">
+            <div class="row">
+                <div class="col-4">
+                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                        <i class="fas fa-list text-lg opacity-10"></i>
+                    </div>
+                </div>
+                <div class="col-8 my-auto text-end">
+                    <h6 class="text-sm mb-0 opacity-7 text-dark">REGISTROS</h6>
+                    <h5 class="font-weight-bolder mb-0">
+                        {{ total_registros }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+  <div class="col-xl-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-body p-3">
+            <div class="row">
+                <div class="col-4">
+                    <div class="icon icon-lg icon-shape bg-gradient-info shadow text-center border-radius-md">
+                        <i class="fas fa-check text-lg opacity-10"></i>
+                    </div>
+                </div>
+                <div class="col-8 my-auto text-end">
+                    <h6 class="text-sm mb-0 opacity-7 text-dark">ESTADOS</h6>
+                    <h5 class="font-weight-bolder mb-0">
+                        <span class="text-success">{{ registros_aprobados }}</span> / <span class="text-primary">{{ registros_pendientes }}</span>
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="col-xl-6 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-body p-3">
+            <div class="row">
+                <div class="col-4">
+                    <div class="icon icon-lg icon-shape bg-gradient-success shadow text-center border-radius-md">
+                        <i class="fas fa-cog text-lg opacity-10"></i>
+                    </div>
+                </div>
+                <div class="col-8 my-auto text-end">
+                    <h6 class="text-sm mb-0 opacity-7 text-dark">ACCIONES</h6>
+                    <div class="d-flex gap-2 pb-0 align-items-end">
+                        <a href="{% url 'rrhh_app:asistencia-create' %}" class="btn btn-sm bg-gradient-dark">
+                            <i class="fas fa-plus me-1"></i>Nuevo
+                        </a>
+                        <button class="btn btn-sm bg-gradient-secondary export" data-type="csv">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================ TABLA ================= -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body px-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table table-flush mb-0 align-items-center" id="datatable-asistencia">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Empleado
+                                </th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Fecha</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Horario</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Horas</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Jornada</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Ubicación</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Estado</th>
+                                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">{{ registro.empleado }}</h6>
+                                            <p class="text-xs text-secondary mb-0">{{ registro.empleado.departamento|default:"-" }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-sm">
+                                    <span class="font-weight-bold">{{ registro.fecha|date:'d/m/Y' }}</span>
+                                </td>
+                                <td class="text-sm">
+                                    <span class="text-dark font-weight-bold">
+                                        {{ registro.hora_inicio|time:'H:i'|default:"-" }}
+                                        <br>
+                                        {{ registro.hora_final|time:'H:i'|default:"-" }}
+                                    </span>
+                                </td>
+                                <td class="text-sm">
+                                    <span class="text-dark font-weight-bold">
+                                        {{registro.horas|default:'0.00'}} h
+                                    </span>
+                                </td>
+                                <td class="text-sm">
+                                    {% if registro.jornada == "0" %}
+                                    <span class="badge bg-gradient-info">{{ registro.get_jornada_display }}</span>
+                                    {% elif registro.jornada == "1" %}
+                                    <span class="badge bg-gradient-dark">{{ registro.get_jornada_display }}</span>
+                                    {% elif registro.jornada == "2" %}
+                                    <span class="badge bg-gradient-secondary">{{ registro.get_jornada_display }}</span>
+                                    {% elif registro.jornada == "3" %}
+                                    <span class="badge bg-gradient-primary">{{ registro.get_jornada_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-gradient-secondary">{{ registro.get_jornada_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-sm">
+                                    {{registro.get_ubicacion_display}}
+                                </td>
+                                <td class="text-sm">
+                                    {% if registro.estado == "0" %}
+                                    <span class="badge bg-gradient-warning">{{ registro.get_estado_display }}</span>
+                                    {% elif registro.estado == "1" %}
+                                    <span class="badge bg-gradient-success">{{ registro.get_estado_display }}</span>
+                                    {% elif registro.estado == "2" %}
+                                    <span class="badge bg-gradient-danger">{{ registro.get_estado_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-gradient-info">{{ registro.get_estado_display }}</span>
+                                    {% endif %}
+                                    {% if registro.aprobado_por %}
+                                    <br>
+                                    <small class="text-xs">por {{ registro.aprobado_por }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'rrhh_app:asistencia-update' registro.id %}" class="me-1"
+                                       data-bs-toggle="tooltip" title="Editar">
+                                        <i class="far fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'rrhh_app:asistencia-delete' registro.id %}" class=""
+                                       data-bs-toggle="tooltip" title="Eliminar">
+                                        <i class="far fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <p>No se encontraron registros de asistencia</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  // Configuración del datepicker para rango de fechas
+  if (document.querySelector('.datetimepicker')) {
+      flatpickr('.datetimepicker', {
+          allowInput: true,
+          mode: "range",
+          dateFormat: "Y-m-d",
+      });
+  }
+
+  // Configuración de DataTables SIN paginación
+  const dataTableAsistencia = new simpleDatatables.DataTable("#datatable-asistencia", {
+      searchable: true,
+      fixedHeight: false,
+      perPage: 10, // Número muy alto para mostrar todos los registros
+  });
+
+  // Exportación de datos
+  document.querySelectorAll(".export").forEach(function (el) {
+      el.addEventListener("click", function (e) {
+          var type = el.dataset.type;
+          var data = {
+              type: type,
+              filename: "registros-asistencia",
+          };
+
+          if (type === "csv") {
+              data.columnDelimiter = ",";
+          }
+
+          dataTableAsistencia.export(data);
+      });
+  });
+</script>
+{% endblock JSscripts %}

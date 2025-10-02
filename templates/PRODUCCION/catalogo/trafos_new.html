@@ -1,0 +1,153 @@
+{% extends "LOGISTICA/transport/base-transporte.html" %}
+
+{% load static %}
+{% block title %} Catálogo {% endblock title %}
+{% block main %} Catálogo {% endblock main %}
+{% block appName %} Transformadores {% endblock appName %}
+{% block Type %} Nuevo {% endblock Type %}
+
+{% block panel-content %}
+<div class="card">
+    <div class="card-header pb-0">
+        <div class="card-title">
+            <h4 class="card-label">
+                {% if object %}Editar{% else %}Crear{% endif %} transformador en catálogo
+            </h4>
+        </div>
+    </div>
+    
+    <div class="card-body pt-0">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="row mb-0">
+                <div class="col-md-6">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label required">{{ form.idSupplier.label }}</label>
+                        {{ form.idSupplier }}
+                        {% if form.idSupplier.errors %}
+                        <div class="text-danger mt-1">{{ form.idSupplier.errors }}</div>
+                        {% endif %}
+
+                    </div>
+                    
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label required">{{ form.KVA.label }}</label>
+                        {{ form.KVA }}
+                        {% if form.KVA.errors %}
+                        <div class="text-danger mt-1">{{ form.KVA.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="row mb-0">
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.HVTAP.label }}</label>
+                        {{ form.HVTAP }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.KTapHV.label }}</label>
+                        {{ form.KTapHV }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.FIXHV.label }}</label>
+                        {{ form.FIXHV }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-0">
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.LV.label }}</label>
+                        {{ form.LV }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.HZ.label }}</label>
+                        {{ form.HZ }}  
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.TYPE.label }}</label>
+                        {{ form.TYPE }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-0">
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.MOUNTING.label }}</label>
+                        {{ form.MOUNTING }}
+                    </div>
+                    
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.COOLING.label }}</label>
+                        {{ form.COOLING }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.WINDING.label }}</label>
+                        {{ form.WINDING }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.INSULAT.label }}</label>
+                        {{ form.INSULAT }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.CONNECTION.label }}</label>
+                        {{ form.CONNECTION }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">{{ form.STANDARD.label }}</label>
+                        {{ form.STANDARD }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'produccion_app:trafos-lista' %}" class="btn bg-gradient-secondary me-3">Cancelar</a>
+                <button type="submit" class="btn bg-gradient-primary me-3">
+                    {% if object %}Actualizar{% else %}Crear{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+    $(document).ready(function() {
+        $('.form-select').select2({
+            placeholder: "Seleccionar...",
+            allowClear: true
+        });
+    });
+</script>
+{% endblock JSscripts %}

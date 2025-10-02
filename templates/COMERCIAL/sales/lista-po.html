@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/sales/base-po.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Ventas {% endblock title %}
-{% block main %} Ventas {% endblock main %}
-{% block appName %} PO {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}PO{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
@@ -70,7 +70,7 @@
             </thead>
             
             <tbody>
-              {% for t in quotes.listQuotes.all %}
+              {% for t in quotes.listQuotes %}
               <tr>
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">

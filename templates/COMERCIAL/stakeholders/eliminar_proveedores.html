@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/stakeholders/base-proveedores.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Usuarios del sistema {% endblock appName %}
-{% block Type %} Eliminar {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Proveedores{% endblock %}
+{% block navbar_Type %}Eliminar{% endblock %}
 
 {% block panel-content %}
 
@@ -20,11 +20,10 @@
       <div class="card-body">
         <h6 class="mb-3">¿Esta seguro de eliminar proveedor?</h6>
         <ul>
-          <li>Cliente: <span class="font-weight-bold">{{object.tradeName}}</span></li>
-          <li>RUC: <span class="font-weight-bold"> {{object.numberIdSupplier}}</span> </li>
-          <li>Marca: <span class="font-weight-bold">{{object.brandName}}</span></li>
-          <li>Origen: <span class="font-weight-bold">{{object.location}}</span></li>
-          
+          <li>Proveedor: <span class="font-weight-bold">{{object.tradeName|default:"-"}}</span></li>
+          <li>RUC: <span class="font-weight-bold"> {{object.numberIdSupplier|default:"-"}}</span> </li>
+          <li>Marca: <span class="font-weight-bold">{{object.brandName|default:"-"}}</span></li>
+          <li>Origen: <span class="font-weight-bold">{{object.get_location_display|default:"-"}}</span></li>
         </ul>
         <div class="d-flex">
           <a href="{% url 'stakeholders_app:proveedor-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i

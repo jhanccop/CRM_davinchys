@@ -49,5 +49,11 @@ urlpatterns = [
 
     # LOGISTICA - transport app
     re_path('', include('applications.LOGISTICA.transport.urls')),
+
+    # PRODUCCION - CATALOGO app
+    re_path('', include('applications.PRODUCTION.urls')),
+
+    # RRHH app
+    re_path('', include('applications.RRHH.urls')),
 ]
 

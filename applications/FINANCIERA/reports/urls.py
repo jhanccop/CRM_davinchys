@@ -6,12 +6,12 @@ app_name = "finanzas_reports_app"
 urlpatterns = [
     # ==================== DASHBOARD PRINCIPAL ====================
     path(
-        'finanzas/reporte-de-cuentas/', 
+        'finanzas/dashboard/', 
         views.ListAccountReport.as_view(),
         name='reporte-de-cuentas',
     ),
     path(
-        'finanzas/reporte-de-cuentas-detalle/<pk>/', 
+        'finanzas/dashboard/detalle/<pk>/', 
         views.AccountReportDetail.as_view(),
         name='reporte-de-cuentas-detalle',
     ),

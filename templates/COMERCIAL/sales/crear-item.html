@@ -1,140 +1,56 @@
 {% extends "COMERCIAL/sales/base-quotes.html" %}
 
-{% load  static %}
+{% load static %}
 {% block title %} Ventas {% endblock title %}
 {% block main %} Ventas {% endblock main %}
 {% block appName %} Cotizaciones {% endblock appName %}
-{% block Type %} Crear - Item {% endblock Type %}
+{% block Type %} {% if object %}Editar{% else %}Crear{% endif %} - Item {% endblock Type %}
 
 {% block panel-content %}
 
 <div class="card">
     <div class="card-body">
 
-        <h5> Agregar Transformador a cotizacion QUO-{{pk}}</h5>
+        <h5 class=" mb-4"> 
+            {% if object %}
+                Editar Item {{ object.idTrafo }}-{{ object.seq }} de cotización {{object.idTrafoQuote}}
+            {% else %}
+                Agregar Transformador a cotización QUO-{{pk}}
+            {% endif %}
+        </h5>
 
         <form id="quoteForm" method="post">
         {% csrf_token %}
 
             <div id="trafoFormContainer">
 
+                <!-- Campo oculto para idTrafoQuote -->
                 <div class="row">
-                    <div class="col-12 col-sm-6" hidden>
+                    <div class="col-12" hidden>
                         <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.idTrafoQuote.label }} 55 </label>
+                            <label class="form-label">{{ form.idTrafoQuote.label }}</label>
                             {{ form.idTrafoQuote }}
                         </div>
                     </div>
+                </div>
+
+                <div class="row">
                     <div class="col-12 col-sm-6">
                         <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.serialNumber.label }}</label>
-                            {{ form.serialNumber }}
+                            <label class="form-label">{{ form.idTrafo.label }}</label>
+                            {{ form.idTrafo }}
                         </div>
                     </div>
                     <div class="col-6 col-sm-3 mt-3 mt-sm-0">
                         <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.quantity.label }}</label>
-                            {{ form.quantity }}
+                            <label class="form-label">{{ form.seq.label }}</label>
+                            {{ form.seq }}
                         </div>
                     </div>
                     <div class="col-6 col-sm-3 mt-3 mt-sm-0">
                         <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.unitCost.label }}</label>
+                            <label class="form-label">{{ form.unitCost.label }}</label>
                             {{ form.unitCost }}
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-                <div class="row">
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.KVA.label }}</label>
-                            {{ form.KVA }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.KTapHV.label }}</label>
-                            {{ form.KTapHV }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.HVTAP.label }}</label>
-                            {{ form.HVTAP }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.LV.label }}</label>
-                            {{ form.LV }}
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-                <div class="row">
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.FIXHV.label }}</label>
-                            {{ form.FIXHV }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.HZ.label }}</label>
-                            {{ form.HZ }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.TYPE.label }}</label>
-                            {{ form.TYPE }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.MOUNTING.label }}</label>
-                            {{ form.MOUNTING }}
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-                <div class="row">
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.COOLING.label }}</label>
-                            {{ form.COOLING }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.WINDING.label }}</label>
-                            {{ form.WINDING }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.INSULAT.label }}</label>
-                            {{ form.INSULAT }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.CONNECTION.label }}</label>
-                            {{ form.CONNECTION }}
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-                <div class="row">
-                    <div class="col-6 col-sm-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label for="exampleFormControlInput1" class="form-label">{{ form.STANDARD.label }}</label>
-                            {{ form.STANDARD }}
                         </div>
                     </div>
                 </div>
@@ -142,8 +58,18 @@
             </div>
 
         <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
-            Crear Transformador
+            {% if object %}Actualizar{% else %}Crear{% endif %} Item
         </button>
+
+        {% if object %}
+        <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id  %}" class="btn btn-secondary mt-3 mb-0">
+            Cancelar
+        </a>
+        {% else%}
+        <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
+            Cancelar
+        </a>
+        {% endif %}
 
         </form>
 
@@ -155,7 +81,13 @@
 {% block JSscripts %}
 
 <script>
-    document.getElementById("id_idTrafoQuote").value = "{{pk}}";
+    // Establecer el valor de idTrafoQuote con el pk de la cotización (solo en creación)
+    document.addEventListener('DOMContentLoaded', function() {
+        const idTrafoQuoteField = document.getElementById("id_idTrafoQuote");
+        if (idTrafoQuoteField && !{{ object|yesno:"true,false" }}) {
+            idTrafoQuoteField.value = "{{pk}}";
+        }
+    });
 </script>
 
 {% endblock JSscripts %}

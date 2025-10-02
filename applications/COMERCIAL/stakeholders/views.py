@@ -31,7 +31,7 @@ class ClientDetailView(ComercialFinanzasMixin,DeleteView):
     model = client
 
 class ClientCreateView(ComercialFinanzasMixin,CreateView):
-    template_name = "COMERCIAL/stakeholders/crear_clientes.html"
+    template_name = "COMERCIAL/stakeholders/cliente_form.html"
     model = client
     form_class = clientForm
     success_url = reverse_lazy('stakeholders_app:cliente-lista')
@@ -53,7 +53,7 @@ class ClientDeleteView(ComercialFinanzasMixin,DeleteView):
     success_url = reverse_lazy('stakeholders_app:cliente-lista')
 
 class ClientUpdateView(ComercialFinanzasMixin,UpdateView):
-    template_name = "COMERCIAL/stakeholders/editar_clientes.html"
+    template_name = "COMERCIAL/stakeholders/cliente_form.html"
     model = client
     form_class = clientForm
     success_url = reverse_lazy('stakeholders_app:cliente-lista')
@@ -108,7 +108,7 @@ class SupplierListView(ComercialFinanzasMixin,ListView):
     model = supplier
 
 class SupplierCreateView(ComercialFinanzasMixin,CreateView):
-    template_name = "COMERCIAL/stakeholders/crear_proveedores.html"
+    template_name = "COMERCIAL/stakeholders/proveedor_form.html"
     model = supplier
     form_class = supplierForm
     success_url = reverse_lazy('stakeholders_app:proveedor-lista')
@@ -151,7 +151,7 @@ class SupplierDeleteView(ComercialFinanzasMixin,DeleteView):
     success_url = reverse_lazy('stakeholders_app:proveedor-lista')
 
 class SupplierUpdateView(ComercialFinanzasMixin,UpdateView):
-    template_name = "COMERCIAL/stakeholders/editar_proveedores.html"
+    template_name = "COMERCIAL/stakeholders/proveedor_form.html"
     model = supplier
     form_class = supplierForm
     success_url = reverse_lazy('stakeholders_app:proveedor-lista')

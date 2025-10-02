@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Documentos{% endblock %}
+{% block navbar_Type %}Eliminar{% endblock %}
+
+{% block panel-content %} 
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header pb-0 text-center">
+                    <h5 class="text-danger mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">¿Está seguro que desea eliminar el documento?</p>
+                    <h6 class="text-dark">{{ object.empleado }}</h6>
+                    <span class="badge bg-gradient-success">
+                        {{ object.get_tipo_display }}
+                    </span>
+                    <p class="text-muted">{{ object.fecha_documento }}</p>
+                    
+                    <div class="alert alert-warning mt-3 text-white">
+                        <small>
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Esta acción no se puede deshacer. Se eliminará este registro.
+                        </small>
+                    </div>
+                    
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn bg-gradient-primary">
+                                <i class="fas fa-trash me-2"></i>Sí, Eliminar
+                            </button>
+                            <a href="{% url 'rrhh_app:documentos-list' %}" class="btn bg-gradient-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

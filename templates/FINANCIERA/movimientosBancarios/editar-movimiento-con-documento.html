@@ -1,146 +1,146 @@
-{% extends "FINANCIERA/movimientosBancarios/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Finanzas {% endblock title %}
-{% block main %} Finanzas {% endblock main %}
-{% block appName %} Editar {% endblock appName %}
-{% block Type %} Movimiento con Documento {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Movimientos Bancarios{% endblock %}
+{% block navbar_Type %}Editar Conciliación con Documento{% endblock %}
 
 {% block panel-content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-10 col-12 mx-auto position-relative">
+      <div class="card">
 
-<div class="row">
-  <div class="col-lg-10 col-12 mx-auto position-relative">
-    <div class="card">
-
-      <div class="card-header p-3 pt-2 pb-0">
-        <h5 class="text-primary">CONCILIACION DOCUMENTARIA</h5>
-        
-        <div class="row">
-          <div class="col-md-8 col-8">
-            <h6 class="mb-0">{{object.idMovOrigin.idAccount}} {{object.idMovOrigin.idAccount.accountName}}</h6>
-            <p class="mt-sm-0 pt-0 mb-0"> {{object.idMovOrigin.description}} {{object.idMovOrigin.originDestination}} </p>
-            <p class="mt-sm-0 pt-0 ">
-              <i class="fas fa-calendar-day me-2 text-lg"></i>
-              <small>{{object.idMovOrigin.date|date:"Y-m-d"}} &nbsp; &nbsp; nOp: {{object.idMovOrigin.opNumber}} </small>
-            </p>
+        <div class="card-header p-3 pt-2 pb-0">
+          <h5 class="text-primary">CONCILIACION DOCUMENTARIA</h5>
+          
+          <div class="row">
+            <div class="col-md-8 col-8">
+              <h6 class="mb-0">{{object.idMovOrigin.idAccount}} {{object.idMovOrigin.idAccount.accountName}}</h6>
+              <p class="mt-sm-0 pt-0 mb-0"> {{object.idMovOrigin.description}} {{object.idMovOrigin.originDestination}} </p>
+              <p class="mt-sm-0 pt-0 ">
+                <i class="fas fa-calendar-day me-2 text-lg"></i>
+                <small>{{object.idMovOrigin.date|date:"Y-m-d"}} &nbsp; &nbsp; nOp: {{object.idMovOrigin.opNumber}} </small>
+              </p>
+              </div>
+            <div class="col-md-4 col4 text-dark text-end font-weight-bolder justify-content-end align-items-center align-middle">
+              <small class="text-lg">{{object.idMovOrigin.idAccount.get_currency_display}} {{object.idMovOrigin.amount|floatformat:"2g"}}</small>
+              <p class="mt-sm-0 pt-0 text-dark font-weight-bold"> Monto conciliado: {{object.idMovOrigin.amountReconcilied|floatformat:"2g"}}</p>
             </div>
-          <div class="col-md-4 col4 text-dark text-end font-weight-bolder justify-content-end align-items-center align-middle">
-            <small class="text-lg">{{object.idMovOrigin.idAccount.get_currency_display}} {{object.idMovOrigin.amount|floatformat:"2g"}}</small>
-            <p class="mt-sm-0 pt-0 text-dark font-weight-bold"> Monto conciliado: {{object.idMovOrigin.amountReconcilied|floatformat:"2g"}}</p>
           </div>
         </div>
-      </div>
 
-      <br>
+        <br>
 
-      <div class="card-body pt-0 pb-0">
-        <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
+        <div class="card-body pt-0 pb-0">
+          <form class="" method="POST" enctype="multipart/form-data" novalidate>{% csrf_token %}
 
-          <div class=" border-radius-xl bg-white" data-animation="FadeIn">
+            <div class=" border-radius-xl bg-white" data-animation="FadeIn">
 
-            <div class="multisteps-form__content">
+              <div class="multisteps-form__content">
 
-              <div class="row" hidden>
-                
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">mov</label>
-                    {{ form.idMovOrigin }}
+                <div class="row" hidden>
+                  
+                  <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">mov</label>
+                      {{ form.idMovOrigin }}
+                    </div>
+                  </div>
+
+                  <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">tipo</label>
+                      {{ form.type }}
+                    </div>
+                  </div>
+
+                  <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                    <div class="form-check">
+                      <label for="exampleFormControlInput1" class="form-label">status</label>
+                      {{ form.status }}
+                    </div>
+                  </div>
+
+                </div>
+
+                <h6 class="font-weight-bolder">Seleccionar documento</h6>
+
+                <div class="row">
+                  <div class="col-12 col-sm-12">
+                    <div class="input-group input-group-outline">
+                      {{ form.idDoc }}
+                    </div>
+                    {% for error in form.idDoc.errors %}
+                    <p class="text-xs text-primary font-weight-bolder mb-0">
+                      {{ error|escape }}
+                    </p>
+                    {% endfor %}
                   </div>
                 </div>
 
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">tipo</label>
-                    {{ form.type }}
-                  </div>
-                </div>
+                <br>
 
-                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                  <div class="form-check">
-                    <label for="exampleFormControlInput1" class="form-label">status</label>
-                    {{ form.status }}
+                <div class="row">
+
+                  <h6 class="text-info"> VERIFICAR LAS EQUIVALENCIAS DE MONEDAS </h6>
+
+                  <div class="col-1 col-sm-1 text-end text-dark">
+                    <h4>{{object.idMovOrigin.idAccount.get_currency_display}}</h4> 
                   </div>
+
+                  <div class="col-5 col-sm-4">
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">Monto a conciliar</label>
+                      {{ form.amountReconcilied }}
+                    </div>
+                    {% for error in form.amountReconcilied.errors %}
+                    <p class="text-xs text-primary font-weight-bolder mb-0">
+                      {{ error|escape }}
+                    </p>
+                    {% endfor %}
+                  </div>
+
+
+                  <div class="col-5 col-sm-4" id="equivalent">
+                    <div class="input-group input-group-outline focused is-focused">
+                      <label for="exampleFormControlInput1" class="form-label">Monto equivalente </label>
+                      {{ form.equivalentAmount }}
+                    </div>
+                    <p class="text-xs">Dejar en 0 si la conciliacion es en la misma moneda</p>
+                    {% for error in form.equivalentAmount.errors %}
+                    <p class="text-xs text-primary font-weight-bolder mb-0">
+                      {{ error|escape }}
+                    </p>
+                    {% endfor %}
+                  </div>
+                  
+                </div>
+                <br>
+
+                {% if form.non_field_errors %}
+                  <div class="alert alert-light">
+                    {% for error in form.non_field_errors %}
+                      <p class="text-danger text-md font-weight-bold"> {{ error }} </p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <div class="button-row d-flex mt-4">
+                  <a class="btn bg-gradient-dark" href="{% url 'movimientosBancarios_app:lista-movimientos' %}"> REGRESAR </a>
+
+                  <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ACTUALIZAR CONCILIACION</button>
                 </div>
 
               </div>
-
-              <h6 class="font-weight-bolder">Seleccionar documento</h6>
-
-              <div class="row">
-                <div class="col-12 col-sm-12">
-                  <div class="input-group input-group-outline">
-                    {{ form.idDoc }}
-                  </div>
-                  {% for error in form.idDoc.errors %}
-                  <p class="text-xs text-primary font-weight-bolder mb-0">
-                    {{ error|escape }}
-                  </p>
-                  {% endfor %}
-                </div>
-              </div>
-
-              <br>
-
-              <div class="row">
-
-                <h6 class="text-info"> VERIFICAR LAS EQUIVALENCIAS DE MONEDAS </h6>
-
-                <div class="col-1 col-sm-1 text-end text-dark">
-                  <h4>{{object.idMovOrigin.idAccount.get_currency_display}}</h4> 
-                </div>
-
-                <div class="col-5 col-sm-4">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto a conciliar</label>
-                    {{ form.amountReconcilied }}
-                  </div>
-                  {% for error in form.amountReconcilied.errors %}
-                  <p class="text-xs text-primary font-weight-bolder mb-0">
-                    {{ error|escape }}
-                  </p>
-                  {% endfor %}
-                </div>
-
-
-                <div class="col-5 col-sm-4" id="equivalent">
-                  <div class="input-group input-group-outline focused is-focused">
-                    <label for="exampleFormControlInput1" class="form-label">Monto equivalente </label>
-                    {{ form.equivalentAmount }}
-                  </div>
-                  <p class="text-xs">Dejar en 0 si la conciliacion es en la misma moneda</p>
-                  {% for error in form.equivalentAmount.errors %}
-                  <p class="text-xs text-primary font-weight-bolder mb-0">
-                    {{ error|escape }}
-                  </p>
-                  {% endfor %}
-                </div>
-                
-              </div>
-              <br>
-
-              {% if form.non_field_errors %}
-                <div class="alert alert-light">
-                  {% for error in form.non_field_errors %}
-                    <p class="text-danger text-md font-weight-bold"> {{ error }} </p>
-                  {% endfor %}
-                </div>
-              {% endif %}
-
-              <div class="button-row d-flex mt-4">
-                <a class="btn bg-gradient-dark" href="{% url 'movimientosBancarios_app:lista-movimientos' %}"> REGRESAR </a>
-
-                <button class="btn bg-gradient-success ms-auto js-btn-next" type="submit" title="Next">ACTUALIZAR CONCILIACION</button>
-              </div>
-
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}

@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/purchase/base-COMERCIAL.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Caja Chica {% endblock appName %}
-{% block Type %} Eliminar {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Caja chica{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
@@ -21,9 +21,9 @@
       <div class="card-body">
         <h6 class="mb-3">¿Esta seguro de eliminar el ingreso a caja chica?</h6>
         <ul>
-          <li>Id: <span class="font-weight-bold">CCH-{{object.id}}</span></li>
+          <li>Id: <span class="font-weight-bold">CCH-{{object.id|default:"-"}}</span></li>
           <li>Monto: <span class="font-weight-bold">{{object.get_currency_display}} {{object.totalPrice}}</span></li>
-          <li>Descripción: <span class="font-weight-bold">{{object.description}}</span></li>
+          <li>Descripción: <span class="font-weight-bold">{{object.description|default:"-"}}</span></li>
         </ul>
         <div class="d-flex">
           <a href="{% url 'compras_app:lista_cajachica' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i

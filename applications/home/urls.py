@@ -17,15 +17,24 @@ urlpatterns = [
         name='unauthorized',
     ),
     path(
-        'quote-with-us/', 
-        views.QuoteView.as_view(),
-        name='quote-with-us',
-    ),
-    path(
         'panel/', 
         views.PanelHomeView.as_view(),
         name='index',
     ),
+    # ==================== MYSPACE ====================
+    path(
+        'mi-espacio/',
+        views.myEspaceView.as_view(),
+        name='bienvenida'),
+
+    # ==================== QUOTE TEST ====================
+    path(
+        'quote-with-us/', 
+        views.QuoteView.as_view(),
+        name='quote-with-us',
+    ),
+
+    # ==================== tracking ====================
     path(
         'enter-tracking-number/', 
         views.EnterTrackingNumberView.as_view(),

@@ -1,41 +1,41 @@
-{% extends "FINANCIERA/movimientosBancarios/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Finanzas {% endblock title %}
-{% block main %} Finanzas {% endblock main %}
-{% block appName %} Movimiento {% endblock appName %}
-{% block Type %} Eliminar {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Movimientos Bancarios{% endblock %}
+{% block navbar_Type %}Eliminar Movimiento{% endblock %}
 
 {% block panel-content %}
+<div class="container-fluid">
+  <div class="row min-vh-80">
+    <div class="col-lg-8 col-md-10 col-12 m-auto">
 
-
-<div class="row min-vh-80">
-  <div class="col-lg-8 col-md-10 col-12 m-auto">
-
-    <div class="card">
-      <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
-        <div class="bg-gradient-dark shadow-dark border-radius-lg pt-3 pb-2">
-          <h6 class="text-center text-white"> ELIMINAR MOVIMIENTO </h6>
+      <div class="card">
+        <div class="card-header p-0 position-relative mt-n5 mx-3 z-index-2">
+          <div class="bg-gradient-dark shadow-dark border-radius-lg pt-3 pb-2">
+            <h6 class="text-center text-white"> ELIMINAR MOVIMIENTO </h6>
+          </div>
         </div>
-      </div>
-      <div class="card-body">
-        <h6 class="mb-3">¿Esta seguro de eliminar el movimiento?</h6>
-        <ul>
-          <li>Cuenta origen: <span class="font-weight-bold">{{object.idAccount}}</span></li>
-          <li>Monto: <span class="font-weight-bold">{{object.amount}}</span></li>
-          <li>Descripción: <span class="font-weight-bold">{{object.description}}</span></li>
-        </ul>
-        <div class="d-flex">
-          <a href="{% url 'movimientosBancarios_app:lista-movimientos' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
-              class="fas fa-undo-alt"></i> Volver</a>
-        
-          <form class="cell medium-5 ms-auto" action="{% url 'movimientosBancarios_app:movimientos-eliminar' object.id %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar Movimiento</button>
-          </form>
+        <div class="card-body">
+          <h6 class="mb-3">¿Esta seguro de eliminar el movimiento?</h6>
+          <ul>
+            <li>Cuenta origen: <span class="font-weight-bold">{{object.idAccount|default:"-"}}</span></li>
+            <li>Monto: <span class="font-weight-bold">{{object.amount|default:"-"}}</span></li>
+            <li>Descripción: <span class="font-weight-bold">{{object.description|default:"-"}}</span></li>
+          </ul>
+          <div class="d-flex">
+            <a href="{% url 'movimientosBancarios_app:lista-movimientos' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i
+                class="fas fa-undo-alt"></i> Volver</a>
           
-        </div>
+            <form class="cell medium-5 ms-auto" action="{% url 'movimientosBancarios_app:movimientos-eliminar' object.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn bg-gradient-danger ms-auto mb-0 js-btn-next">Eliminar Movimiento</button>
+            </form>
+            
+          </div>
 
+        </div>
       </div>
     </div>
   </div>

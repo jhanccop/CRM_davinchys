@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/purchase/base-OC.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Ordenes de compra {% endblock appName %}
-{% block Type %} Lista {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Ordenes de compra{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 <!-- ================ VISTA DE ORDENES DE COMPRA EN GENERAL ================= -->

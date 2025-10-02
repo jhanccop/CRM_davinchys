@@ -1,27 +1,157 @@
 {% load static %}
+{% load menu_tags %}
+
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es">
+
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'css/foundation-icons/foundation-icons.css' %}">
-  <link rel="stylesheet" href="{% static 'css/foundation.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <title>{% block title %}{% endblock title %}</title>
-  {% block css %}{% endblock css %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/crm.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'assets/img/crm.png' %}">
+    <title>
+        ERP Davinchys - {% block title %}{% endblock %}
+    </title>
+    
+    <!-- Fonts and icons -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/css.css' %}" />
+    
+    <!-- Nucleo Icons -->
+    <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+    
+    <!-- Font Awesome Icons -->
+    <script src="{% static 'assets/js/plugins/awesone.js' %}" crossorigin="anonymous"></script>
+    <script src="{% static 'assets/js/jquery-1.12.4.js' %}" crossorigin="anonymous"></script>
+    
+    <!-- Material Icons -->
+    <link href="{% static 'assets/css/icon.css' %}" rel="stylesheet">
+    
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{% static 'assets/css/material-dashboard.css' %}" rel="stylesheet" />
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
 
-  {% block content %}
-  {% endblock content %}
+<body class="g-sidenav-show bg-gray-200">
+    <!-- Sidebar Navigation -->
+    <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 bg-gradient-dark" id="sidenav-main">
+        <div class="sidenav-header">
+            <a class="navbar-brand m-0" href="{% url 'home_app:home' %}">
+                <img src="{% static 'assets/img/logo-ct.png' %}" class="navbar-brand-img h-100" alt="CRM Davinchys">
+                <span class="ms-1 font-weight-bold text-white">ERP Davinchys</span>
+            </a>
+        </div>
+        
+        <hr class="horizontal light mt-0 mb-2">
+        
+        <div class="w-auto" id="sidenav-collapse-main">
+            <ul class="navbar-nav">
+                {% for menu_key, menu_data in menu_structure.items %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" data-bs-toggle="collapse" aria-expanded="false" href="#{{ menu_key }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="{{ menu_data.icon }} opacity-10 text-lg"></i>
+                        </div>
+                        <span class="sidenav-normal ms-2 ps-1">
+                            {{ menu_data.name }} <b class="caret"></b>
+                        </span>
+                    </a>
+                    
+                    <div class="collapse {% is_submenu_active request menu_data.items %}" id="{{ menu_key }}">
+                        <ul class="nav nav-sm flex-column">
+                            {% for item in menu_data.items %}
+                            <li class="nav-item">
+                                <a class="nav-link text-white {% is_menu_active request item.url_name %}" 
+                                   href="{% if item.url_name %}{% url item.url_name %}{% else %}#{% endif %}">
+                                    <span class="sidenav-mini-icon">{{ item.mini_icon }}</span>
+                                    <span class="sidenav-normal ms-2 ps-1">{{ item.name }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
 
-  {% block js %}
-  
-  {% endblock js %}
+    <!-- Main Content -->
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+        <!-- Navbar -->
+        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
+            <div class="container-fluid py-1 px-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                        <li class="breadcrumb-item text-sm">
+                            <a class="text-dark" href="{% url 'home_app:home' %}">
+                                <i class="fas fa-home text-md"></i>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item text-sm"><a class="text-dark" href="{% url 'home_app:home' %}">Principal</a></li>
+                        <li class="breadcrumb-item text-sm text-dark" aria-current="page">
+                            {% block navbar_main %}Sistema{% endblock %}
+                        </li>
+                        <li class="breadcrumb-item text-sm text-dark" aria-current="page">
+                            {% block navbar_appName %}Módulo{% endblock %}
+                        </li>
+                        <li class="breadcrumb-item text-sm text-dark" aria-current="page">
+                            {% block navbar_Type %}Sección{% endblock %}
+                        </li>
+                    </ol>
+                </nav>
+                
+                <!-- El resto del navbar se mantiene igual -->
+                <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+                    <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+                        <i class="fas fa-user-alt me-sm-1"></i>
+                        &ensp;{{ user|default:"" }} &ensp; <b> {{ user.get_position_display|default:"Usuario" }}</b>
+                    </div>
+
+                    <ul class="navbar-nav justify-content-end">
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="{% url 'users_app:user-logout' %}" class="nav-link text-body font-weight-bold px-0">
+                                <i class="fas fa-sign-out-alt me-sm-1 text-primary text-lg"></i>
+                                <span class="d-sm-inline d-none text-primary">SALIR</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page Content -->
+        {% block panel-content %}
+        {% endblock %}
+
+        <!-- Footer -->
+        {% include 'includes/footer.html' %}
+    </main>
+
+    <!-- Core JS Files -->
+    <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js' %}"></script>
+    
+    <!-- Page-specific JS -->
+    {% block JSscripts %}{% endblock %}
+
+    <script>
+        // Initialize tooltips and popovers
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Smooth scrollbar for sidebar
+        var win = navigator.platform.indexOf('Win') > -1;
+        if (win && document.querySelector('#sidenav-scrollbar')) {
+            var options = {
+                damping: '0.5'
+            }
+            Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+        }
+    </script>
 </body>
-<script src="{% static 'js/vendor/jquery.js' %}"></script>
-<script src="{% static 'js/vendor/what-input.js' %}"></script>
-<script src="{% static 'js/vendor/foundation.js' %}"></script>
-<script src="{% static 'js/app.js' %}"></script>
 </html>

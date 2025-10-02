@@ -3,9 +3,9 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import (
-  Incomes,
-  Trafos,
-  quotes,
+    Incomes,
+    quotes,
+    Items
 )
 from django.forms import inlineformset_factory
 from applications.users.models import User
@@ -239,7 +239,7 @@ class quotesForm(forms.ModelForm):
             'idClient': forms.Select(
                 attrs = {
                     'placeholder': '',
-                    'class': 'input-group-field form-control',
+                    'class': 'form-control',
                 }
             ),
             'dateOrder': forms.DateInput(
@@ -295,166 +295,30 @@ class quotesForm(forms.ModelForm):
             ),
         }
 
+        labels = {
+            'idClient': 'Cliente',
+            'idTinReceiving': 'Empresa receptora',
+            'idTinExecuting': 'Empresa ejecutora',
+            'shortDescription': 'Descripción',
+            'currency': 'Moneda',
+            'dateOrder': 'Fecha de solicitud',
+            'deadline': 'Fecha de entrega',
+            'payMethod': 'Método de pago',
+            'isPO': '¿Es PO?',
+        }
+
     #def __init__(self, *args, **kwargs):
     #    super(quotesForm, self).__init__(*args, **kwargs)
     #    self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
 
-class TrafoForm(forms.ModelForm):
+class ItemForm(forms.ModelForm):
     class Meta:
-        model = Trafos
-        exclude = ['idTrafoQuote']
-        fields = (
-            #'idTrafoQuote',
-            'serialNumber',
-
-            #'provider',
-            'quantity',
-            'unitCost',
-
-            'KVA',
-            'HVTAP',
-            'KTapHV',
-            'LV',
-            
-            'FIXHV',
-            'HZ',
-            'TYPE',
-            'MOUNTING',
-
-            'COOLING',
-            'WINDING',
-            'INSULAT',
-            'CONNECTION',
-
-            'STANDARD',
-
-        )
-        widgets = {
-            'serialNumber': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'unitCost': forms.NumberInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'quantity': forms.NumberInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'KVA': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'HVTAP': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'KTapHV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'FIXHV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'LV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'HZ': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'TYPE': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'MOUNTING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'COOLING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'WINDING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'INSULAT': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'CONNECTION': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'STANDARD': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'description': forms.Textarea(
-                attrs = {
-                    'placeholder': '',
-                    'rows': '3',
-                    'class': 'input-group-field form-control',
-                }
-            )
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Opcional: hacer que el campo esté completamente ausente del formulario
-        if 'idTrafoQuote' in self.fields:
-            del self.fields['idTrafoQuote']
-
-class TrafoItemForm(forms.ModelForm):
-    class Meta:
-        model = Trafos
+        model = Items
         fields = (
             'idTrafoQuote',
-            'serialNumber',
-
-            #'provider',
-            'quantity',
+            'idTrafo',
+            'seq',
             'unitCost',
-
-            'KVA',
-            'HVTAP',
-            'KTapHV',
-            'LV',
-            
-            'FIXHV',
-            'HZ',
-            'TYPE',
-            'MOUNTING',
-
-            'COOLING',
-            'WINDING',
-            'INSULAT',
-            'CONNECTION',
-
-            'STANDARD',
 
         )
         widgets = {
@@ -463,7 +327,12 @@ class TrafoItemForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'serialNumber': forms.TextInput(
+            'idTrafo': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'seq': forms.NumberInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -473,93 +342,18 @@ class TrafoItemForm(forms.ModelForm):
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
+                    'step': '0.01',
+                    'min': '0'
                 }
             ),
-            'quantity': forms.NumberInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'KVA': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'HVTAP': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'KTapHV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'FIXHV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'LV': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'HZ': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'TYPE': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'MOUNTING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'COOLING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'WINDING': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'INSULAT': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'CONNECTION': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'STANDARD': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'description': forms.Textarea(
-                attrs = {
-                    'placeholder': '',
-                    'rows': '3',
-                    'class': 'input-group-field form-control',
-                }
-            )
         }
 
-TrafosFormSet = inlineformset_factory(
-    quotes,
-    Trafos,
-    form=TrafoForm,
-    extra=1,
-    can_delete=True,
-    fields='__all__'
-)
+#ItemsFormSet = inlineformset_factory(
+#    quotes,
+#    Items,
+#    #Trafos,
+#    form=TrafoForm,
+#    extra=1,
+#    can_delete=True,
+#    fields='__all__'
+#)

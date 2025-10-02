@@ -6,8 +6,8 @@ from import_export.admin import ImportExportModelAdmin
 from .models import (
     Incomes,
     quotes,
-    Trafos,
-    QuoteTracking
+    QuoteTracking,
+    Items
 )
 
 ## ==================== ExpensesDocuments =====================
@@ -54,6 +54,8 @@ class quotesAdmin(ImportExportModelAdmin):
         'id',
         'created',
         'idClient',
+        'idTinReceiving',
+        'idTinExecuting',
         'amount',
         'deadline',
         'isPO'
@@ -62,27 +64,23 @@ class quotesAdmin(ImportExportModelAdmin):
     list_filter = ('idClient',)
     #autocomplete_fields = ['idPetitioner',]
 
-## ==================== TRANSFORMADORES =====================
-class TrafosResource(resources.ModelResource):
+## ==================== ITEMS TRANSFORMADORES =====================
+class ItemsResource(resources.ModelResource):
     class Meta:
-        model = Trafos
+        model = Items
 
-@admin.register(Trafos)
-class TrafosAdmin(ImportExportModelAdmin):
-    resource_class = TrafosResource
+@admin.register(Items)
+class ItemsAdmin(ImportExportModelAdmin):
+    resource_class = ItemsResource
 
     list_display = (
         'id',
         'idTrafoQuote',
-        'KVA',
-        'HVTAP',
-        'serialNumber',
-        'quantity',
-        'unitCost',
+        'idTrafo',
+        'seq',
     )
-    search_fields = ('idTrafoQuote',)
-    list_filter = ('idTrafoQuote',)
-    #autocomplete_fields = ['idPetitioner',]
+    search_fields = ('idTrafoQuote','idTrafo')
+    list_filter = ('idTrafo',)
 
 ## ==================== TRACKING QUOTES =====================
 class QuoteTrackingResource(resources.ModelResource):

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Clientes{% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Registrar{% endif %} {% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid">
+    <h5>{% if object %}EDITAR{% else %}REGISTRAR{% endif %} ingreso a caja chica</h5>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Formulario principal del requerimiento -->
+        <div class="card mb-4">
+            <div class="card-header pb-0">Descrición general</div>
+            <div class="card-body">
+
+                <div class="row" hidden>
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group input-group-outline is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Solicitante</label>
+                            {{ form.idPetitioner }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-8 col-sm-8">
+                        <div class="input-group input-group-outline is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Descripción</label>
+                            {{ form.description }}
+                        </div>
+                    </div>
+                    <div class="col-4 col-sm-2">
+                        <div class="input-group input-group-outline is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Moneda</label>
+                            {{ form.currency }}
+                        </div>
+                    </div>
+                    <div class="col-4 col-sm-2">
+                        <div class="input-group input-group-outline is-focused">
+                            <label for="exampleFormControlInput1" class="form-label">Monto estimado total</label>
+                            {{ form.totalPrice }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formset para los items -->
+        <div class="card mb-4">
+            <div class="card-header pb-0">Items de de caja chica</div>
+            <div class="card-body p-0">
+                {{ item_formset.management_form }}
+                
+                <table class="table" id="items-table">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-4" style="width: 40%;">Producto</th>
+                            <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2" style="width: 10%;">Categoría</th>
+                            <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2" style="width: 10%;">Cantidad</th>
+                            <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2" style="width: 10%;">Precio unitario</th>
+                            <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2" style="width: 10%;">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in item_formset %}
+                        <tr class="item-form pb-0 pt-0">
+                            <td class="text-start ps-4 pb-0">
+                                <div class="input-group input-group-outline">
+                                    {{ form.product }}
+                                </div>
+                            </td>
+                            <td class="text-start pb-0">
+                                <div class="input-group input-group-outline">
+                                    {{ form.category }}
+                                </div>
+                            </td>
+                            <td class="text-end  pb-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    {{ form.quantity }}
+                                </div>
+                            </td>
+                            <td class="text-end pb-0">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    {{ form.price }}
+                                </div>
+                            </td>
+                            <td class="text-end pb-0">
+                                <button type="button" class="btn btn-danger btn-sm delete-row mt-1">Eliminar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary ms-3" id="add-item">Agregar otro item</button>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">
+            {% if object %}Actualizar{% else %}Registrar{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock panel-content %}
+{% block JSscripts %}
+
+<script>
+    // Función para calcular el total
+    function calculateTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll('#items-table tbody tr:not([style*="display: none"])');
+        
+        rows.forEach(row => {
+            const priceInput = row.querySelector('input[name*="price"]');
+            const quantityInput = row.querySelector('input[name*="quantity"]');
+            
+            // Verificar que los inputs existan y no estén marcados para eliminar
+            if (priceInput && quantityInput && !row.querySelector('input[name*="DELETE"][type="checkbox"]:checked')) {
+                const price = parseFloat(priceInput.value) || 0;
+                const quantity = parseFloat(quantityInput.value) || 0;
+                total += price * quantity;
+            }
+        });
+
+        // Actualizar el campo totalPrice con 2 decimales
+        document.getElementById('id_totalPrice').value = total.toFixed(2);
+    }
+
+    // Escuchar cambios en los campos de precio y cantidad
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById('items-table');
+        
+        // Calcular total inicial
+        calculateTotal();
+        
+        // Escuchar cambios en cualquier input de la tabla (precio, cantidad o checkbox DELETE)
+        table.addEventListener('input', function(e) {
+            if (e.target.name.includes('price') || 
+                e.target.name.includes('quantity') || 
+                e.target.name.includes('DELETE')) {
+                calculateTotal();
+            }
+        });
+        
+        // Configurar el botón "Agregar otro item"
+        document.getElementById('add-item').addEventListener('click', function() {
+            const formCount = document.getElementById('id_form-TOTAL_FORMS');
+            const table = document.getElementById('items-table').getElementsByTagName('tbody')[0];
+
+            const newRow = table.rows[table.rows.length - 1].cloneNode(true);
+            const newIndex = parseInt(formCount.value);
+
+            newRow.innerHTML = newRow.innerHTML.replace(/form-(\d+)/g, `form-${newIndex}`);
+            newRow.style.display = ''; // Asegurar que la nueva fila es visible
+
+            // Limpiar valores
+            const inputs = newRow.getElementsByTagName('input');
+            for (let input of inputs) {
+                if (input.type !== 'hidden') {
+                    if (input.name.includes('DELETE')) {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                }
+            }
+
+            table.appendChild(newRow);
+            formCount.value = newIndex + 1;
+            
+            // Recalcular el total después de añadir
+            calculateTotal();
+        });
+    });
+
+    // Manejar eliminación de filas (mejorado)
+    document.getElementById('items-table').addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-row')) {
+            e.preventDefault();
+            const row = e.target.closest('tr');
+            const deleteCheckbox = row.querySelector('input[name*="DELETE"]');
+
+            if (deleteCheckbox) {
+                // Si es una fila existente (con ID), marcamos para borrar
+                deleteCheckbox.checked = true;
+                row.style.display = 'none';
+            } else {
+                // Si es una fila nueva, la eliminamos directamente
+                row.remove();
+                // Actualizar el contador de formularios
+                const forms = document.querySelectorAll('#items-table tbody tr:not([style*="display: none"])');
+                document.getElementById('id_form-TOTAL_FORMS').value = forms.length;
+
+                // Reindexar los formularios restantes
+                forms.forEach((formRow, index) => {
+                    formRow.querySelectorAll('input, select').forEach(input => {
+                        input.name = input.name.replace(/form-\d+/, `form-${index}`);
+                        input.id = input.id.replace(/form-\d+/, `form-${index}`);
+                    });
+                });
+            }
+            
+            // Recalcular el total después de eliminar
+            calculateTotal();
+        }
+    });
+</script>
+
+<script>
+    document.getElementById("id_idPetitioner").value = "{{user.id}}";
+</script>
+
+{% endblock JSscripts %}

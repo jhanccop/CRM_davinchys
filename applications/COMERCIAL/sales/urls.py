@@ -5,7 +5,7 @@ app_name = "ventas_app"
 
 urlpatterns = [
     # ==================== COTIZACIONES DE FABRICACION ====================
-    path('comercial/cotizaciones/lista/', views.TrafoQuoteListView.as_view(), name='cotizaciones-lista'),
+    path('comercial/cotizaciones/', views.TrafoQuoteListView.as_view(), name='cotizaciones-lista'),
     path('comercial/cotizaciones/nuevo/', views.QuoteCreateView.as_view(), name='cotizacion-nuevo'),
     path('comercial/cotizaciones/agregar/', views.AddTrafoToQuoteView.as_view(), name='agregar-a-cotizacion'),
     path('comercial/cotizaciones/detalle/<pk>/', views.QuoteDetailView.as_view(), name='cotizacion-detalle'),

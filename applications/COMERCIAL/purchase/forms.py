@@ -13,6 +13,8 @@ from .models import (
     requirementsQuotes
 )
 
+from applications.users.models import User
+
 # ============================ REQUERIMENTOS ============================
 class RequirementsForm(forms.ModelForm):
     class Meta:
@@ -58,12 +60,19 @@ class RequirementItemForm(forms.ModelForm):
         fields = [
             'idRequirement',
             'product',
+            'type',
             'quantity',
             'price',
         ]
 
         widgets = {
             'idRequirement': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
+            'type': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'form-control',
@@ -89,6 +98,51 @@ class RequirementItemForm(forms.ModelForm):
                 }
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        self.setup_type_choices()
+    
+    def setup_type_choices(self):
+        """Configura las opciones del campo type según la posición del usuario"""
+        
+        # Choices por defecto (todos los tipos disponibles)
+        all_choices = [
+            (requirementItems.ARTICULO, 'Artículo'),
+            (requirementItems.TRANSFORMADOR, 'Transformador'),
+            (requirementItems.CONTENEDOR, 'Contenedor'),
+            (requirementItems.ADUANA, 'Aduana'),
+            # Agrega aquí todas las opciones disponibles en tu modelo
+        ]
+        
+        if self.request and hasattr(self.request, 'user') and self.request.user.is_authenticated:
+            user = self.request.user
+            
+            # Ejemplo de lógica basada en la posición del usuario
+            if hasattr(user, 'position') and user.position == User.LOGISTICA:  
+                print("Usuario es de LOGÍSTICA")
+                self.fields['type'].choices = [
+                    (requirementItems.ARTICULO, 'Artículo'),
+                    (requirementItems.CONTENEDOR, 'Contenedor'),
+                    (requirementItems.ADUANA, 'Aduana'),
+                ]
+            elif hasattr(user, 'position') and user.position == User.PRODUCCION:
+                print("Usuario es de PRODUCCION")
+                self.fields['type'].choices = [
+                    (requirementItems.ARTICULO, 'Artículo'),
+                    (requirementItems.TRANSFORMADOR, 'Transformador'),
+                ]
+            else:
+                self.fields['type'].choices = [
+                    (requirementItems.ARTICULO, 'Artículo'),
+                ]
+        else:
+            print("Usuario no autenticado o request no disponible")
+            self.fields['type'].choices = [
+                (requirementItems.ARTICULO, 'Artículo'),
+            ]
 
 # ============================ TRACKING REQUERIMENTOS ============================
 class RequestTrackingForm(forms.ModelForm):

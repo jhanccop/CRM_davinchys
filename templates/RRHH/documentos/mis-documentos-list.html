@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Mis Documentos{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %} 
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-6 col-12 d-flex ms-auto">
+            <a href="{% url 'rrhh_app:mis-documentos-registrar' %}" class="btn bg-gradient-dark ms-auto">
+                <i class="fas fa-plus me-2"></i>Nuevo Documento
+            </a>
+            <button class="export btn btn-icon btn-outline-secondary ms-3" data-type="csv" type="button">
+                <i class="fas fa-download me-2"></i>Exportar CSV
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4 col-md-3">
+                            <h5 class="mb-0">Mis Documentos</h5>
+                        </div>
+                        <div class="col-lg-8 col-md-9">
+                            <form method="GET" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <div class="input-group input-group-outline me-2 is-focused">
+                                    <div class="form-label">Tipo de documento</div>
+                                    <select class="form-control" name="typeKword" id="typeKword">
+                                        <option value="-1">Todos los tipos</option>
+                                        <option value="0" {% if request.GET.typeKword == '0' %}selected{% endif %}>Boleta de Pago</option>
+                                        <option value="1" {% if request.GET.typeKword == '1' %}selected{% endif %}>Contrato</option>
+                                        <option value="2" {% if request.GET.typeKword == '2' %}selected{% endif %}>Curriculum Vitae</option>
+                                        <option value="3" {% if request.GET.typeKword == '3' %}selected{% endif %}>Identificación</option>
+                                        <option value="4" {% if request.GET.typeKword == '4' %}selected{% endif %}>Certificación</option>
+                                        <option value="5" {% if request.GET.typeKword == '5' %}selected{% endif %}>Otro</option>
+                                    </select>
+                                </div>
+                                <div class="pt-3 pb-0">
+                                    <button class="btn bg-gradient-primary" type="submit"> Buscar </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0 px-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table table-flush mb-0 align-items-center" id="datatable-documentos">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Tipo</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Nombre del Documento</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Fecha Documento</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Archivo</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for documento in documentos.lista %}
+                                <tr class="p-0">
+                                    <td class="text-sm pt-0 pb-0">
+                                        <span class="badge bg-gradient-info">{{ documento.get_tipo_display }}</span>
+                                    </td>
+                                    <td class="text-sm pt-0 pb-0">
+                                        <span class="font-weight-bold">{{ documento.nombre }}</span>
+                                        {% if documento.descripcion %}
+                                        <p class="text-xs text-secondary mb-0">{{ documento.descripcion|truncatewords:5 }}</p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-sm pt-0 pb-0 text-end">
+                                        <span class="font-weight-bold">{{ documento.fecha_documento|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td class="text-sm pt-0 pb-0 text-end">
+                                        {% if documento.archivo %}
+                                        <a href="{{ documento.archivo.url }}" target="_blank" class="badge bg-gradient-success" 
+                                        data-bs-toggle="tooltip" title="Descargar archivo">
+                                            <i class="fas fa-download me-1"></i>Ver
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary">Sin archivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pt-0 pb-0">
+                                        <a href="" class="me-1" 
+                                        data-bs-toggle="tooltip" title="Ver detalle">
+                                            <i class="far fa-eye text-primary"></i>
+                                        </a>
+                                        <a href="{% url 'rrhh_app:mis-documentos-update' documento.id %}" class="me-1" 
+                                        data-bs-toggle="tooltip" title="Editar">
+                                            <i class="far fa-edit text-dark"></i>
+                                        </a>
+                                        <a href="{% url 'rrhh_app:mis-documentos-delete' documento.id %}" class="" 
+                                        data-bs-toggle="tooltip" title="Eliminar">
+                                            <i class="far fa-trash-alt text-danger"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-file-alt fa-2x text-secondary mb-2"></i>
+                                        <p class="text-muted">No se encontraron documentos</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            dateFormat: 'Y-m-d',
+            mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+    // DataTable
+    const dataTableDocumentos = new simpleDatatables.DataTable("#datatable-documentos", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 10,
+    });
+
+    // Export functionality
+    document.querySelectorAll(".export").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+            var type = el.dataset.type;
+            var data = {
+                type: type,
+                filename: "documentos_" + new Date().toISOString().split('T')[0],
+            };
+            if (type === "csv") {
+                data.columnDelimiter = ",";
+            }
+            dataTableDocumentos.export(data);
+        });
+    });
+
+</script>
+{% endblock JSscripts %}

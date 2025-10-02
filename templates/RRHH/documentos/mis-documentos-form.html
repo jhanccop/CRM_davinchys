@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Documentos{% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Registrar{% endif %} {% endblock %}
+
+{% block panel-content %} 
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">
+                                {% if object %}Editar Documento{% else %}Nuevo Documento{% endif %}
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'rrhh_app:mis-documentos' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6" hidden>
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.empleado.field.required %} required{% endif %}">
+                                    <label class="form-label">{{ form.empleado.label }}</label>
+                                    {{ form.empleado }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group input-group-outline my-3 is-focused {% if form.tipo.field.required %}required{% endif %}">
+                                    <label class="form-label">{{ form.tipo.label }}</label>
+                                    {{ form.tipo }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.nombre.label }}</label>
+                                    {{ form.nombre }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.fecha_documento.label }}</label>
+                                    {{ form.fecha_documento }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.descripcion.label }}</label>
+                                    {{ form.descripcion }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="input-group input-group-outline my-3 is-focused">
+                                    <label class="form-label">{{ form.archivo.label }}</label>
+                                    {{ form.archivo }}
+                                </div>
+                                {% if form.archivo.errors %}
+                                    <div class="text-danger text-xs">
+                                        {% for error in form.archivo.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if object and object.archivo %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Archivo actual: 
+                                            <a href="{{ object.archivo.url }}" target="_blank" class="text-primary">
+                                                <i class="fas fa-file-download me-1"></i>{{ object.archivo.name|cut:"documentos/" }}
+                                            </a>
+                                        </small>
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">Formatos permitidos: PDF, DOC, DOCX, JPG, PNG</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn bg-gradient-dark">
+                                    <i class="fas fa-save me-2"></i>
+                                    {% if object %}Actualizar{% else %}Crear{% endif %} Documento
+                                </button>
+                                <a href="{% url 'rrhh_app:documentos-list' %}" class="btn btn-outline-secondary">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            //mode: "range"
+        }); // flatpickr
+    }
+</script>
+
+<script>
+    document.getElementById("id_empleado").value = "{{user.empleado.id}}";
+</script>
+
+{% endblock JSscripts %}

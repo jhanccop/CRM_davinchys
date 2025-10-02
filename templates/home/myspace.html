@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Mi espacio{% endblock %}
+{% block navbar_appName %}Dashboard{% endblock %}
+{% block navbar_Type %}Principal{% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <h4>Dashboard Personal</h4>
+
+    <!-- Información Personal -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <h5 class="card-title mb-0"><i class="fas fa-user"></i> Información Personal</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label for="periodo" class="form-label">Período de Consulta</label>
+                                <select name="periodo" id="periodo" class="form-control">
+                                    <option value="mes_actual" {% if periodo_seleccionado == 'mes_actual' %}selected{% endif %}>Mes Actual</option>
+                                    <option value="mes_anterior" {% if periodo_seleccionado == 'mes_anterior' %}selected{% endif %}>Mes Anterior</option>
+                                    <option value="semestre" {% if periodo_seleccionado == 'semestre' %}selected{% endif %}>Último Semestre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mt-3 text-end">
+                                <a href="{% url 'home_app:bienvenida' %}" class="btn bg-gradient-secondary">Limpiar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Nombre:</span>
+                                <span class="text-muted">{{ user|default:"-" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Departamento:</span>
+                                <span class="text-muted">{{ user.empleado.departamento.nombre|default:"-" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Fecha de Ingreso:</span>
+                                <span class="text-muted">{{ user.empleado.fecha_contratacion|date:"d/m/Y"|default:"-" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Salario Base:</span>
+                                <span class="text-muted">{{ user.empleado.salario_base|default:"-" }} {{ user.empleado.get_moneda_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Tipo de Contrato:</span>
+                                <span class="text-muted">{{ user.empleado.get_tipo_contrato_display|default:"-" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-dark">Estado:</span>
+                                <span class="badge {% if user.empleado.activo %}bg-gradient-success{% else %}bg-gradient-danger{% endif %}">
+                                    {{ user.empleado.activo|yesno:"Activo,Inactivo" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widgets RRHH -->
+    <div class="row mt-4">
+        <!-- Días Laborables -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Días Laborables</p>
+                    <h3>{{ dias_laborables }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Días Laborados -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Días Laborados</p>
+                    <h3 class="text-success">{{ dias_laborados }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Días Ausentes -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card border-left-danger">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Días Ausentes</p>
+                    <h3 class="text-danger">{{ dias_ausentes }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Días Permiso -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Días Permiso</p>
+                    <h3 class="text-primary">{{ dias_permiso }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horas Extra 1 -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Horas Extra 1</p>
+                    <h3 class="text-warning">{{ horas_extra1 }}h</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horas Extra 2 -->
+        <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <p class="mb-0 text-dark">Horas Extra 2</p>
+                    <h3 class="text-info">{{ horas_extra2 }}h</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Registro Rápido y Documentos -->
+    <div class="row mb-4">
+        <!-- Registro Rápido -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h5 class="card-title mb-0"><i class="fas fa-clock"></i> Registro Rápido</h5>
+                </div>
+                <div class="card-body pb-2">
+                    <div class="d-grid">
+                        <!-- Botón Asistencia -->
+                        <button type="button" 
+                            class="btn w-100 font-semibold transition-colors
+                                   {% if registro_hoy %}
+                                   bg-gradient-secondary disabled
+                                   {% else %}
+                                   bg-gradient-success
+                                   {% endif %}"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalRegistroRapido"
+                            {% if registro_hoy %}disabled{% endif %}>
+                            {% if registro_hoy %}
+                            <i class="fas fa-check text-lg text-success"></i> Registrada Hoy
+                            {% else %}
+                            <i class="fas fa-fingerprint text-lg text-white"></i> Registrar Asistencia
+                            {% endif %}
+                        </button>
+
+                        <!-- Botón Horas Extra 1 -->
+                        <button type="button"
+                            class="btn w-100 font-semibold text-center transition-colors
+                                   {% if horas_extra1_registradas %}
+                                   bg-gradient-secondary disabled
+                                   {% else %}
+                                   bg-gradient-warning
+                                   {% endif %}"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalHorasExtra1"
+                            {% if horas_extra1_registradas %}disabled{% endif %}>
+                            {% if horas_extra1_registradas %}
+                            <i class="fas fa-check text-lg text-success"></i> HE1 Registradas Hoy
+                            {% else %}
+                            <i class="far fa-clock"></i> HE1 (18:01-21:59)
+                            {% endif %}
+                        </button>
+
+                        <!-- Botón Horas Extra 2 -->
+                        <button type="button"
+                            class="btn w-100 font-semibold text-center transition-colors
+                                   {% if horas_extra2_registradas %}
+                                   bg-gradient-secondary disabled
+                                   {% else %}
+                                   bg-gradient-info
+                                   {% endif %}"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalHorasExtra2"
+                            {% if horas_extra2_registradas %}disabled{% endif %}>
+                            {% if horas_extra2_registradas %}
+                            <i class="fas fa-check text-lg text-success"></i> HE2 Registradas Hoy
+                            {% else %}
+                            <i class="far fa-clock"></i> HE2 (22:00-05:59)
+                            {% endif %}
+                        </button>
+
+                        <!-- Botón Lista Completa -->
+                        <a href="{% url 'rrhh_app:asistencia-user-list' %}" 
+                           class="btn w-100 font-semibold text-center bg-gradient-dark">
+                            <i class="fas fa-list"></i> Ver más
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-file-pdf"></i> Docs</h5>
+                    <a href="{% url 'rrhh_app:documentos-list' %}" class="btn btn-sm bg-gradient-dark">Más</a>
+                </div>
+                <div class="card-body">
+                    <!-- Progreso Documentos -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-sm font-weight-bold">Porcentaje completado</span>
+                            <span class="text-sm font-weight-bold">{{ porcentaje_documentos|floatformat:0 }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-gradient-primary" role="progressbar" 
+                                 style="width: {{ porcentaje_documentos }}%" 
+                                 aria-valuenow="{{ porcentaje_documentos }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        {% for documento in documentos %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div class="d-flex align-items-center">
+                                <span class="material-icons text-primary me-2" style="font-size: 18px;">description</span>
+                                <span class="text-sm">{{ documento.get_tipo_display }}</span>
+                            </div>
+                            <span class="badge badge-sm bg-gradient-secondary">{{ documento.fecha_documento|date:"d/m/Y" }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-sm text-center mb-0">No hay documentos registrados</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Permisos -->
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-id-badge"></i> Seguimiento de Permisos</h5>
+                    <a href="" class="btn btn-sm bg-gradient-dark">Ver Todos</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-dark">Tipo</th>
+                                    <th class="text-end text-dark">Periodo</th>
+                                    <th class="text-center text-dark">Horas</th>
+                                    <th class="text-center text-dark">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for permiso in permisos %}
+                                <tr>
+                                    <td class="ps-4">{{ permiso.get_tipo_display }}</td>
+                                    <td class="text-end">
+                                        {{ permiso.fecha_inicio|date:"d/m/Y" }} - {{ permiso.fecha_fin|date:"d/m/Y" }}
+                                    </td>
+                                    <td class="text-center">{{ permiso.horas }}</td>
+                                    <td class="text-center">
+                                        <span class="badge 
+                                            {% if permiso.estado == '1' %}bg-gradient-success
+                                            {% elif permiso.estado == '2' %}bg-gradient-danger
+                                            {% else %}bg-gradient-warning{% endif %}">
+                                            {{ permiso.get_estado_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No hay permisos registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Modal Registro Rápido -->
+<div class="modal fade" id="modalRegistroRapido" tabindex="-1" aria-labelledby="modalRegistroRapidoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRegistroRapidoLabel">Registro Rápido de Asistencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'rrhh_app:registro_asistencia_rapido' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row mb-0">
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Hora de Inicio:</label>
+                            <input type="time" class="form-control" value="08:25" readonly>
+                        </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label class="form-label">Hora de Salida:</label>
+                                <input type="time" class="form-control" value="17:59" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="input-group input-group-outline is-focused">
+                            <label class="form-label">Ubicación:</label>
+                            <select name="ubicacion" class="form-control" required>
+                                <option value="">Seleccionar ubicación</option>
+                                <option value="0">Shell</option>
+                                <option value="1">Colon</option>
+                                <option value="2">Planta</option>
+                                <option value="3">Remoto</option>
+                                <option value="4">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="input-group input-group-outline is-focused">
+                            <label class="form-label">Observaciones:</label>
+                        <textarea name="observaciones" class="form-control" rows="3" placeholder="Observaciones opcionales..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn bg-gradient-success">Registrar Asistencia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Horas Extra 1 -->
+<div class="modal fade" id="modalHorasExtra1" tabindex="-1" aria-labelledby="modalHorasExtra1Label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHorasExtra1Label">Horas Extra 1 (18:01-21:59)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'rrhh_app:registro_horas_extra' '1' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row mb-0">
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label class="form-label">Hora de Inicio:</label>
+                                <input type="time" name="hora_inicio" class="form-control" value="18:01" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label class="form-label">Hora de Finalización:</label>
+                                <input type="time" name="hora_final" class="form-control" value="21:59" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">Ubicación:</label>
+                        <select name="ubicacion" class="form-control" required>
+                            <option value="">Seleccionar ubicación</option>
+                            <option value="0">Shell</option>
+                            <option value="1">Colon</option>
+                            <option value="2">Planta</option>
+                            <option value="3">Remoto</option>
+                            <option value="4">Otro</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">Observaciones:</label>
+                        <textarea name="observaciones" class="form-control" rows="3" placeholder="Descripción del trabajo realizado..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn bg-gradient-warning">Registrar HE1</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Horas Extra 2 -->
+<div class="modal fade" id="modalHorasExtra2" tabindex="-1" aria-labelledby="modalHorasExtra2Label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHorasExtra2Label">Registro Horas Extra 2 (22:00-05:59)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'rrhh_app:registro_horas_extra' '2' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label class="form-label">Hora de Inicio:</label>
+                                <input type="time" name="hora_inicio" class="form-control" value="22:00" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label class="form-label">Hora de Finalización:</label>
+                                <input type="time" name="hora_final" class="form-control" value="05:59" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group input-group-outline is-focused">
+                        <label class="form-label">Ubicación:</label>
+                        <select name="ubicacion" class="form-control" required>
+                            <option value="">Seleccionar ubicación</option>
+                            <option value="0">Shell</option>
+                            <option value="1">Colon</option>
+                            <option value="2">Planta</option>
+                            <option value="3">Remoto</option>
+                            <option value="4">Otro</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-outline my-3 is-focused">
+                        <label class="form-label">Observaciones:</label>
+                        <textarea name="observaciones" class="form-control" rows="3" placeholder="Descripción del trabajo realizado..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn bg-gradient-info">Registrar HE2</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Selector de periodo
+    const selectorPeriodo = document.getElementById('periodo');
+    selectorPeriodo.addEventListener('change', function() {
+        const periodo = this.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('periodo', periodo);
+        window.location.href = url.toString();
+    });
+});
+</script>
+{% endblock JSscripts %}

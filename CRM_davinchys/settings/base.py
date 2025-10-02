@@ -33,6 +33,8 @@ DJANGO_APPS = (
 )
 
 LOCAL_APPS = (
+    'applications.core',
+    
     'applications.users',
     'applications.home',
     'applications.producto',
@@ -57,7 +59,14 @@ LOCAL_APPS = (
     'applications.FINANCIERA.movimientosBancarios',
     'applications.FINANCIERA.documentos',
 
+    # AREA LOGISTICA
     'applications.LOGISTICA.transport',
+
+    # AREA PRODUCCION
+    'applications.PRODUCTION',
+
+    # AREA RRHH
+    'applications.RRHH',
 
     'multiselectfield',
     'import_export',
@@ -93,13 +102,16 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                # Context processor personalizado para el menú
+                'applications.core.context_processors.menu_navigation',
+
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'CRM_davinchys.wsgi.application'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -122,6 +134,17 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.User'
 
 LANGUAGE_CODE = 'es-mx'
+
+PERMISSIONS = {
+    'rh': [
+        ('add_empleado', 'Puede agregar empleados'),
+        ('change_empleado', 'Puede modificar empleados'),
+        ('delete_empleado', 'Puede eliminar empleados'),
+        ('view_all_asistencia', 'Puede ver toda la asistencia'),
+        ('view_all_documentos', 'Puede ver todos los documentos'),
+        ('approve_permisos', 'Puede aprobar/rechazar permisos'),
+    ]
+}
 
 #TIME_ZONE = 'UTC'
 TIME_ZONE = 'America/Lima'

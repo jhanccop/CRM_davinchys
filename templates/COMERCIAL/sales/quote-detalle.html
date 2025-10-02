@@ -8,7 +8,7 @@
 
 {% block panel-content %}
 
-<div class="container mt-4">
+<div class="container">
     <div class="row">
         <div class="col-md-6">
             <div class="card">
@@ -25,7 +25,9 @@
                             <tbody>
                                 <tr>
                                     <td width="40%" class="text-muted">Cliente</td>
-                                    <td class="fw-bold text-primary">{{quote.idClient}}</td>
+                                    <td class="fw-bold text-primary">
+                                        {{quote.idClient.tradeName}}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Cia Receptora</td>
@@ -100,35 +102,33 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Serial</th>
-                        <th>KVA</th>
-                        <th>KTapHV</th>
-                        <th>HVTAP</th>
-                        <th>LV</th>
-                        <th>Cantidad</th>
-                        <th>Costo Unitario</th>
-                        <th>Acciones</th>
+                        <th class="text-end">Serial</th>
+                        <th class="text-end">KVA</th>
+                        <th class="text-end">KTapHV</th>
+                        <th class="text-end">HVTAP</th>
+                        <th class="text-end">LV</th>
+                        <th class="text-end">Costo Unitario</th>
+                        <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for trafo in trafos %}
                     <tr>
-                        <td>{{ trafo.serialNumber }}</td>
-                        <td class="text-end">{{ trafo.get_KVA_display }}</td>
-                        <td class="text-end">{{ trafo.get_KTapHV_display }}</td>
-                        <td class="text-end">{{ trafo.get_HVTAP_display }}</td>
-                        <td class="text-end">{{ trafo.get_LV_display }}</td>
-                        <td class="text-end">{{ trafo.quantity }}</td>
+                        <td class="text-end">{{ trafo }}</td>
+                        <td class="text-end">{{ trafo.idTrafo.get_KVA_display }}</td>
+                        <td class="text-end">{{ trafo.idTrafo.get_KTapHV_display }}</td>
+                        <td class="text-end">{{ trafo.idTrafo.get_HVTAP_display }}</td>
+                        <td class="text-end">{{ trafo.idTrafo.get_LV_display }}</td>
                         <td class="text-end">{{ trafo.unitCost }}</td>
-                        <td>
+                        <td class="text-end">
                             <a href="{% url 'ventas_app:detalle-item' trafo.id %}">
                                 <i class="far fa-eye text-info text-lg"></i>
                             </a>
-                            &emsp;
+                            &ensp;
                             <a href="{% url 'ventas_app:editar-item' trafo.id %}">
                                 <i class="far fa-edit text-dark text-lg"></i>
                             </a>
-                            &emsp;
+                            &ensp;
                             <a href="{% url 'ventas_app:eliminar-item' trafo.id %}">
                                 <i class="far fa-trash-alt text-primary text-lg"></i>
                             </a>

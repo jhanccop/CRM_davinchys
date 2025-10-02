@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}RRHH{% endblock %}
+{% block navbar_appName %}Empleados{% endblock %}
+{% block navbar_Type %}Reporte {% endblock %}
+
+{% block panel-content %} 
+
+
+<div class="container-fluid">
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h5 class="card-title mb-0">Filtros del Reporte</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label for="empleado" class="form-label">Empleado</label>
+                                <select name="empleado" id="empleado" class="form-control">
+                                    <option value="">Todos los empleados</option>
+                                    {% for emp in empleados %}
+                                    <option value="{{ emp.id }}" 
+                                            {% if emp.id|stringformat:"s" == empleado_seleccionado %}selected{% endif %}>
+                                        {{ emp.user|default:"-" }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                                <input type="date" name="fecha_inicio" id="fecha_inicio" 
+                                    class="form-control datetimepicker" value="{{ fecha_inicio|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group input-group-outline my-3 is-focused">
+                                <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                                <input type="date" name="fecha_fin" id="fecha_fin" 
+                                   class="form-control datetimepicker" value="{{ fecha_fin|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-end pt-3">
+                                <button type="submit" class="btn btn-primary">Generar Reporte</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for reporte in reportes %}
+    <!-- Reporte Individual por Empleado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        Reporte de Asistencia: {{ reporte.empleado.user|default:"-" }} del {{ fecha_inicio|date:"d/m/Y" }} - {{ fecha_fin|date:"d/m/Y" }}
+                    </h5>
+                    <p class="text-sm mb-0">
+                        Días laborables: {{ reporte.dias_laborables }} | Días del período: {{ reporte.metricas.total_dias_periodo }}
+                    </p>
+                </div>
+                <div class="card-body pt-0">
+                    <!-- Resumen General -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center p-3">
+                                    <h2 class="text-gradient text-info">
+                                        <span id="status1" countto="{{ reporte.metricas.dias_laborables }}">
+                                            {{ reporte.metricas.dias_laborables }}
+                                        </span>
+                                    </h2>
+                                    <h6 class="mb-0 font-weight-bolder">Días Laborables</h6>
+                                    <small class="text-muted">Excluye fines de semana y feriados</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center p-3">
+                                    <h2 class="text-gradient text-success">
+                                        <span id="status2" countto="{{ reporte.metricas.dias_regulares_laborados }}">
+                                            {{ reporte.metricas.dias_regulares_laborados }}
+                                        </span>
+                                    </h2>
+                                    <h6 class="mb-0 font-weight-bolder">Días Regulares</h6>
+                                    <small class="text-muted">Jornada regular trabajada</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center p-3">
+                                    <h2 class="text-gradient text-primary">
+                                        <span id="status3" countto="{{ reporte.metricas.dias_inasistencia }}">
+                                            {{ reporte.metricas.dias_inasistencia }}
+                                        </span>
+                                    </h2>
+                                    <h6 class="mb-0 font-weight-bolder">Inasistencias</h6>
+                                    <small class="text-muted">Días laborables no trabajados</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center p-3">
+                                    <h2 class="{% if reporte.metricas.porcentaje_asistencia >= 90 %}text-success{% elif reporte.metricas.porcentaje_asistencia >= 70 %}text-warning{% else %}text-primary{% endif %}">
+                                        <span id="status4" countto="{{ reporte.metricas.porcentaje_asistencia }}">
+                                            {{ reporte.metricas.porcentaje_asistencia }}%
+                                        </span>
+                                    </h2>
+                                    <h6 class="mb-0 font-weight-bolder">% Asistencia</h6>
+                                    <small class="text-muted">Sobre días laborables</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas Detalladas -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Horas Trabajadas</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <table class="table table-sm table-hover">
+                                        <tr>
+                                            <td>Horas Totales Trabajadas:</td>
+                                            <td class="text-end"><strong>{{ reporte.metricas.horas_totales }}h</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas Regulares:</td>
+                                            <td class="text-end text-success">{{ reporte.metricas.horas_regulares }}h</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas Extra Tipo 1 (HE1):</td>
+                                            <td class="text-end text-warning">{{ reporte.metricas.horas_extra1 }}h</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas Extra Tipo 2 (HE2):</td>
+                                            <td class="text-end text-warning">{{ reporte.metricas.horas_extra2 }}h</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas en Feriados:</td>
+                                            <td class="text-end text-info">{{ reporte.metricas.horas_feriados }}h</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas Esperadas ({{ reporte.metricas.dias_laborables }}d × 8h):</td>
+                                            <td class="text-end"><strong>{{ reporte.metricas.horas_esperadas }}h</strong></td>
+                                        </tr>
+                                        <tr class="table-active">
+                                            <td><strong>Eficiencia:</strong></td>
+                                            <td class="text-end"><strong>{{ reporte.metricas.porcentaje_eficiencia }}%</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Permisos y Otros</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Días Feriados Laborados:</td>
+                                            <td class="text-end text-info">{{ reporte.metricas.dias_feriados_laborados }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Días Totales Trabajados:</td>
+                                            <td class="text-end">{{ reporte.metricas.dias_trabajados }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Permisos Solicitados:</td>
+                                            <td class="text-end">{{ reporte.metricas.permisos_solicitados }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Permisos Aprobados:</td>
+                                            <td class="text-end text-success">{{ reporte.metricas.permisos_aprobados }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Permisos Pendientes:</td>
+                                            <td class="text-end text-warning">{{ reporte.metricas.permisos_pendientes }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Horas de Permisos Aprobados:</td>
+                                            <td class="text-end">{{ reporte.metricas.horas_permisos_aprobados }}h</td>
+                                        </tr>
+                                        <tr class="table-active">
+                                            <td><strong>Horas de Inasistencia:</strong></td>
+                                            <td class="text-end text-danger"><strong>{{ reporte.metricas.horas_inasistencia }}h</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ubicaciones de Trabajo -->
+                    {% if reporte.metricas.ubicaciones %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Ubicaciones de Trabajo</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <div class="row">
+                                        {% for ubicacion in reporte.metricas.ubicaciones %}
+                                        <div class="col-md-3 col-6 mb-2">
+                                            <div class="d-flex justify-content-between">
+                                                <span class="fw-bold">
+                                                    {% if ubicacion.ubicacion == "0" %}Shell
+                                                    {% elif ubicacion.ubicacion == "1" %}Colon
+                                                    {% elif ubicacion.ubicacion == "2" %}Planta
+                                                    {% elif ubicacion.ubicacion == "3" %}Remoto
+                                                    {% elif ubicacion.ubicacion == "4" %}Otro
+                                                    {% else %}Sin especificar{% endif %}
+                                                </span>
+                                                <span class="text-primary">
+                                                    {{ ubicacion.total_dias }}d / {{ ubicacion.total_horas|floatformat:1 }}h
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Detalle de Permisos -->
+                    {% if reporte.permisos %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Detalle de Permisos</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tipo</th>
+                                                    <th>Fecha Inicio</th>
+                                                    <th>Fecha Fin</th>
+                                                    <th>Días</th>
+                                                    <th>Horas</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for permiso in reporte.permisos %}
+                                                <tr>
+                                                    <td>{{ permiso.tipo }}</td>
+                                                    <td>{{ permiso.fecha_inicio|date:"d/m/Y" }}</td>
+                                                    <td>{{ permiso.fecha_fin|date:"d/m/Y" }}</td>
+                                                    <td>{{ permiso.dias }}</td>
+                                                    <td>{{ permiso.horas }}h</td>
+                                                    <td>
+                                                        <span class="badge {% if permiso.estado_codigo == '1' %}bg-success{% elif permiso.estado_codigo == '0' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ permiso.estado }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Resumen por Semanas -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Resumen por Semanas</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Semana</th>
+                                                    <th>Del</th>
+                                                    <th>Al</th>
+                                                    <th>Días Laborables</th>
+                                                    <th>Días Trabajados</th>
+                                                    <th>% Asistencia</th>
+                                                    <th>Horas Totales</th>
+                                                    <th>Horas Regulares</th>
+                                                    <th>HE1</th>
+                                                    <th>HE2</th>
+                                                    <th>Feriados</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for semana in reporte.resumen_semanas %}
+                                                <tr>
+                                                    <td>Semana {{ semana.semana_num }}</td>
+                                                    <td>{{ semana.fecha_inicio|date:"d/m/Y" }}</td>
+                                                    <td>{{ semana.fecha_fin|date:"d/m/Y" }}</td>
+                                                    <td class="text-center">{{ semana.dias_laborables }}</td>
+                                                    <td class="text-center">{{ semana.dias_trabajados }}</td>
+                                                    <td class="text-center {% if semana.porcentaje_asistencia >= 90 %}text-success{% elif semana.porcentaje_asistencia >= 70 %}text-warning{% else %}text-danger{% endif %}">
+                                                        {{ semana.porcentaje_asistencia }}%
+                                                    </td>
+                                                    <td class="text-center"><strong>{{ semana.horas_totales|floatformat:1 }}h</strong></td>
+                                                    <td class="text-center">{{ semana.horas_regulares|floatformat:1 }}h</td>
+                                                    <td class="text-center text-warning">{{ semana.horas_extra1|floatformat:1 }}h</td>
+                                                    <td class="text-center text-warning">{{ semana.horas_extra2|floatformat:1 }}h</td>
+                                                    <td class="text-center text-info">{{ semana.horas_feriado|floatformat:1 }}h</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle Diario -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-header bg-light pb-0">
+                                    <h6 class="card-title mb-0">Detalle Diario</h6>
+                                </div>
+                                <div class="card-body pt-0 pb-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Día</th>
+                                                    <th>Primer Registro</th>
+                                                    <th>Último Registro</th>
+                                                    <th>Total Registros</th>
+                                                    <th>Horas Totales</th>
+                                                    <th>Horas Regulares</th>
+                                                    <th>HE1</th>
+                                                    <th>HE2</th>
+                                                    <th>Tipo Día</th>
+                                                    <th>Ubicaciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for fecha, datos in reporte.horas_por_dia.items %}
+                                                <tr>
+                                                    <td>{{ datos.fecha|date:"d/m/Y" }}</td>
+                                                    <td>{{ datos.fecha|date:"l" }}</td>
+                                                    <td class="text-center">{{ datos.primer_registro|time:"H:i"|default:"-" }}</td>
+                                                    <td class="text-center">{{ datos.ultimo_registro|time:"H:i"|default:"-" }}</td>
+                                                    <td class="text-center">{{ datos.total_registros }}</td>
+                                                    <td class="text-center"><strong>{{ datos.horas_totales }}h</strong></td>
+                                                    <td class="text-center text-success">{{ datos.horas_regulares }}h</td>
+                                                    <td class="text-center">
+                                                        {% if datos.horas_extra1 > 0 %}
+                                                        <span class="badge bg-warning">{{ datos.horas_extra1 }}h</span>
+                                                        {% else %}-{% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if datos.horas_extra2 > 0 %}
+                                                        <span class="badge bg-danger">{{ datos.horas_extra2 }}h</span>
+                                                        {% else %}-{% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if datos.es_feriado %}
+                                                        <span class="badge bg-info">Feriado</span>
+                                                        {% elif datos.es_laborable %}
+                                                        <span class="badge bg-success">Laborable</span>
+                                                        {% else %}
+                                                        <span class="badge bg-secondary">Fin de semana</span>
+                                                        {% endif %}
+                                                        {% if datos.es_futuro %}
+                                                        <span class="badge bg-warning">Futuro</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% for ubicacion in datos.ubicaciones %}
+                                                        {% if ubicacion.ubicacion == "0" %}Shell
+                                                        {% elif ubicacion.ubicacion == "1" %}Colon
+                                                        {% elif ubicacion.ubicacion == "2" %}Planta
+                                                        {% elif ubicacion.ubicacion == "3" %}Remoto
+                                                        {% elif ubicacion.ubicacion == "4" %}Otro
+                                                        {% endif %}{% if not forloop.last %}, {% endif %}
+                                                        {% empty %}
+                                                        -
+                                                        {% endfor %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                No hay datos para mostrar con los filtros seleccionados.
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+
+<script>
+    // Configuración del datepicker para rango de fechas
+  if (document.querySelector('.datetimepicker')) {
+      flatpickr('.datetimepicker', {
+          allowInput: true,
+          dateFormat: "Y-m-d",
+      });
+  }
+</script>
+
+<script>
+    // Funcionalidad para los filtros
+    document.addEventListener('DOMContentLoaded', function() {
+        // Actualizar fecha fin cuando cambia fecha inicio
+        document.getElementById('fecha_inicio').addEventListener('change', function() {
+            const fechaFin = document.getElementById('fecha_fin');
+            if (this.value && (!fechaFin.value || this.value > fechaFin.value)) {
+                fechaFin.value = this.value;
+            }
+        });
+    });
+</script>
+
+{% endblock JSscripts %}

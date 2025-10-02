@@ -118,6 +118,23 @@ class LogisticaMixin(LoginRequiredMixin):
             )
         return super().dispatch(request, *args, **kwargs)
 
+# =========================== PERMISOS RRHH ===========================
+class RRHHMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('users_app:user-login')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        #
+        if not check_ocupation_user(request.user.position, User.RECURSOSHUMANOS):
+            # no tiene autorizacion
+            return HttpResponseRedirect(
+                reverse(
+                    'home_app:unauthorized'
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
+
 class VentasPermisoMixin(LoginRequiredMixin):
     login_url = reverse_lazy('users_app:user-login')
 

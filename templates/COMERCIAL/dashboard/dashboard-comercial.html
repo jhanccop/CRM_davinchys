@@ -1,392 +1,394 @@
-{% extends "COMERCIAL/dashboard/base-Dashboard.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Comercial {% endblock title %}
-{% block main %} Comercial {% endblock main %}
-{% block appName %} Compañia {% endblock appName %}
-{% block Type %} Dashboard {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Dashboard{% endblock %}
+{% block navbar_Type %}Principal{% endblock %}
 
 {% block panel-content %}
 
-<div class="row">
-  <div class="col-lg-4 col-md-2 mb-2 d-flex flex-column justify-content-center">
-    <h2 class="text-2xl font-semibold mb-1">Panel Comercial</h2>
-    <p class="text-sm text-gray-500 mb-0">Visión general de compras</p>
-    <p class="text-sm text-gray-500 mb-0">ventas, pagos y cobranzas</p>
-  </div>
-
-  <div class="col-lg-4 col-md-5 mb-4">
-    <div class="card mb-0">
-      <div class="card-body p-3 mb-0">
-        <h6 class="mb-0">Acciones Urgentes</h6>
-        <div class="align-items-center mb-0 mt-2">
-
-          <a type="button" class="btn btn-primary w-100" href="{% url 'compras_app:list_requirement' %}">
-            <span>Cotizaciones por aprobar</span>
-            <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
-          </a>
-          <a type="button" class="btn btn-primary w-100 mb-0" href="{% url 'compras_app:list_requirement' %}">
-            <span>Adquisiones por aprobar</span>
-            <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-lg-4 col-md-5 mb-4">
-    <div class="card mb-0 h-100">
-      <div class="card-body p-3 mb-0">
-        <h6 class="mb-0 ">Filtro por fecha</h6>
-        <form method="GET" class="">{% csrf_token %}
-          <div class="input-group input-group-outline mb-2">
-            <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
-              placeholder="today" id="dateKword" name="dateKword">
-          </div>
-          <button class="btn bg-gradient-primary mb-0 w-100" type="submit"> Filtrar </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<div class="row">
-
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="card  mb-2">
-            <div class="card-header p-2 ps-3">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="text-sm mb-0 text-capitalize text-dark"> total por pagar</p>
-                        <h6 class="mb-0 text-primary">PEN 0.00</h6>
-                        <h6 class="mb-0 text-primary">USD 0.00</h6>
-                    </div>
-                    <div class="icon icon-md icon-shape bg-gradient-primary shadow-dark shadow text-center border-radius-lg">
-                        <i class="fas fa-arrow-down  opacity-10"></i>
-                    </div>
-                </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-2 ps-3">
-              <a href="">
-                <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-              </a>
-            </div>
-        </div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-4 col-md-2 mb-2 d-flex flex-column justify-content-center">
+      <h2 class="text-2xl font-semibold mb-1">Panel Comercial</h2>
+      <p class="text-sm text-gray-500 mb-0">Visión general de compras</p>
+      <p class="text-sm text-gray-500 mb-0">ventas, pagos y cobranzas</p>
     </div>
 
+    <div class="col-lg-4 col-md-5 mb-4">
+      <div class="card mb-0">
+        <div class="card-body p-3 mb-0">
+          <h6 class="mb-0">Acciones Urgentes</h6>
+          <div class="align-items-center mb-0 mt-2">
 
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="card  mb-2">
-            <div class="card-header p-2 ps-3">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="text-sm mb-0 text-capitalize text-dark">total por cobrar</p>
-                        <h6 class="mb-0 text-success">PEN 0.00</h6>
-                        <h6 class="mb-0 text-success">USD 0.00</h6>
-                    </div>
-                    <div
-                        class="icon icon-md icon-shape bg-gradient-success shadow-dark shadow text-center border-radius-lg">
-                        <i class="fas fa-arrow-up  opacity-10"></i>
-                    </div>
-                </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-2 ps-3">
-              <a href="">
-                <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-              </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="card  mb-2">
-            <div class="card-header p-2 ps-3">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="text-sm mb-0 text-capitalize">Pedidos</p>
-                        <h6 class="mb-0">PEND: 0</h6>
-                        <h6 class="mb-0">COMP: 0</h6>
-                    </div>
-                    <div
-                        class="icon icon-md icon-shape bg-gradient-secondary shadow-dark shadow text-center border-radius-lg">
-                        <i class="fas fa-trailer opacity-10"></i>
-                    </div>
-                </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-2 ps-3">
-              <a href="">
-                <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-              </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="card  mb-2">
-            <div class="card-header p-2 ps-3">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="text-sm mb-0 text-capitalize">Ordenes de compra</p>
-                        <h6 class="mb-0">PEND: 0</h6>
-                        <h6 class="mb-0">COMP: 0</h6>
-                    </div>
-                    <div
-                        class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
-                        <i class="fas fa-cart-plus opacity-10"></i>
-                    </div>
-                </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-2 ps-3">
-              <a href="{% url 'compras_app:lista_ordenescompra' %}">
-                <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-              </a>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="row pt-3">
-
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header pb-0 ">
-        <div class="row align-middle align-items-center">
-          <div class="col-lg-6 col-md-3">
-            <h5 class="mb-0">Ordenes de compra</h5>
+            <a type="button" class="btn btn-primary w-100" href="{% url 'compras_app:list_requirement' %}">
+              <span>Cotizaciones por aprobar</span>
+              <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
+            </a>
+            <a type="button" class="btn btn-primary w-100 mb-0" href="{% url 'compras_app:list_requirement' %}">
+              <span>Adquisiones por aprobar</span>
+              <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
+            </a>
           </div>
         </div>
       </div>
-      <div class="card-body pt-0 px-0 pb-2">
-        <div class="table-responsive p-0">
-          <table class="table table-flush mb-0 align-items-center" id="datatable-move">
-            <thead class="thead-light">
-              <tr>
-                <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
-                </th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Solicitado por</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total </th>
-                <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Estado </th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in documentos.requerimientos %}
-              <tr>
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+    </div>
+
+    <div class="col-lg-4 col-md-5 mb-4">
+      <div class="card mb-0 h-100">
+        <div class="card-body p-3 mb-0">
+          <h6 class="mb-0 ">Filtro por fecha</h6>
+          <form method="GET" class="">{% csrf_token %}
+            <div class="input-group input-group-outline mb-2">
+              <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
+                placeholder="today" id="dateKword" name="dateKword">
+            </div>
+            <button class="btn bg-gradient-primary mb-0 w-100" type="submit"> Filtrar </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="card  mb-2">
+              <div class="card-header p-2 ps-3">
+                  <div class="d-flex justify-content-between">
+                      <div>
+                          <p class="text-sm mb-0 text-capitalize text-dark"> total por pagar</p>
+                          <h6 class="mb-0 text-primary">PEN 0.00</h6>
+                          <h6 class="mb-0 text-primary">USD 0.00</h6>
+                      </div>
+                      <div class="icon icon-md icon-shape bg-gradient-primary shadow-dark shadow text-center border-radius-lg">
+                          <i class="fas fa-arrow-down  opacity-10"></i>
+                      </div>
                   </div>
-                </td>
+              </div>
+              <hr class="dark horizontal my-0">
+              <div class="card-footer p-2 ps-3">
+                <a href="">
+                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
+                </a>
+              </div>
+          </div>
+      </div>
 
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                      <h6 class="mb-0 text-sm">REQ-{{t.id}} </h6>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="card  mb-2">
+              <div class="card-header p-2 ps-3">
+                  <div class="d-flex justify-content-between">
+                      <div>
+                          <p class="text-sm mb-0 text-capitalize text-dark">total por cobrar</p>
+                          <h6 class="mb-0 text-success">PEN 0.00</h6>
+                          <h6 class="mb-0 text-success">USD 0.00</h6>
+                      </div>
+                      <div
+                          class="icon icon-md icon-shape bg-gradient-success shadow-dark shadow text-center border-radius-lg">
+                          <i class="fas fa-arrow-up  opacity-10"></i>
+                      </div>
+                  </div>
+              </div>
+              <hr class="dark horizontal my-0">
+              <div class="card-footer p-2 ps-3">
+                <a href="">
+                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
+                </a>
+              </div>
+          </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="card  mb-2">
+              <div class="card-header p-2 ps-3">
+                  <div class="d-flex justify-content-between">
+                      <div>
+                          <p class="text-sm mb-0 text-capitalize">Pedidos</p>
+                          <h6 class="mb-0">PEND: 0</h6>
+                          <h6 class="mb-0">COMP: 0</h6>
+                      </div>
+                      <div
+                          class="icon icon-md icon-shape bg-gradient-secondary shadow-dark shadow text-center border-radius-lg">
+                          <i class="fas fa-trailer opacity-10"></i>
+                      </div>
+                  </div>
+              </div>
+              <hr class="dark horizontal my-0">
+              <div class="card-footer p-2 ps-3">
+                <a href="">
+                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
+                </a>
+              </div>
+          </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="card  mb-2">
+              <div class="card-header p-2 ps-3">
+                  <div class="d-flex justify-content-between">
+                      <div>
+                          <p class="text-sm mb-0 text-capitalize">Ordenes de compra</p>
+                          <h6 class="mb-0">PEND: 0</h6>
+                          <h6 class="mb-0">COMP: 0</h6>
+                      </div>
+                      <div
+                          class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
+                          <i class="fas fa-cart-plus opacity-10"></i>
+                      </div>
+                  </div>
+              </div>
+              <hr class="dark horizontal my-0">
+              <div class="card-footer p-2 ps-3">
+                <a href="{% url 'compras_app:lista_ordenescompra' %}">
+                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
+                </a>
+              </div>
+          </div>
+      </div>
+
+  </div>
+
+  <div class="row pt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header pb-0 ">
+          <div class="row align-middle align-items-center">
+            <div class="col-lg-6 col-md-3">
+              <h5 class="mb-0">Ordenes de compra</h5>
+            </div>
+          </div>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
+                  </th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Solicitado por</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total </th>
+                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Estado </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in documentos.requerimientos %}
+                <tr>
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                        <h6 class="mb-0 text-sm">REQ-{{t.id}} </h6>
+                      </a>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{ t.idPetitioner.get_position_display }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-start">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-end">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-end">
+                    {% if t.lastStatus == "5" %}
+                    <span class="badge badge-primary">{{ t.lastStatusDisplay }}</span>
+                    {% elif t.lastStatus == "12" %}
+                    <span class="badge badge-success">{{ t.lastStatusDisplay }}</span>
+                    {% else %}
+                    <span class="badge badge-secondary">{{ t.lastStatusDisplay }}</span>
+                    {% endif %}
+
+                  </td>
+
+                  <td>
+                    <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
+                      data-bs-placement="left" aria-expanded="false">
+                      <i class="fas fa-bars text-lg text-dark"></i>
                     </a>
-                  </div>
-                </td>
-
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{ t.idPetitioner.get_position_display }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-start">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-end">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-end">
-                  {% if t.lastStatus == "5" %}
-                  <span class="badge badge-primary">{{ t.lastStatusDisplay }}</span>
-                  {% elif t.lastStatus == "12" %}
-                  <span class="badge badge-success">{{ t.lastStatusDisplay }}</span>
-                  {% else %}
-                  <span class="badge badge-secondary">{{ t.lastStatusDisplay }}</span>
-                  {% endif %}
-
-                </td>
-
-                <td>
-                  <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
-                    data-bs-placement="left" aria-expanded="false">
-                    <i class="fas fa-bars text-lg text-dark"></i>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
-                    aria-labelledby="dropdownMarketingCard" style="">
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:edit_requirement' t.id %}"> Cotizar con proveedores </a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:nueva_cotizacion_id' t.id %}"> Registrar cotización </a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:crear_compra_id' t.id %}"> Adjuntar Factura / Boleta / RHE </a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher de pago</a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:crear_compra_id' t.id %}"> Registrar producto o servicio </a></li>
-                  </ul>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row pt-3">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header pb-0 ">
-        <div class="row align-middle align-items-center">
-          <div class="col-lg-6 col-md-3">
-            <h5 class="mb-0">Lista de POs</h5>
+                    <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
+                      aria-labelledby="dropdownMarketingCard" style="">
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:edit_requirement' t.id %}"> Cotizar con proveedores </a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:nueva_cotizacion_id' t.id %}"> Registrar cotización </a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Adjuntar Factura / Boleta / RHE </a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher de pago</a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Registrar producto o servicio </a></li>
+                    </ul>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      <div class="card-body pt-0 px-0 pb-2">
-        <div class="table-responsive p-0">
-          <table class="table table-flush mb-0 align-items-center" id="datatable-pedidos">
-            <thead class="thead-light">
-              <tr>
-                <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
-                </th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Contenedor</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">PO</th>
-                <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total
-                </th>
-                <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Seguimiento
-                </th>
-                <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in documentos.pedidos %}
-              <tr>
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
-                  </div>
-                </td>
+    </div>
+  </div>
 
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                      <h6 class="mb-0 text-sm">PO-{{t.id}} </h6>
+  <div class="row pt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header pb-0 ">
+          <div class="row align-middle align-items-center">
+            <div class="col-lg-6 col-md-3">
+              <h5 class="mb-0">Lista de POs</h5>
+            </div>
+          </div>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-pedidos">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
+                  </th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Contenedor</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">PO</th>
+                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
+                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total
+                  </th>
+                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Seguimiento
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in documentos.pedidos %}
+                <tr>
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <a href="{% url 'compras_app:detail_requirement' t.id %}">
+                        <h6 class="mb-0 text-sm">PO-{{t.id}} </h6>
+                      </a>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{t.idPetitioner.get_position_display }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-start">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-end">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm text-end">
+                    {% if t.lastArea == "10" %}
+                    {%if t.lastStatus == "2" %}
+                    <span class="badge badge-success">Jefe de área - aprobado</span>
+                    {% elif t.lastStatus == "3" %}
+                    <span class="badge badge-primary">Jefe de área - rechazado</span>
+                    {% else %}
+                    <span class="badge badge-secondary">Jefe de área - espera</span>
+                    {% endif %}
+
+                    {% elif t.lastArea == "4" %}
+                    {%if t.lastStatus == "2" %}
+                    <span class="badge badge-success">Gerencia</span>
+                    {% elif t.lastStatus == "3" %}
+                    <span class="badge badge-primary">Gerencia</span>
+                    {% else %}
+                    <span class="badge badge-secondary">Gerencia</span>
+                    {% endif %}
+
+                    {% elif t.lastArea == "1" %}
+                    {%if t.lastStatus == "2" %}
+                    <span class="badge badge-success">Compras</span>
+                    {% elif t.lastStatus == "3" %}
+                    <span class="badge badge-primary">Compras</span>
+                    {% else %}
+                    <span class="badge badge-secondary">Compras</span>
+                    {% endif %}
+
+                    {% elif t.lastArea == "3" %}
+                    <span class="badge badge-secondary">Compras</span>
+                    {% elif t.lastArea == "4" %}
+                    <span class="badge badge-secondary">Contabilidad</span>
+                    {% elif t.lastArea == "5" %}
+                    <span class="badge badge-secondary">Finanzas</span>
+                    {% endif %}
+
+                    {%if t.lastStatus == "1" %}
+                    <span class="badge badge-secondary">Recibido</span>
+                    {% elif t.lastStatus == "2" %}
+                    <span class="badge badge-success">Aprobado</span>
+                    {% elif t.lastStatus == "3" %}
+                    <span class="badge badge-secondary">Rechazado</span>
+                    {% elif t.lastStatus == "4" %}
+                    <span class="badge badge-warning">Observado</span>
+                    {% elif t.lastStatus == "5" %}
+                    <span class="badge badge-success">Completado</span>
+                    {% endif %}
+
+                  </td>
+
+                  <td>
+                    <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
+                      data-bs-placement="left" aria-expanded="false">
+                      <i class="fas fa-bars text-lg text-dark"></i>
                     </a>
-                  </div>
-                </td>
-
-                <td class="text-sm">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{t.idPetitioner.get_position_display }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-start">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-end">
-                  <div class="d-flex flex-column justify-content-center">
-                    <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
-                  </div>
-                </td>
-
-                <td class="text-sm text-end">
-                  {% if t.lastArea == "10" %}
-                  {%if t.lastStatus == "2" %}
-                  <span class="badge badge-success">Jefe de área - aprobado</span>
-                  {% elif t.lastStatus == "3" %}
-                  <span class="badge badge-primary">Jefe de área - rechazado</span>
-                  {% else %}
-                  <span class="badge badge-secondary">Jefe de área - espera</span>
-                  {% endif %}
-
-                  {% elif t.lastArea == "4" %}
-                  {%if t.lastStatus == "2" %}
-                  <span class="badge badge-success">Gerencia</span>
-                  {% elif t.lastStatus == "3" %}
-                  <span class="badge badge-primary">Gerencia</span>
-                  {% else %}
-                  <span class="badge badge-secondary">Gerencia</span>
-                  {% endif %}
-
-                  {% elif t.lastArea == "1" %}
-                  {%if t.lastStatus == "2" %}
-                  <span class="badge badge-success">Compras</span>
-                  {% elif t.lastStatus == "3" %}
-                  <span class="badge badge-primary">Compras</span>
-                  {% else %}
-                  <span class="badge badge-secondary">Compras</span>
-                  {% endif %}
-
-                  {% elif t.lastArea == "3" %}
-                  <span class="badge badge-secondary">Compras</span>
-                  {% elif t.lastArea == "4" %}
-                  <span class="badge badge-secondary">Contabilidad</span>
-                  {% elif t.lastArea == "5" %}
-                  <span class="badge badge-secondary">Finanzas</span>
-                  {% endif %}
-
-                  {%if t.lastStatus == "1" %}
-                  <span class="badge badge-secondary">Recibido</span>
-                  {% elif t.lastStatus == "2" %}
-                  <span class="badge badge-success">Aprobado</span>
-                  {% elif t.lastStatus == "3" %}
-                  <span class="badge badge-secondary">Rechazado</span>
-                  {% elif t.lastStatus == "4" %}
-                  <span class="badge badge-warning">Observado</span>
-                  {% elif t.lastStatus == "5" %}
-                  <span class="badge badge-success">Completado</span>
-                  {% endif %}
-
-                </td>
-
-                <td>
-                  <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
-                    data-bs-placement="left" aria-expanded="false">
-                    <i class="fas fa-bars text-lg text-dark"></i>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
-                    aria-labelledby="dropdownMarketingCard" style="">
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Cotizacion </a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:crear_compra_id' t.id %}"> Agregar Factura / Boleta / RHE </a></li>
-                    <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                        href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher </a></li>
-                  </ul>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                    <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
+                      aria-labelledby="dropdownMarketingCard" style="">
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Cotizacion </a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Agregar Factura / Boleta / RHE </a></li>
+                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
+                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher </a></li>
+                    </ul>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </div>
 
 {% endblock panel-content %}

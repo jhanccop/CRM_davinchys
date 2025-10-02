@@ -88,11 +88,12 @@ def create_initial_tracking(sender, instance, created, **kwargs):
     """
     Crea un registro de tracking inicial cuando se crea un nuevo requerimiento
     """
+
     if created:
         RequestTracking.objects.create(
             idRequirement=instance,
             status=RequestTracking.RECIBIDO,  # Estado inicial 'Creado'
-            area=RequestTracking.AREAMANAGER  # Área inicial 'Usuario'
+            area = instance.idPetitioner.position  # Área inicial 'Usuario'
         )
 
 

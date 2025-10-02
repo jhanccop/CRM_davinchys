@@ -322,7 +322,7 @@ class FinancialDocumentsListView(FinanzasMixin,ListView):
     return payload
 
 class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
-  template_name = "FINANCIERA/documentos/documento-financiero-nuevo.html"
+  template_name = "FINANCIERA/documentos/documento-financiero-form.html"
   model = FinancialDocuments
   form_class = FinancialDocumentsForm
   success_url = reverse_lazy('documentos_app:documento-financiero-lista')
@@ -493,7 +493,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
 
             fields['expenseFlag'] = True
 
-            print("factura_json", factura_json)
+            #print("factura_json", factura_json)
             
             # Verificar si existe ruc receptor para evitar facturas de otras empresas
             if client_recept:
@@ -506,7 +506,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                 elif idTinE and idTinE.id == self.request.user.company.id:
                     fields['idTin'] = idTinE.id
 
-                    print("change")
+                    #print("change")
 
                     temp = supplier_id
                     supplier_id = client_recept
@@ -523,7 +523,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
 
             # filtro, por id y por ruc para detectar duplicados
             if fields['expenseFlag']:
-                print("EGRESO",fields)
+                #print("EGRESO",fields)
                 if supplier_id:
                     supplierO = supplier.objects.filter(numberIdSupplier=supplier_id).first()
 
@@ -540,9 +540,9 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
                         f'¡No se encuentra al proveedor con RUC: {supplier_id}'
                         )
             else:
-                print("INGRESO",fields)
+                #print("INGRESO",fields)
 
-                print(supplier_id)
+                #print(supplier_id)
                 if supplier_id:
                     supplierO = client.objects.filter(numberIdClient=supplier_id).first()
 
@@ -640,7 +640,7 @@ class FinancialDocumentsCreateView(FinanzasMixin,CreateView):
       return super().form_valid(form)
   
 class FinancialDocumentsEditView(FinanzasMixin,UpdateView):
-  template_name = "FINANCIERA/documentos/documento-financiero-editar.html"
+  template_name = "FINANCIERA/documentos/documento-financiero-form.html"
   model = FinancialDocuments
   form_class = FinancialDocumentsForm
   success_url = reverse_lazy('documentos_app:documento-financiero-lista')
@@ -679,7 +679,7 @@ class OthersDocumentsListView(FinanzasMixin,ListView):
 
     documentation = OthersDocuments.objects.ListaDocumentosPorTipo(
       intervalo = intervalDate,
-      tipo = int(selectedType),
+      tipoD = int(selectedType),
       compania_id = compania_id
       )
   
@@ -691,13 +691,13 @@ class OthersDocumentsListView(FinanzasMixin,ListView):
     return payload
 
 class OthersDocumentsCreateView(FinanzasMixin,CreateView):
-  template_name = "FINANCIERA/documentos/documento-generico-nuevo.html"
+  template_name = "FINANCIERA/documentos/documento-generico-form.html"
   model = OthersDocuments
   form_class = OthersDocumentsForm
   success_url = reverse_lazy('documentos_app:documento-generico-lista')
   
 class OthersDocumentsEditView(FinanzasMixin,UpdateView):
-  template_name = "FINANCIERA/documentos/documento-generico-editar.html"
+  template_name = "FINANCIERA/documentos/documento-generico-form.html"
   model = OthersDocuments
   form_class = OthersDocumentsForm
   success_url = reverse_lazy('documentos_app:documento-generico-lista')
