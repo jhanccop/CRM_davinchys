@@ -347,7 +347,7 @@ class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
         if RegistroAsistencia.objects.filter(
             empleado=empleado, 
             fecha=hoy, 
-            jornada='0'
+            jornada_diaria='0'
         ).exists():
             messages.warning(self.request, 'Ya tienes un registro de asistencia para hoy')
             return redirect('rrhh_app:bienvenida')
@@ -358,7 +358,7 @@ class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
         registro.fecha = hoy
         registro.hora_inicio = timezone.now().replace(hour=9, minute=00, second=0).time()  # Hora actual
         registro.hora_final = timezone.now().replace(hour=18, minute=00, second=0).time()  # 18:00
-        registro.jornada = '0'  # Jornada regular
+        registro.jornada_diaria = '0'  # Jornada regular
         registro.estado = '0'  # Pendiente
         
         registro.save()
