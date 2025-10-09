@@ -12,8 +12,11 @@ from .managers import (
     RegistroAsistenciaManager,
     EmpleadoManager,
     DocumentoManager,
-    PermisoManager
+    PermisoManager,
+    LocalManager
 )
+
+from applications.cuentas.models import Tin
 
 class Departamento(TimeStampedModel):
     nombre = models.CharField(max_length=100)
@@ -96,19 +99,17 @@ class Feriados(TimeStampedModel):
     def __str__(self):
         return f"{self.fecha} - {self.Nombre}"
 
+class Local(TimeStampedModel):
+    nombreLocal = models.CharField('Nombre Local', max_length=20)
+    idCompany = models.ForeignKey(Tin, on_delete=models.CASCADE)
+    descripcion = models.CharField('Descripción', max_length=50, blank=True, null=True)
+
+    objects = LocalManager() 
+
+    def __str__(self):
+        return f"{self.nombreLocal} - {self.idCompany}"
+
 class RegistroAsistencia(TimeStampedModel):
-    LOCAL1 = "0"
-    LOCAL2 = "1"
-    LOCAL3 = "2"
-    REMOTO = "3"
-    OTROLOCAL = "4"
-    TIPO_LOCAL = [
-        (LOCAL1, 'Shell'),
-        (LOCAL2, 'Colon'),
-        (LOCAL3, 'Planta'),
-        (REMOTO, 'Remoto'),
-        (OTROLOCAL, 'Otro'),
-    ]
 
     PENDIENTE = "0"
     APROBADO = "1"
@@ -121,28 +122,49 @@ class RegistroAsistencia(TimeStampedModel):
         (PROCESADO, 'Procesado'),
     ]
 
+    # JORNADA HORARIA (según hora del día)
     REGULAR = "0"
     HEXTRA1 = "1"
     HEXTRA2 = "2"
-    FERIADO = "3"
-    REFRIGERIO = "4"
-    OTRAJORNADA = "5"
-    TIPO_JORNADA = [
+    TIPO_JORNADA_HORARIA = [
         (REGULAR, 'Reg 9:00 - 18:00'),
-        (HEXTRA1, 'HE1 18:01 - 21:59'),
-        (HEXTRA2, 'HE2 22:00 - 05:59'),
+        (HEXTRA1, 'HE1 18:01 - 21:00'),
+        (HEXTRA2, 'HE2 21:01 - 23:59 y 00:00 - 06:00'),
+    ]
+
+    # JORNADA DIARIA (según tipo de día)
+    LABORABLE = "0"
+    FERIADO = "1"
+    FINDESEMANA = "2"
+    TIPO_JORNADA_DIARIA = [
+        (LABORABLE, 'Día Laborable'),
         (FERIADO, 'Feriado'),
-        (REFRIGERIO, 'Refrigerio'),
-        (OTRAJORNADA, 'Otro'),
+        (FINDESEMANA, 'Fin de semana'),
     ]
 
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
     fecha = models.DateField('Fecha')
     hora_inicio = models.TimeField('Hora inicio', null=True, blank=True)
     hora_final = models.TimeField('Hora final', null=True, blank=True)
-    ubicacion = models.CharField('Local', max_length=1, choices=TIPO_LOCAL)
-    jornada = models.CharField('Jornada', max_length=1, choices=TIPO_JORNADA,
-                               default=REGULAR, blank=True)
+    idLocal = models.ForeignKey(Local, on_delete=models.CASCADE, null=True, blank=True)
+    ubicacion = models.CharField('Local', max_length=1, null=True, blank=True)
+    
+    # Campos separados para jornada horaria y diaria
+    jornada_horaria = models.CharField(
+        'Tipo de Jornada Horaria', 
+        max_length=1, 
+        choices=TIPO_JORNADA_HORARIA,
+        default=REGULAR, 
+        blank=True
+    )
+    jornada_diaria = models.CharField(
+        'Tipo de Jornada Diaria', 
+        max_length=1, 
+        choices=TIPO_JORNADA_DIARIA,
+        default=LABORABLE, 
+        blank=True
+    )
+    
     observaciones = models.TextField('Observaciones', blank=True)
 
     # Campos calculados
@@ -156,38 +178,111 @@ class RegistroAsistencia(TimeStampedModel):
                                      null=True, blank=True,
                                      related_name="asistencia_aprobacion")
 
-    objects = RegistroAsistenciaManager()  # o tu RegistroAsistenciaManager si lo tienes
+    objects = RegistroAsistenciaManager() 
 
     class Meta:
         indexes = [
             models.Index(fields=['empleado', 'fecha']),
-            models.Index(fields=['fecha', 'jornada']),
+            models.Index(fields=['fecha', 'jornada_horaria']),
+            models.Index(fields=['fecha', 'jornada_diaria']),
         ]
-        unique_together = ['empleado', 'fecha', 'hora_inicio', 'jornada']
+        unique_together = ['empleado', 'fecha', 'hora_inicio', 'jornada_horaria']
         ordering = ['-fecha', '-hora_inicio']
         verbose_name = 'Asistencia'
         verbose_name_plural = "Registro de asistencia"
 
-    def clean(self):
-        if self.hora_inicio and self.hora_final:
-            if self.hora_final <= self.hora_inicio:
-                raise ValidationError('Hora final debe ser mayor que hora inicio')
+    def es_fin_de_semana(self):
+        """Determina si la fecha es fin de semana (sábado o domingo)"""
+        return self.fecha.weekday() in [5, 6]  # 5 = sábado, 6 = domingo
 
-    def determinar_jornada_por_hora(self, hora_time):
+    def es_feriado(self):
+        """Determina si la fecha es feriado consultando el modelo Feriados"""
+        try:
+            from .models import Feriados
+            return Feriados.objects.filter(fecha=self.fecha).exists()
+        except:
+            return False
+
+    def determinar_jornada_horaria(self, hora_time):
         """
-        Determina el tipo de jornada según la hora proporcionada
+        Determina la jornada horaria según la hora proporcionada:
+        - REGULAR: 09:00 - 18:00
+        - HEXTRA1: 18:01 - 21:00
+        - HEXTRA2: 21:01 - 23:59 y 00:00 - 06:00
         """
         hora = hora_time.hour
-        if 18 <= hora <= 21:
+        minuto = hora_time.minute
+        
+        # Convertir a minutos desde medianoche para comparación precisa
+        tiempo_minutos = hora * 60 + minuto
+        
+        # Definir rangos en minutos
+        inicio_regular = 9 * 60  # 09:00 = 540 minutos
+        fin_regular = 18 * 60    # 18:00 = 1080 minutos
+        fin_hextra1 = 21 * 60    # 21:00 = 1260 minutos
+        fin_hextra2_noche = 6 * 60  # 06:00 = 360 minutos
+        
+        # Jornada regular: 09:00 - 18:00
+        if inicio_regular <= tiempo_minutos <= fin_regular:
+            return self.REGULAR
+        
+        # Horas extra tipo 1: 18:01 - 21:00
+        elif fin_regular < tiempo_minutos <= fin_hextra1:
             return self.HEXTRA1
-        elif hora >= 22 or hora <= 6:
+        
+        # Horas extra tipo 2: 21:01 - 23:59 y 00:00 - 06:00
+        elif tiempo_minutos > fin_hextra1 or tiempo_minutos <= fin_hextra2_noche:
             return self.HEXTRA2
+        
+        # Período no cubierto: 06:01 - 08:59 (antes del inicio de jornada regular)
         else:
             return self.REGULAR
 
+    def determinar_jornada_diaria(self):
+        """
+        Determina la jornada diaria según el tipo de día:
+        - FERIADO: prioridad máxima
+        - FINDESEMANA: si es sábado o domingo
+        - LABORABLE: por defecto
+        """
+        if self.es_feriado():
+            return self.FERIADO
+        elif self.es_fin_de_semana():
+            return self.FINDESEMANA
+        else:
+            return self.LABORABLE
+
+    def determinar_jornadas_completas(self):
+        """
+        Determina ambas jornadas automáticamente
+        """
+        jornada_horaria = self.REGULAR
+        jornada_diaria = self.determinar_jornada_diaria()
+        
+        # Determinar jornada horaria solo si hay hora de inicio
+        if self.hora_inicio:
+            jornada_horaria = self.determinar_jornada_horaria(self.hora_inicio)
+        
+        return jornada_horaria, jornada_diaria
+
+    def get_jornada_completa_display(self):
+        """Retorna el display completo de ambas jornadas"""
+        display_horaria = dict(self.TIPO_JORNADA_HORARIA).get(self.jornada_horaria, '')
+        display_diaria = dict(self.TIPO_JORNADA_DIARIA).get(self.jornada_diaria, '')
+        
+        return f"{display_horaria} - {display_diaria}"
+
+    def necesita_aprobacion(self):
+        """
+        Determina si el registro requiere aprobación:
+        - LABORABLE + REGULAR: No requiere aprobación
+        - Cualquier otra combinación: Requiere aprobación
+        """
+        return not (self.jornada_diaria == self.LABORABLE and self.jornada_horaria == self.REGULAR)
+
     def calcular_horas_laboradas(self):
         """
-        Calcula las horas laboradas considerando los diferentes rangos de jornada
+        Calcula las horas laboradas
         """
         if not self.hora_inicio or not self.hora_final:
             return 0.0
@@ -199,29 +294,66 @@ class RegistroAsistencia(TimeStampedModel):
         if self.hora_final <= self.hora_inicio:
             fin_dt += timedelta(days=1)
 
-        # Determinar jornada
-        jornada_inicio = self.determinar_jornada_por_hora(self.hora_inicio)
-        jornada_fin = self.determinar_jornada_por_hora(self.hora_final)
-
-        if jornada_inicio == self.HEXTRA2 or jornada_fin == self.HEXTRA2:
-            self.jornada = self.HEXTRA2
-        elif jornada_inicio == self.HEXTRA1 or jornada_fin == self.HEXTRA1:
-            self.jornada = self.HEXTRA1
-        else:
-            self.jornada = self.REGULAR
+        # Determinar ambas jornadas automáticamente
+        self.jornada_horaria, self.jornada_diaria = self.determinar_jornadas_completas()
 
         diferencia = fin_dt - inicio_dt
         horas_totales = diferencia.total_seconds() / 3600
         return round(horas_totales, 2)
 
+    def clean(self):
+        if self.hora_inicio and self.hora_final:
+            if self.hora_final <= self.hora_inicio:
+                raise ValidationError('Hora final debe ser mayor que hora inicio')
+
     def save(self, *args, **kwargs):
         self.full_clean()
+        
+        # Determinar las jornadas automáticamente antes de guardar
+        if self.fecha:
+            self.jornada_horaria, self.jornada_diaria = self.determinar_jornadas_completas()
+            
+            # Gestionar estado según necesidad de aprobación
+            if not self.necesita_aprobacion():
+                self.estado = self.PROCESADO
+                self.aprobado_por = None
+            elif self.necesita_aprobacion() and self.estado == self.PROCESADO:
+                # Si requiere aprobación pero está como procesado, cambiar a pendiente
+                self.estado = self.PENDIENTE
+        
         if self.hora_inicio and self.hora_final:
             self.horas = self.calcular_horas_laboradas()
+            
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.empleado} - {self.fecha} ({self.get_jornada_display()})"
+        return f"{self.empleado} - {self.fecha} ({self.get_jornada_completa_display()})"
+
+    # Métodos utilitarios para facilitar el filtrado
+    @property
+    def es_jornada_especial(self):
+        """Indica si es una jornada que requiere aprobación especial"""
+        return self.necesita_aprobacion()
+
+    @property
+    def es_horario_regular(self):
+        """Indica si es horario regular"""
+        return self.jornada_horaria == self.REGULAR
+
+    @property
+    def es_dia_laborable(self):
+        """Indica si es día laborable normal"""
+        return self.jornada_diaria == self.LABORABLE
+
+    @property
+    def es_dia_especial(self):
+        """Indica si es feriado o fin de semana"""
+        return self.jornada_diaria in [self.FERIADO, self.FINDESEMANA]
+
+    @property
+    def es_horario_extra(self):
+        """Indica si es horario extra (HEXTRA1 o HEXTRA2)"""
+        return self.jornada_horaria in [self.HEXTRA1, self.HEXTRA2]
 
 class ActividadDiaria(TimeStampedModel):
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)

@@ -20,9 +20,9 @@
                             </h5>
                             <p class="mb-0">Tipos de jornada</p>
                             <ul>
-                                <li>Jornada regular de 8:00 - 18:00</li>
-                                <li>Horas extra 1 (HE1) de 18:00 - 21:59</li>
-                                <li>Horas extra 2 (HE1) de 22:00 - 05:59</li>
+                                <li>Jornada regular de 9:00 a 18:00</li>
+                                <li>Horas extra 1 (HE1) de 18:01 a 22:00</li>
+                                <li>Horas extra 2 (HE2) de 22:00 a 00:00 ó 00:00 a 06:00</li>
                             </ul>
                         </div>
                         <div class="col-md-6 text-end">
@@ -74,8 +74,8 @@
                             </div>
                             <div class="col-md-3 mt-0 pt-0">
                                 <div class="input-group input-group-outline my-3 is-focused {% if form.ubicacion.field.required %}is-filled{% endif %}">
-                                    <label class="form-label">{{ form.ubicacion.label }}</label>
-                                    {{ form.ubicacion }}
+                                    <label class="form-label">{{ form.idLocal.label }}</label>
+                                    {{ form.idLocal }}
                                 </div>
                             </div>
                         </div>
@@ -95,7 +95,7 @@
                                     <i class="fas fa-save me-2"></i>
                                     {% if object %}Actualizar{% else %}Registrar{% endif %} Asistencia
                                 </button>
-                                <a href="{% url 'rrhh_app:asistencia-list' %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'rrhh_app:asistencia-user-list' %}" class="btn btn-outline-secondary">
                                     Cancelar
                                 </a>
                             </div>

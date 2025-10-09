@@ -1,0 +1,336 @@
+<!-- templates/RRHH/asistencia/registro_multiple.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Mi espacio{% endblock %}
+{% block navbar_appName %}Mis asistencias{% endblock %}
+{% block navbar_Type %}Registrar Horas Extra{% endblock %}
+
+{% block panel-content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Registro Multiple de Asistencia
+                    </h4>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnAgregarFila">
+                        <i class="fas fa-plus me-1"></i>Agregar Fila
+                    </button>
+                </div>
+                <div class="card-body pt-0">
+                    {% if empleado %}
+                    <div class="alert alert-info mb-4 text-white">
+                        <strong>Nombre:</strong> {{ empleado|default:"-" }}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" id="registroForm">
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="tablaRegistros">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="12%">Fecha</th>
+                                        <th width="12%">Hora Inicio</th>
+                                        <th width="12%">Hora Final</th>
+                                        <th width="12%">Local</th>
+                                        <th width="20%">Observaciones</th>
+                                        <th width="16%">Jornada Horaria</th>
+                                        <th width="16%">Jornada Diaria</th>
+                                        <th width="5%">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="formset-body">
+                                    {% for form in formset %}
+                                    <tr class="registro-fila">
+                                        <td>{{ form.fecha }}</td>
+                                        <td>{{ form.hora_inicio }}</td>
+                                        <td>{{ form.hora_final }}</td>
+                                        <td>{{ form.idLocal }}</td>
+                                        <td>{{ form.observaciones }}</td>
+                                        <td>
+                                            <span class="jornada-horaria-display badge bg-secondary" data-jornada="0">-</span>
+                                        </td>
+                                        <td>
+                                            <span class="jornada-diaria-display badge bg-secondary" data-jornada="0">-</span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm btn-eliminar" {% if forloop.first and formset.total_form_count == 1 %}style="display: none;"{% endif %}>
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% if form.errors %}
+                                    <tr class="error-row">
+                                        <td colspan="8">
+                                            <div class="alert alert-danger py-2">
+                                                {% for field in form %}
+                                                    {% if field.errors %}
+                                                        <strong>{{ field.label }}:</strong>
+                                                        {{ field.errors|striptags }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="mb-0">Tipos de jornada</p>
+                        <ul>
+                            <li>Jornada regular de 9:00 a 18:00</li>
+                            <li>Horas extra 1 (HE1) de 18:01 a 22:00</li>
+                            <li>Horas extra 2 (HE2) de 22:00 a 00:00 ó 00:00 a 06:00</li>
+                        </ul>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn bg-gradient-success">
+                                <i class="fas fa-save me-2"></i>Guardar Registros
+                            </button>
+                            <a href="{% url 'rrhh_app:asistencia-user-list' %}" class="btn bg-gradient-dark">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template para nuevas filas -->
+<template id="fila-template">
+    <tr class="registro-fila">
+        <td><input type="date" name="registros-__prefix__-fecha" class="form-control fecha-input" required onchange="actualizarJornadas(this)"></td>
+        <td><input type="time" name="registros-__prefix__-hora_inicio" class="form-control hora-inicio" onchange="actualizarJornadas(this)"></td>
+        <td><input type="time" name="registros-__prefix__-hora_final" class="form-control hora-final"></td>
+        <td>
+            <select name="registros-__prefix__-idLocal" class="form-control" required>
+                {% for choice in formset.empty_form.idLocal.field.choices %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><textarea name="registros-__prefix__-observaciones" class="form-control" rows="2" placeholder="Observaciones"></textarea></td>
+        <td>
+            <span class="jornada-horaria-display badge bg-gradient-secondary" data-jornada="0">-</span>
+        </td>
+        <td>
+            <span class="jornada-diaria-display badge bg-gradient-secondary" data-jornada="0">-</span>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm btn-eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+// Datos de feriados desde Django (pasar desde la vista)
+const feriados = {{ feriados|safe }};
+const feriadosDates = feriados; // Ya vienen como strings 'YYYY-MM-DD'
+
+// Función para determinar jornada horaria según hora
+function determinarJornadaHoraria(horaStr) {
+    if (!horaStr) return { tipo: 'No definida', codigo: '0', clase: 'bg-gradient-secondary' };
+    
+    const [horas, minutos] = horaStr.split(':').map(Number);
+    const tiempoMinutos = horas * 60 + minutos;
+    
+    // Definir rangos según el modelo Django
+    const INICIO_REGULAR = 9 * 60;    // 09:00 = 540 minutos
+    const FIN_REGULAR = 18 * 60;      // 18:00 = 1080 minutos
+    const FIN_HEXTRA1 = 21 * 60;      // 21:00 = 1260 minutos
+    const FIN_HEXTRA2_NOCHE = 6 * 60; // 06:00 = 360 minutos
+    
+    if (INICIO_REGULAR <= tiempoMinutos && tiempoMinutos <= FIN_REGULAR) {
+        return { tipo: 'Regular', codigo: '0', clase: 'bg-gradient-success' };
+    } else if (FIN_REGULAR < tiempoMinutos && tiempoMinutos <= FIN_HEXTRA1) {
+        return { tipo: 'Extra 1', codigo: '1', clase: 'bg-gradient-warning' };
+    } else if (tiempoMinutos > FIN_HEXTRA1 || tiempoMinutos <= FIN_HEXTRA2_NOCHE) {
+        return { tipo: 'Extra 2/Noche', codigo: '2', clase: 'bg-gradient-danger' };
+    } else {
+        return { tipo: 'Especial', codigo: '0', clase: 'bg-info' };
+    }
+}
+
+// Función para determinar jornada diaria según fecha
+function determinarJornadaDiaria(fechaStr) {
+    if (!fechaStr) return { tipo: 'No definida', codigo: '0', clase: 'bg-gradient-secondary' };
+    
+    const fecha = new Date(fechaStr);
+    const diaSemana = fecha.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+    
+    // Verificar si es feriado
+    if (feriadosDates.includes(fechaStr)) {
+        return { tipo: 'Feriado', codigo: '1', clase: 'bg-danger' };
+    }
+    
+    // Verificar si es fin de semana
+    if (diaSemana === 5 || diaSemana === 6) { // 0=domingo, 6=sábado
+        return { tipo: 'Fin de semana', codigo: '2', clase: 'bg-warning' };
+    }
+    
+    // Por defecto, día laborable
+    return { tipo: 'Laborable', codigo: '0', clase: 'bg-success' };
+}
+
+// Función para actualizar ambas jornadas
+function actualizarJornadas(elemento) {
+    const fila = elemento.closest('.registro-fila');
+    if (!fila) return;
+    
+    const fechaInput = fila.querySelector('.fecha-input');
+    const horaInicioInput = fila.querySelector('.hora-inicio');
+    const jornadaHorariaDisplay = fila.querySelector('.jornada-horaria-display');
+    const jornadaDiariaDisplay = fila.querySelector('.jornada-diaria-display');
+    
+    // Actualizar jornada diaria (solo con fecha)
+    if (fechaInput && jornadaDiariaDisplay) {
+        const jornadaDiaria = determinarJornadaDiaria(fechaInput.value);
+        jornadaDiariaDisplay.textContent = jornadaDiaria.tipo;
+        jornadaDiariaDisplay.className = `jornada-diaria-display badge ${jornadaDiaria.clase}`;
+        jornadaDiariaDisplay.setAttribute('data-jornada', jornadaDiaria.codigo);
+    }
+    
+    // Actualizar jornada horaria (con hora de inicio)
+    if (horaInicioInput && jornadaHorariaDisplay) {
+        const jornadaHoraria = determinarJornadaHoraria(horaInicioInput.value);
+        jornadaHorariaDisplay.textContent = jornadaHoraria.tipo;
+        jornadaHorariaDisplay.className = `jornada-horaria-display badge ${jornadaHoraria.clase}`;
+        jornadaHorariaDisplay.setAttribute('data-jornada', jornadaHoraria.codigo);
+    }
+    
+    // Verificar si requiere aprobación
+    verificarAprobacion(fila);
+}
+
+// Función para verificar si requiere aprobación
+function verificarAprobacion(fila) {
+    const jornadaHorariaDisplay = fila.querySelector('.jornada-horaria-display');
+    const jornadaDiariaDisplay = fila.querySelector('.jornada-diaria-display');
+    
+    if (jornadaHorariaDisplay && jornadaDiariaDisplay) {
+        const esHorarioRegular = jornadaHorariaDisplay.getAttribute('data-jornada') === '0';
+        const esDiaLaborable = jornadaDiariaDisplay.getAttribute('data-jornada') === '0';
+        
+        // Según el modelo: LABORABLE + REGULAR = No requiere aprobación
+        const requiereAprobacion = !(esDiaLaborable && esHorarioRegular);
+        
+        // Resaltar fila si requiere aprobación
+        if (requiereAprobacion) {
+            fila.classList.add('table-warning');
+            fila.title = 'Requiere aprobación';
+        } else {
+            fila.classList.remove('table-warning');
+            fila.title = 'No requiere aprobación - Procesado automáticamente';
+        }
+    }
+}
+
+// Configurar eventos para una fila
+function configurarEventosFila(fila) {
+    const fechaInput = fila.querySelector('.fecha-input');
+    const horaInicioInput = fila.querySelector('.hora-inicio');
+    
+    if (fechaInput) {
+        fechaInput.addEventListener('change', function() {
+            actualizarJornadas(this);
+        });
+    }
+    
+    if (horaInicioInput) {
+        horaInicioInput.addEventListener('change', function() {
+            actualizarJornadas(this);
+        });
+    }
+    
+    // Actualizar al cargar la página
+    actualizarJornadas(fila);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const formsetBody = document.getElementById('formset-body');
+    const managementForm = document.getElementById('id_registros-TOTAL_FORMS');
+    const btnAgregarFila = document.getElementById('btnAgregarFila');
+    const filaTemplate = document.getElementById('fila-template');
+    let totalForms = parseInt(managementForm.value);
+
+    // Agregar nueva fila
+    btnAgregarFila.addEventListener('click', function() {
+        const newFilaHtml = filaTemplate.innerHTML.replace(/__prefix__/g, totalForms);
+        const newFila = document.createElement('tr');
+        newFila.className = 'registro-fila';
+        newFila.innerHTML = newFilaHtml;
+        
+        formsetBody.appendChild(newFila);
+        configurarEventosFila(newFila);
+        
+        // Actualizar contador
+        totalForms++;
+        managementForm.value = totalForms;
+        
+        // Mostrar todos los botones de eliminar
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.style.display = 'inline-block';
+        });
+    });
+
+    // Eliminar fila
+    formsetBody.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-eliminar')) {
+            const fila = e.target.closest('.registro-fila');
+            const totalFilas = document.querySelectorAll('.registro-fila').length;
+            
+            if (totalFilas > 1) {
+                fila.remove();
+                totalForms--;
+                managementForm.value = totalForms;
+                
+                // Ocultar botón eliminar si solo queda una fila
+                if (totalForms === 1) {
+                    document.querySelector('.btn-eliminar').style.display = 'none';
+                }
+            }
+        }
+    });
+
+    // Configurar eventos para filas existentes al cargar la página
+    document.querySelectorAll('.registro-fila').forEach(configurarEventosFila);
+});
+</script>
+
+<style>
+.jornada-horaria-display,
+.jornada-diaria-display {
+    font-size: 0.8em;
+    padding: 0.3em 0.5em;
+    display: block;
+    text-align: center;
+    margin-bottom: 2px;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.registro-fila:hover {
+    background-color: #f8f9fa;
+}
+</style>
+
+{% endblock JSscripts %}

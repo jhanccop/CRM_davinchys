@@ -129,6 +129,9 @@
                             <a href="{% url 'rrhh_app:asistencia-user-create' %}" class="btn btn-sm bg-gradient-dark">
                                 <i class="fas fa-plus me-1"></i>Nuevo
                             </a>
+                            <a href="{% url 'rrhh_app:asistencia-user-multiple-create' %}" class="btn btn-sm bg-gradient-dark">
+                                <i class="fas fa-plus me-1"></i> LISTA HE
+                            </a>
                             <button class="btn btn-sm bg-gradient-secondary export" data-type="csv">
                                 <i class="fas fa-download me-1"></i>Exportar
                             </button>
@@ -158,7 +161,9 @@
                                     <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
                                         Horas</th>
                                     <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
-                                        Jornada</th>
+                                        J. horaria</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
+                                        J. diaria</th>
                                     <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
                                         Ubicación</th>
                                     <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">
@@ -194,20 +199,33 @@
                                         </span>
                                     </td>
                                     <td class="text-sm">
-                                        {% if registro.jornada == "0" %}
-                                        <span class="badge bg-gradient-info">{{ registro.get_jornada_display }}</span>
-                                        {% elif registro.jornada == "1" %}
-                                        <span class="badge bg-gradient-dark">{{ registro.get_jornada_display }}</span>
+                                        {% if registro.jornada_horaria == "0" %}
+                                        <span class="badge bg-gradient-info">{{ registro.get_jornada_horaria_display }}</span>
+                                        {% elif registro.jornada_horaria == "1" %}
+                                        <span class="badge bg-gradient-dark">{{ registro.get_jornada_horaria_display }}</span>
                                         {% elif registro.jornada == "2" %}
-                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_display }}</span>
+                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_horaria_display }}</span>
                                         {% elif registro.jornada == "3" %}
-                                        <span class="badge bg-gradient-primary">{{ registro.get_jornada_display }}</span>
+                                        <span class="badge bg-gradient-primary">{{ registro.get_jornada_horaria_display }}</span>
                                         {% else %}
-                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_display }}</span>
+                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_horaria_display }}</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-sm">
-                                        {{registro.get_ubicacion_display}}
+                                        {% if registro.jornada_diaria == "0" %}
+                                        <span class="badge bg-gradient-info">{{ registro.get_jornada_diaria_display }}</span>
+                                        {% elif registro.jornada == "1" %}
+                                        <span class="badge bg-gradient-dark">{{ registro.get_jornada_diaria_display }}</span>
+                                        {% elif registro.jornada == "2" %}
+                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_diaria_display }}</span>
+                                        {% elif registro.jornada == "3" %}
+                                        <span class="badge bg-gradient-primary">{{ registro.get_jornada_diaria_display }}</span>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary">{{ registro.get_jornada_diaria_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-sm">
+                                        {{registro.idLocal.nombreLocal}}
                                     </td>
                                     <td class="text-sm">
                                         {% if registro.estado == "0" %}
@@ -217,7 +235,6 @@
                                         {% elif registro.estado == "2" %}
                                         <span class="badge bg-gradient-danger">{{ registro.get_estado_display }}</span>
                                         {% else %}
-                                        <span class="badge bg-gradient-info">{{ registro.get_estado_display }}</span>
                                         {% endif %}
                                         {% if registro.aprobado_por %}
                                         <br>

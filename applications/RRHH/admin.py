@@ -23,6 +23,23 @@ class EmpleadoResource(ImportExportModelAdmin):
     search_fields = ('nombre',)
     list_filter = ('nombre',)
 
+## ==================== Local =====================
+class LocalResource(resources.ModelResource):
+    class Meta:
+        model = Local
+        import_id_fields = ['id']
+
+@admin.register(Local)
+class LocalResource(ImportExportModelAdmin):
+    resource_class = LocalResource
+    list_display = (
+        'id',
+        'nombreLocal',
+        'idCompany',
+        'descripcion',
+    )
+    search_fields = ('idCompany',)
+    list_filter = ('idCompany',)
 
 ## ==================== Empleado =====================
 class EmpleadoResource(resources.ModelResource):
@@ -80,13 +97,14 @@ class RegistroAsistenciaAdmin(ImportExportModelAdmin):
         'fecha',
         'hora_inicio',
         'hora_final',
-        'ubicacion',
-        'jornada',
+        'idLocal',
+        'jornada_horaria',
+        'jornada_diaria',
         'horas',
         'estado'
     )
-    search_fields = ('empleado__user__username', 'ubicacion')
-    list_filter = ('jornada', 'fecha', 'empleado__departamento')
+    search_fields = ('empleado__user__username',)
+    list_filter = ('jornada_horaria', 'fecha', 'empleado__departamento')
     date_hierarchy = 'fecha'
 
 ## ==================== DIAS FERIADOS =====================

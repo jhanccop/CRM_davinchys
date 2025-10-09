@@ -55,15 +55,11 @@
                                 <span class="text-muted">{{ user.empleado.fecha_contratacion|date:"d/m/Y"|default:"-" }}</span>
                             </div>
                             <div class="d-flex justify-content-between border-bottom py-2">
-                                <span class="text-dark">Salario Base:</span>
-                                <span class="text-muted">{{ user.empleado.salario_base|default:"-" }} {{ user.empleado.get_moneda_display }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-flex justify-content-between border-bottom py-2">
                                 <span class="text-dark">Tipo de Contrato:</span>
                                 <span class="text-muted">{{ user.empleado.get_tipo_contrato_display|default:"-" }}</span>
                             </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="d-flex justify-content-between border-bottom py-2">
                                 <span class="text-dark">Estado:</span>
                                 <span class="badge {% if user.empleado.activo %}bg-gradient-success{% else %}bg-gradient-danger{% endif %}">
@@ -164,7 +160,7 @@
                             {% if registro_hoy %}
                             <i class="fas fa-check text-lg text-success"></i> Registrada Hoy
                             {% else %}
-                            <i class="fas fa-fingerprint text-lg text-white"></i> Registrar Asistencia
+                            <i class="fas fa-fingerprint text-lg text-white"></i> Reg. Asistencia hoy
                             {% endif %}
                         </button>
 
@@ -182,7 +178,7 @@
                             {% if horas_extra1_registradas %}
                             <i class="fas fa-check text-lg text-success"></i> HE1 Registradas Hoy
                             {% else %}
-                            <i class="far fa-clock"></i> HE1 (18:01-21:59)
+                            <i class="far fa-clock"></i> HE1 hoy (18:01-22:00)
                             {% endif %}
                         </button>
 
@@ -200,7 +196,7 @@
                             {% if horas_extra2_registradas %}
                             <i class="fas fa-check text-lg text-success"></i> HE2 Registradas Hoy
                             {% else %}
-                            <i class="far fa-clock"></i> HE2 (22:00-05:59)
+                            <i class="far fa-clock"></i> HE2 hoy (22:01-23:59)
                             {% endif %}
                         </button>
 
@@ -303,7 +299,6 @@
         </div>
     </div>
 
-
 </div>
 
 <!-- Modal Registro Rápido -->
@@ -321,13 +316,13 @@
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
                             <label class="form-label">Hora de Inicio:</label>
-                            <input type="time" class="form-control" value="08:25" readonly>
+                            <input type="time" class="form-control" value="09:00" readonly>
                         </div>
                         </div>
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
                                 <label class="form-label">Hora de Salida:</label>
-                                <input type="time" class="form-control" value="17:59" readonly>
+                                <input type="time" class="form-control" value="18:00" readonly>
                             </div>
                         </div>
                     </div>
@@ -335,13 +330,11 @@
                     <div class="mb-3">
                         <div class="input-group input-group-outline is-focused">
                             <label class="form-label">Ubicación:</label>
-                            <select name="ubicacion" class="form-control" required>
+                            <select name="idLocal" class="form-control" required>
                                 <option value="">Seleccionar ubicación</option>
-                                <option value="0">Shell</option>
-                                <option value="1">Colon</option>
-                                <option value="2">Planta</option>
-                                <option value="3">Remoto</option>
-                                <option value="4">Otro</option>
+                                {% for local in locales %}
+                                <option value="{{local.id}}">{{local.nombreLocal}}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -367,7 +360,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalHorasExtra1Label">Horas Extra 1 (18:01-21:59)</h5>
+                <h5 class="modal-title" id="modalHorasExtra1Label">Horas Extra 1 (18:01-22:00)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{% url 'rrhh_app:registro_horas_extra' '1' %}">
@@ -383,20 +376,18 @@
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
                                 <label class="form-label">Hora de Finalización:</label>
-                                <input type="time" name="hora_final" class="form-control" value="21:59" required>
+                                <input type="time" name="hora_final" class="form-control" value="22:00" required>
                             </div>
                         </div>
                     </div>
 
                     <div class="input-group input-group-outline my-3 is-focused">
                         <label class="form-label">Ubicación:</label>
-                        <select name="ubicacion" class="form-control" required>
+                        <select name="idLocal" class="form-control" required>
                             <option value="">Seleccionar ubicación</option>
-                            <option value="0">Shell</option>
-                            <option value="1">Colon</option>
-                            <option value="2">Planta</option>
-                            <option value="3">Remoto</option>
-                            <option value="4">Otro</option>
+                            {% for local in locales %}
+                            <option value="{{local.id}}">{{local.nombreLocal}}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="input-group input-group-outline my-3 is-focused">
@@ -418,7 +409,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalHorasExtra2Label">Registro Horas Extra 2 (22:00-05:59)</h5>
+                <h5 class="modal-title" id="modalHorasExtra2Label">Registro Horas Extra 2 (22:01-23:59)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{% url 'rrhh_app:registro_horas_extra' '2' %}">
@@ -428,26 +419,24 @@
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
                                 <label class="form-label">Hora de Inicio:</label>
-                                <input type="time" name="hora_inicio" class="form-control" value="22:00" required>
+                                <input type="time" name="hora_inicio" class="form-control" value="22:01" required>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
                                 <label class="form-label">Hora de Finalización:</label>
-                                <input type="time" name="hora_final" class="form-control" value="05:59" required>
+                                <input type="time" name="hora_final" class="form-control" value="23:59" required>
                             </div>
                         </div>
                     </div>
                     
                     <div class="input-group input-group-outline is-focused">
                         <label class="form-label">Ubicación:</label>
-                        <select name="ubicacion" class="form-control" required>
+                        <select name="idLocal" class="form-control" required>
                             <option value="">Seleccionar ubicación</option>
-                            <option value="0">Shell</option>
-                            <option value="1">Colon</option>
-                            <option value="2">Planta</option>
-                            <option value="3">Remoto</option>
-                            <option value="4">Otro</option>
+                            {% for local in locales %}
+                            <option value="{{local.id}}">{{local.nombreLocal}}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="input-group input-group-outline my-3 is-focused">

@@ -11,6 +11,9 @@ from django.db.models import Q, Count, Sum, Avg, When, Value, IntegerField
 from django.utils import timezone
 import calendar
 from django.contrib import messages
+from django.http import HttpResponseRedirect
+
+from django.forms import modelformset_factory
 
 from applications.users.mixins import (
     RRHHMixin
@@ -181,10 +184,159 @@ class AsistenciaDeleteView(RRHHMixin, DeleteView):
     #permission_required = 'rh.delete_empleado'
     success_url = reverse_lazy('rrhh_app:asistencia-list')
 
+class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, CreateView):
+    model = RegistroAsistencia
+    template_name = 'RRHH/asistencia/registro_multiple.html'
+    success_url = reverse_lazy('rrhh_app:asistencia-user-list')
+    fields = []
+    
+    def get_empleado(self):
+        """Obtiene el empleado basado en los parámetros de la URL o el usuario"""
+        user_id = self.request.user.id
+        return Empleado.objects.get(user__id=user_id)
+        
+    def get_formset_class(self):
+        """Retorna la clase del formset (sin instanciar)"""
+        return modelformset_factory(
+            RegistroAsistencia,
+            fields=['fecha', 'hora_inicio', 'hora_final', 'idLocal', 'observaciones'],
+            extra=1,
+            can_delete=False,  # Añadido para evitar campos DELETE
+            widgets={
+                'fecha': forms.DateInput(attrs={
+                    'type': 'date', 
+                    'class': 'form-control fecha-input',
+                    'required': 'required'
+                }),
+                'hora_inicio': forms.TimeInput(attrs={
+                    'type': 'time', 
+                    'class': 'form-control hora-inicio'
+                }),
+                'hora_final': forms.TimeInput(attrs={
+                    'type': 'time', 
+                    'class': 'form-control hora-final'
+                }),
+                'idLocal': forms.Select(attrs={'class': 'form-control'}),
+                'observaciones': forms.Textarea(attrs={
+                    'class': 'form-control', 
+                    'rows': 2, 
+                    'placeholder': 'Observaciones'
+                }),
+            }
+        )
+
+    def get_formset(self, data=None):
+        """Retorna una instancia del formset, con data si se proporciona"""
+        formset_class = self.get_formset_class()
+        if data:
+            return formset_class(data, prefix='registros')
+        return formset_class(queryset=RegistroAsistencia.objects.none(), prefix='registros')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        empleado = self.get_empleado()
+        context['empleado'] = empleado
+        context['formset'] = self.get_formset()
+        
+        # Pasar datos para JavaScript
+        try:
+            from .models import Feriados
+            feriados = list(Feriados.objects.values_list('fecha', flat=True))
+            context['feriados'] = [f.strftime('%Y-%m-%d') for f in feriados]
+        except:
+            context['feriados'] = []
+        
+        return context
+
+    def form_valid(self, form):
+        empleado = self.get_empleado()
+        if not empleado:
+            messages.error(self.request, 'No se pudo identificar al empleado.')
+            return self.form_invalid(form)
+
+        # Obtener el formset con los datos POST
+        formset = self.get_formset(self.request.POST)
+        
+        if formset.is_valid():
+            registros_guardados = 0
+            registros_con_errores = 0
+            
+            # CAMBIO CLAVE: Usar commit=False para asignar empleado antes de guardar
+            instances = formset.save(commit=False)
+            
+            for i, instance in enumerate(instances):
+                # Asignar el empleado ANTES de cualquier validación
+                instance.empleado = empleado
+                
+                try:
+                    # Ahora sí validar con el empleado ya asignado
+                    instance.full_clean()
+                    # Guardar (las jornadas se calcularán automáticamente en save())
+                    instance.save()
+                    registros_guardados += 1
+                    
+                except ValidationError as e:
+                    registros_con_errores += 1
+                    for field, errors in e.error_dict.items():
+                        for error in errors:
+                            messages.error(
+                                self.request, 
+                                f"Registro {i+1}: Error en {field} - {error}"
+                            )
+                except Exception as e:
+                    registros_con_errores += 1
+                    messages.error(
+                        self.request, 
+                        f"Registro {i+1}: Error inesperado - {str(e)}"
+                    )
+            
+            # Mostrar resumen
+            if registros_guardados > 0:
+                messages.success(
+                    self.request, 
+                    f'Se guardaron {registros_guardados} registros de asistencia correctamente.'
+                )
+                return HttpResponseRedirect(self.success_url)
+            else:
+                if registros_con_errores == 0:
+                    messages.warning(
+                        self.request, 
+                        'No se encontraron registros para guardar.'
+                    )
+                else:
+                    messages.error(
+                        self.request, 
+                        'No se pudo guardar ningún registro. Verifique los datos ingresados.'
+                    )
+                return self.form_invalid(form)
+                
+        else:
+            # Mostrar errores específicos del formset
+            for i, form_in_formset in enumerate(formset):
+                if form_in_formset.errors:
+                    for field, errors in form_in_formset.errors.items():
+                        for error in errors:
+                            field_label = form_in_formset.fields[field].label if field in form_in_formset.fields else field
+                            messages.error(
+                                self.request, 
+                                f"Registro {i+1}: Error en {field_label} - {error}"
+                            )
+            
+            # Errores no relacionados con formularios específicos
+            if formset.non_form_errors():
+                for error in formset.non_form_errors():
+                    messages.error(self.request, f"Error general: {error}")
+                    
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
+        return super().form_invalid(form)
+
 # =========================== MY ESPACE ===========================
 class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
     model = RegistroAsistencia
-    fields = ['ubicacion', 'observaciones']
+    fields = ['idLocal', 'observaciones']
     template_name = 'rrhh/modal_registro_rapido.html'
     
     def form_valid(self, form):
@@ -204,8 +356,8 @@ class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
         registro = form.save(commit=False)
         registro.empleado = empleado
         registro.fecha = hoy
-        registro.hora_inicio = timezone.now().replace(hour=8, minute=24, second=0).time()  # Hora actual
-        registro.hora_final = timezone.now().replace(hour=17, minute=59, second=0).time()  # 18:00
+        registro.hora_inicio = timezone.now().replace(hour=9, minute=00, second=0).time()  # Hora actual
+        registro.hora_final = timezone.now().replace(hour=18, minute=00, second=0).time()  # 18:00
         registro.jornada = '0'  # Jornada regular
         registro.estado = '0'  # Pendiente
         

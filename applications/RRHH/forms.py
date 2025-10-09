@@ -61,7 +61,7 @@ class ContactoEmergenciaForm(forms.ModelForm):
 class RegistroAsistenciaForm(forms.ModelForm):
     class Meta:
         model = RegistroAsistencia
-        fields = ['empleado','fecha','hora_inicio','hora_final','ubicacion','observaciones']
+        fields = ['empleado','fecha','hora_inicio','hora_final','idLocal','observaciones']
         widgets = {
             'empleado': forms.Select(attrs={
                 'class': 'form-control',
@@ -84,7 +84,7 @@ class RegistroAsistenciaForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'time'
             }),
-            'ubicacion': forms.Select(
+            'idLocal': forms.Select(
                 attrs={
                     'class': 'form-control',
                     'required':'required',
@@ -114,13 +114,16 @@ class FiltroAsistenciaForm(forms.Form):
         choices=[('', 'Todos los estados')] + RegistroAsistencia.TIPO_ESTADOS,
         required=False
     )
-    jornada = forms.ChoiceField(
-        choices=[('', 'Todas las jornadas')] + RegistroAsistencia.TIPO_JORNADA,
+    jornada_horaria = forms.ChoiceField(
+        choices=[('', 'Todas las jornadas')] + RegistroAsistencia.TIPO_JORNADA_HORARIA,
+        required=False
+    )
+    jornada_diaria = forms.ChoiceField(
+        choices=[('', 'Todas las jornadas')] + RegistroAsistencia.TIPO_JORNADA_DIARIA,
         required=False
     )
     ubicacion = forms.ChoiceField(
-        choices=[('', 'Todas las ubicaciones')] + RegistroAsistencia.TIPO_LOCAL,
-        required=False
+        choices=[('', 'Todas las ubicaciones')]
     )
 
 class ActividadDiariaForm(forms.ModelForm):

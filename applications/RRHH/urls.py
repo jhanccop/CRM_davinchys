@@ -33,8 +33,10 @@ urlpatterns = [
 
     path('rrhh/mi-asistencia/', views.AsistenciaUserListView.as_view(), name='asistencia-user-list'),
     path('rrhh/mi-asistencia/registrar/', views.AsistenciaCreateUserView.as_view(), name='asistencia-user-create'),
-    path('rrhh/mi-asistencia/<int:pk>/editar/', views.AsistenciaUpdateUserView.as_view(), name='asistencia-user-update'),
-    path('rrhh/mi-asistencia/<int:pk>/eliminar/', views.AsistenciaDeleteUserView.as_view(), name='asistencia-user-delete'),
+    path('rrhh/mi-asistencia/editar/<int:pk>/', views.AsistenciaUpdateUserView.as_view(), name='asistencia-user-update'),
+    path('rrhh/mi-asistencia/eliminar/<int:pk>/', views.AsistenciaDeleteUserView.as_view(), name='asistencia-user-delete'),
+
+    path('rrhh/mi-asistencia/HE-multiple/', views.RegistroAsistenciaMultipleCreateView.as_view(), name='asistencia-user-multiple-create'),
 
     path('rrhh/asistencia/usuario/', views.RegistroAsistenciaRapidoView.as_view(), name='registro_asistencia_rapido'),
     path('rrhh/asistencia/horas-extra/<str:tipo>/', views.RegistroHorasExtraView.as_view(), name='registro_horas_extra'),

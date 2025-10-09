@@ -41,6 +41,16 @@ class RegistroAsistenciaManager0(models.Manager):
             total_horas_extra2=Sum('horas', filter=Q(jornada='2'))
         )
 
+class LocalManager(models.Manager):
+    def obtenerLocalPorCompañia(self, idCompany):
+        """
+        Lista de locales compañia
+        """
+        
+        return self.filter(
+            idCompany = idCompany,
+        )
+
 class RegistroAsistenciaManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related('empleado', 'aprobado_por')

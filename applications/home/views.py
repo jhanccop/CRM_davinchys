@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 
 from applications.actividades.models import Trafos, RestDays, DailyTasks
 from applications.COMERCIAL.purchase.models import RequestTracking
-from applications.RRHH.models import Empleado, Documento, Permiso, RegistroAsistencia, Feriados
+from applications.RRHH.models import Local, Empleado, Documento, Permiso, RegistroAsistencia, Feriados
 
 # forms
 from applications.actividades.forms import TrafoForm
@@ -175,6 +175,10 @@ class myEspaceView(LoginRequiredMixin, TemplateView):
         
         # Permisos
         context['permisos'] = empleado.permiso_set.all()[:5]
+
+        # Locales
+        idCompañia = self.request.user.company
+        context['locales'] = Local.objects.obtenerLocalPorCompañia(idCompañia)
         
         return context
     
