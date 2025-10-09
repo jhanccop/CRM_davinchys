@@ -147,7 +147,7 @@ class RegistroAsistencia(TimeStampedModel):
     hora_inicio = models.TimeField('Hora inicio', null=True, blank=True)
     hora_final = models.TimeField('Hora final', null=True, blank=True)
     idLocal = models.ForeignKey(Local, on_delete=models.CASCADE, null=True, blank=True)
-    ubicacion = models.CharField('Local', max_length=1, null=True, blank=True)
+    ubicacion = models.CharField('Local', max_length=1, null=True, blank=True, default = "0")
     
     # Campos separados para jornada horaria y diaria
     jornada_horaria = models.CharField(
