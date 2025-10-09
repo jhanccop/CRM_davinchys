@@ -211,14 +211,14 @@ class myEspaceView(LoginRequiredMixin, TemplateView):
         dias_laborables = self._calcular_dias_laborables(fecha_inicio, fecha_fin)
         
         # Días laborados (registros con jornada regular)
-        dias_laborados = registros.filter(jornada='0').values('fecha').distinct().count()
+        dias_laborados = registros.filter(jornada_diaria='0').values('fecha').distinct().count()
         
         # Horas extra
-        horas_extra1 = registros.filter(jornada='1').aggregate(
+        horas_extra1 = registros.filter(jornada_diaria='1').aggregate(
             total=Sum('horas')
         )['total'] or 0
         
-        horas_extra2 = registros.filter(jornada='2').aggregate(
+        horas_extra2 = registros.filter(jornada_diaria='2').aggregate(
             total=Sum('horas')
         )['total'] or 0
         
@@ -267,12 +267,12 @@ class myEspaceView(LoginRequiredMixin, TemplateView):
         hoy = timezone.now().date()
         return empleado.registroasistencia_set.filter(
             fecha=hoy,
-            jornada='0'  # Jornada regular
+            jornada_diaria='0'  # Jornada regular
         ).first()
     
     def _obtener_horas_extra_hoy(self, empleado, tipo_extra):
         hoy = timezone.now().date()
         return empleado.registroasistencia_set.filter(
             fecha=hoy,
-            jornada=tipo_extra  # '1' para HE1, '2' para HE2
+            jornada_diaria=tipo_extra  # '1' para HE1, '2' para HE2
         ).exists()
