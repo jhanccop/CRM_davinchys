@@ -137,7 +137,6 @@ class Items(TimeStampedModel):
     def __str__(self):
         return f"{self.idTrafo}-{self.seq} "
    
-
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """
     # AREAS DE REQUERIMIENTO

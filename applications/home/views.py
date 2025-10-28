@@ -204,21 +204,21 @@ class myEspaceView(LoginRequiredMixin, TemplateView):
     
     def _calcular_metricas_asistencia(self, empleado, fecha_inicio, fecha_fin):
         # Obtener todos los registros de asistencia en el período
-        registros = empleado.registroasistencia_set.filtrar_por_fecha(fecha_inicio, fecha_fin)
+        registros = empleado.registro_asistencia.filtrar_por_fecha(fecha_inicio, fecha_fin)
         
         # Calcular días laborables (lunes a viernes, excluyendo feriados)
         from applications.RRHH.models import Feriados
         dias_laborables = self._calcular_dias_laborables(fecha_inicio, fecha_fin)
         
         # Días laborados (registros con jornada regular)
-        dias_laborados = registros.filter(jornada_diaria='0').values('fecha').distinct().count()
+        dias_laborados = registros.filter(jornada_horaria='0').values('fecha').distinct().count()
         
         # Horas extra
-        horas_extra1 = registros.filter(jornada_diaria='1').aggregate(
+        horas_extra1 = registros.filter(jornada_horaria='1').aggregate(
             total=Sum('horas')
         )['total'] or 0
         
-        horas_extra2 = registros.filter(jornada_diaria='2').aggregate(
+        horas_extra2 = registros.filter(jornada_horaria='2').aggregate(
             total=Sum('horas')
         )['total'] or 0
         
@@ -265,14 +265,14 @@ class myEspaceView(LoginRequiredMixin, TemplateView):
     
     def _obtener_registro_hoy(self, empleado):
         hoy = timezone.now().date()
-        return empleado.registroasistencia_set.filter(
+        return empleado.registro_asistencia.filter(
             fecha=hoy,
-            jornada_diaria='0'  # Jornada regular
+            jornada_horaria='0'  # Jornada regular
         ).first()
     
     def _obtener_horas_extra_hoy(self, empleado, tipo_extra):
         hoy = timezone.now().date()
-        return empleado.registroasistencia_set.filter(
+        return empleado.registro_asistencia.filter(
             fecha=hoy,
-            jornada_diaria=tipo_extra  # '1' para HE1, '2' para HE2
+            jornada_horaria=tipo_extra  # '1' para HE1, '2' para HE2
         ).exists()

@@ -377,21 +377,21 @@
                                                     <td class="text-center text-success">{{ datos.horas_regulares }}h</td>
                                                     <td class="text-center">
                                                         {% if datos.horas_extra1 > 0 %}
-                                                        <span class="badge bg-warning">{{ datos.horas_extra1 }}h</span>
+                                                        <span class="badge bg-gradient-warning">{{ datos.horas_extra1 }}h</span>
                                                         {% else %}-{% endif %}
                                                     </td>
                                                     <td class="text-center">
                                                         {% if datos.horas_extra2 > 0 %}
-                                                        <span class="badge bg-danger">{{ datos.horas_extra2 }}h</span>
+                                                        <span class="badge bg-gradient-primary">{{ datos.horas_extra2 }}h</span>
                                                         {% else %}-{% endif %}
                                                     </td>
                                                     <td class="text-center">
                                                         {% if datos.es_feriado %}
                                                         <span class="badge bg-info">Feriado</span>
                                                         {% elif datos.es_laborable %}
-                                                        <span class="badge bg-success">Laborable</span>
+                                                        <span class="badge bg-gradient-success">Laborable</span>
                                                         {% else %}
-                                                        <span class="badge bg-secondary">Fin de semana</span>
+                                                        <span class="badge bg-gradient-secondary">Fin de semana</span>
                                                         {% endif %}
                                                         {% if datos.es_futuro %}
                                                         <span class="badge bg-warning">Futuro</span>
@@ -399,11 +399,11 @@
                                                     </td>
                                                     <td>
                                                         {% for ubicacion in datos.ubicaciones %}
-                                                        {% if ubicacion.ubicacion == "0" %}Shell
-                                                        {% elif ubicacion.ubicacion == "1" %}Colon
-                                                        {% elif ubicacion.ubicacion == "2" %}Planta
-                                                        {% elif ubicacion.ubicacion == "3" %}Remoto
-                                                        {% elif ubicacion.ubicacion == "4" %}Otro
+                                                        {% if ubicacion.idLocal == 0 %}Shell
+                                                        {% elif ubicacion.idLocal == 1 %}Colon
+                                                        {% elif ubicacion.idLocal == 2 %}Planta
+                                                        {% elif ubicacion.idLocal == 3 %}Remoto
+                                                        {% elif ubicacion.idLocal == 4 %}Otro
                                                         {% endif %}{% if not forloop.last %}, {% endif %}
                                                         {% empty %}
                                                         -

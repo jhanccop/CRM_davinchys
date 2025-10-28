@@ -70,7 +70,7 @@
             </thead>
             
             <tbody>
-              {% for t in quotes.listQuotes %}
+              {% for t in quotes.listQuotes.all %}
               <tr>
                 <td class="text-sm">
                   <div class="d-flex flex-column justify-content-center">
@@ -114,7 +114,7 @@
                 </td>
 
                 <td>
-                    {% for r in t.trafo_Quote.all %}
+                    {% for r in t.item_Quote.all %}
                     <li class="mb-0">{{r}}</li>
                     {% endfor%}
                 </td>

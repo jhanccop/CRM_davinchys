@@ -372,7 +372,7 @@ class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
 
 class RegistroHorasExtraView(LoginRequiredMixin,CreateView):
     model = RegistroAsistencia
-    fields = ['hora_inicio', 'hora_final', 'ubicacion', 'observaciones']
+    fields = ['hora_inicio', 'hora_final', 'idLocal', 'observaciones']
     template_name = 'rrhh/modal_horas_extra.html'
     
     def get_context_data(self, **kwargs):
@@ -700,10 +700,10 @@ class DashboardView(RRHHMixin, TemplateView):
         horas_extra = RegistroAsistencia.objects.filter(
             empleado__in=empleados,
             fecha__range=[fecha_inicio, fecha_fin],
-            jornada__in=['1', '2']  # HE1 y HE2
+            jornada_horaria__in=['1', '2']  # HE1 y HE2
         ).aggregate(
-            total_he1=Sum('horas', filter=Q(jornada='1')),
-            total_he2=Sum('horas', filter=Q(jornada='2'))
+            total_he1=Sum('horas', filter=Q(jornada_horaria='1')),
+            total_he2=Sum('horas', filter=Q(jornada_horaria='2'))
         )
         
         # Permisos pendientes
@@ -760,11 +760,11 @@ class DashboardView(RRHHMixin, TemplateView):
             porcentaje_asistencia = (dias_asistidos / dias_laborables_empleado * 100) if dias_laborables_empleado > 0 else 0
             
             # Horas extra
-            horas_extra1 = registros.filter(jornada='1').aggregate(
+            horas_extra1 = registros.filter(jornada_horaria='1').aggregate(
                 total=Sum('horas')
             )['total'] or 0
             
-            horas_extra2 = registros.filter(jornada='2').aggregate(
+            horas_extra2 = registros.filter(jornada_horaria='2').aggregate(
                 total=Sum('horas')
             )['total'] or 0
             
@@ -854,8 +854,8 @@ class DashboardView(RRHHMixin, TemplateView):
             total_porcentajes += porcentaje
             
             # Sumar horas extra
-            he1 = registros.filter(jornada='1').aggregate(total=Sum('horas'))['total'] or 0
-            he2 = registros.filter(jornada='2').aggregate(total=Sum('horas'))['total'] or 0
+            he1 = registros.filter(jornada_horaria='1').aggregate(total=Sum('horas'))['total'] or 0
+            he2 = registros.filter(jornada_horaria='2').aggregate(total=Sum('horas'))['total'] or 0
             
             horas_extra1_total += float(he1)
             horas_extra2_total += float(he2)
@@ -988,10 +988,10 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
         
         # Horas por tipo de jornada
         horas_por_jornada = registros.aggregate(
-            horas_regulares=Sum('horas', filter=Q(jornada=RegistroAsistencia.REGULAR)),
-            horas_he1=Sum('horas', filter=Q(jornada=RegistroAsistencia.HEXTRA1)),
-            horas_he2=Sum('horas', filter=Q(jornada=RegistroAsistencia.HEXTRA2)),
-            horas_feriados=Sum('horas', filter=Q(jornada=RegistroAsistencia.FERIADO))
+            horas_regulares=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.REGULAR)),
+            horas_he1=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.HEXTRA1)),
+            horas_he2=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.HEXTRA2)),
+            horas_feriados=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.FERIADO))
         )
         
         horas_regulares = horas_por_jornada['horas_regulares'] or 0
@@ -1001,12 +1001,12 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
         
         # Días feriados laborados
         dias_feriados_laborados = registros.filter(
-            jornada=RegistroAsistencia.FERIADO
+            jornada_horaria=RegistroAsistencia.FERIADO
         ).values('fecha').distinct().count()
         
         # Días regulares laborados (excluyendo feriados)
         dias_regulares_laborados = registros.filter(
-            jornada=RegistroAsistencia.REGULAR
+            jornada_horaria=RegistroAsistencia.REGULAR
         ).values('fecha').distinct().count()
         
         # Permisos
@@ -1041,7 +1041,7 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
         porcentaje_eficiencia = (horas_totales / horas_esperadas * 100) if horas_esperadas > 0 else 0
         
         # Ubicaciones de trabajo
-        ubicaciones = registros.values('ubicacion').annotate(
+        ubicaciones = registros.values('idLocal').annotate(
             total_dias=Count('fecha', distinct=True),
             total_horas=Sum('horas')
         )
@@ -1089,10 +1089,10 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
             
             # Horas por tipo de jornada
             horas_jornada = registros_dia.aggregate(
-                regular=Sum('horas', filter=Q(jornada=RegistroAsistencia.REGULAR)),
-                he1=Sum('horas', filter=Q(jornada=RegistroAsistencia.HEXTRA1)),
-                he2=Sum('horas', filter=Q(jornada=RegistroAsistencia.HEXTRA2)),
-                feriado=Sum('horas', filter=Q(jornada=RegistroAsistencia.FERIADO))
+                regular=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.REGULAR)),
+                he1=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.HEXTRA1)),
+                he2=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.HEXTRA2)),
+                feriado=Sum('horas', filter=Q(jornada_horaria=RegistroAsistencia.FERIADO))
             )
             
             # Primer y último registro del día
@@ -1100,7 +1100,7 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
             ultimo_registro = registros_dia.last()
             
             # Ubicaciones utilizadas en el día
-            ubicaciones = registros_dia.values('ubicacion').annotate(
+            ubicaciones = registros_dia.values('idLocal').annotate(
                 count=Count('id')
             )
             

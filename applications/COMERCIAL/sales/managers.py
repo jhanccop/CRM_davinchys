@@ -177,7 +177,7 @@ class quotesManager(models.Manager):
         return result
     
     def ListaPOPorRuc(self, intervalo, company, isPO):
-        from .models import Trafos, QuoteTracking
+        from .models import Items, QuoteTracking
         Intervals = intervalo.split(' to ')
         intervals = [datetime.strptime(dt, "%Y-%m-%d") for dt in Intervals]
 
@@ -194,10 +194,10 @@ class quotesManager(models.Manager):
         ).order_by('-created')
 
         # Prefetch para optimizar la carga de los productos Trafos
-        trafos_prefetch = Prefetch(
-            'trafo_Quote',
-            queryset=Trafos.objects.all(),
-            to_attr='productos'
+        items_prefetch = Prefetch(
+            'item_Quote',  # ← Este es el related_name correcto
+            queryset=Items.objects.select_related('idTrafo'),  # Optimizar con select_related
+            to_attr='items'
         )
 
         # Consulta principal con annotate para el último tracking y prefetch para los trafos
@@ -220,7 +220,7 @@ class quotesManager(models.Manager):
                 default=Value('Desconocido'),
                 output_field=CharField()
             )
-        ).prefetch_related(trafos_prefetch)
+        ).prefetch_related(items_prefetch)
 
         return result
     

@@ -142,7 +142,7 @@ class RegistroAsistencia(TimeStampedModel):
         (FINDESEMANA, 'Fin de semana'),
     ]
 
-    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='registro_asistencia')
     fecha = models.DateField('Fecha')
     hora_inicio = models.TimeField('Hora inicio', null=True, blank=True)
     hora_final = models.TimeField('Hora final', null=True, blank=True)
