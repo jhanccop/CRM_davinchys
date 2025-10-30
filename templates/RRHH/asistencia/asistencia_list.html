@@ -61,7 +61,7 @@
                 <label class="form-label">Jornada</label>
               <select class="form-control" name="jornada" id="jornada">
                 <option value="">Todas</option>
-                {% for jornada_key, jornada_value in view.model.TIPO_JORNADA %}
+                {% for jornada_key, jornada_value in view.model.TIPO_JORNADA_HORARIA %}
                 <option value="{{ jornada_key }}" 
                         {% if jornada_actual == jornada_key %}selected{% endif %}>
                   {{ jornada_value }}
@@ -88,45 +88,65 @@
 
 <!-- ================ ESTADÍSTICAS ================= -->
 <div class="row mt-4">
-  <div class="col-xl-3 col-sm-6 mb-4">
-    <div class="card">
-        <div class="card-body p-3">
-            <div class="row">
-                <div class="col-4">
-                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-md">
-                        <i class="fas fa-list text-lg opacity-10"></i>
+ <div class="col-xl-2 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow text-center border-radius-md">
+                            <i class="fas fa-list text-lg opacity-10"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-8 my-auto text-end">
-                    <h6 class="text-sm mb-0 opacity-7 text-dark">REGISTROS</h6>
-                    <h5 class="font-weight-bolder mb-0">
-                        {{ total_registros }}
-                    </h5>
+                    <div class="col-8 my-auto text-end">
+                        <h6 class="text-sm mb-0 opacity-7 text-dark">Nro Reg</h6>
+                        <h5 class="font-weight-bolder mb-0">
+                            {{ total_registros }}
+                        </h5>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-  </div>
-  
-  <div class="col-xl-3 col-sm-6 mb-4">
-    <div class="card">
-        <div class="card-body p-3">
-            <div class="row">
-                <div class="col-4">
-                    <div class="icon icon-lg icon-shape bg-gradient-info shadow text-center border-radius-md">
-                        <i class="fas fa-check text-lg opacity-10"></i>
+    
+    <div class="col-xl-2 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                            <i class="fas fa-check text-lg opacity-10"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-8 my-auto text-end">
-                    <h6 class="text-sm mb-0 opacity-7 text-dark">ESTADOS</h6>
-                    <h5 class="font-weight-bolder mb-0">
-                        <span class="text-success">{{ registros_aprobados }}</span> / <span class="text-primary">{{ registros_pendientes }}</span>
-                    </h5>
+                    <div class="col-8 my-auto text-end">
+                        <h6 class="text-sm mb-0 opacity-7 text-dark">HE1</h6>
+                        <h5 class="font-weight-bolder mb-0">
+                            {{ total_HE1.tot|default:"0" }}
+                        </h5>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-  </div>
+
+    <div class="col-xl-2 col-sm-6 mb-4">
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="icon icon-lg icon-shape bg-gradient-secondary shadow text-center border-radius-md">
+                            <i class="fas fa-check text-lg opacity-10"></i>
+                        </div>
+                    </div>
+                    <div class="col-8 my-auto text-end">
+                        <h6 class="text-sm mb-0 opacity-7 text-dark">HE2</h6>
+                        <h5 class="font-weight-bolder mb-0">
+                           {{ total_HE2.tot|default:"0" }}
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
   <div class="col-xl-6 col-sm-6 mb-4">
     <div class="card">

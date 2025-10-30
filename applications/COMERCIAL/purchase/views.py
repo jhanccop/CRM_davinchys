@@ -276,7 +276,8 @@ class LogisticRequirementListView(LoginRequiredMixin,ListView):
 
     documentation = requirements.objects.ListaRequerimientosPorArea(
       intervalo = intervalDate,
-      idArea = user.position
+      #idArea = user.position
+      idArea = user.empleado.departamento.idArea
       )
     
     allDocumentation = []

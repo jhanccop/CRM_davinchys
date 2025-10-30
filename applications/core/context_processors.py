@@ -141,13 +141,13 @@ def menu_navigation(request):
                     'name': 'Rep. Asistencia',
                     'url_name': 'rrhh_app:reporte_asistencia_persona',
                     'mini_icon': 'RA',
-                    'permission': 'rrhh.view_asistencia'
+                    'permission': None#'rrhh.view_asistencia'
                 },
                 {
                     'name': 'Lista Asistencia',
                     'url_name': 'rrhh_app:asistencia-list',
                     'mini_icon': 'LA',
-                    'permission': 'rrhh.view_asistencia'
+                    'permission': None#'rrhh.view_asistencia'
                 },
                 {
                     'name': 'Lista Documentos',
@@ -168,9 +168,9 @@ def menu_navigation(request):
                     'permission': 'produccion.view_dashboard'
                 },
                 {
-                    'name': 'Fabricación',
-                    'url_name': '',
-                    'mini_icon': 'FA',
+                    'name': 'Catálogo Transformadores',
+                    'url_name': 'produccion_app:trafos-lista',
+                    'mini_icon': 'CT',
                     'permission': 'produccion.view_fabricacion'
                 }
             ]

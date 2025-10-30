@@ -1,7 +1,9 @@
 from django.apps import AppConfig
 
-
 class RrhhConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'applications.RRHH'
     verbose_name = 'RRHH'
+
+    def ready(self):
+        import applications.RRHH.signals

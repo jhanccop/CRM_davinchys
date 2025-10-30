@@ -1,7 +1,8 @@
 from django.db import models
 from datetime import timedelta, datetime, time
-from django.db.models import Count, Sum, Avg, Q, F
+from django.db.models import Count, Sum, Avg, Q, F, DecimalField
 from django.utils import timezone
+from django.db.models.functions import Coalesce
 
 class RegistroAsistenciaManager0(models.Manager):
     def ObtenerAssitenciaPorRangoCompaniaTipo(self, idCompany, intervalo, TypeKword):

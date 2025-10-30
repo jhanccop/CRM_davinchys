@@ -14,6 +14,7 @@ from .models import (
 )
 
 from applications.users.models import User
+from applications.RRHH.models import Empleado, Departamento
 
 # ============================ REQUERIMENTOS ============================
 class RequirementsForm(forms.ModelForm):
@@ -120,24 +121,59 @@ class RequirementItemForm(forms.ModelForm):
         if self.request and hasattr(self.request, 'user') and self.request.user.is_authenticated:
             user = self.request.user
             
-            # Ejemplo de lógica basada en la posición del usuario
-            if hasattr(user, 'position') and user.position == User.LOGISTICA:  
-                print("Usuario es de LOGÍSTICA")
+            # Obtener el departamento del empleado a través de la relación
+            try:
+                empleado = user.empleado
+                departamento = empleado.departamento
+                
+                if departamento:
+                    # Lógica basada en el idArea del departamento
+                    if departamento.idArea == Departamento.LOGISTICA:
+                        print("Usuario es de LOGÍSTICA")
+                        self.fields['type'].choices = [
+                            (requirementItems.ARTICULO, 'Artículo'),
+                            (requirementItems.CONTENEDOR, 'Contenedor'),
+                            (requirementItems.ADUANA, 'Aduana'),
+                        ]
+                    elif departamento.idArea == Departamento.PRODUCCION:
+                        print("Usuario es de PRODUCCION")
+                        self.fields['type'].choices = [
+                            (requirementItems.ARTICULO, 'Artículo'),
+                            (requirementItems.TRANSFORMADOR, 'Transformador'),
+                        ]
+                    elif departamento.idArea == Departamento.COMERCIAL:
+                        print("Usuario es de COMERCIAL")
+                        self.fields['type'].choices = [
+                            (requirementItems.ARTICULO, 'Artículo'),
+                            (requirementItems.TRANSFORMADOR, 'Transformador'),
+                            (requirementItems.CONTENEDOR, 'Contenedor'),
+                        ]
+                    elif departamento.idArea == Departamento.FINANZAS:
+                        print("Usuario es de FINANZAS")
+                        self.fields['type'].choices = [
+                            (requirementItems.ARTICULO, 'Artículo'),
+                            (requirementItems.ADUANA, 'Aduana'),
+                        ]
+                    else:
+                        # Para otros departamentos, mostrar solo artículo
+                        print(f"Usuario es de {departamento.nombre}")
+                        self.fields['type'].choices = [
+                            (requirementItems.ARTICULO, 'Artículo'),
+                        ]
+                else:
+                    # Si el empleado no tiene departamento asignado
+                    print("Usuario no tiene departamento asignado")
+                    self.fields['type'].choices = [
+                        (requirementItems.ARTICULO, 'Artículo'),
+                    ]
+                    
+            except Empleado.DoesNotExist:
+                # Si no existe el objeto Empleado relacionado
+                print("Usuario no tiene perfil de empleado")
                 self.fields['type'].choices = [
                     (requirementItems.ARTICULO, 'Artículo'),
-                    (requirementItems.CONTENEDOR, 'Contenedor'),
-                    (requirementItems.ADUANA, 'Aduana'),
                 ]
-            elif hasattr(user, 'position') and user.position == User.PRODUCCION:
-                print("Usuario es de PRODUCCION")
-                self.fields['type'].choices = [
-                    (requirementItems.ARTICULO, 'Artículo'),
-                    (requirementItems.TRANSFORMADOR, 'Transformador'),
-                ]
-            else:
-                self.fields['type'].choices = [
-                    (requirementItems.ARTICULO, 'Artículo'),
-                ]
+                
         else:
             print("Usuario no autenticado o request no disponible")
             self.fields['type'].choices = [

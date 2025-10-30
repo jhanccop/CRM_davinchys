@@ -153,7 +153,7 @@ class AsistenciaListView(RRHHMixin, ListView):
         # Filtro por jornada
         jornada = self.request.GET.get('jornada')
         if jornada:
-            queryset = queryset.filter(jornada=jornada)
+            queryset = queryset.filter(jornada_horaria=jornada)
             
         return queryset.order_by('-fecha', '-hora_inicio')
     
@@ -173,8 +173,11 @@ class AsistenciaListView(RRHHMixin, ListView):
         # Estadísticas
         queryset = self.get_queryset()
         context['total_registros'] = queryset.count()
-        context['registros_pendientes'] = queryset.filter(estado=RegistroAsistencia.PENDIENTE).count()
-        context['registros_aprobados'] = queryset.filter(estado=RegistroAsistencia.APROBADO).count()
+        context['total_HE1'] = queryset.filter(jornada_horaria=RegistroAsistencia.HEXTRA1).aggregate(tot = Sum("horas"))
+        context['total_HE2'] = queryset.filter(jornada_horaria=RegistroAsistencia.HEXTRA2).aggregate(tot = Sum("horas"))
+        
+        #context['registros_pendientes'] = queryset.filter(estado=RegistroAsistencia.PENDIENTE).count()
+        #context['registros_aprobados'] = queryset.filter(estado=RegistroAsistencia.APROBADO).count()
         
         return context
 
@@ -444,7 +447,7 @@ class AsistenciaUserListView(LoginRequiredMixin, ListView):
         # Filtro por jornada
         jornada = self.request.GET.get('jornada')
         if jornada:
-            queryset = queryset.filter(jornada=jornada)
+            queryset = queryset.filter(jornada_horaria=jornada)
             
         return queryset.order_by('-fecha', '-hora_inicio')
     
@@ -456,11 +459,8 @@ class AsistenciaUserListView(LoginRequiredMixin, ListView):
         try:
             empleado_actual = Empleado.objects.get(user=self.request.user)
             context['empleado_actual'] = empleado_actual
-            # Si necesitas la lista de empleados para otros propósitos, puedes mantenerla
-            # pero probablemente ya no sea necesaria para filtros
             context['empleados'] = Empleado.objects.filter(user=self.request.user)
         except Empleado.DoesNotExist:
-            # Manejar el caso donde el usuario no tiene un empleado asociado
             context['empleado_actual'] = None
             context['empleados'] = Empleado.objects.none()
         
@@ -472,8 +472,10 @@ class AsistenciaUserListView(LoginRequiredMixin, ListView):
         # Estadísticas
         queryset = self.get_queryset()
         context['total_registros'] = queryset.count()
-        context['registros_pendientes'] = queryset.filter(estado=RegistroAsistencia.PENDIENTE).count()
-        context['registros_aprobados'] = queryset.filter(estado=RegistroAsistencia.APROBADO).count()
+        context['total_HE1'] = queryset.filter(jornada_horaria=RegistroAsistencia.HEXTRA1).aggregate(tot = Sum("horas"))
+        context['total_HE2'] = queryset.filter(jornada_horaria=RegistroAsistencia.HEXTRA2).aggregate(tot = Sum("horas"))
+        #context['registros_pendientes'] = queryset.filter(estado=RegistroAsistencia.PENDIENTE).count()
+        #context['registros_aprobados'] = queryset.filter(estado=RegistroAsistencia.APROBADO).count()
         
         return context
 
