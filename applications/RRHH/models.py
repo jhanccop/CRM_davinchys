@@ -161,8 +161,8 @@ class RegistroAsistencia(TimeStampedModel):
     HEXTRA2 = "2"
     TIPO_JORNADA_HORARIA = [
         (REGULAR, 'Reg 9:00 - 18:00'),
-        (HEXTRA1, 'HE1 18:01 - 21:00'),
-        (HEXTRA2, 'HE2 21:01 - 23:59 y 00:00 - 06:00'),
+        (HEXTRA1, 'HE1 18:01 - 22:00'),
+        (HEXTRA2, 'HE2 22:01 - 23:59 y 00:00 - 06:00'),
     ]
 
     # JORNADA DIARIA (según tipo de día)

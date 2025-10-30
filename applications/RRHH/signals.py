@@ -111,11 +111,11 @@ def dividir_por_jornada_horaria(hora_inicio, hora_final):
         {
             'tipo': RegistroAsistencia.HEXTRA1,
             'inicio': time(18, 1),
-            'fin': time(21, 0)
+            'fin': time(22, 0)
         },
         {
             'tipo': RegistroAsistencia.HEXTRA2,
-            'inicio': time(21, 1),
+            'inicio': time(22, 1),
             'fin': time(23, 59)
         },
         {
