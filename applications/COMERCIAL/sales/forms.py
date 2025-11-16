@@ -5,7 +5,8 @@ from django.core.exceptions import ValidationError
 from .models import (
     Incomes,
     quotes,
-    Items
+    Items,
+    ItemTracking
 )
 from django.forms import inlineformset_factory
 from applications.users.models import User
@@ -202,7 +203,6 @@ class IncomesForm(forms.ModelForm):
             self.fields['idTin'].initial = self.request.session['compania_id']
 
 # =========================== TRAFO QUOTES ===========================
-
 class quotesForm(forms.ModelForm):
     class Meta:
         model = quotes
@@ -332,7 +332,7 @@ class ItemForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'seq': forms.NumberInput(
+            'seq': forms.TextInput(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',
@@ -344,6 +344,34 @@ class ItemForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                     'step': '0.01',
                     'min': '0'
+                }
+            ),
+        }
+
+class ItemTrackingForm(forms.ModelForm):
+    class Meta:
+        model = ItemTracking
+        fields = (
+            'idItem',
+            'statusItem',
+            'statusPlate',
+
+        )
+        widgets = {
+            'idItem': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'statusItem': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'statusPlate': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
                 }
             ),
         }

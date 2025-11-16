@@ -66,7 +66,7 @@
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> Cliente </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Es PO?</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Productos</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Tipo - Serie</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                 </tr>
               </thead>
@@ -117,7 +117,7 @@
 
                   <td>
                       {% for r in t.item_Quote.all %}
-                      <li class="pt-0 mb-0">{{r}}</li>
+                      <p class="pt-0 mb-0">{{r}}</p>
                       {% endfor%}
                   </td>
 

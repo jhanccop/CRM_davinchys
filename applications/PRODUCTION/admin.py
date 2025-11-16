@@ -19,8 +19,10 @@ class TrafosAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'KVA',
-        'HVTAP',
-        'idSupplier'
+        'idSupplier',
+        'HV',
+        'LV'
+
     )
     search_fields = ('idSupplier',)
     list_filter = ('idSupplier',)

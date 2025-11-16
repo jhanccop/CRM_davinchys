@@ -114,10 +114,12 @@ class Items(TimeStampedModel):
 
     idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
     idTrafo = models.ForeignKey(Trafos, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Trafo")
-    seq = models.IntegerField(
-        "Numero secuencial",
+    seq = models.CharField(
+        "Serial",
+        max_length=20,
         blank=True,
         null=True,
+        #unique=True
     )
 
     unitCost = models.DecimalField(
@@ -128,6 +130,12 @@ class Items(TimeStampedModel):
         null=True,
     )
 
+    fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(POvouchers, self).delete(*args, **kwargs)
+
     #objects = TrafosManager()
 
     class Meta:
@@ -135,8 +143,56 @@ class Items(TimeStampedModel):
         verbose_name_plural = 'Items Transformadores'
 
     def __str__(self):
-        return f"{self.idTrafo}-{self.seq} "
+        return f"{self.idTrafo} - {self.seq} "
    
+class ItemTracking(TimeStampedModel):
+    """
+        SEGUIMIENTO A ITEMS INDIVIDUALES
+    """
+    idItem = models.ForeignKey(Items, on_delete = models.CASCADE, null=True, blank = True, related_name="itemTracking")
+    
+    SOLICITADO = '0'
+    FABRICADO = '1'
+    ENRUTA = '2'
+    ENDESTINO = '3'
+    ENTREGADO = '4'
+
+    STATE_CHOICES = [
+        (SOLICITADO, 'Required'),
+        (FABRICADO, 'Assembled'),
+        (ENRUTA, 'On the way'),
+        (ENDESTINO, 'At destination'),
+        (ENTREGADO, 'Delivered'),
+    ]
+
+    statusItem = models.CharField(
+        'Estado de orden',
+        max_length=2,
+        choices=STATE_CHOICES,
+        null = True,
+        blank = True,
+        default=SOLICITADO
+    )
+
+    statusPlate = models.CharField(
+        'Estado de placa',
+        max_length=2,
+        choices=STATE_CHOICES,
+        null = True,
+        blank = True,
+        default=SOLICITADO
+    )
+
+    #objects = QuoteTrackingManager()
+
+    class Meta:
+        verbose_name = 'Seguimiento de Transformador'
+        verbose_name_plural = 'Tracking TRansformadores'
+    
+    def __str__(self):
+        return f"{self.idItem} | {self.get_statusItem_display()} | {self.get_statusPlate_display()}"
+
+
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """
     # AREAS DE REQUERIMIENTO

@@ -2,6 +2,7 @@ from model_utils.models import TimeStampedModel
 
 from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 
 from applications.COMERCIAL.stakeholders.models import supplier 
 
@@ -17,127 +18,33 @@ class Trafos(TimeStampedModel):
         blank=True, 
         null=True
     )
-    
-    KVA_CHOICES = (
-        ('0', '15'),
-        ('1', '30'),
-        ('2', '75'),
-        ('3', '100'),
-        ('4', '167'),
-        ('5', '200'),
-        ('6', '250'),
-        ('7', '400'),
-        ('8', '500'),
-        ('9', '600'),
-        ('10', '750'),
-        ('11', '1000'),
-        ('12', '1500'),
-        ('13', '2000'), 
-    )
-
-    HVTAP_CHOICES = (
-        ('0', 'K-Tap - HV'),
-        ('1', 'Fix HV'),
-    )
-
-    KTapHV_CHOICES = (
-        ('0', '12700/7200'),
-        ('1', '24940/14400'),
-    )
-    FIXHV_CHOICES = (
-        ('0', '7200'),
-        ('1', '12470'),
-        ('2', '22900'),
-    )
-
-    LV_CHOICES = (
-        ('0', '120/240'),
-        ('1', '277/480'),
-    )
-
-    HZ_CHOICES = (
-        ('0', '50'),
-        ('1', '60'),
-    )
-
-    # ==== PHASE ====
-    MONO = "0"
-    THREE = "1"
-    PHASE_CHOICES = (
-        (MONO, 'Mono-phasic'),
-        (THREE, 'Three-phasic'),
-    )
-    PHASE_NICK = {
-        MONO: 'MP',
-        THREE: 'TP',
-    }
-
-    # ==== MOUNTING ====
-    POLE = "0"
-    STANDARD = "1"
-    PAD = "2"
-    MOUNTING_CHOICES = (
-        ('0', 'Pole'),
-        ('1', 'Standard'),
-        ('2', 'Feed Through Pad'),
-    )
-    MOUNTING_NICK = {
-        POLE: 'PO',
-        STANDARD: 'ST',
-        PAD: 'PAD',
-    }
-
-    COOLING_CHOICES = (
-        ('0', 'Oil'),
-        ('1', 'Dry'),
-    )
-
-    WINDING_CHOICES = (
-        ('0', 'Al - Al'),
-        ('1', 'Cu - CU'),
-    )
-
-    INSULAT_CHOICES = (
-        ('0', 'A'),
-        ('1', 'E'),
-        ('2', 'H'),
-    )
-
-    CONNECTION_CHOICES = (
-        ('0', 'WEY'),
-        ('1', 'DELTA'),
-    )
-
-    STANDARD_CHOICES = (
-        ('0', 'NMX-116'),
-        ('1', 'IEC 61558'),
-    )
-
-    TENSION_CHOICES = (
-        ('0', '220'),
-        ('1', '380'),
-        ('2', '400'),
-        ('3', '460'),
-        ('4', '600'),
-        ('5', '10000'),
-        ('6', '13800'),
-        ('7', '20000'),
-        ('8', '22900'),
-    )
-
-    TYPE_CHOICES = (
-        ('0', 'Seco'),
-        ('1', 'Aceite'),
-        ('2', 'Pedestal'),
-        ('3', 'Integrado'),
-        ('4', 'Subestacion'),
-        ('5', 'Poste'),
-    )
 
     id = models.AutoField(primary_key=True)
 
     idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True,related_name="prod_trafo_supplier")
     
+    # ========== KVA ==========
+    KVA_CHOICES = (
+        ('0', '75'),
+        ('1', '100'),
+        ('2', '150'),
+        ('3', '167'),
+        ('4', '225'),
+        ('5', '250'),
+        ('6', '300'),
+        ('7', '500'),
+        ('8', '750'),
+        ('9', '1000'),
+        ('10', '1500'),
+        ('11', '2000'),
+        ('12', '2000/3000'),
+        ('13', '2500'),
+        ('14', '2600'),
+        ('15', '3000'),
+        ('16', '3000/3750'),
+        ('17', '3750'),
+        ('18', '5000'), 
+    )
     KVA = models.CharField(
         'kVA CAPACITY',
         max_length=2,
@@ -146,36 +53,49 @@ class Trafos(TimeStampedModel):
         null=True
     )
 
-    HVTAP = models.CharField(
-        'HV TAP',
+    # ========== HIGH VOLTAGE ==========
+    HV_CHOICES = (
+        ('0', '4160'),
+        ('1', '7200'),
+        ('2', '8320'),
+        ('3', '12470'),
+        ('4', '13200'),
+        ('5', '13800'),
+        ('6', '14400'),
+        ('7', '21600'),
+        ('8', '22860'),
+        ('9', '23960'),
+        ('10', '24940'),
+        ('11', '34500'),
+    )
+    HV = models.CharField(
+        'HV',
         max_length=2,
-        choices=HVTAP_CHOICES,
+        choices=HV_CHOICES,
         blank=True, 
         null=True
     )
 
-    KTapHV = models.CharField(
-        'K Tap HV',
-        max_length=2,
-        choices=KTapHV_CHOICES,
-        blank=True, 
-        null=True
+    # ========== LOW VOLTAGE ==========
+    LV_CHOICES = (
+        ('0', '240/120'),
+        ('1', '480Y/277'),
+        ('2', '208Y/120'),
+        ('3', '4160Y/2400'),
+        ('4', '277/480Y'),
     )
-
-    FIXHV = models.CharField(
-        'FIX HV',
-        max_length=2,
-        choices=FIXHV_CHOICES,
-        blank=True, 
-        null=True
-    )
-
     LV = models.CharField(
         'LV',
         max_length=2,
         choices=LV_CHOICES,
         blank=True, 
         null=True
+    )
+
+    # ========== FREQUENCY ==========
+    HZ_CHOICES = (
+        ('0', '50'),
+        ('1', '60'),
     )
 
     HZ = models.CharField(
@@ -186,13 +106,68 @@ class Trafos(TimeStampedModel):
         null=True
     )
 
-    TYPE = models.CharField(
-        'TYPE',
+    # ========== PHASE ==========
+    MONO = "0"
+    THREE = "1"
+    PHASE_CHOICES = (
+        (MONO, 'Mono-phasic'),
+        (THREE, 'Three-phasic'),
+    )
+    PHASE_NICK = {
+        MONO: 'MO',
+        THREE: 'TP',
+    }
+    PHASE = models.CharField(
+        'PHASE',
         max_length=2,
         choices=PHASE_CHOICES,
         blank=True, 
         null=True
     )
+
+    # ========== DERIVATIONS ==========
+    TAPS = "0"
+    KTAPS = "1"
+    DERIVATIONS_CHOICES = (
+        (TAPS, 'TAPS'),
+        (KTAPS, 'KTAPS'),
+    )
+    DERIVATIONS = models.CharField(
+        'Derivations',
+        max_length=2,
+        choices=DERIVATIONS_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    KTAPSVALUES = ArrayField(
+        models.IntegerField(),
+        default=list,
+        blank=True,
+        null=True
+    )
+
+    # ==== MOUNTING ====
+    POLE = "0"
+    PEDESTAL = "1"
+    PLATFORM = "2"
+    UNDERGROUND = "3"
+    SUBSTATION = "4"
+
+    MOUNTING_CHOICES = (
+        (POLE, 'Pole'),
+        (PEDESTAL, 'Pedestal'),
+        (PLATFORM, 'Platform'),
+        (UNDERGROUND, 'Underground'),
+        (SUBSTATION, 'Substation'),
+    )
+    MOUNTING_NICK = {
+        POLE: 'PM',
+        PEDESTAL: 'PED',
+        PLATFORM: 'PLA',
+        UNDERGROUND: 'UND',
+        SUBSTATION: 'SUB',
+    }
 
     MOUNTING = models.CharField(
         'MOUNTING TYPE',
@@ -200,6 +175,31 @@ class Trafos(TimeStampedModel):
         choices=MOUNTING_CHOICES,
         blank=True, 
         null=True
+    )
+
+    # ==== COOLING ====
+    ONAN = "0"
+    ONAF = "1"
+    KNAN = "2"
+    KNAF = "3"
+    AN = "4"
+    AF = "5"
+    OFAN = "6"
+    OFAF = "7"
+    ONWF = "8"
+    OFWF = "9"
+
+    COOLING_CHOICES = (
+        (ONAN, 'ONAN'),
+        (ONAF, 'ONAF'),
+        (KNAN, 'KNAN'),
+        (KNAF, 'KNAF'),
+        (AN, 'AN'),
+        (AF, 'AF'),
+        (OFAN, 'OFAN'),
+        (OFAF, 'OFAF'),
+        (ONWF, 'ONWF'),
+        (OFWF, 'OFWF'),
     )
 
     COOLING = models.CharField(
@@ -210,6 +210,12 @@ class Trafos(TimeStampedModel):
         null=True
     )
 
+    # ==== WINDING ====
+    WINDING_CHOICES = (
+        ('0', 'Al'),
+        ('1', 'Cu'),
+    )
+
     WINDING = models.CharField(
         'WINDING',
         max_length=2,
@@ -218,20 +224,30 @@ class Trafos(TimeStampedModel):
         null=True
     )
 
-    INSULAT = models.CharField(
-        'INSULAT CLASS',
-        max_length=2,
-        choices=INSULAT_CHOICES,
-        blank=True, 
-        null=True
+    # ==== CONNECTION ====
+    CONNECTION_CHOICES = (
+        ('0', 'Dyn1'),
+        ('1', 'Dyn11'),
+        ('2', 'Yyn0'),
+        ('3', 'YNyn0'),
+        ('4', 'Dzn0'),
+        ('5', 'Yd11'),
+        ('6', 'lio'),
     )
-
     CONNECTION = models.CharField(
         'CONNECTION',
         max_length=2,
         choices=CONNECTION_CHOICES,
         blank=True, 
         null=True
+    )
+
+    # ==== STANDARD ====
+    STANDARD_CHOICES = (
+        ('0', 'IEEE C57.12.00'), # subestaciones
+        ('1', 'IEEE C57.12.20'), # monofasicos aéreos
+        ('2', 'IEEE C57.12.21'), # monofasicos tipo pedestal
+        ('3', 'IEEE C57.12.34'), # pedestales
     )
 
     STANDARD = models.CharField(
@@ -249,4 +265,4 @@ class Trafos(TimeStampedModel):
         verbose_name_plural = 'Transformadores'
 
     def __str__(self):
-        return f"{self.PHASE_NICK.get(self.TYPE, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')}{self.get_KVA_display()}"
+        return f"{self.PHASE_NICK.get(self.PHASE, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')}{self.get_KVA_display()}"

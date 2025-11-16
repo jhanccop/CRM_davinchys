@@ -1,0 +1,191 @@
+{% extends 'home/base-home.html' %}
+{% load static %}
+
+{% block title %} FAT's Search {% endblock title %}
+
+{% block content %}
+
+<br><br>
+<div class="row pt-4">
+    <div class="col-12 col-lg-8 mx-auto my-4">
+        <div class="card">
+            <div class="card-body">
+                <form class="multisteps-form__form" style="height: 100px;">
+                    <!--single form panel-->
+                    <div class="multisteps-form__panel js-active" data-animation="FadeIn">
+                        <div class="row text-center">
+                            <div class="col-10 mx-auto">
+                                <h5 class="font-weight-normal">Enter serial number</h5>
+                            </div>
+                        </div>
+                        <div class="multisteps-form__content">
+                            <form method="GET" class="">{% csrf_token %}
+                            <div class="row mt-3">
+                                <div class="col-12 col-sm-8 mt-8 mt-sm-0 text-center">
+                                    <div class="input-group input-group-outline focused is-focused mb-4">
+                                        <label class="form-label">  Serial number</label>
+                                        <input type="text" class="form-control focused is-focused " value="{{Items.order}}" id="order" name="order">
+                                    </div>
+
+                                </div>
+                                <div class="col-12 col-sm-4 mt-4 mt-sm-0 text-start">
+                                    <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="submit"
+                                        title="Next">search</button>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-lg-8 mx-auto my-5 mt-0">
+        {% if Items.tracking %}
+        <div class="card h-100 mt-4 mt-md-0">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex align-items-center">
+                    <h6>Transformer tracking</h6>
+                </div>
+            </div>
+            <div class="card-body px-3 pt-0 pb-2">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">TYPE</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo}}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">Serial Number</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.seq}}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">KVA</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_KVA_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0"> HV</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_HV_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">LV</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_LV_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">PHASE</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_PHASE_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">COOLING TYPE</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_COOLING_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">WINDING</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_WINDING_display}}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">PO NUMBER</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">PO-{{Items.order}}</p>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center justify-content-center mb-0">
+
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">EQUIPMENT STATUS</p>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-pill bg-gradient-primary">NOT YET</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">PLATE STATUS</p>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-pill bg-gradient-primary">NOT YET</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">FAT STATUS</p>
+                                        </td>
+                                        <td>
+                                            <a href=""><span
+                                                    class="badge badge-pill bg-gradient-success">DOWNLOAD</span></a>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+        <h6>Not found</h6>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

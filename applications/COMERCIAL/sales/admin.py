@@ -7,7 +7,8 @@ from .models import (
     Incomes,
     quotes,
     QuoteTracking,
-    Items
+    Items,
+    ItemTracking
 )
 
 ## ==================== ExpensesDocuments =====================
@@ -102,3 +103,21 @@ class QuoteTrackingAdmin(ImportExportModelAdmin):
     list_filter = ('idquote',)
     #autocomplete_fields = ['idPetitioner',]
 
+## ==================== TRACKING ITEMS TRANSFORMADORES =====================
+class ItemTrackingResource(resources.ModelResource):
+    class Meta:
+        model = ItemTracking
+
+@admin.register(ItemTracking)
+class ItemTrackingAdmin(ImportExportModelAdmin):
+    resource_class = ItemTrackingResource
+
+    list_display = (
+        'id',
+        'created',
+        'idItem',
+        'statusItem',
+        'statusPlate',
+    )
+    search_fields = ('statusItem',)
+    list_filter = ('statusItem',)

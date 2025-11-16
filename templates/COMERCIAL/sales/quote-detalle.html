@@ -102,11 +102,9 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th class="text-end">Serial</th>
-                        <th class="text-end">KVA</th>
-                        <th class="text-end">KTapHV</th>
-                        <th class="text-end">HVTAP</th>
-                        <th class="text-end">LV</th>
+                        <th class="text-end">Tipo - Serial</th>
+                        <th class="text-end">Equipment Status</th>
+                        <th class="text-end">Plate Status</th>
                         <th class="text-end">Costo Unitario</th>
                         <th class="text-end">Acciones</th>
                     </tr>
@@ -115,12 +113,26 @@
                     {% for trafo in trafos %}
                     <tr>
                         <td class="text-end">{{ trafo }}</td>
-                        <td class="text-end">{{ trafo.idTrafo.get_KVA_display }}</td>
-                        <td class="text-end">{{ trafo.idTrafo.get_KTapHV_display }}</td>
-                        <td class="text-end">{{ trafo.idTrafo.get_HVTAP_display }}</td>
-                        <td class="text-end">{{ trafo.idTrafo.get_LV_display }}</td>
+                        <td class="text-end">
+                            {% if trafo.itemTracking.all.last.statusItem == "6"  %}
+                            <span class="badge badge-success">{{ trafo.itemTracking.all.last.get_statusItem_display }}</span>
+                            {% else %}
+                            <span class="badge badge-secondary">{{ trafo.itemTracking.all.last.get_statusItem_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if trafo.itemTracking.all.last.statusPlate == "6"  %}
+                            <span class="badge badge-success">{{ trafo.itemTracking.all.last.get_statusPlate_display }}</span>
+                            {% else %}
+                            <span class="badge badge-secondary">{{ trafo.itemTracking.all.last.get_statusPlate_display }}</span>
+                            {% endif %}
+                        </td>
                         <td class="text-end">{{ trafo.unitCost }}</td>
                         <td class="text-end">
+                            <a href="{% url 'ventas_app:actualizar-estado-item' trafo.id %}">
+                                <i class="fas fa-truck text-success text-lg"></i>
+                            </a>
+                            &ensp;
                             <a href="{% url 'ventas_app:detalle-item' trafo.id %}">
                                 <i class="far fa-eye text-info text-lg"></i>
                             </a>
@@ -141,6 +153,7 @@
         </div>
     </div>
 </div>
+
 
 {% endblock panel-content %}
 

@@ -47,11 +47,13 @@ from applications.clientes.models import (
 
 from applications.COMERCIAL.stakeholders.models import client
 from applications.PRODUCTION.models import Trafos
+from applications.COMERCIAL.sales.models import Items,ItemTracking
 
 from .forms import (
   IncomesForm,
   quotesForm,
-  ItemForm
+  ItemForm,
+  ItemTrackingForm
   )
 
 class QuotesListView(ComercialMixin,ListView):
@@ -553,7 +555,7 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
                         item = Items.objects.create(
                             idTrafoQuote=self.object,  # Instancia de quotes
                             idTrafo=trafo,            # Instancia de Trafos
-                            seq=seq_counter,          # Secuencial único global
+                            #seq=seq_counter,          # Secuencial único global
                             #quantity=1,               # Cada item representa 1 unidad
                             unitCost=unit_cost
                         )
@@ -639,3 +641,34 @@ class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
         pk = self.kwargs["pk"]
         item = Items.objects.get(id = pk)
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+
+# ================= ACTUALIZAR SEGUIMIENTO ITEMS ========================
+class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):
+    template_name = "COMERCIAL/sales/actualizar-estado-item.html"
+    model = ItemTracking
+    form_class = ItemTrackingForm
+
+    def get_context_data(self,**kwargs):
+        pk = self.kwargs['pk']
+        context = super().get_context_data(**kwargs)
+        context['pk'] = pk
+        context['tracking'] = ItemTracking.objects.filter(idItem = pk)
+        return context
+    
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        item = Items.objects.get(id = pk)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+
+
+# ================= DETAIL ITEMS FOR USER ======================== 
+class DetailSerialNumberView(ListView):
+    template_name = "COMERCIAL/sales/detail-serial-number.html"
+    context_object_name = 'Items'
+
+    def get_queryset(self):
+        order = self.request.GET.get("order", '')
+        payload = {}
+        payload["order"] = order
+        payload["tracking"] = Items.objects.filter(seq = order)
+        return payload

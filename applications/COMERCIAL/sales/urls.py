@@ -19,6 +19,14 @@ urlpatterns = [
     path('comercial/cotizaciones/editar/item/<pk>/', views.UpdateTrafoItemView.as_view(), name='editar-item'),
     path('comercial/cotizaciones/detalle/item/<pk>/', views.DetailTrafoItemView.as_view(), name='detalle-item'),
     path('comercial/cotizaciones/elimnar/item/<pk>/', views.DeleteTrafoItemView.as_view(), name='eliminar-item'),
+
+    # ==================== ITEMS UPDATE TRACKING ====================
+    path('comercial/cotizaciones/seguimiento/actualizar/<pk>/',views.UpdateTrackingItemView.as_view(),name='actualizar-estado-item'),
+
+    # ==================== FAQ SEARCH ====================
+    path('comercial/fats-search/',views.DetailSerialNumberView.as_view(),name='detail-serial-number'),
+
+    
     
     #path('comercial/cotizaciones/editar/<pk>/', views.IncomesEditView.as_view(), name='ventas-editar'),
     #path('comercial/cotizaciones/detalle/<pk>/', views.IncomesDetailView.as_view(), name='ventas-detalle'),

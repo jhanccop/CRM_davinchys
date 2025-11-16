@@ -1,0 +1,118 @@
+{% extends "COMERCIAL/sales/base-quotes.html" %}
+
+{% load static %}
+{% block title %} Ventas {% endblock title %}
+{% block main %} Ventas {% endblock main %}
+{% block appName %} Cotizaciones {% endblock appName %}
+{% block Type %} {% if object %}Actualizar{% else %}Añadir{% endif %} - Estado {% endblock Type %}
+
+{% block panel-content %}
+
+<div class="card">
+    <div class="card-body">
+
+        <h5 class=" mb-4"> 
+            {% if object %}
+                Añadir Item {{ object.idTrafo }}-{{ object.seq }} de cotización {{object.idTrafoQuote}}
+            {% else %}
+                Añadir estado a seguimiento de Transformador {{pk}}
+            {% endif %}
+        </h5>
+
+        <h6>Historial de eventos</h5>
+
+        <div class="timeline timeline-one-side">
+
+            {% for event in tracking %}
+            <div class="timeline-block mb-3">
+                <span class="timeline-step">
+                    {% if event.statusItem == "0" %}
+                    <i class="fas fa-check text-secondary text-gradient text-lg"></i>
+                    {% elif event.statusItem == "1" %}
+                    <i class="fas fa-building text-secondary text-gradient text-lg"></i>
+                    {% elif event.statusItem == "2" %}
+                    <i class="fas fa-ship text-secondary text-gradient text-lg"></i>
+                    {% elif event.statusItem == "3" %}
+                    <i class="fas fa-flag-checkered text-secondary text-gradient text-lg"></i>
+                    {% elif event.statusItem == "4" %}
+                    <i class="fas fa-check text-secondary text-gradient text-lg"></i>
+                    {% endif %}
+                </span>
+
+                <div class="timeline-content">
+                    <h6 class="text-dark text-sm font-weight-bold mb-0">{{event.get_statusItem_display}}</h6>
+                    <p class="text-secondary font-weight-normal text-xs mt-1 mb-0"> {{event.created}} </p>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {{tracking}}
+
+        <form id="quoteForm" method="post">
+        {% csrf_token %}
+
+            <div id="trafoFormContainer">
+
+                <!-- Campo oculto para idTrafoQuote -->
+                <div class="row">
+                    <div class="col-12" >
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label">{{ form.idItem.label }}</label>
+                            {{ form.idItem }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-sm-6">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label">{{ form.statusItem.label }}</label>
+                            {{ form.statusItem }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                        <div class="input-group input-group-outline focused is-focused">
+                            <label class="form-label">{{ form.statusPlate.label }}</label>
+                            {{ form.statusPlate }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+            {% if object %}Actualizar{% else %}Crear{% endif %} Item
+        </button>
+
+        {% if object %}
+        <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id  %}" class="btn btn-secondary mt-3 mb-0">
+            Cancelar
+        </a>
+        {% else%}
+        <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
+            Cancelar
+        </a>
+        {% endif %}
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+    // Establecer el valor de idTrafoQuote con el pk de la cotización (solo en creación)
+    document.addEventListener('DOMContentLoaded', function() {
+        const idTrafoQuoteField = document.getElementById("id_idItem");
+        if (idTrafoQuoteField && !{{ object|yesno:"true,false" }}) {
+            idTrafoQuoteField.value = "{{pk}}";
+        }
+    });
+</script>
+
+{% endblock JSscripts %}

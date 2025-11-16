@@ -5,9 +5,9 @@ class TrafosForm(forms.ModelForm):
     class Meta:
         model = Trafos
         fields = [
-            'idSupplier', 'KVA', 'HVTAP', 'KTapHV', 'FIXHV', 'LV', 'HZ', 
-            'TYPE', 'MOUNTING', 'COOLING', 'WINDING', 'INSULAT', 
-            'CONNECTION', 'STANDARD'
+            'idSupplier', 'DERIVATIONS','KVA','HV', 'LV', 'HZ', 
+            'PHASE', 'MOUNTING', 'COOLING', 'WINDING', 
+            'CONNECTION', 'STANDARD','KTAPSVALUES'
         ]
         widgets = {
             'idSupplier': forms.Select(attrs={
@@ -19,15 +19,7 @@ class TrafosForm(forms.ModelForm):
                 #'data-control': 'select2',
                 #'data-placeholder': 'Seleccionar kVA'
             }),
-            'HVTAP': forms.Select(attrs={
-                'class': 'form-control',
-                #'data-control': 'select2'
-            }),
-            'KTapHV': forms.Select(attrs={
-                'class': 'form-control',
-                #'data-control': 'select2'
-            }),
-            'FIXHV': forms.Select(attrs={
+            'HV': forms.Select(attrs={
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
@@ -39,7 +31,7 @@ class TrafosForm(forms.ModelForm):
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
-            'TYPE': forms.Select(attrs={
+            'PHASE': forms.Select(attrs={
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
@@ -51,11 +43,11 @@ class TrafosForm(forms.ModelForm):
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
-            'WINDING': forms.Select(attrs={
+            'DERIVATIONS': forms.Select(attrs={
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
-            'INSULAT': forms.Select(attrs={
+            'WINDING': forms.Select(attrs={
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
@@ -67,22 +59,25 @@ class TrafosForm(forms.ModelForm):
                 'class': 'form-control',
                 #'data-control': 'select2'
             }),
+            'KTAPSVALUES': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 10, 20, 30, 40'
+            }),
         }
         labels = {
             'idSupplier': 'Proveedor',
             'KVA': 'Capacidad kVA',
-            'HVTAP': 'Tap HV',
-            'KTapHV': 'K Tap HV',
-            'FIXHV': 'FIX HV',
+            'HV': 'Tap HV',
             'LV': 'LV',
             'HZ': 'Frecuencia',
-            'TYPE': 'Tipo de Fase',
+            'PHASE': 'Fases',
             'MOUNTING': 'Tipo de Montaje',
             'COOLING': 'Enfriamiento',
             'WINDING': 'Devanado',
             'INSULAT': 'Clase de Aislamiento',
             'CONNECTION': 'Conexión',
             'STANDARD': 'Estándar',
+            'KTAPSVALUES': "Lista Ktaps"
         }
 
 class TrafosFilterForm(forms.Form):
