@@ -19,7 +19,7 @@
             {% endif %}
         </h5>
 
-        <form id="quoteForm" method="post">
+        <form id="quoteForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
             <div id="trafoFormContainer">
@@ -52,6 +52,23 @@
                             <label class="form-label">{{ form.unitCost.label }}</label>
                             {{ form.unitCost }}
                         </div>
+                    </div>
+                </div>
+
+                <div class="row pt-4">
+                    <div class="col-12 col-sm-12 mt-sm-0">
+                    <h6 class="mb-0">Adjuntar FAT</h6>
+                    <div class="input-group input-group-outline">
+                        <div class="form-group w-100">
+                        {{ form.fat_file }}
+                        </div>
+                    </div>
+                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                    {% for error in form.fat_file.errors %}
+                    <p class="text-xs text-primary mb-0">
+                        {{ error|escape }}
+                    </p>
+                    {% endfor %}
                     </div>
                 </div>
 

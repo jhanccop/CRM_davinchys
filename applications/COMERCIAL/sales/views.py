@@ -34,7 +34,8 @@ from .models import (
   quotes,
   #Trafos,
   QuoteTracking,
-  Items
+  Items,
+  ItemTracking
 )
 
 from applications.cuentas.models import (
@@ -661,7 +662,7 @@ class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
 
 
-# ================= DETAIL ITEMS FOR USER ======================== 
+# ================= DETAIL ITEMS FOR CLIENT ======================== 
 class DetailSerialNumberView(ListView):
     template_name = "COMERCIAL/sales/detail-serial-number.html"
     context_object_name = 'Items'
@@ -671,4 +672,5 @@ class DetailSerialNumberView(ListView):
         payload = {}
         payload["order"] = order
         payload["tracking"] = Items.objects.filter(seq = order)
+        payload["itemTracking"] = ItemTracking.objects.filter(idItem__seq = order).last
         return payload

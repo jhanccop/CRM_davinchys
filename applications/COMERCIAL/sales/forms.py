@@ -319,7 +319,7 @@ class ItemForm(forms.ModelForm):
             'idTrafo',
             'seq',
             'unitCost',
-
+            'fat_file'
         )
         widgets = {
             'idTrafoQuote': forms.Select(
@@ -346,7 +346,25 @@ class ItemForm(forms.ModelForm):
                     'min': '0'
                 }
             ),
+            'fat_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"fat_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_fat_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
         }
+    
+    def clean_fat_file(self):
+        fat_file = self.cleaned_data.get('fat_file')
+        if fat_file:
+            if not fat_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if fat_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return fat_file
 
 class ItemTrackingForm(forms.ModelForm):
     class Meta:
@@ -368,7 +386,7 @@ class ItemTrackingForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'statusPlate': forms.TextInput(
+            'statusPlate': forms.Select(
                 attrs = {
                     'placeholder': '',
                     'class': 'input-group-field form-control',

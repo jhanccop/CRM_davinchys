@@ -149,10 +149,23 @@
                                 <tbody>
                                     <tr>
                                         <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">LAST UPDATE</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.itemTracking.created}}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
                                             <p class="text-sm font-weight-bolder mb-0 text-dark">EQUIPMENT STATUS</p>
                                         </td>
                                         <td>
-                                            <span class="badge badge-pill bg-gradient-primary">NOT YET</span>
+                                            {% if Items.itemTracking.statusItem == "4" %}
+                                            <span class="badge badge-pill bg-gradient-success">{{Items.itemTracking.get_statusItem_display}}</span>
+                                            {% else %}
+                                            <span class="badge badge-pill bg-gradient-dark">{{Items.itemTracking.get_statusItem_display}}</span>
+                                            {% endif %}
+                                            
                                         </td>
                                     </tr>
                                     <tr>
@@ -160,7 +173,11 @@
                                             <p class="text-sm font-weight-bolder mb-0 text-dark">PLATE STATUS</p>
                                         </td>
                                         <td>
-                                            <span class="badge badge-pill bg-gradient-primary">NOT YET</span>
+                                            {% if Items.itemTracking.statusPlate == "4" %}
+                                            <span class="badge badge-pill bg-gradient-success">{{Items.itemTracking.get_statusPlate_display}}</span>
+                                            {% else %}
+                                            <span class="badge badge-pill bg-gradient-dark">{{Items.itemTracking.get_statusPlate_display}}</span>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     <tr>
@@ -168,8 +185,13 @@
                                             <p class="text-sm font-weight-bolder mb-0 text-dark">FAT STATUS</p>
                                         </td>
                                         <td>
-                                            <a href=""><span
-                                                    class="badge badge-pill bg-gradient-success">DOWNLOAD</span></a>
+                                            {% if Items.tracking.0.fat_file %}
+                                            <a href="{{ Items.tracking.0.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                            <span class="badge badge-pill bg-gradient-success">DOWNLOAD</span>
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-gradient-secondary">No yet</span>
+                                            {% endif %}
 
                                         </td>
                                     </tr>

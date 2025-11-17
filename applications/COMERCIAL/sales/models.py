@@ -133,8 +133,8 @@ class Items(TimeStampedModel):
     fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
 
     def delete(self, *args, **kwargs):
-        self.pdf_file.delete()
-        super(POvouchers, self).delete(*args, **kwargs)
+        self.fat_file.delete()
+        super(Items, self).delete(*args, **kwargs)
 
     #objects = TrafosManager()
 
@@ -171,7 +171,7 @@ class ItemTracking(TimeStampedModel):
         choices=STATE_CHOICES,
         null = True,
         blank = True,
-        default=SOLICITADO
+       # default=SOLICITADO
     )
 
     statusPlate = models.CharField(
@@ -180,7 +180,7 @@ class ItemTracking(TimeStampedModel):
         choices=STATE_CHOICES,
         null = True,
         blank = True,
-        default=SOLICITADO
+        #default=SOLICITADO
     )
 
     #objects = QuoteTrackingManager()
@@ -191,7 +191,6 @@ class ItemTracking(TimeStampedModel):
     
     def __str__(self):
         return f"{self.idItem} | {self.get_statusItem_display()} | {self.get_statusPlate_display()}"
-
 
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """
