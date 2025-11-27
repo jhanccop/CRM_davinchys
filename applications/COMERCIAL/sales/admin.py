@@ -8,6 +8,7 @@ from .models import (
     quotes,
     QuoteTracking,
     Items,
+    ItemImage,
     ItemTracking
 )
 
@@ -77,11 +78,32 @@ class ItemsAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'idTrafoQuote',
-        'idTrafo',
         'seq',
+        'PHASE',
+        'COOLING',
+        'MOUNTING',
+        'KVA'
     )
-    search_fields = ('idTrafoQuote','idTrafo')
-    list_filter = ('idTrafo',)
+    search_fields = ('idTrafoQuote',)
+    list_filter = ('idTrafoQuote',)
+
+## ==================== IMAGEN ITEMS TRANSFORMADORES =====================
+class ItemImageResource(resources.ModelResource):
+    class Meta:
+        model = ItemImage
+
+@admin.register(ItemImage)
+class ItemImageAdmin(ImportExportModelAdmin):
+    resource_class = ItemImageResource
+
+    list_display = (
+        'id',
+        'item',
+        'is_main',
+        'description',
+    )
+    search_fields = ('item',)
+    list_filter = ('item',)
 
 ## ==================== TRACKING QUOTES =====================
 class QuoteTrackingResource(resources.ModelResource):

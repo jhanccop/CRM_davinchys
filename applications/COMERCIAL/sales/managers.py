@@ -146,12 +146,11 @@ class quotesManager(models.Manager):
         ).order_by('-created')
 
         # CORRECCIÓN: Usar el related_name correcto
-        # En tu modelo Items, el related_name es "item_Quote" para idTrafoQuote
-        items_prefetch = Prefetch(
-            'item_Quote',  # ← Este es el related_name correcto
-            queryset=Items.objects.select_related('idTrafo'),  # Optimizar con select_related
-            to_attr='items'
-        )
+        #items_prefetch = Prefetch(
+        #    'item_Quote',  # ← Este es el related_name correcto
+        #    queryset=Items.objects.select_related('idTrafo'),  # Optimizar con select_related
+        #    to_attr='items'
+        #)
 
         # Consulta principal con annotate para el último tracking y prefetch para los items
         result = self.filter(
@@ -172,7 +171,7 @@ class quotesManager(models.Manager):
                 default=Value('Desconocido'),
                 output_field=CharField()
             )
-        ).prefetch_related(items_prefetch).distinct()  # Agregar distinct para evitar duplicados
+        )#.prefetch_related(items_prefetch).distinct()  # Agregar distinct para evitar duplicados
 
         return result
     

@@ -1,10 +1,10 @@
-{% extends "COMERCIAL/sales/base-quotes.html" %}
+{% extends "base.html" %}
 
-{% load  static %}
-{% block title %} Ventas {% endblock title %}
-{% block main %} Ventas {% endblock main %}
-{% block appName %} Cotizaciones {% endblock appName %}
-{% block Type %} Detalle - Item {% endblock Type %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
+{% block navbar_Type %}Detalle Item{% endblock %}
 
 {% block panel-content %}
 
@@ -34,25 +34,64 @@
                                 <i class="fas fa-info-circle me-2"></i>Información Básica
                             </h5>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body mb-0 pb-0">
                             <div class="info-item mb-3">
-                                <small class="text-muted">Número de Serie</small>
-                                <h4 class="fw-bold text-primary">{{ object.serialNumber|default:"N/A" }}</h4>
+                                <div class="info-item mb-3">
+                                        <small class="text-muted">Tipo</small>
+                                        <h4 class="fw-bold text-primary">DT{{ object.get_PHASE_nick|default:"-" }}{{ object.get_COOLING_nick|default:"-" }}{{ object.get_MOUNTING_nick|default:"-" }} </h4>
+                                    </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
                                     <div class="info-item mb-3">
-                                        <small class="text-muted">Cantidad</small>
-                                        <p class="fw-bold fs-5 text-success">{{ object.quantity|default:0 }}</p>
+                                        <small class="text-muted">Número de Serie</small>
+                                        <h4 class="fw-bold text-primary">{{ object.seq|default:"N/A" }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Costo Unitario</small>
-                                        <p class="fw-bold fs-5 text-danger">{{ object.idTrafoQuote.get_currency_display }} {{ object.unitCost|floatformat:2|default:"0.00" }}</p>
+                                        <p class="fw-bold fs-5 text-info">{{ object.idTrafoQuote.get_currency_display }} {{ object.unitCost|floatformat:2|default:"0.00" }}</p>
                                     </div>
                                 </div>
                             </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                    {% if object.fat_file %}
+                                    <a href="{{ object.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                    <span class="badge bg-gradient-success text-md">VIEW FAT FILE</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-gradient-secondary text-md">NO FAT FILE</span>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                        {% if object.drawing_file %}
+                                        <a href="{{ object.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        <span class="badge bg-gradient-success text-md">VIEW DRAWING FILE</span>
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary text-md">No DRAWING FILE</span>
+                                        {% endif %}
+
+                                    </div>
+                            </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                        {% if object.plate_file %}
+                                        <a href="{{ object.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        <span class="badge bg-gradient-success text-md">VIEW PLATE FILE</span>
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary text-md">No PLATE FILE</span>
+                                        {% endif %}
+
+                                    </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -70,38 +109,37 @@
                                 <div class="col-md-4">
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Capacidad kVA</small>
-                                        <p class="fw-bold">{{ object.idTrafo.get_KVA_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.get_KVA_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
-                                        <small class="text-muted">HV TAP</small>
-                                        <p class="fw-bold">{{ object.get_HVTAP_display|default:"N/A" }}</p>
-                                    </div>
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">K Tap HV</small>
-                                        <p class="fw-bold">{{ object.get_KTapHV_display|default:"N/A" }}</p>
-                                    </div>
-                                    
-                                </div>
-                                <div class="col-md-4">
-                                    
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">FIX HV</small>
-                                        <p class="fw-bold">{{ object.get_FIXHV_display|default:"N/A" }}</p>
+                                        <small class="text-muted">HV</small>
+                                        <p class="fw-bold text-dark">{{ object.get_HV_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">LV</small>
-                                        <p class="fw-bold">{{ object.get_LV_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.get_LV_display|default:"N/A" }}</p>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">HZ</small>
+                                        <p class="fw-bold text-dark">{{ object.get_HZ_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
-                                        <small class="text-muted">Frecuencia (HZ)</small>
-                                        <p class="fw-bold">{{ object.get_HZ_display|default:"N/A" }}</p>
+                                        <small class="text-muted">WINDING</small>
+                                        <p class="fw-bold text-dark">{{ object.get_WINDING_display|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">CONNECTION</small>
+                                        <p class="fw-bold text-dark">{{ object.get_CONNECTION_display|default:"N/A" }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     
                                     <div class="info-item mb-3">
-                                        <small class="text-muted">Tipo</small>
-                                        <p class="fw-bold">{{ object.get_TYPE_display|default:"N/A" }}</p>
+                                        <small class="text-muted">STANDARD</small>
+                                        <p class="fw-bold">{{ object.get_STANDARD_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Montaje</small>
@@ -110,41 +148,6 @@
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Enfriamiento</small>
                                         <p class="fw-bold">{{ object.get_COOLING_display|default:"N/A" }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Características Adicionales -->
-                <div class="col-lg-6 col-md-6 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-gradient-secondary p-3">
-                            <h5 class="card-title mb-0 text-white">
-                                <i class="fas fa-sliders-h me-2"></i>Características Eléctricas
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Devanado</small>
-                                        <p class="fw-bold">{{ object.get_WINDING_display|default:"N/A" }}</p>
-                                    </div>
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Clase de Aislamiento</small>
-                                        <p class="fw-bold">{{ object.get_INSULAT_display|default:"N/A" }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Conexión</small>
-                                        <p class="fw-bold">{{ object.get_CONNECTION_display|default:"N/A" }}</p>
-                                    </div>
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Estándar</small>
-                                        <p class="fw-bold">{{ object.get_STANDARD_display|default:"N/A" }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +203,7 @@
                 </div>
 
                 <!-- Metadata -->
-                <div class="col-12">
+                <div class="col-lg-6 col-md-6 mb-4">
                     <div class="card shadow-sm">
                         <div class="card-header bg-gradient-secondary p-3">
                             <h5 class="card-title mb-0 text-white">

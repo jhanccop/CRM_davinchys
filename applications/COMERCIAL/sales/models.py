@@ -6,6 +6,8 @@ from applications.cuentas.models import Tin, Account # COMPAÑIAS PROPIETARIAS
 #from applications.clientes.models import Cliente
 from applications.COMERCIAL.stakeholders.models import client, supplier # Clientes
 from applications.PRODUCTION.models import Trafos
+from django.core.exceptions import ValidationError
+
 
 from .managers import (
     IncomesManager,
@@ -107,13 +109,13 @@ class quotes(TimeStampedModel):
 
 class Items(TimeStampedModel):
     """
-        ITEMS INDIVIDUALES
+        TRANSFORMADORES INDIVIDUALES
     """
     #from applications.LOGISTICA.transport.models import Container
     #idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_container")
 
+    # ========== DATOS COMERCIALES ==========
     idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
-    idTrafo = models.ForeignKey(Trafos, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Trafo")
     seq = models.CharField(
         "Serial",
         max_length=20,
@@ -121,7 +123,6 @@ class Items(TimeStampedModel):
         null=True,
         #unique=True
     )
-
     unitCost = models.DecimalField(
         'Costo unitario', 
         max_digits=10, 
@@ -131,9 +132,258 @@ class Items(TimeStampedModel):
     )
 
     fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
+    drawing_file = models.FileField(upload_to='drawing_docss/',null=True,blank=True)
+    plate_file = models.FileField(upload_to='plate_docss/',null=True,blank=True)
 
+    #  ========== TIPO ==========
+    #  PHASE 
+    MONO = "0"
+    THREE = "1"
+    PHASE_CHOICES = (
+        (MONO, 'Mono-phasic'),
+        (THREE, 'Three-phasic'),
+    )
+    PHASE_NICK = {
+        MONO: 'MO',
+        THREE: 'TP',
+    }
+    PHASE = models.CharField(
+        'PHASE',
+        max_length=2,
+        choices=PHASE_CHOICES,
+        blank=True, 
+        null=True
+    )
+    
+    def get_PHASE_nick(self):
+        return self.PHASE_NICK.get(self.PHASE, '-')
+
+    #  COOLING 
+    ONAN = "0"
+    ONAF = "1"
+    KNAN = "2"
+    KNAF = "3"
+    AN = "4"
+    AF = "5"
+    OFAN = "6"
+    OFAF = "7"
+    ONWF = "8"
+    OFWF = "9"
+
+    COOLING_CHOICES = (
+        (ONAN, 'ONAN'),
+        (ONAF, 'ONAF'),
+        (KNAN, 'KNAN'),
+        (KNAF, 'KNAF'),
+        (AN, 'AN'),
+        (AF, 'AF'),
+        (OFAN, 'OFAN'),
+        (OFAF, 'OFAF'),
+        (ONWF, 'ONWF'),
+        (OFWF, 'OFWF'),
+    )
+
+    COOLING_NICK = {
+        ONAN: 'MO',
+        ONAF: 'MO',
+        KNAN: 'VM',
+        KNAF: 'VM',
+        AN: '',
+        AF: '',
+        OFAN: '',
+        OFAF: '',
+        ONWF: '',
+        OFWF: '',
+    }
+
+    COOLING = models.CharField(
+        'COOLING',
+        max_length=2,
+        choices=COOLING_CHOICES,
+        blank=True, 
+        null=True
+    )
+    def get_COOLING_nick(self):
+        return self.COOLING_NICK.get(self.COOLING, '-')
+    
+    #  MOUNTING 
+    POLE = "0"
+    PEDESTAL = "1"
+    PLATFORM = "2"
+    UNDERGROUND = "3"
+    SUBSTATION = "4"
+
+    MOUNTING_CHOICES = (
+        (POLE, 'Pole'),
+        (PEDESTAL, 'Pedestal'),
+        (PLATFORM, 'Platform'),
+        (UNDERGROUND, 'Underground'),
+        (SUBSTATION, 'Substation'),
+    )
+    
+    MOUNTING_NICK = {
+        POLE: 'PM',
+        PEDESTAL: 'PED',
+        PLATFORM: 'PLA',
+        UNDERGROUND: 'UND',
+        SUBSTATION: 'SUB',
+    }
+
+    MOUNTING = models.CharField(
+        'MOUNTING TYPE',
+        max_length=2,
+        choices=MOUNTING_CHOICES,
+        blank=True, 
+        null=True
+    )
+    def get_MOUNTING_nick(self):
+        return self.MOUNTING_NICK.get(self.MOUNTING, '-')
+    
+    # ========== CARACTERITICAS TECNICAS ==========
+    #  KVA 
+    KVA_CHOICES = (
+        ('0', '75'),
+        ('1', '100'),
+        ('2', '150'),
+        ('3', '167'),
+        ('4', '225'),
+        ('5', '250'),
+        ('6', '300'),
+        ('7', '500'),
+        ('8', '750'),
+        ('9', '1000'),
+        ('10', '1500'),
+        ('11', '2000'),
+        ('12', '2000/3000'),
+        ('13', '2500'),
+        ('14', '2600'),
+        ('15', '3000'),
+        ('16', '3000/3750'),
+        ('17', '3750'),
+        ('18', '5000'), 
+    )
+    KVA = models.CharField(
+        'kVA CAPACITY',
+        max_length=2,
+        choices=KVA_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  HIGH VOLTAGE 
+    HV_CHOICES = (
+        ('0', '4160'),
+        ('1', '7200'),
+        ('2', '8320'),
+        ('3', '12470'),
+        ('4', '13200'),
+        ('5', '13800'),
+        ('6', '14400'),
+        ('7', '21600'),
+        ('8', '22860'),
+        ('9', '23960'),
+        ('10', '24940'),
+        ('11', '34500'),
+    )
+    HV = models.CharField(
+        'HV',
+        max_length=2,
+        choices=HV_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  LOW VOLTAGE 
+    LV_CHOICES = (
+        ('0', '240/120'),
+        ('1', '480Y/277'),
+        ('2', '208Y/120'),
+        ('3', '4160Y/2400'),
+        ('4', '277/480Y'),
+    )
+    LV = models.CharField(
+        'LV',
+        max_length=2,
+        choices=LV_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  FREQUENCY 
+    HZ_CHOICES = (
+        ('0', '50'),
+        ('1', '60'),
+    )
+    HZ = models.CharField(
+        'FREQUENCY',
+        max_length=2,
+        choices=HZ_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  WINDING 
+    WINDING_CHOICES = (
+        ('0', 'Al'),
+        ('1', 'Cu'),
+    )
+    WINDING = models.CharField(
+        'WINDING',
+        max_length=2,
+        choices=WINDING_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  CONNECTION 
+    CONNECTION_CHOICES = (
+        ('0', 'Dyn1'),
+        ('1', 'Dyn11'),
+        ('2', 'Yyn0'),
+        ('3', 'YNyn0'),
+        ('4', 'Dzn0'),
+        ('5', 'Yd11'),
+        ('6', 'lio'),
+    )
+    CONNECTION = models.CharField(
+        'CONNECTION',
+        max_length=2,
+        choices=CONNECTION_CHOICES,
+        blank=True, 
+        null=True
+    )
+
+    #  STANDARD 
+    STANDARD_CHOICES = (
+        ('0', 'IEEE C57.12.00'), # subestaciones
+        ('1', 'IEEE C57.12.20'), # monofasicos aéreos
+        ('2', 'IEEE C57.12.21'), # monofasicos tipo pedestal
+        ('3', 'IEEE C57.12.34'), # pedestales
+    )
+    STANDARD = models.CharField(
+        'STANDARD',
+        max_length=2,
+        choices=STANDARD_CHOICES,
+        blank=True, 
+        null=True
+    )
+    
     def delete(self, *args, **kwargs):
-        self.fat_file.delete()
+        """
+        Elimina todos los archivos asociados al modelo antes de eliminar el registro
+        """
+        # Eliminar fat_file
+        if self.fat_file:
+            self.fat_file.delete(save=False)
+        
+        # Eliminar drawing_file
+        if self.drawing_file:
+            self.drawing_file.delete(save=False)
+        
+        # Eliminar plate_file
+        if self.plate_file:
+            self.plate_file.delete(save=False)
+        
         super(Items, self).delete(*args, **kwargs)
 
     #objects = TrafosManager()
@@ -143,7 +393,7 @@ class Items(TimeStampedModel):
         verbose_name_plural = 'Items Transformadores'
 
     def __str__(self):
-        return f"{self.idTrafo} - {self.seq} "
+        return f"DT{self.PHASE_NICK.get(self.PHASE, '')}{self.COOLING_NICK.get(self.COOLING, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')} {self.get_KVA_display()} - {self.seq} "
    
 class ItemTracking(TimeStampedModel):
     """
@@ -191,6 +441,60 @@ class ItemTracking(TimeStampedModel):
     
     def __str__(self):
         return f"{self.idItem} | {self.get_statusItem_display()} | {self.get_statusPlate_display()}"
+
+class ItemImage(TimeStampedModel):
+    """Modelo para almacenar múltiples imágenes de un Item"""
+    item = models.ForeignKey(
+        'Items', 
+        on_delete=models.CASCADE, 
+        related_name='images'
+    )
+    image = models.ImageField(
+        upload_to='item_images/',
+        verbose_name='Imagen del producto'
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Orden de visualización'
+    )
+    is_main = models.BooleanField(
+        default=False,
+        verbose_name='Imagen principal'
+    )
+    description = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name='Descripción'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', '-is_main', '-created_at']
+        verbose_name = 'Imagen del Item'
+        verbose_name_plural = 'Imágenes del Item'
+    
+    def __str__(self):
+        return f"Imagen {self.order} - {self.item.seq}"
+    
+    def save(self, *args, **kwargs):
+        # Validar que no haya más de 5 imágenes por item
+        if not self.pk:
+            existing_count = ItemImage.objects.filter(item=self.item).count()
+            if existing_count >= 5:
+                raise ValidationError('No se pueden agregar más de 5 imágenes por producto')
+        
+        # Si esta imagen es principal, quitar el flag de las demás
+        if self.is_main:
+            ItemImage.objects.filter(item=self.item).update(is_main=False)
+        
+        super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        # Eliminar el archivo físico
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
 
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """

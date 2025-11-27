@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
+{% block navbar_Type %}Agregar Imágenes - {{ item.seq }}{% endblock %}
+
+{% block panel-content %}
+
+<div class="row mt-4">
+    <div class="col-lg-9 col-12 mx-auto position-relative">
+        <div class="card">
+            <div class="card-header p-3 pt-2">
+                <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                    <i class="far fa-image opacity-10"></i>
+                </div>
+                <h6 class="mb-0">Añadir imagenes</h6>
+            </div>
+            <div class="card-body pt-0">
+                
+                <h6 class="form-text text-muted ms-1">
+                    Sube hasta {{ remaining }} imagen(es) más para el item <strong>{{ item }}</strong>
+                </h6>
+
+                <div class="item-info-box">
+                    <div class="info-item">
+                        <div class="info-label">Imágenes Actuales</div>
+                        <div class="info-value">{{ current_count }} / 5</div>
+                    </div>
+                </div>
+
+                {% if remaining == 0 %}
+                <div class="alert alert-warning">
+                    ⚠️ Este item ya tiene el máximo de 5 imágenes. Elimina alguna para agregar más.
+                </div>
+                <div class="form-actions">
+                    <a href="{% url 'ventas_app:detalle-item' item.pk %}" class="btn btn-secondary">
+                        ← Volver al Item
+                    </a>
+                </div>
+                {% else %}
+
+                <div class="alert alert-secondary text-white">
+                    Puedes seleccionar hasta {{ remaining }} imagen(es). Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB
+                    por imagen.
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <div class="form-control drop-zone bg-gradient-light mb-4" id="dropZone">
+                        <div class="container">
+                            <div class="drop-zone-text">
+                                Arrastra las imágenes aquí
+                            </div>
+                            <div class="drop-zone-hint">
+                                o haz clic para seleccionar archivos
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <input class="form-control text-dark bg-gradient-light" type="file" name="images" id="images" multiple accept="image/*">
+
+                    <div id="previewContainer" class="preview-container"></div>
+
+                    <div class="form-actions mt-4" >
+                        <a href="{% url 'ventas_app:detalle-item' item.pk %}" class="btn bg-gradient-dark  m-0 ms-2">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn bg-gradient-success m-0 ms-2" id="submitBtn" disabled>
+                            Subir Imágenes (<span id="fileCount">0</span>)
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('images');
+    const previewContainer = document.getElementById('previewContainer');
+    const submitBtn = document.getElementById('submitBtn');
+    const fileCountSpan = document.getElementById('fileCount');
+    const maxFiles = {{ remaining }};
+    let selectedFiles = [];
+
+    // Click en la zona de drop
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // Selección de archivos
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+        const filesArray = Array.from(files);
+
+        if (selectedFiles.length + filesArray.length > maxFiles) {
+            alert(`Solo puedes subir un máximo de ${maxFiles} imagen(es).`);
+            return;
+        }
+
+        filesArray.forEach(file => {
+            if (!file.type.startsWith('image/')) {
+                alert(`${file.name} no es una imagen válida.`);
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} es muy grande. Tamaño máximo: 5MB`);
+                return;
+            }
+
+            selectedFiles.push(file);
+            addPreview(file);
+        });
+
+        updateSubmitButton();
+    }
+
+    function addPreview(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `
+            <img src="${e.target.result}" class="preview-image" alt="Preview">
+            <button type="button" class="preview-remove" data-filename="${file.name}">×</button>
+        `;
+
+            previewContainer.appendChild(div);
+
+            // Agregar evento para eliminar
+            div.querySelector('.preview-remove').addEventListener('click', function () {
+                removeFile(file.name);
+                div.remove();
+            });
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function removeFile(filename) {
+        selectedFiles = selectedFiles.filter(f => f.name !== filename);
+        updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+        fileCountSpan.textContent = selectedFiles.length;
+        submitBtn.disabled = selectedFiles.length === 0;
+
+        // Actualizar el input file
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+    }
+</script>
+{% endblock JSscripts %}

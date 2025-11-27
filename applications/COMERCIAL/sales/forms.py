@@ -6,7 +6,8 @@ from .models import (
     Incomes,
     quotes,
     Items,
-    ItemTracking
+    ItemTracking,
+    ItemImage
 )
 from django.forms import inlineformset_factory
 from applications.users.models import User
@@ -315,19 +316,32 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Items
         fields = (
+
+            # COMERCIAL
             'idTrafoQuote',
-            'idTrafo',
             'seq',
             'unitCost',
-            'fat_file'
+            'fat_file',
+            'drawing_file',
+            'plate_file',
+
+            # TIPO
+            'PHASE',
+            'COOLING',
+            'MOUNTING',
+
+            # CARACTERISTICAS TECNICAS
+            'KVA',
+            'HV',
+            'LV',
+            'HZ',
+            'WINDING',
+            'CONNECTION',
+            'STANDARD',
+            
         )
         widgets = {
             'idTrafoQuote': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'idTrafo': forms.Select(
                 attrs = {
                     'class': 'input-group-field form-control',
                 }
@@ -346,12 +360,82 @@ class ItemForm(forms.ModelForm):
                     'min': '0'
                 }
             ),
+            'PHASE': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'COOLING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'MOUNTING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'KVA': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'LV': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'HZ': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'WINDING': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'CONNECTION': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'STANDARD': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            
+            
             'fat_file': forms.ClearableFileInput(
                 attrs = {
                     'type':"file",
                     'name':"fat_file",
                     'class': 'form-control text-dark',
                     'id':"id_fat_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
+            'drawing_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"drawing_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_drawing_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
+            'plate_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"drawing_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_drawing_file",
                     'accept':".pdf,.jpg,.jpeg,.png"
                 }
             ),
@@ -365,6 +449,24 @@ class ItemForm(forms.ModelForm):
             if fat_file.size > 5*1024*1024:  # 5 MB limit
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return fat_file
+    
+    def clean_drawing_file(self):
+        drawing_file = self.cleaned_data.get('drawing_file')
+        if drawing_file:
+            if not drawing_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if drawing_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return drawing_file
+    
+    def clean_plate_file(self):
+        plate_file = self.cleaned_data.get('plate_file')
+        if plate_file:
+            if not plate_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if plate_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return plate_file
 
 class ItemTrackingForm(forms.ModelForm):
     class Meta:
@@ -393,6 +495,93 @@ class ItemTrackingForm(forms.ModelForm):
                 }
             ),
         }
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+class ItemImageForm(forms.ModelForm):
+    class Meta:
+        model = ItemImage
+        fields = ['image', 'order', 'is_main', 'description']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'is_main': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'description': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Descripción de la imagen (opcional)'
+            })
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        # Validación adicional si es necesario
+        return cleaned_data
+
+class MultipleItemImageForm(forms.Form):
+    """Formulario para subir múltiples imágenes a la vez"""
+    images = MultipleFileField(
+        label='Seleccionar imágenes (máximo 5)',
+        required=False,
+        widget=MultipleFileInput(attrs={
+            'accept': 'image/*',
+            'class': 'form-control'
+        })
+    )
+    
+    def __init__(self, *args, item=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.item = item
+    
+    def clean_images(self):
+        images = self.files.getlist('images')
+        
+        if self.item:
+            current_count = ItemImage.objects.filter(item=self.item).count()
+            if current_count + len(images) > 5:
+                raise ValidationError(
+                    f'Solo puedes tener máximo 5 imágenes. '
+                    f'Actualmente tienes {current_count} imágenes.'
+                )
+        
+        if len(images) > 5:
+            raise ValidationError('No puedes subir más de 5 imágenes a la vez.')
+        
+        # Validar tamaño y tipo de archivo
+        for image in images:
+            if image.size > 5 * 1024 * 1024:  # 5MB
+                raise ValidationError(
+                    f'El archivo {image.name} es muy grande. '
+                    'Tamaño máximo: 5MB'
+                )
+            
+            if not image.content_type.startswith('image/'):
+                raise ValidationError(
+                    f'El archivo {image.name} no es una imagen válida.'
+                )
+        
+        return images
 
 #ItemsFormSet = inlineformset_factory(
 #    quotes,

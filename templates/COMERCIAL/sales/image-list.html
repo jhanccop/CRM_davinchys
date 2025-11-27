@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
+{% block navbar_Type %}imagenes{% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid py-2">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header con navegación -->
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}"
+                        class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
+                    </a>
+                    <a href="{% url 'ventas_app:editar-item' item.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i> Editar
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-4">Item Details</h5>
+                    <div class="row">
+                        <div class="col-xl-5 col-lg-6 text-center">
+                            <div class="item-image">
+                                {% if item.images.first %}
+                                <img class="w-100 border-radius-lg shadow-lg mx-auto"
+                                    src="{{ item.images.first.image.url }}" alt="{{ item.seq }}">
+                                <span class="image-badge">
+                                    {{ item.image_count }} / 5
+                                </span>
+                                {% else %}
+                                <div class="no-image">📷</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="my-gallery d-flex mt-4 pt-2" itemscope=""
+                                itemtype="http://schema.org/ImageGallery" data-pswp-uid="1">
+
+                                {% for img in item.images.all %}
+                                <figure itemprop="associatedMedia" itemscope=""
+                                    itemtype="http://schema.org/ImageObject">
+                                    <a href="{{ img.image.url }}" itemprop="contentUrl" data-size="500x600">
+                                        <img class="w-100 min-height-100 max-height-100 border-radius-lg shadow"
+                                            src="{{ img.image.url }}" alt="Image description">
+                                    </a>
+                                </figure>
+                                {% empty %}
+                                <span class="badge badge-primary">NO IMAGES</span>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+                        <div class="col-lg-5 mx-auto">
+                            <div class="row mt-0 mb-4">
+                                <div class="col-lg-5">
+                                    <a class="btn bg-gradient-dark mb-0 mt-lg-auto w-100" href="{% url 'ventas_app:item_add_images' item.id %} ">Subir imagen</a>
+                                </div>
+                            </div>
+
+                            <div class="info-item mb-3">
+                                <div class="info-item mb-3">
+                                        <small class="text-muted">Tipo</small>
+                                        <h4 class="fw-bold text-primary">DT{{ item.get_PHASE_nick|default:"-" }}{{ item.get_COOLING_nick|default:"-" }}{{ item.get_MOUNTING_nick|default:"-" }} </h4>
+                                    </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Número de Serie</small>
+                                        <h4 class="fw-bold text-primary">{{ item.seq|default:"N/A" }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-item mb-3">
+                                        <small class="text-muted">Costo Unitario</small>
+                                        <p class="fw-bold fs-5 text-info">{{ item.idTrafoQuote.get_currency_display }} {{ item.unitCost|floatformat:2|default:"0.00" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                    {% if item.fat_file %}
+                                    <a href="{{ item.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        <span class="badge bg-gradient-success text-md">VIEW FAT FILE</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-gradient-secondary text-md">NO FAT FILE</span>
+                                    {% endif %}
+                            
+                                </div>
+                            </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                    {% if item.drawing_file %}
+                                    <a href="{{ item.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        <span class="badge bg-gradient-success text-md">VIEW DRAWING FILE</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-gradient-secondary text-md">No DRAWING FILE</span>
+                                    {% endif %}
+                            
+                                </div>
+                            </div>
+                            <div class="info-item mb-0">
+                                <div class="info-item mb-2">
+                                    {% if item.plate_file %}
+                                    <a href="{{ item.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        <span class="badge bg-gradient-success text-md">VIEW PLATE FILE</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-gradient-secondary text-md">No PLATE FILE</span>
+                                    {% endif %}
+                            
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+
+        <!-- Especificaciones Técnicas -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-secondary p-3">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-cogs me-2"></i>Especificaciones Técnicas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Capacidad kVA</small>
+                                <p class="fw-bold text-dark">{{ item.get_KVA_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">HV</small>
+                                <p class="fw-bold text-dark">{{ item.get_HV_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">LV</small>
+                                <p class="fw-bold text-dark">{{ item.get_LV_display|default:"N/A" }}</p>
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-item mb-3">
+                                <small class="text-muted">HZ</small>
+                                <p class="fw-bold text-dark">{{ item.get_HZ_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">WINDING</small>
+                                <p class="fw-bold text-dark">{{ item.get_WINDING_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">CONNECTION</small>
+                                <p class="fw-bold text-dark">{{ item.get_CONNECTION_display|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            
+                            <div class="info-item mb-3">
+                                <small class="text-muted">STANDARD</small>
+                                <p class="fw-bold">{{ item.get_STANDARD_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Montaje</small>
+                                <p class="fw-bold">{{ item.get_MOUNTING_display|default:"N/A" }}</p>
+                            </div>
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Enfriamiento</small>
+                                <p class="fw-bold">{{ item.get_COOLING_display|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de la Cotización -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-secondary p-3">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Información de Cotización
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <small class="text-muted">Cotización Asociada</small>
+                                <p class="fw-bold">
+                                    <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}" 
+                                    class="text-decoration-none">
+                                        QUO-{{ item.idTrafoQuote.id }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <small class="text-muted">Fecha de Creación</small>
+                                <p class="fw-bold">{{ item.created|date:"d/m/Y H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="info-item mb-3">
+                        <small class="text-muted">Cliente</small>
+                        {% if item.idTrafoQuote.idClient %}
+                        <a href="{% url 'stakeholders_app:cliente-detalle' item.idTrafoQuote.idClient.id %}">
+                            <p class="fw-bold">{{ item.idTrafoQuote.idClient|default:"" }}</p>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="info-item mb-3">
+                        <small class="text-muted">Descripción</small>
+                        <p class="fw-bold">{{ item.idTrafoQuote.shortDescription|default:"Sin descripción" }}</p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+{% endblock JSscripts %}

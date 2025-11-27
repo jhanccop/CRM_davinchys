@@ -161,6 +161,7 @@ class Trafos(TimeStampedModel):
         (UNDERGROUND, 'Underground'),
         (SUBSTATION, 'Substation'),
     )
+    
     MOUNTING_NICK = {
         POLE: 'PM',
         PEDESTAL: 'PED',

@@ -1,4 +1,4 @@
-{% extends 'COMERCIAL/sales/base-quotes.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %} Cotizaciones {% endblock title %}
@@ -43,10 +43,6 @@
                             {{ form.currency }}
                         </div>
                         <div class="input-group input-group-outline my-3 is-focused">
-                            <label class="form-label" for="{{ form.initialAmount.id_for_label }}">Monto Inicial</label>
-                            {{ form.initialAmount }}
-                        </div>
-                        <div class="input-group input-group-outline my-3 is-focused">
                             <label class="form-label" for="{{ form.dateOrder.id_for_label }}">Fecha de Solicitud</label>
                             {{ form.dateOrder }}
                         </div>
@@ -67,40 +63,193 @@
             </div>
         </div>
 
-        <!-- Formulario para agregar productos -->
+        <!-- Formulario para agregar items -->
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h5>Modelos de Transformadores</h5>
+                <h5>Plantilla de Transformadores</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body pt-0">
+                <!-- Fila 1: Tipo de Transformador -->
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label" for="id_trafo">Transformador</label>
-                            <select id="id_trafo" class="form-control trafo-select">
-                                <option value="">Seleccionar transformador</option>
-                                {% for trafo in trafos %}
-                                <option value="{{ trafo.id }}">{{ trafo }}</option>
-                                {% endfor %}
+                    <h6> Tipo y serie de  transformador</h6>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Phase</label>
+                            <select id="id_phase" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">Mono-phasic</option>
+                                <option value="1">Three-phasic</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label" for="id_quantity">Cantidad</label>
-                            <input type="number" id="id_quantity" class="form-control quantity-input" min="1" value="1">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Cooling</label>
+                            <select id="id_cooling" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">ONAN</option>
+                                <option value="1">ONAF</option>
+                                <option value="2">KNAN</option>
+                                <option value="3">KNAF</option>
+                                <option value="4">AN</option>
+                                <option value="5">AF</option>
+                                <option value="6">OFAN</option>
+                                <option value="7">OFAF</option>
+                                <option value="8">ONWF</option>
+                                <option value="9">OFWF</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label" for="id_unit_cost">Costo Unitario</label>
-                            <input type="number" id="id_unit_cost" class="form-control unit-cost-input" step="0.01" min="0">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Mounting</label>
+                            <select id="id_mounting" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">Pole</option>
+                                <option value="1">Pedestal</option>
+                                <option value="2">Platform</option>
+                                <option value="3">Underground</option>
+                                <option value="4">Substation</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Serial</label>
+                            <input type="text" id="id_seq" class="form-control" placeholder="Ej: TRF-001">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 2: Características Eléctricas -->
+                <div class="row">
+                    <h6 class="mt-2 mb-0"> Características técnicas</h6>
+                    <div class="col-md-2">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">KVA</label>
+                            <select id="id_kva" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">75</option>
+                                <option value="1">100</option>
+                                <option value="2">150</option>
+                                <option value="3">167</option>
+                                <option value="4">225</option>
+                                <option value="5">250</option>
+                                <option value="6">300</option>
+                                <option value="7">500</option>
+                                <option value="8">750</option>
+                                <option value="9">1000</option>
+                                <option value="10">1500</option>
+                                <option value="11">2000</option>
+                                <option value="12">2000/3000</option>
+                                <option value="13">2500</option>
+                                <option value="14">2600</option>
+                                <option value="15">3000</option>
+                                <option value="16">3000/3750</option>
+                                <option value="17">3750</option>
+                                <option value="18">5000</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button type="button" id="add-item" class="btn btn-primary btn-block">Agregar</button>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">HV</label>
+                            <select id="id_hv" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">4160</option>
+                                <option value="1">7200</option>
+                                <option value="2">8320</option>
+                                <option value="3">12470</option>
+                                <option value="4">13200</option>
+                                <option value="5">13800</option>
+                                <option value="6">14400</option>
+                                <option value="7">21600</option>
+                                <option value="8">22860</option>
+                                <option value="9">23960</option>
+                                <option value="10">24940</option>
+                                <option value="11">34500</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">LV</label>
+                            <select id="id_lv" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">240/120</option>
+                                <option value="1">480Y/277</option>
+                                <option value="2">208Y/120</option>
+                                <option value="3">4160Y/2400</option>
+                                <option value="4">277/480Y</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Frequency</label>
+                            <select id="id_hz" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">50 Hz</option>
+                                <option value="1">60 Hz</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Winding</label>
+                            <select id="id_winding" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">Al</option>
+                                <option value="1">Cu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Connection</label>
+                            <select id="id_connection" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">Dyn1</option>
+                                <option value="1">Dyn11</option>
+                                <option value="2">Yyn0</option>
+                                <option value="3">YNyn0</option>
+                                <option value="4">Dzn0</option>
+                                <option value="5">Yd11</option>
+                                <option value="6">lio</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 3: Standard y Costos -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Standard</label>
+                            <select id="id_standard" class="form-control">
+                                <option value="">Seleccionar</option>
+                                <option value="0">IEEE C57.12.00</option>
+                                <option value="1">IEEE C57.12.20</option>
+                                <option value="2">IEEE C57.12.21</option>
+                                <option value="3">IEEE C57.12.34</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" id="id_quantity" class="form-control" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label">Costo Unitario</label>
+                            <input type="number" id="id_unit_cost" class="form-control" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group my-3">
+                            <button type="button" id="add-item" class="btn bg-gradient-dark btn-block">Agregar</button>
                         </div>
                     </div>
                 </div>
@@ -110,16 +259,18 @@
         <!-- Tabla de productos agregados -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5>Productos en Lista</h5>
+                <h5>Items en la Cotización</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped" id="items-table">
                         <thead>
                             <tr>
-                                <th>Transformador</th>
+                                <th>Descripción</th>
+                                <th>Serial</th>
+                                <th>KVA</th>
                                 <th>Cantidad</th>
-                                <th>Costo Unitario</th>
+                                <th>Costo Unit.</th>
                                 <th>Subtotal</th>
                                 <th>Acciones</th>
                             </tr>
@@ -129,7 +280,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                                <td colspan="5" class="text-right"><strong>Total:</strong></td>
                                 <td><strong id="total-amount">0.00</strong></td>
                                 <td></td>
                             </tr>
@@ -158,27 +309,68 @@ jQuery(document).ready(function($) {
     var items = [];
     var itemCounter = 0;
 
+    // Mapeo de valores a textos para mostrar
+    const PHASE_MAP = {'0': 'Mono', '1': 'Three'};
+    const COOLING_MAP = {'0': 'ONAN', '1': 'ONAF', '2': 'KNAN', '3': 'KNAF', '4': 'AN', '5': 'AF', '6': 'OFAN', '7': 'OFAF', '8': 'ONWF', '9': 'OFWF'};
+    const MOUNTING_MAP = {'0': 'Pole', '1': 'Pedestal', '2': 'Platform', '3': 'Underground', '4': 'Substation'};
+    const KVA_MAP = {'0': '75', '1': '100', '2': '150', '3': '167', '4': '225', '5': '250', '6': '300', '7': '500', '8': '750', '9': '1000', '10': '1500', '11': '2000', '12': '2000/3000', '13': '2500', '14': '2600', '15': '3000', '16': '3000/3750', '17': '3750', '18': '5000'};
+
     // Función para agregar item a la tabla
     $('#add-item').on('click', function() {
-        var trafoSelect = $('#id_trafo');
-        var quantityInput = $('#id_quantity');
-        var unitCostInput = $('#id_unit_cost');
+        // Obtener todos los valores
+        var phase = $('#id_phase').val();
+        var cooling = $('#id_cooling').val();
+        var mounting = $('#id_mounting').val();
+        var seq = $('#id_seq').val().trim();
+        var kva = $('#id_kva').val();
+        var hv = $('#id_hv').val();
+        var lv = $('#id_lv').val();
+        var hz = $('#id_hz').val();
+        var winding = $('#id_winding').val();
+        var connection = $('#id_connection').val();
+        var standard = $('#id_standard').val();
+        var quantity = parseInt($('#id_quantity').val());
+        var unitCost = parseFloat($('#id_unit_cost').val());
         
-        var trafoId = trafoSelect.val();
-        var trafoText = trafoSelect.find('option:selected').text();
-        var quantity = parseInt(quantityInput.val());
-        var unitCost = parseFloat(unitCostInput.val());
-        
-        if (!trafoId || isNaN(quantity) || quantity <= 0 || isNaN(unitCost) || unitCost <= 0) {
-            alert('Por favor complete todos los campos correctamente');
+        // Validación
+        if (!phase || !cooling || !mounting || !kva || !hv || !lv || !hz || !winding || !connection || !standard) {
+            alert('Por favor complete todos los campos técnicos del transformador');
             return;
         }
+        
+        if (!seq) {
+            alert('Por favor ingrese un número de serial');
+            return;
+        }
+        
+        if (isNaN(quantity) || quantity <= 0) {
+            alert('Por favor ingrese una cantidad válida');
+            return;
+        }
+        
+        if (isNaN(unitCost) || unitCost <= 0) {
+            alert('Por favor ingrese un costo unitario válido');
+            return;
+        }
+        
+        // Crear descripción del transformador
+        var description = `${PHASE_MAP[phase]} ${COOLING_MAP[cooling]} ${MOUNTING_MAP[mounting]} ${KVA_MAP[kva]}kVA`;
         
         // Agregar item al array
         var item = {
             id: itemCounter++,
-            trafo_id: trafoId,
-            trafo_text: trafoText,
+            description: description,
+            seq: seq,
+            phase: phase,
+            cooling: cooling,
+            mounting: mounting,
+            kva: kva,
+            hv: hv,
+            lv: lv,
+            hz: hz,
+            winding: winding,
+            connection: connection,
+            standard: standard,
             quantity: quantity,
             unit_cost: unitCost,
             subtotal: quantity * unitCost
@@ -190,10 +382,26 @@ jQuery(document).ready(function($) {
         updateTable();
         
         // Limpiar formulario
-        quantityInput.val('1');
-        unitCostInput.val('');
-        unitCostInput.focus();
+        clearItemForm();
     });
+
+    // Función para limpiar el formulario de items
+    function clearItemForm() {
+        $('#id_phase').val('');
+        $('#id_cooling').val('');
+        $('#id_mounting').val('');
+        $('#id_seq').val('');
+        $('#id_kva').val('');
+        $('#id_hv').val('');
+        $('#id_lv').val('');
+        $('#id_hz').val('');
+        $('#id_winding').val('');
+        $('#id_connection').val('');
+        $('#id_standard').val('');
+        $('#id_quantity').val('1');
+        $('#id_unit_cost').val('');
+        $('#id_phase').focus();
+    }
 
     // Función para actualizar la tabla y el total
     function updateTable() {
@@ -208,13 +416,15 @@ jQuery(document).ready(function($) {
         
         // Llenar tabla
         $.each(items, function(index, item) {
-            var row = $('<tr class = "mb-0"></tr>');
-            row.append($('<td class = "mb-0"></td>').text(item.trafo_text));
-            row.append($('<td class = "mb-0"></td>').text(item.quantity));
-            row.append($('<td class = "mb-0"></td>').text(item.unit_cost.toFixed(2)));
-            row.append($('<td class = "mb-0"></td>').text(item.subtotal.toFixed(2)));
+            var row = $('<tr></tr>');
+            row.append($('<td></td>').text(item.description));
+            row.append($('<td></td>').text(item.seq));
+            row.append($('<td></td>').text(KVA_MAP[item.kva]));
+            row.append($('<td></td>').text(item.quantity));
+            row.append($('<td></td>').text(item.unit_cost.toFixed(2)));
+            row.append($('<td></td>').text(item.subtotal.toFixed(2)));
             
-            var removeButton = $('<button type="button" class="btn btn-primary btn-sm">Eliminar</button>');
+            var removeButton = $('<button type="button" class="btn btn-danger btn-sm">Eliminar</button>');
             removeButton.on('click', function() {
                 removeItem(item.id);
             });
@@ -234,30 +444,30 @@ jQuery(document).ready(function($) {
         var itemsData = [];
         $.each(items, function(index, item) {
             itemsData.push({
-                trafo_id: item.trafo_id,
+                phase: item.phase,
+                cooling: item.cooling,
+                mounting: item.mounting,
+                seq: item.seq,
+                kva: item.kva,
+                hv: item.hv,
+                lv: item.lv,
+                hz: item.hz,
+                winding: item.winding,
+                connection: item.connection,
+                standard: item.standard,
                 quantity: item.quantity,
                 unit_cost: item.unit_cost
             });
         });
         
         itemsDataElement.val(JSON.stringify(itemsData));
-        
-        // Actualizar el campo amount del formulario principal si es necesario
-        var amountField = $('[name="amount"]');
-        if (amountField.length > 0) {
-            amountField.val(totalAmount);
-        }
     }
 
     // Función para eliminar item
     function removeItem(itemId) {
-        var newItems = [];
-        $.each(items, function(index, item) {
-            if (item.id !== itemId) {
-                newItems.push(item);
-            }
+        items = items.filter(function(item) {
+            return item.id !== itemId;
         });
-        items = newItems;
         updateTable();
     }
 
@@ -265,26 +475,33 @@ jQuery(document).ready(function($) {
     $('#quote-form').on('submit', function(e) {
         if (items.length === 0) {
             e.preventDefault();
-            alert('Debe agregar al menos un producto a la cotización');
+            alert('Debe agregar al menos un transformador a la cotización');
             return false;
         }
         
-        // Validar que todos los campos requeridos estén llenos
-        var requiredFields = $('#quote-form').find('select[required], input[required]');
+        // Validar campos requeridos del formulario principal
         var valid = true;
+        var requiredFields = [
+            '#id_idClient',
+            '#id_idTinReceiving', 
+            '#id_idTinExecuting',
+            '#id_currency',
+            '#id_dateOrder',
+            '#id_deadline',
+            '#id_payMethod'
+        ];
         
-        requiredFields.each(function() {
-            if (!$(this).val()) {
+        $.each(requiredFields, function(index, fieldId) {
+            var field = $(fieldId);
+            if (field.length > 0 && !field.val()) {
                 valid = false;
-                $(this).addClass('is-invalid');
-            } else {
-                $(this).removeClass('is-invalid');
+                field.addClass('is-invalid');
             }
         });
         
         if (!valid) {
             e.preventDefault();
-            alert('Por favor complete todos los campos requeridos');
+            alert('Por favor complete todos los campos requeridos de la cotización');
             return false;
         }
         
@@ -299,7 +516,13 @@ jQuery(document).ready(function($) {
 </script>
 
 <script>
-    document.getElementById("id_idTinReceiving").value = "{{user.company.id}}";
+    document.addEventListener('DOMContentLoaded', function() {
+        // Establecer la empresa receptora por defecto
+        var tinReceivingField = document.getElementById("id_idTinReceiving");
+        if (tinReceivingField) {
+            tinReceivingField.value = "{{user.company.id}}";
+        }
+    });
 </script>
 
 {% endblock JSscripts %}

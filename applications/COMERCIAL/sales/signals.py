@@ -22,33 +22,54 @@ def create_item_tracking(sender, instance, created, **kwargs):
             statusPlate=ItemTracking.SOLICITADO
         )
 
-# Signal para eliminar archivo cuando se elimina el registro
+        
+# Signal para eliminar archivos cuando se elimina el registro
 @receiver(post_delete, sender=Items)
-def delete_fat_file_on_delete(sender, instance, **kwargs):
+def delete_files_on_delete(sender, instance, **kwargs):
     """
-    Elimina el archivo del sistema cuando se elimina el registro
+    Elimina todos los archivos del sistema cuando se elimina el registro
     """
+    # Eliminar fat_file
     if instance.fat_file:
         if os.path.isfile(instance.fat_file.path):
             os.remove(instance.fat_file.path)
+    
+    # Eliminar drawing_file
+    if instance.drawing_file:
+        if os.path.isfile(instance.drawing_file.path):
+            os.remove(instance.drawing_file.path)
+    
+    # Eliminar plate_file
+    if instance.plate_file:
+        if os.path.isfile(instance.plate_file.path):
+            os.remove(instance.plate_file.path)
 
 
-# Signal para eliminar archivo anterior cuando se actualiza con un nuevo archivo
+# Signal para eliminar archivos anteriores cuando se actualizan
 @receiver(pre_save, sender=Items)
-def delete_old_fat_file_on_update(sender, instance, **kwargs):
+def delete_old_files_on_update(sender, instance, **kwargs):
     """
-    Elimina el archivo anterior cuando se actualiza con uno nuevo
+    Elimina los archivos anteriores cuando se actualizan con nuevos archivos
     """
     if not instance.pk:
         return False
 
     try:
-        old_file = Items.objects.get(pk=instance.pk).fat_file
+        old_instance = Items.objects.get(pk=instance.pk)
     except Items.DoesNotExist:
         return False
 
-    # Si hay un archivo anterior y es diferente al nuevo, eliminarlo
-    new_file = instance.fat_file
-    if old_file and old_file != new_file:
-        if os.path.isfile(old_file.path):
-            os.remove(old_file.path)
+    # Verificar y eliminar fat_file anterior
+    if old_instance.fat_file and old_instance.fat_file != instance.fat_file:
+        if os.path.isfile(old_instance.fat_file.path):
+            os.remove(old_instance.fat_file.path)
+
+    # Verificar y eliminar drawing_file anterior
+    if old_instance.drawing_file and old_instance.drawing_file != instance.drawing_file:
+        if os.path.isfile(old_instance.drawing_file.path):
+            os.remove(old_instance.drawing_file.path)
+
+    # Verificar y eliminar plate_file anterior
+    if old_instance.plate_file and old_instance.plate_file != instance.plate_file:
+        if os.path.isfile(old_instance.plate_file.path):
+            os.remove(old_instance.plate_file.path)

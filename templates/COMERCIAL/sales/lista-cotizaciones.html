@@ -30,12 +30,7 @@
         <div class="card-header pb-0 ">
           <div class="row">
             <div class="col-lg-5 col-md-3">
-              <h6 class="mb-0">{{quote.selectedAccount.accountName}} </h6>
-              <p class="text-sm mb-0 text-info font-weight-bold">
-                <span class="text-md font-weight-bold">{{movimientos.selectedAccount.get_currency_display}}
-                  {{movimientos.lastBalance.balance|floatformat:"2g"}}</span> <small
-                  class="text-xs text-secondary">{{movimientos.selectedAccount.modified|date:'Y-m-d H:i'}}</small>
-              </p>
+              
             </div>
             <div class="col-lg-7 col-md-9">
               <form method="GET" class="">{% csrf_token %}
@@ -61,11 +56,11 @@
             <table class="table table-flush mb-0 align-items-center" id="datatable-move">
               <thead class="thead-light">
                 <tr>
-                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">RFQ/Fecha
+                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">RFQ / Fecha
                   </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> Cliente </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Es PO?</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento - Cot</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Tipo - Serie</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                 </tr>
@@ -117,7 +112,7 @@
 
                   <td>
                       {% for r in t.item_Quote.all %}
-                      <p class="pt-0 mb-0">{{r}}</p>
+                      <a href="{% url 'ventas_app:detalle-item' r.id %}"><p class="pt-0 mb-0">{{r}}</p></a>
                       {% endfor%}
                   </td>
 

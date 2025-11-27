@@ -45,10 +45,52 @@
 <div class="row">
     <div class="col-12 col-lg-8 mx-auto my-5 mt-0">
         {% if Items.tracking %}
-        <div class="card h-100 mt-4 mt-md-0">
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-4">Pictures</h5>
+                        <div class="row">
+                            <div class="col-xl-12 col-lg-12 text-center">
+                                <div class="item-image">
+                                    {% if Items.tracking.0.images.first %}
+                                    <img class="w-100 border-radius-lg shadow-lg mx-auto"
+                                        src="{{ Items.tracking.0.images.first.image.url }}" alt="{{ Items.tracking.0.seq }}">
+                                    
+                                    {% else %}
+                                    <div class="no-image">📷</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="my-gallery d-flex mt-4 pt-2" itemscope=""
+                                    itemtype="" data-pswp-uid="1">
+
+                                    {% for img in Items.tracking.0.images.all %}
+                                    <figure itemprop="associatedMedia" itemscope=""
+                                        itemtype="">
+                                        <a href="{{ img.image.url }}" itemprop="contentUrl" data-size="500x600">
+                                            <img class="w-100 min-height-100 max-height-100 border-radius-lg shadow"
+                                                src="{{ img.image.url }}" alt="Image description">
+                                        </a>
+                                    </figure>
+                                    {% empty %}
+                                    <span class="badge badge-primary">NO IMAGES</span>
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 mt-md-0">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex align-items-center">
-                    <h6>Transformer tracking</h6>
+                    <h6>Order tracking</h6>
                 </div>
             </div>
             <div class="card-body px-3 pt-0 pb-2">
@@ -63,7 +105,7 @@
                                             <p class="text-sm font-weight-normal mb-0">TYPE</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo}}</p>
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0}}</p>
                                         </td>
                                     </tr>
                                     <tr>
@@ -79,7 +121,7 @@
                                             <p class="text-sm font-weight-normal mb-0">KVA</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_KVA_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_KVA_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -88,7 +130,7 @@
                                             <p class="text-sm font-weight-normal mb-0"> HV</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_HV_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_HV_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -97,7 +139,7 @@
                                             <p class="text-sm font-weight-normal mb-0">LV</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_LV_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_LV_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -106,7 +148,7 @@
                                             <p class="text-sm font-weight-normal mb-0">PHASE</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_PHASE_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_PHASE_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -115,7 +157,7 @@
                                             <p class="text-sm font-weight-normal mb-0">COOLING TYPE</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_COOLING_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_COOLING_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -124,7 +166,7 @@
                                             <p class="text-sm font-weight-normal mb-0">WINDING</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_WINDING_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_WINDING_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -133,7 +175,7 @@
                                             <p class="text-sm font-weight-normal mb-0">PO NUMBER</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">PO-{{Items.order}}</p>
+                                            <p class="text-sm font-weight-normal mb-0">PO-{{Items.tracking.0.idTrafoQuote}}</p>
                                         </td>
                                     </tr>
 
@@ -187,6 +229,36 @@
                                         <td>
                                             {% if Items.tracking.0.fat_file %}
                                             <a href="{{ Items.tracking.0.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                            <span class="badge badge-pill bg-gradient-success">DOWNLOAD</span>
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-gradient-secondary">No yet</span>
+                                            {% endif %}
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">DRAWING STATUS</p>
+                                        </td>
+                                        <td>
+                                            {% if Items.tracking.0.drawing_file %}
+                                            <a href="{{ Items.tracking.0.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                            <span class="badge badge-pill bg-gradient-success">DOWNLOAD</span>
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-gradient-secondary">No yet</span>
+                                            {% endif %}
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p class="text-sm font-weight-bolder mb-0 text-dark">PLATE STATUS</p>
+                                        </td>
+                                        <td>
+                                            {% if Items.tracking.0.plate_file %}
+                                            <a href="{{ Items.tracking.0.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                             <span class="badge badge-pill bg-gradient-success">DOWNLOAD</span>
                                             </a>
                                             {% else %}

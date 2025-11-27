@@ -12,7 +12,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Crear Nueva Cotización</h3>
+                    <h3 class="card-title">Crear Nueva Cotización **** </h3>
                 </div>
                 <form method="post" id="quoteForm">
                     {% csrf_token %}
@@ -37,6 +37,7 @@
                                     {{ form.dateOrder }}
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>{{ form.idTinReceiving.label }}</label>
@@ -59,6 +60,7 @@
                                     <label class="form-check-label">{{ form.isPO.label }}</label>
                                 </div>
                             </div>
+
                         </div>
 
                         <!-- Tabla de productos -->

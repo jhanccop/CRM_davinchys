@@ -6,6 +6,8 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+from django.shortcuts import render, get_object_or_404, redirect
+
 from django.shortcuts import render
 
 from applications.users.mixins import (
@@ -48,12 +50,14 @@ from applications.clientes.models import (
 
 from applications.COMERCIAL.stakeholders.models import client
 from applications.PRODUCTION.models import Trafos
-from applications.COMERCIAL.sales.models import Items,ItemTracking
+from applications.COMERCIAL.sales.models import Items,ItemTracking, ItemImage
 
 from .forms import (
   IncomesForm,
   quotesForm,
   ItemForm,
+  ItemImageForm,
+  MultipleItemImageForm,
   ItemTrackingForm
   )
 
@@ -505,7 +509,96 @@ class TrafoPoListView(ComercialFinanzasMixin,ListView):
         return payload
 
 # ======================================
-class QuoteCreateView(ComercialFinanzasMixin, CreateView):
+class QuoteCreateView2(ComercialFinanzasMixin, CreateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote_create.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Crear el formset para Items
+        ItemFormSet = inlineformset_factory(
+            quotes,
+            Items,
+            form=ItemForm,
+            extra=1,  # Mostrar 3 formularios vacíos inicialmente
+            can_delete=True,
+            min_num=1,
+            validate_min=True
+        )
+        
+        if self.request.POST:
+            context['formset'] = ItemFormSet(self.request.POST, self.request.FILES)
+        else:
+            context['formset'] = ItemFormSet()
+            
+        context['trafos'] = Trafos.objects.all()
+        return context
+    
+    @transaction.atomic
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+        
+        # Debug: Ver qué datos llegan
+        print("POST data:", self.request.POST)
+        print("Formset errors:", formset.errors)
+        print("Formset is valid:", formset.is_valid())
+        
+        # Validar el formset
+        if formset.is_valid():
+            # Guardar la cotización
+            self.object = form.save(commit=False)
+            self.object.save()  # Guardar primero para obtener el ID
+            
+            # Calcular el monto total desde los items
+            total_amount = 0
+            items_saved = 0
+            
+            for item_form in formset:
+                if item_form.cleaned_data and not item_form.cleaned_data.get('DELETE', False):
+                    # Verificar que tenga datos relevantes
+                    if item_form.cleaned_data.get('unitCost'):
+                        unit_cost = item_form.cleaned_data.get('unitCost', 0)
+                        total_amount += unit_cost
+                        items_saved += 1
+            
+            print(f"Items que se guardarán: {items_saved}")
+            
+            # Asignar el formset a la instancia de la cotización
+            formset.instance = self.object
+            formset.save()
+            
+            # Actualizar el monto total
+            self.object.amount = total_amount
+            self.object.save()
+            
+            # Crear registro en el tracking
+            QuoteTracking.objects.create(
+                idquote=self.object,
+                status=QuoteTracking.ESPERA,
+                area=QuoteTracking.COMERCIAL
+            )
+            
+            print(f"Cotización guardada con {items_saved} items")
+            return super().form_valid(form)
+        else:
+            # Debug: mostrar errores
+            print("Errores del formset:")
+            for i, form_errors in enumerate(formset.errors):
+                if form_errors:
+                    print(f"Form {i}: {form_errors}")
+            print("Non form errors:", formset.non_form_errors())
+            
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        print("Formulario principal inválido:", form.errors)
+        return self.render_to_response(self.get_context_data(form=form))
+
+class QuoteCreateView3(ComercialFinanzasMixin, CreateView):
     model = quotes
     form_class = quotesForm
     template_name = 'COMERCIAL/sales/quote_create.html'
@@ -595,8 +688,113 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
         context['form'] = form
         return render(self.request, self.template_name, context)
 
-# ================= ITEMS ========================
+class QuoteCreateView(ComercialFinanzasMixin, CreateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote_create.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ya no necesitas pasar Trafos si vas a crear Items directamente
+        return context
+    
+    @transaction.atomic
+    def form_valid(self, form):
+        # Guardar la cotización primero
+        self.object = form.save(commit=False)
+        
+        # Procesar el monto total desde el frontend
+        items_data = self.request.POST.get('items_data', '[]')
+        total_amount = 0
+        
+        try:
+            import json
+            items_list = json.loads(items_data)
+            
+            # Calcular el monto total
+            for item_data in items_list:
+                quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
+                total_amount += quantity * unit_cost
+            
+            # Asignar el monto total a la cotización
+            self.object.amount = total_amount
+            self.object.initialAmount = total_amount  # También puedes guardar el monto inicial
+            self.object.save()
+            
+            # Crear items directamente desde los datos del template
+            for item_data in items_list:
+                quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
+                
+                # Datos técnicos del transformador
+                phase = item_data.get('phase')
+                cooling = item_data.get('cooling')
+                mounting = item_data.get('mounting')
+                kva = item_data.get('kva')
+                hv = item_data.get('hv')
+                lv = item_data.get('lv')
+                hz = item_data.get('hz')
+                winding = item_data.get('winding')
+                connection = item_data.get('connection')
+                standard = item_data.get('standard')
+                seq = item_data.get('seq', '')  # Serial del transformador
+                
+                # Crear un item por cada unidad solicitada
+                for i in range(quantity):
+                    try:
+                        item = Items.objects.create(
+                            idTrafoQuote=self.object,  # FK a quotes
+                            seq=f"{seq}-{i+1}" if quantity > 1 else seq,  # Agregar sufijo si hay múltiples unidades
+                            unitCost=unit_cost,
+                            
+                            # Características técnicas
+                            PHASE=phase,
+                            COOLING=cooling,
+                            MOUNTING=mounting,
+                            KVA=kva,
+                            HV=hv,
+                            LV=lv,
+                            HZ=hz,
+                            WINDING=winding,
+                            CONNECTION=connection,
+                            STANDARD=standard,
+                        )
+                        
+                    except Exception as e:
+                        print(f"ERROR al crear item {i+1}:", str(e))
+                        continue
+             
+            # Crear registro en el tracking
+            tracking = QuoteTracking.objects.create(
+                idquote=self.object,
+                status=QuoteTracking.ESPERA,
+                area=QuoteTracking.COMERCIAL
+            )
+            
+            messages.success(self.request, f'Cotización creada exitosamente con {len(items_list)} items.')
+            return super().form_valid(form)
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            print("ERROR en procesamiento JSON:", str(e))
+            form.add_error(None, f'Error al procesar los items: {str(e)}')
+            return self.form_invalid(form)
+        except Exception as e:
+            print("ERROR general:", str(e))
+            form.add_error(None, f'Error general: {str(e)}')
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        print("*** Formulario inválido ***")
+        print("Errores:", form.errors)
+        context = self.get_context_data()
+        context['form'] = form
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        return render(self.request, self.template_name, context)
+    
 
+# ================= ITEMS ========================
 class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
     template_name = "COMERCIAL/sales/crear-item.html"
     model = Items
@@ -642,6 +840,145 @@ class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
         pk = self.kwargs["pk"]
         item = Items.objects.get(id = pk)
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+    
+
+# ================= IMAGENES ITEMS ========================
+class ItemImageListView(ComercialFinanzasMixin, ListView):
+    """Listado de imágenes de un item específico"""
+    model = ItemImage
+    template_name = 'COMERCIAL/sales/image-list.html'
+    context_object_name = 'images'
+    
+    def get_queryset(self):
+        self.item = get_object_or_404(Items, pk=self.kwargs['item_pk'])
+        return ItemImage.objects.filter(item=self.item).order_by('order', '-is_main')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item'] = self.item
+        return context
+
+class ItemImageCreateView(ComercialFinanzasMixin, CreateView):
+    """Agregar una imagen individual"""
+    model = ItemImage
+    form_class = ItemImageForm
+    template_name = 'sales/items/image_form.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.item = get_object_or_404(Items, pk=self.kwargs['item_pk'])
+        # Verificar límite de imágenes
+        if self.item.images.count() >= 5:
+            messages.error(request, 'Este item ya tiene el máximo de 5 imágenes.')
+            return redirect('sales:item_detail', pk=self.item.pk)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        form.instance.item = self.item
+        messages.success(self.request, 'Imagen agregada exitosamente.')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('sales:item_detail', kwargs={'pk': self.item.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item'] = self.item
+        return context
+
+
+class ItemImageUpdateView(ComercialFinanzasMixin, UpdateView):
+    """Actualizar una imagen existente"""
+    model = ItemImage
+    form_class = ItemImageForm
+    template_name = 'sales/items/image_form.html'
+    
+    def get_queryset(self):
+        return ItemImage.objects.filter(item_id=self.kwargs['item_pk'])
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Imagen actualizada exitosamente.')
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('sales:item_detail', kwargs={'pk': self.object.item.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item'] = self.object.item
+        return context
+
+
+class ItemImageDeleteView(ComercialFinanzasMixin, DeleteView):
+    """Eliminar una imagen"""
+    model = ItemImage
+    template_name = 'sales/items/image_confirm_delete.html'
+    
+    def get_queryset(self):
+        return ItemImage.objects.filter(item_id=self.kwargs['item_pk'])
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Imagen eliminada exitosamente.')
+        return super().delete(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        return reverse('sales:item_detail', kwargs={'pk': self.kwargs['item_pk']})
+
+
+class ItemMultipleImageUploadView(ComercialFinanzasMixin, FormView):
+    """Subir múltiples imágenes a la vez"""
+    form_class = MultipleItemImageForm
+    template_name = 'COMERCIAL/sales/multiple_image_upload.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.item = get_object_or_404(Items, pk=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['item'] = self.item
+        return kwargs
+    
+    def form_valid(self, form):
+        images = self.request.FILES.getlist('images')
+        
+        if not images:
+            messages.warning(self.request, 'No se seleccionaron imágenes.')
+            return redirect('sales:item_detail', pk=self.item.pk)
+        
+        # Verificar límite total
+        current_count = self.item.images.count()
+        remaining = 5 - current_count
+        
+        if len(images) > remaining:
+            messages.error(
+                self.request, 
+                f'Solo puedes agregar {remaining} imagen(es) más. '
+                f'Actualmente tienes {current_count} imágenes.'
+            )
+            return self.form_invalid(form)
+        
+        # Crear las imágenes
+        created_count = 0
+        for i, image in enumerate(images):
+            ItemImage.objects.create(
+                item=self.item,
+                image=image,
+                order=current_count + i
+            )
+            created_count += 1
+        
+        messages.success(
+            self.request, 
+            f'{created_count} imagen(es) agregada(s) exitosamente.'
+        )
+        return redirect('ventas_app:detalle-item', pk=self.item.pk)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item'] = self.item
+        context['current_count'] = self.item.images.count()
+        context['remaining'] = 5 - context['current_count']
+        return context
 
 # ================= ACTUALIZAR SEGUIMIENTO ITEMS ========================
 class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):

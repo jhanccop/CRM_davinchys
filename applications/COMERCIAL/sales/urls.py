@@ -20,6 +20,14 @@ urlpatterns = [
     path('comercial/cotizaciones/detalle/item/<pk>/', views.DetailTrafoItemView.as_view(), name='detalle-item'),
     path('comercial/cotizaciones/elimnar/item/<pk>/', views.DeleteTrafoItemView.as_view(), name='eliminar-item'),
 
+    # ==================== IMAGENES ITEMS ====================
+    # ==================== CRUD IMÁGENES ====================
+    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/', views.ItemImageListView.as_view(), name='image_list'),
+    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/agregar/', views.ItemImageCreateView.as_view(), name='image_create'),
+    path('comercial/cotizaciones/items/<int:pk>/imagenes/agregar-multiples/', views.ItemMultipleImageUploadView.as_view(), name='item_add_images'),
+    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/<int:pk>/editar/', views.ItemImageUpdateView.as_view(), name='image_update'),
+    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/<int:pk>/eliminar/', views.ItemImageDeleteView.as_view(), name='image_delete'),
+
     # ==================== ITEMS UPDATE TRACKING ====================
     path('comercial/cotizaciones/seguimiento/actualizar/<pk>/',views.UpdateTrackingItemView.as_view(),name='actualizar-estado-item'),
 
