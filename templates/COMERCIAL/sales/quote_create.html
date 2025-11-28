@@ -58,6 +58,11 @@
                             {{ form.isPO }}
                             <label class="form-check-label" for="{{ form.isPO.id_for_label }}">Es PO?</label>
                         </div>
+                        <div class="input-group input-group-outline my-3 is-focused">
+                            <label class="form-label" for="{{ form.poNumber.id_for_label }}">Número de PO</label>
+                            {{ form.poNumber }}
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -77,8 +82,8 @@
                             <label class="form-label">Phase</label>
                             <select id="id_phase" class="form-control">
                                 <option value="">Seleccionar</option>
-                                <option value="0">Mono-phasic</option>
-                                <option value="1">Three-phasic</option>
+                                <option value="0">Single-phase</option>
+                                <option value="1">Three-phase</option>
                             </select>
                         </div>
                     </div>
@@ -181,6 +186,7 @@
                                 <option value="2">208Y/120</option>
                                 <option value="3">4160Y/2400</option>
                                 <option value="4">277/480Y</option>
+                                <option value="5">277</option>
                             </select>
                         </div>
                     </div>
