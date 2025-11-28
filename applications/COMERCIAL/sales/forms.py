@@ -222,6 +222,7 @@ class quotesForm(forms.ModelForm):
             
             'shortDescription',
             'isPO',
+            'poNumber'
         )
         
         widgets = {
@@ -270,6 +271,12 @@ class quotesForm(forms.ModelForm):
                     'class': 'form-check-input',
                 },
             ),
+            'poNumber': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
             'currency': forms.Select(
                 attrs = {
                     'placeholder': '',
@@ -306,6 +313,7 @@ class quotesForm(forms.ModelForm):
             'deadline': 'Fecha de entrega',
             'payMethod': 'Método de pago',
             'isPO': '¿Es PO?',
+            'poNumber':'Número de PO'
         }
 
     #def __init__(self, *args, **kwargs):

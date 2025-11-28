@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import json
+import re
 
 from django.contrib import messages
 from django.db import transaction
@@ -885,7 +886,6 @@ class ItemImageCreateView(ComercialFinanzasMixin, CreateView):
         context['item'] = self.item
         return context
 
-
 class ItemImageUpdateView(ComercialFinanzasMixin, UpdateView):
     """Actualizar una imagen existente"""
     model = ItemImage
@@ -907,7 +907,6 @@ class ItemImageUpdateView(ComercialFinanzasMixin, UpdateView):
         context['item'] = self.object.item
         return context
 
-
 class ItemImageDeleteView(ComercialFinanzasMixin, DeleteView):
     """Eliminar una imagen"""
     model = ItemImage
@@ -922,7 +921,6 @@ class ItemImageDeleteView(ComercialFinanzasMixin, DeleteView):
     
     def get_success_url(self):
         return reverse('sales:item_detail', kwargs={'pk': self.kwargs['item_pk']})
-
 
 class ItemMultipleImageUploadView(ComercialFinanzasMixin, FormView):
     """Subir múltiples imágenes a la vez"""
@@ -998,9 +996,26 @@ class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):
         item = Items.objects.get(id = pk)
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
 
-
 # ================= DETAIL ITEMS FOR CLIENT ======================== 
-class DetailSerialNumberView(ListView):
+
+def normalize_serial(serial):
+    """
+    Normaliza un número de serie para búsqueda:
+    - Elimina espacios en blanco
+    - Elimina caracteres especiales (/, -, etc.)
+    - Convierte a mayúsculas para uniformidad
+    """
+    if not serial:
+        return ''
+    # Eliminar espacios
+    serial = serial.strip()
+    # Eliminar caracteres especiales comunes (/, -, _, etc.)
+    serial = re.sub(r'[/\-_\s]+', '', serial)
+    # Convertir a mayúsculas para uniformidad
+    serial = serial.upper()
+    return serial
+
+class DetailSerialNumberView0(ListView):
     template_name = "COMERCIAL/sales/detail-serial-number.html"
     context_object_name = 'Items'
 
@@ -1010,4 +1025,33 @@ class DetailSerialNumberView(ListView):
         payload["order"] = order
         payload["tracking"] = Items.objects.filter(seq = order)
         payload["itemTracking"] = ItemTracking.objects.filter(idItem__seq = order).last
+        return payload
+    
+class DetailSerialNumberView(ListView):
+    template_name = "COMERCIAL/sales/detail-serial-number.html"
+    context_object_name = 'Items'
+
+    def get_queryset(self):
+        order = self.request.GET.get("order", '')
+        normalized_order = normalize_serial(order)
+        
+        payload = {}
+        payload["order"] = order
+        
+        # Filtrar todos los items y normalizar en Python
+        all_items = Items.objects.filter(seq__isnull=False)
+        matching_items = [
+            item for item in all_items 
+            if normalize_serial(item.seq) == normalized_order
+        ]
+        
+        payload["tracking"] = matching_items
+        
+        if matching_items:
+            payload["itemTracking"] = ItemTracking.objects.filter(
+                idItem__in=[item.id for item in matching_items]
+            ).last()
+        else:
+            payload["itemTracking"] = None
+        
         return payload

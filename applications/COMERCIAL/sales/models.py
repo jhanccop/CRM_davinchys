@@ -98,6 +98,13 @@ class quotes(TimeStampedModel):
 
     isPO = models.BooleanField("Es PO?",default = False)
 
+    poNumber = models.CharField(
+        'PO number',
+        max_length = 10, 
+        null = True,
+        blank = True
+    )
+
     objects = quotesManager()
 
     class Meta:
@@ -140,8 +147,8 @@ class Items(TimeStampedModel):
     MONO = "0"
     THREE = "1"
     PHASE_CHOICES = (
-        (MONO, 'Mono-phasic'),
-        (THREE, 'Three-phasic'),
+        (MONO, 'Single-phase'),
+        (THREE, 'Three-phase'),
     )
     PHASE_NICK = {
         MONO: 'MO',
@@ -300,6 +307,7 @@ class Items(TimeStampedModel):
         ('2', '208Y/120'),
         ('3', '4160Y/2400'),
         ('4', '277/480Y'),
+        ('5', '277'),
     )
     LV = models.CharField(
         'LV',

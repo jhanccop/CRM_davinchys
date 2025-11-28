@@ -60,7 +60,8 @@ class quotesAdmin(ImportExportModelAdmin):
         'idTinExecuting',
         'amount',
         'deadline',
-        'isPO'
+        'isPO',
+        'poNumber'
     )
     search_fields = ('idClient',)
     list_filter = ('idClient',)
