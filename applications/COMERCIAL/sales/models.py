@@ -151,7 +151,7 @@ class Items(TimeStampedModel):
         (THREE, 'Three-phase'),
     )
     PHASE_NICK = {
-        MONO: 'MO',
+        MONO: 'SP',
         THREE: 'TP',
     }
     PHASE = models.CharField(
