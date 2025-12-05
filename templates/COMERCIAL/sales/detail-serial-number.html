@@ -55,8 +55,11 @@
                             <div class="col-xl-12 col-lg-12 text-center">
                                 <div class="item-image">
                                     {% if Items.tracking.0.images.first %}
-                                    <img class="w-100 border-radius-lg shadow-lg mx-auto"
-                                        src="{{ Items.tracking.0.images.first.image.url }}" alt="{{ Items.tracking.0.seq }}">
+                                    <img class="w-100 border-radius-lg shadow-lg mx-auto d-block"
+                                        src="{{ Items.tracking.0.images.first.image.url }}" 
+                                        alt="{{ Items.tracking.0.seq }}"
+                                        loading="lazy"
+                                        style="max-width: 100%; height: auto; object-fit: cover;">
                                     
                                     {% else %}
                                     <div class="no-image">📷</div>
@@ -121,7 +124,7 @@
                                             <p class="text-sm font-weight-normal mb-0">KVA</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_KVA_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_KVA_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -130,7 +133,7 @@
                                             <p class="text-sm font-weight-normal mb-0"> HV</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_HV_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_HV_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -139,7 +142,7 @@
                                             <p class="text-sm font-weight-normal mb-0">LV</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_LV_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_LV_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -148,7 +151,7 @@
                                             <p class="text-sm font-weight-normal mb-0">PHASE</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_PHASE_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_PHASE_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -157,7 +160,7 @@
                                             <p class="text-sm font-weight-normal mb-0">COOLING TYPE</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_COOLING_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_COOLING_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -166,7 +169,7 @@
                                             <p class="text-sm font-weight-normal mb-0">WINDING</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.get_WINDING_display}}
+                                            <p class="text-sm font-weight-normal mb-0">{{Items.tracking.0.idTrafo.get_WINDING_display}}
                                             </p>
                                         </td>
                                     </tr>
@@ -175,7 +178,7 @@
                                             <p class="text-sm font-weight-normal mb-0">PO NUMBER</p>
                                         </td>
                                         <td>
-                                            <p class="text-sm font-weight-normal mb-0">PO-{{Items.tracking.0.idTrafoQuote}}</p>
+                                            <p class="text-sm font-weight-normal mb-0">PO-{{Items.tracking.0.idTrafoQuote.poNumber}}</p>
                                         </td>
                                     </tr>
 

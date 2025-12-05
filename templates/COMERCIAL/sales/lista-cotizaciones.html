@@ -119,7 +119,7 @@
 
                   <td>
                       {% for r in t.item_Quote.all %}
-                      <a href="{% url 'ventas_app:detalle-item' r.id %}"><p class="pt-0 mb-0">{{r}}</p></a>
+                      <a href="{% url 'ventas_app:detail-item-all' r.id %}"><p class="pt-0 mb-0">{{r}}</p></a>
                       {% endfor%}
                   </td>
 

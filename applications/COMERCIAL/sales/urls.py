@@ -22,7 +22,7 @@ urlpatterns = [
 
     # ==================== IMAGENES ITEMS ====================
     # ==================== CRUD IMÁGENES ====================
-    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/', views.ItemImageListView.as_view(), name='image_list'),
+    path('comercial/cotizaciones/items/<int:item_pk>/imagenes/', views.ItemDetailAllListView.as_view(), name='detail-item-all'),
     path('comercial/cotizaciones/items/<int:item_pk>/imagenes/agregar/', views.ItemImageCreateView.as_view(), name='image_create'),
     path('comercial/cotizaciones/items/<int:pk>/imagenes/agregar-multiples/', views.ItemMultipleImageUploadView.as_view(), name='item_add_images'),
     path('comercial/cotizaciones/items/<int:item_pk>/imagenes/<int:pk>/editar/', views.ItemImageUpdateView.as_view(), name='image_update'),

@@ -8,6 +8,7 @@ from applications.cuentas.models import Tin
 from applications.COMERCIAL.stakeholders.models import client, supplier
 from applications.COMERCIAL.purchase.models import requirements
 from applications.COMERCIAL.sales.models import quotes
+from applications.LOGISTICA.transport.models import Container
 
 from .managers import (
     FinancialDocumentsManager,
@@ -52,7 +53,9 @@ class RawsFilesRHE(TimeStampedModel):
 class FinancialDocuments(TimeStampedModel):
 
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
-    idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True)
+    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True)
+
+    idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True) # po de cliente
     
     # TYPES
     FACTURA = '0'

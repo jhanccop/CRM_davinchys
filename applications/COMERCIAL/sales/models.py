@@ -5,7 +5,7 @@ from django.conf import settings
 from applications.cuentas.models import Tin, Account # COMPAÑIAS PROPIETARIAS
 #from applications.clientes.models import Cliente
 from applications.COMERCIAL.stakeholders.models import client, supplier # Clientes
-from applications.PRODUCTION.models import Trafos
+from applications.LOGISTICA.transport.models import Container
 from django.core.exceptions import ValidationError
 
 
@@ -114,33 +114,12 @@ class quotes(TimeStampedModel):
     def __str__(self):
         return f"QUO-{self.id} | {self.idClient}"
 
-class Items(TimeStampedModel):
+class Trafo(TimeStampedModel):
     """
         TRANSFORMADORES INDIVIDUALES
     """
-    #from applications.LOGISTICA.transport.models import Container
-    #idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_container")
 
-    # ========== DATOS COMERCIALES ==========
-    idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
-    seq = models.CharField(
-        "Serial",
-        max_length=20,
-        blank=True,
-        null=True,
-        #unique=True
-    )
-    unitCost = models.DecimalField(
-        'Costo unitario', 
-        max_digits=10, 
-        decimal_places=2,
-        blank=True,
-        null=True,
-    )
-
-    fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
     drawing_file = models.FileField(upload_to='drawing_docss/',null=True,blank=True)
-    plate_file = models.FileField(upload_to='plate_docss/',null=True,blank=True)
 
     #  ========== TIPO ==========
     #  PHASE 
@@ -222,7 +201,7 @@ class Items(TimeStampedModel):
 
     MOUNTING_CHOICES = (
         (POLE, 'Pole'),
-        (PEDESTAL, 'Pedestal'),
+        (PEDESTAL, 'Pad'),
         (PLATFORM, 'Platform'),
         (UNDERGROUND, 'Underground'),
         (SUBSTATION, 'Substation'),
@@ -230,7 +209,7 @@ class Items(TimeStampedModel):
     
     MOUNTING_NICK = {
         POLE: 'PM',
-        PEDESTAL: 'PED',
+        PEDESTAL: 'PAD',
         PLATFORM: 'PLA',
         UNDERGROUND: 'UND',
         SUBSTATION: 'SUB',
@@ -291,6 +270,8 @@ class Items(TimeStampedModel):
         ('9', '23960'),
         ('10', '24940'),
         ('11', '34500'),
+        ('12', '2400Delta X 7200Delta X 4160GY/2400 X 12470GY/7200'),
+        ('13', '12470 X 24940'),
     )
     HV = models.CharField(
         'HV',
@@ -308,6 +289,8 @@ class Items(TimeStampedModel):
         ('3', '4160Y/2400'),
         ('4', '277/480Y'),
         ('5', '277'),
+        ('6', '480'),
+        ('7', '208')
     )
     LV = models.CharField(
         'LV',
@@ -352,6 +335,7 @@ class Items(TimeStampedModel):
         ('4', 'Dzn0'),
         ('5', 'Yd11'),
         ('6', 'lio'),
+        ('6', 'Dyn1/YNyn0'),
     )
     CONNECTION = models.CharField(
         'CONNECTION',
@@ -375,7 +359,52 @@ class Items(TimeStampedModel):
         blank=True, 
         null=True
     )
-    
+
+    def delete(self, *args, **kwargs):
+        """
+        Elimina todos los archivos asociados al modelo antes de eliminar el registro
+        """
+        
+        # Eliminar drawing_file
+        if self.drawing_file:
+            self.drawing_file.delete(save=False)
+        
+        super(Items, self).delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Transformador'
+        verbose_name_plural = 'Transformadores'
+
+    def __str__(self):
+        return f"DT{self.PHASE_NICK.get(self.PHASE, '')}{self.COOLING_NICK.get(self.COOLING, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')} {self.get_KVA_display()} - {self.id}"
+
+class Items(TimeStampedModel):
+    """
+        Items INDIVIDUALES
+    """
+    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_container")
+
+    # ========== DATOS COMERCIALES ==========
+    idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
+    idTrafo = models.ForeignKey(Trafo, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
+    seq = models.CharField(
+        "Serial",
+        max_length=20,
+        blank=True,
+        null=True,
+        unique=True
+    )
+    unitCost = models.DecimalField(
+        'Costo unitario', 
+        max_digits=10, 
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+
+    fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
+    plate_file = models.FileField(upload_to='plate_docss/',null=True,blank=True)
+
     def delete(self, *args, **kwargs):
         """
         Elimina todos los archivos asociados al modelo antes de eliminar el registro
@@ -383,10 +412,6 @@ class Items(TimeStampedModel):
         # Eliminar fat_file
         if self.fat_file:
             self.fat_file.delete(save=False)
-        
-        # Eliminar drawing_file
-        if self.drawing_file:
-            self.drawing_file.delete(save=False)
         
         # Eliminar plate_file
         if self.plate_file:
@@ -397,11 +422,11 @@ class Items(TimeStampedModel):
     #objects = TrafosManager()
 
     class Meta:
-        verbose_name = 'Item Transformador'
-        verbose_name_plural = 'Items Transformadores'
+        verbose_name = 'Item'
+        verbose_name_plural = 'Items'
 
     def __str__(self):
-        return f"DT{self.PHASE_NICK.get(self.PHASE, '')}{self.COOLING_NICK.get(self.COOLING, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')} {self.get_KVA_display()} - {self.seq} "
+        return f"{self.idTrafo} - {self.seq} "
    
 class ItemTracking(TimeStampedModel):
     """
@@ -502,7 +527,6 @@ class ItemImage(TimeStampedModel):
         # Eliminar el archivo físico
         self.image.delete(save=False)
         super().delete(*args, **kwargs)
-
 
 class QuoteTracking(TimeStampedModel):
     """ Modelo de seguimiento de cotzaciones de fabricacion """

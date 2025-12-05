@@ -1,199 +1,122 @@
 {% extends "base.html" %}
 
 {% load static %}
-{% block title %} Ventas {% endblock title %}
-{% block main %} Ventas {% endblock main %}
-{% block appName %} Cotizaciones {% endblock appName %}
-{% block Type %} {% if object %}Editar{% else %}Crear{% endif %} - Item {% endblock Type %}
+{% block navbar_main %}Ventas{% endblock %}
+{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
+{% block navbar_Type %} {% if object %}Editar{% else %}Crear{% endif %} - Item  {% endblock %}
 
 {% block panel-content %}
 
-<div class="card">
-    <div class="card-body">
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
 
-        <h5 class=" mb-4"> 
+            <h5 class=" mb-4"> 
+                {% if object %}
+                    Editar Transformador {{ object.idTrafo }}-{{ object.seq }} de cotización {{object.idTrafoQuote}}
+                {% else %}
+                    Agregar Transformador a cotización QUO-{{pk}}
+                {% endif %}
+            </h5>
+
+            <form id="quoteForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+                <div id="trafoFormContainer">
+
+                    <!-- Campo oculto para idTrafoQuote -->
+                    <div class="row">
+                        <div class="col-12" hidden>
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.idTrafoQuote.label }}</label>
+                                {{ form.idTrafoQuote }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row pb-4">
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label"> Tipo de transformador </label>
+                                {{ form.idTrafo }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label"> Contenedor </label>
+                                {{ form.idContainer }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.seq.label }}</label>
+                                {{ form.seq }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.unitCost.label }}</label>
+                                {{ form.unitCost }}
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="row pt-4">
+                        <div class="col-12 col-sm-12 mt-sm-0">
+                        <h6 class="mb-0">Adjuntar FAT</h6>
+                        <div class="input-group input-group-outline">
+                            <div class="form-group w-100">
+                            {{ form.fat_file }}
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                        {% for error in form.fat_file.errors %}
+                        <p class="text-xs text-primary mb-0">
+                            {{ error|escape }}
+                        </p>
+                        {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row pt-4">
+                        <div class="col-12 col-sm-12 mt-sm-0">
+                        <h6 class="mb-0">Adjuntar plate_file</h6>
+                        <div class="input-group input-group-outline">
+                            <div class="form-group w-100">
+                            {{ form.plate_file }}
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                        {% for error in form.plate_file.errors %}
+                        <p class="text-xs text-primary mb-0">
+                            {{ error|escape }}
+                        </p>
+                        {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+
+            <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+                {% if object %}Actualizar{% else %}Crear{% endif %} Item
+            </button>
+
             {% if object %}
-                Editar Transformador {{ object.idTrafo }}-{{ object.seq }} de cotización {{object.idTrafoQuote}}
-            {% else %}
-                Agregar Transformador a cotización QUO-{{pk}}
+            <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id  %}" class="btn btn-secondary mt-3 mb-0">
+                Cancelar
+            </a>
+            {% else%}
+            <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
+                Cancelar
+            </a>
             {% endif %}
-        </h5>
 
-        <form id="quoteForm" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+            </form>
 
-            <div id="trafoFormContainer">
-
-                <!-- Campo oculto para idTrafoQuote -->
-                <div class="row">
-                    <div class="col-12" hidden>
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.idTrafoQuote.label }}</label>
-                            {{ form.idTrafoQuote }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pb-4">
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.seq.label }}</label>
-                            {{ form.seq }}
-                        </div>
-                    </div>
-                    <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.unitCost.label }}</label>
-                            {{ form.unitCost }}
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="">Tipo de transformador</h6>
-
-                <div class="row pb-4">
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.PHASE.label }}</label>
-                            {{ form.PHASE }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.COOLING.label }}</label>
-                            {{ form.COOLING }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.MOUNTING.label }}</label>
-                            {{ form.MOUNTING }}
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="">Características técnicas</h6>
-
-                <div class="row pb-4">
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.KVA.label }}</label>
-                            {{ form.KVA }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.HV.label }}</label>
-                            {{ form.HV }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.LV.label }}</label>
-                            {{ form.LV }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.HZ.label }}</label>
-                            {{ form.HZ }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pb-4">
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.WINDING.label }}</label>
-                            {{ form.WINDING }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.CONNECTION.label }}</label>
-                            {{ form.CONNECTION }}
-                        </div>
-                    </div>
-                    <div class="col-4 col-sm-3 mt-3 mt-sm-0">
-                        <div class="input-group input-group-outline focused is-focused">
-                            <label class="form-label">{{ form.STANDARD.label }}</label>
-                            {{ form.STANDARD }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pt-4">
-                    <div class="col-12 col-sm-12 mt-sm-0">
-                    <h6 class="mb-0">Adjuntar FAT</h6>
-                    <div class="input-group input-group-outline">
-                        <div class="form-group w-100">
-                        {{ form.fat_file }}
-                        </div>
-                    </div>
-                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                    {% for error in form.fat_file.errors %}
-                    <p class="text-xs text-primary mb-0">
-                        {{ error|escape }}
-                    </p>
-                    {% endfor %}
-                    </div>
-                </div>
-
-                <div class="row pt-4">
-                    <div class="col-12 col-sm-12 mt-sm-0">
-                    <h6 class="mb-0">Adjuntar drawing_file</h6>
-                    <div class="input-group input-group-outline">
-                        <div class="form-group w-100">
-                        {{ form.drawing_file }}
-                        </div>
-                    </div>
-                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                    {% for error in form.drawing_file.errors %}
-                    <p class="text-xs text-primary mb-0">
-                        {{ error|escape }}
-                    </p>
-                    {% endfor %}
-                    </div>
-                </div>
-
-                <div class="row pt-4">
-                    <div class="col-12 col-sm-12 mt-sm-0">
-                    <h6 class="mb-0">Adjuntar plate_file</h6>
-                    <div class="input-group input-group-outline">
-                        <div class="form-group w-100">
-                        {{ form.plate_file }}
-                        </div>
-                    </div>
-                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                    {% for error in form.plate_file.errors %}
-                    <p class="text-xs text-primary mb-0">
-                        {{ error|escape }}
-                    </p>
-                    {% endfor %}
-                    </div>
-                </div>
-
-            </div>
-
-        <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
-            {% if object %}Actualizar{% else %}Crear{% endif %} Item
-        </button>
-
-        {% if object %}
-        <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id  %}" class="btn btn-secondary mt-3 mb-0">
-            Cancelar
-        </a>
-        {% else%}
-        <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
-            Cancelar
-        </a>
-        {% endif %}
-
-        </form>
-
+        </div>
     </div>
 </div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}

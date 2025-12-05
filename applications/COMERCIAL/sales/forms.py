@@ -7,8 +7,10 @@ from .models import (
     quotes,
     Items,
     ItemTracking,
-    ItemImage
+    ItemImage,
+    Trafo
 )
+
 from django.forms import inlineformset_factory
 from applications.users.models import User
 
@@ -320,18 +322,13 @@ class quotesForm(forms.ModelForm):
     #    super(quotesForm, self).__init__(*args, **kwargs)
     #    self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
 
-class ItemForm(forms.ModelForm):
+class trafoForm(forms.ModelForm):
     class Meta:
-        model = Items
+        model = Trafo
         fields = (
 
             # COMERCIAL
-            'idTrafoQuote',
-            'seq',
-            'unitCost',
-            'fat_file',
             'drawing_file',
-            'plate_file',
 
             # TIPO
             'PHASE',
@@ -349,25 +346,6 @@ class ItemForm(forms.ModelForm):
             
         )
         widgets = {
-            'idTrafoQuote': forms.Select(
-                attrs = {
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'seq': forms.TextInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
-            'unitCost': forms.NumberInput(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                    'step': '0.01',
-                    'min': '0'
-                }
-            ),
             'PHASE': forms.Select(
                 attrs = {
                     'class': 'input-group-field form-control',
@@ -419,6 +397,71 @@ class ItemForm(forms.ModelForm):
                 }
             ),
             
+            'drawing_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"drawing_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_drawing_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
+        }
+    
+    def clean_drawing_file(self):
+        drawing_file = self.cleaned_data.get('drawing_file')
+        if drawing_file:
+            if not drawing_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if drawing_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return drawing_file
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        model = Items
+        fields = (
+
+            # COMERCIAL
+            'idTrafoQuote',
+            'idTrafo',
+            'idContainer',
+            'seq',
+            'unitCost',
+            'fat_file',
+            'plate_file',
+
+        )
+        widgets = {
+            'idTrafoQuote': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idTrafo': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'idContainer': forms.Select(
+                attrs = {
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'seq': forms.TextInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                }
+            ),
+            'unitCost': forms.NumberInput(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'input-group-field form-control',
+                    'step': '0.01',
+                    'min': '0'
+                }
+            ),
             
             'fat_file': forms.ClearableFileInput(
                 attrs = {
@@ -426,15 +469,6 @@ class ItemForm(forms.ModelForm):
                     'name':"fat_file",
                     'class': 'form-control text-dark',
                     'id':"id_fat_file",
-                    'accept':".pdf,.jpg,.jpeg,.png"
-                }
-            ),
-            'drawing_file': forms.ClearableFileInput(
-                attrs = {
-                    'type':"file",
-                    'name':"drawing_file",
-                    'class': 'form-control text-dark',
-                    'id':"id_drawing_file",
                     'accept':".pdf,.jpg,.jpeg,.png"
                 }
             ),
@@ -457,15 +491,6 @@ class ItemForm(forms.ModelForm):
             if fat_file.size > 5*1024*1024:  # 5 MB limit
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return fat_file
-    
-    def clean_drawing_file(self):
-        drawing_file = self.cleaned_data.get('drawing_file')
-        if drawing_file:
-            if not drawing_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
-                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
-            if drawing_file.size > 5*1024*1024:  # 5 MB limit
-                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
-        return drawing_file
     
     def clean_plate_file(self):
         plate_file = self.cleaned_data.get('plate_file')

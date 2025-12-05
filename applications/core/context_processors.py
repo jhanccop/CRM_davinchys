@@ -186,9 +186,9 @@ def menu_navigation(request):
                     'permission': 'logistica.view_dashboard'
                 },
                 {
-                    'name': 'Req. Logísticos',
-                    'url_name': '',
-                    'mini_icon': 'RL',
+                    'name': 'CONTENEDORES',
+                    'url_name': 'logistica_app:lista-contenedores',
+                    'mini_icon': 'CO',
                     'permission': 'logistica.view_requerimiento'
                 }
             ]

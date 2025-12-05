@@ -9,7 +9,8 @@ from .models import (
     QuoteTracking,
     Items,
     ItemImage,
-    ItemTracking
+    ItemTracking,
+    Trafo
 )
 
 ## ==================== ExpensesDocuments =====================
@@ -67,7 +68,26 @@ class quotesAdmin(ImportExportModelAdmin):
     list_filter = ('idClient',)
     #autocomplete_fields = ['idPetitioner',]
 
-## ==================== ITEMS TRANSFORMADORES =====================
+## ==================== TRANSFORMADORES =====================
+class TrafoResource(resources.ModelResource):
+    class Meta:
+        model = Trafo
+
+@admin.register(Trafo)
+class TrafoAdmin(ImportExportModelAdmin):
+    resource_class = TrafoResource
+
+    list_display = (
+        'id',
+        'PHASE',
+        'COOLING',
+        'MOUNTING',
+        'KVA'
+    )
+    #search_fields = ('idTrafoQuote',)
+    #list_filter = ('idTrafoQuote',)
+
+## ==================== ITEMS  =====================
 class ItemsResource(resources.ModelResource):
     class Meta:
         model = Items
@@ -78,15 +98,11 @@ class ItemsAdmin(ImportExportModelAdmin):
 
     list_display = (
         'id',
-        'idTrafoQuote',
+        'idTrafo',
         'seq',
-        'PHASE',
-        'COOLING',
-        'MOUNTING',
-        'KVA'
     )
-    search_fields = ('idTrafoQuote',)
-    list_filter = ('idTrafoQuote',)
+    #search_fields = ('idTrafoQuote',)
+    #list_filter = ('idTrafoQuote',)
 
 ## ==================== IMAGEN ITEMS TRANSFORMADORES =====================
 class ItemImageResource(resources.ModelResource):

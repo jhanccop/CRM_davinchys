@@ -35,7 +35,7 @@ from django.views.generic import (
 from .models import (
   Incomes,
   quotes,
-  #Trafos,
+  Trafo,
   QuoteTracking,
   Items,
   ItemTracking
@@ -694,106 +694,126 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
     form_class = quotesForm
     template_name = 'COMERCIAL/sales/quote_create.html'
     success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-        
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Ya no necesitas pasar Trafos si vas a crear Items directamente
-        return context
     
     @transaction.atomic
     def form_valid(self, form):
-        # Guardar la cotización primero
-        self.object = form.save(commit=False)
-        
-        # Procesar el monto total desde el frontend
-        items_data = self.request.POST.get('items_data', '[]')
-        total_amount = 0
-        
         try:
+            # Guardar la cotización primero
+            self.object = form.save(commit=False)
+            
+            # Procesar items desde el frontend
+            items_data = self.request.POST.get('items_data', '[]')
+            files_metadata = self.request.POST.get('files_metadata', '{}')
+            
+            total_amount = 0
+            
             import json
             items_list = json.loads(items_data)
+            files_metadata_dict = json.loads(files_metadata)
             
-            # Calcular el monto total
-            for item_data in items_list:
+            if not items_list:
+                form.add_error(None, 'Debe agregar al menos un transformador')
+                return self.form_invalid(form)
+            
+            # Mapeo inverso para archivos
+            file_mapping = {}
+            for file_id, metadata in files_metadata_dict.items():
+                file_mapping[metadata['item_index']] = {
+                    'file_id': file_id,
+                    'file_name': metadata['file_name']
+                }
+            
+            # Calcular monto total y crear items
+            for index, item_data in enumerate(items_list):
                 quantity = int(item_data.get('quantity', 1))
                 unit_cost = float(item_data.get('unit_cost', 0))
                 total_amount += quantity * unit_cost
             
-            # Asignar el monto total a la cotización
+            # Guardar cotización
             self.object.amount = total_amount
-            self.object.initialAmount = total_amount  # También puedes guardar el monto inicial
+            self.object.initialAmount = total_amount
             self.object.save()
             
-            # Crear items directamente desde los datos del template
-            for item_data in items_list:
+            # Procesar cada transformador
+            for index, item_data in enumerate(items_list):
                 quantity = int(item_data.get('quantity', 1))
                 unit_cost = float(item_data.get('unit_cost', 0))
                 
-                # Datos técnicos del transformador
-                phase = item_data.get('phase')
-                cooling = item_data.get('cooling')
-                mounting = item_data.get('mounting')
-                kva = item_data.get('kva')
-                hv = item_data.get('hv')
-                lv = item_data.get('lv')
-                hz = item_data.get('hz')
-                winding = item_data.get('winding')
-                connection = item_data.get('connection')
-                standard = item_data.get('standard')
-                seq = item_data.get('seq', '')  # Serial del transformador
+                # Obtener archivo si existe
+                drawing_file = None
+                if index in file_mapping:
+                    file_id = file_mapping[index]['file_id']
+                    drawing_file = self.request.FILES.get(file_id)
                 
-                # Crear un item por cada unidad solicitada
+                # Crear el Transformador (Trafo)
+                trafo = Trafo.objects.create(
+                    PHASE=item_data.get('phase'),
+                    COOLING=item_data.get('cooling'),
+                    MOUNTING=item_data.get('mounting'),
+                    KVA=item_data.get('kva'),
+                    HV=item_data.get('hv'),
+                    LV=item_data.get('lv'),
+                    HZ=item_data.get('hz'),
+                    WINDING=item_data.get('winding'),
+                    CONNECTION=item_data.get('connection'),
+                    STANDARD=item_data.get('standard'),
+                    drawing_file=drawing_file
+                )
+                
+                # Crear Items (uno por cada unidad)
+                base_seq = item_data.get('seq', f'TRAFO-{index+1:03d}')
+                
                 for i in range(quantity):
-                    try:
-                        item = Items.objects.create(
-                            idTrafoQuote=self.object,  # FK a quotes
-                            seq=f"{seq}-{i+1}" if quantity > 1 else seq,  # Agregar sufijo si hay múltiples unidades
-                            unitCost=unit_cost,
-                            
-                            # Características técnicas
-                            PHASE=phase,
-                            COOLING=cooling,
-                            MOUNTING=mounting,
-                            KVA=kva,
-                            HV=hv,
-                            LV=lv,
-                            HZ=hz,
-                            WINDING=winding,
-                            CONNECTION=connection,
-                            STANDARD=standard,
-                        )
-                        
-                    except Exception as e:
-                        print(f"ERROR al crear item {i+1}:", str(e))
-                        continue
-             
-            # Crear registro en el tracking
-            tracking = QuoteTracking.objects.create(
+                    item_seq = f"{base_seq}-{i+1:03d}" if quantity > 1 else base_seq
+                    
+                    item = Items.objects.create(
+                        idTrafoQuote=self.object,
+                        idTrafo=trafo,  # Relación con el transformador
+                        seq=item_seq,
+                        unitCost=unit_cost,
+                    )
+                    
+                    # Crear tracking para el item
+                    #ItemTracking.objects.create(
+                    #    idItem=item,
+                    #    statusItem=ItemTracking.SOLICITADO,
+                    #    statusPlate=ItemTracking.SOLICITADO
+                    #)
+            
+            # Crear tracking de la cotización
+            QuoteTracking.objects.create(
                 idquote=self.object,
                 status=QuoteTracking.ESPERA,
                 area=QuoteTracking.COMERCIAL
             )
             
-            messages.success(self.request, f'Cotización creada exitosamente con {len(items_list)} items.')
-            return super().form_valid(form)
+            # Si es AJAX request
+            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': str(self.success_url),
+                    'message': f'Cotización creada con {len(items_list)} transformador(es) y {sum(int(i.get("quantity", 1)) for i in items_list)} item(s)'
+                })
             
-        except (json.JSONDecodeError, ValueError) as e:
-            print("ERROR en procesamiento JSON:", str(e))
-            form.add_error(None, f'Error al procesar los items: {str(e)}')
-            return self.form_invalid(form)
+            messages.success(self.request, f'Cotización creada exitosamente con {len(items_list)} transformador(es).')
+            return redirect(self.success_url)
+            
         except Exception as e:
-            print("ERROR general:", str(e))
-            form.add_error(None, f'Error general: {str(e)}')
+            print(f"ERROR: {str(e)}")
+            form.add_error(None, f'Error al procesar la cotización: {str(e)}')
             return self.form_invalid(form)
     
     def form_invalid(self, form):
-        print("*** Formulario inválido ***")
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Por favor corrige los errores en el formulario.',
+                'errors': form.errors.as_json()
+            })
+        
         print("Errores:", form.errors)
-        context = self.get_context_data()
-        context['form'] = form
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
-        return render(self.request, self.template_name, context)
-    
+        return super().form_invalid(form)
 
 # ================= ITEMS ========================
 class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
@@ -844,10 +864,10 @@ class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
     
 
 # ================= IMAGENES ITEMS ========================
-class ItemImageListView(ComercialFinanzasMixin, ListView):
+class ItemDetailAllListView(ComercialFinanzasMixin, ListView):
     """Listado de imágenes de un item específico"""
     model = ItemImage
-    template_name = 'COMERCIAL/sales/image-list.html'
+    template_name = 'COMERCIAL/sales/item-detail.html'
     context_object_name = 'images'
     
     def get_queryset(self):
@@ -879,7 +899,7 @@ class ItemImageCreateView(ComercialFinanzasMixin, CreateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse('sales:item_detail', kwargs={'pk': self.item.pk})
+        return reverse('sales:detail-item-all', kwargs={'pk': self.item.pk})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -994,7 +1014,7 @@ class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):
     def get_success_url(self, *args, **kwargs):
         pk = self.kwargs["pk"]
         item = Items.objects.get(id = pk)
-        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+        return reverse_lazy('ventas_app:detail-item-all', kwargs={'item_pk':item.id})
 
 # ================= DETAIL ITEMS FOR CLIENT ======================== 
 
@@ -1015,18 +1035,6 @@ def normalize_serial(serial):
     serial = serial.upper()
     return serial
 
-class DetailSerialNumberView0(ListView):
-    template_name = "COMERCIAL/sales/detail-serial-number.html"
-    context_object_name = 'Items'
-
-    def get_queryset(self):
-        order = self.request.GET.get("order", '')
-        payload = {}
-        payload["order"] = order
-        payload["tracking"] = Items.objects.filter(seq = order)
-        payload["itemTracking"] = ItemTracking.objects.filter(idItem__seq = order).last
-        return payload
-    
 class DetailSerialNumberView(ListView):
     template_name = "COMERCIAL/sales/detail-serial-number.html"
     context_object_name = 'Items'

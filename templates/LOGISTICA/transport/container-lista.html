@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Logística{% endblock %}
+{% block navbar_appName %}Contenedores{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %}
+
+<!-- ================ EXPORTAR - NUEVO ================= -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-6 col-12 d-flex ms-auto">
+      <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+        Export CSV
+      </a>
+      <div class="dropleft ms-3">
+        <a class="btn bg-gradient-secondary" href="{% url 'logistica_app:nuevo-contenedor' %}">
+          NUEVO
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header pb-0 ">
+          <div class="row">
+            <div class="col-lg-5 col-md-3">
+              <h6 class="mb-0">Lista de Contenedores</h6>
+            </div>
+            <div class="col-lg-7 col-md-9">
+              <form method="GET" class="">{% csrf_token %}
+                <div class="d-flex align-items-center">
+                  
+                  <div class="input-group input-group-outline">
+                    <input class="form-control datetimepicker text-center text-dark" 
+                           value="{{intervalDate}}"
+                           placeholder="Selecciona rango de fechas" 
+                           id="dateKword" 
+                           name="dateKword">
+                  </div>
+                  &emsp;
+                  <div class="pt-3 pb-0">
+                    <button class="btn bg-gradient-dark" type="submit"> Buscar </button>
+                  </div>
+
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-containers">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">
+                    ID / Fecha
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> 
+                    PO relacionados 
+                  </th>
+                  
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Monto Neto
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Estado
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Es Orden?
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              
+              <tbody>
+                {% for container in containers.listContainer %}
+                <tr>
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <p class="text-sm font-weight-normal text-dark mb-0">
+                        <a href="">
+                          {{container.containerName}}
+                        </a>
+                      </p>
+                      <p class="text-sm font-weight-normal text-secondary mb-0">
+                        {{ container.created|date:'d-m-Y H:i' }}
+                      </p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                        {% regroup container.item_container.all by idTrafoQuote as trafo_list %}
+                        {% for trafo in trafo_list %}
+                        <span class="badge badge-info me-3">{{ trafo.grouper.poNumber }}</span>
+                        {% endfor %}
+                      
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs text-dark">
+                        {{container.get_currency_display}} {{container.netAmount|floatformat:2}}
+                      </h6>
+                      <p class="text-sm font-weight-normal text-secondary mb-0">
+                        Bruto: {{container.grossAmount|floatformat:2}}
+                      </p>
+                    </div>
+                  </td>
+
+                  <td class="text-sm">
+                    {% with ultimo_tracking=container.containertracking_set.last %}
+                      {% if ultimo_tracking %}
+                        {% if ultimo_tracking.status == "0" %}
+                          <span class="badge badge-primary"> 
+                            {{ultimo_tracking.get_area_display}} - {{ultimo_tracking.get_status_display}}
+                          </span>
+                        {% elif ultimo_tracking.status == "12" %}
+                          <span class="badge badge-success">
+                            {{ultimo_tracking.get_status_display}}
+                          </span>
+                        {% else %}
+                          <span class="badge badge-secondary">
+                            {{ultimo_tracking.get_status_display}}
+                          </span>
+                        {% endif %}
+                      {% else %}
+                        <span class="badge badge-light">Sin tracking</span>
+                      {% endif %}
+                    {% endwith %}
+                  </td>
+
+                  <td>
+                    {% if container.isOrder %}
+                    <span class="badge badge-success">Orden de Compra</span>
+                    {% else %}
+                    <span class="badge badge-primary">Requerimiento</span>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    <a href="">
+                      <i class="far fa-eye text-info text-lg"></i>
+                    </a>
+                    &ensp;
+                    <a href="{% url 'logistica_app:editar-contenedor' container.id %}">
+                      <i class="far fa-edit text-dark text-lg"></i>
+                    </a>
+                    &ensp;
+                    <a href="">
+                      <i class="far fa-trash-alt text-primary text-lg"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <p class="text-muted">No hay contenedores registrados</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    if (document.querySelector('.datetimepicker')) {
+        flatpickr('.datetimepicker', {
+            allowInput: true,
+            mode: "range",
+            dateFormat: "Y-m-d",
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+    }
+</script>
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  /* CONTAINERS DATATABLE */
+  const dataTable= new simpleDatatables.DataTable("#datatable-containers", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 15,
+    labels: {
+        placeholder: "Buscar...",
+        perPage: "{select} registros por página",
+        noRows: "No se encontraron registros",
+        info: "Mostrando {start} a {end} de {rows} registros",
+    }
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+
+      var data = {
+        type: type,
+        filename: "contenedores-lista",
+      };
+
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+
+      dataTable.export(data);
+    });
+  });
+
+</script>
+
+{% endblock JSscripts %}

@@ -3,14 +3,14 @@
 {% load static %}
 
 {% block navbar_main %}Comercial{% endblock %}
-{% block navbar_appName %}PO{% endblock %}
+{% block navbar_appName %}PO {% endblock %}
 {% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
-<div class="container-fluid">
 
-  <!-- ================ EXPORTAR - NUEVO ================= -->
+<!-- ================ EXPORTAR - NUEVO ================= -->
+<div class="container-fluid">
   <div class="row">
     <div class="col-lg-6 col-12 d-flex ms-auto">
       <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
@@ -30,20 +30,15 @@
         <div class="card-header pb-0 ">
           <div class="row">
             <div class="col-lg-5 col-md-3">
-              <h6 class="mb-0">{{quote.selectedAccount.accountName}} </h6>
-              <p class="text-sm mb-0 text-info font-weight-bold">
-                <span class="text-md font-weight-bold">{{movimientos.selectedAccount.get_currency_display}}
-                  {{movimientos.lastBalance.balance|floatformat:"2g"}}</span> <small
-                  class="text-xs text-secondary">{{movimientos.selectedAccount.modified|date:'Y-m-d H:i'}}</small>
-              </p>
+              
             </div>
             <div class="col-lg-7 col-md-9">
               <form method="GET" class="">{% csrf_token %}
                 <div class="d-flex align-items-center">
-
+                  
                   <div class="input-group input-group-outline">
-                    <input class="form-control datetimepicker text-center text-dark"
-                      value="{{object_list.intervalDate}}" placeholder="today" id="dateKword" name="dateKword">
+                    <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
+                      placeholder="today" id="dateKword" name="dateKword">
                   </div>
                   &emsp;
                   <div class="pt-3 pb-0">
@@ -55,52 +50,52 @@
             </div>
           </div>
         </div>
-
+        
         <div class="card-body pt-0 px-0 pb-2">
           <div class="table-responsive p-0">
             <table class="table table-flush mb-0 align-items-center" id="datatable-move">
               <thead class="thead-light">
                 <tr>
-                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">Fecha/RFQ
+                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">RFK / PO / Fecha
                   </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> Cliente </th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Es PO?</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Productos</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento - Cot</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Tipo - Serie</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                 </tr>
               </thead>
-
+              
               <tbody>
-                {% for t in quotes.listQuotes.all %}
+                {% for t in quotes.listQuotes %}
                 <tr>
                   <td class="text-sm">
                     <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-sm"> <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          {{ t.dateOrder|date:'d-m-Y' }}</a>
+                      
+                      <p class="text-sm font-weight-normal text-dark mb-0">
+                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
+                          QUO-{{t.id}}
+                        </a>
+                      </p>
+                      <h6 class="mb-0 text-sm">
+                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
+                          {{t.poNumber|default:"-"}}
+                        </a>
                       </h6>
-                      <p class="text-sm font-weight-normal text-secondary mb-0">QUO-{{t.id}}</p>
+                      <p class="text-sm font-weight-normal text-secondary mb-0">
+                        {{ t.dateOrder|date:'d-m-Y' }}
+                      </p>
                     </div>
                   </td>
 
                   <td class="text-sm">
                     <div class="d-flex flex-column justify-content-center">
                       <h6 class="mb-0 text-xs text-secondary"> <a
-                          href="{% url 'ventas_app:cotizacion-detalle' t.id %}">{{t.idClient.tradeName}} </a>
+                        href="{% url 'ventas_app:cotizacion-detalle' t.id %}">{{t.idClient.tradeName}} </a>
                       </h6>
                       <p class="text-sm font-weight-normal text-secondary mb-0">
                         {{t.idClient.numberIdClient|default:"-"}}
                       </p>
                     </div>
-                  </td>
-
-                  <td>
-                    {% if t.isPO %}
-                    <span class="badge badge-success">PO</span>
-                    {% else %}
-                    <span class="badge badge-primary">no PO</span>
-                    {% endif %}
-
                   </td>
 
                   <td class="text-sm">
@@ -111,33 +106,31 @@
                     {% else %}
                     <span class="badge badge-secondary">{{t.ultimo_evento_display}}</span>
                     {% endif %}
-
-
                   </td>
 
                   <td>
-                    {% for r in t.item_Quote.all %}
-                    <li class="mb-0">{{r}}</li>
-                    {% endfor%}
+                      {% for r in t.item_Quote.all %}
+                      <a href="{% url 'ventas_app:detail-item-all' r.id %}"><p class="pt-0 mb-0">{{r}}</p></a>
+                      {% endfor%}
                   </td>
 
                   <td>
-                    <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                      <i class="far fa-eye text-info text-lg"></i>
-                    </a>
-                    &emsp;
-                    <a href="{% url 'ventas_app:cotizacion-editar' t.id %}">
-                      <i class="far fa-edit text-dark text-lg"></i>
-                    </a>
-                    &emsp;
-                    <a href="{% url 'ventas_app:cotizacion-eliminar' t.id %}">
-                      <i class="far fa-trash-alt text-primary text-lg"></i>
-                    </a>
+                      <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
+                          <i class="far fa-eye text-info text-lg"></i>
+                      </a>
+                      &ensp;
+                      <a href="{% url 'ventas_app:cotizacion-editar' t.id %}">
+                          <i class="far fa-edit text-dark text-lg"></i>
+                      </a>
+                      &ensp;
+                      <a href="{% url 'ventas_app:cotizacion-eliminar' t.id %}">
+                          <i class="far fa-trash-alt text-primary text-lg"></i>
+                      </a>
                   </td>
                 </tr>
                 {% endfor %}
               </tbody>
-
+              
             </table>
           </div>
         </div>

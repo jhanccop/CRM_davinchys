@@ -138,28 +138,22 @@
                                 <a href="{{ trafo.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                 <span class="badge badge-pill bg-gradient-success">VIEW</span>
                                 </a>
-                                {% else %}
-                                <span class="badge bg-gradient-secondary">No yet</span>
                                 {% endif %}
 
                             </td>
                             <td class="text-end">
-                                {% if trafo.drawing_file %}
-                                <a href="{{ trafo.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                {% if trafo.idTrafo.drawing_file %}
+                                <a href="{{ trafo.idTrafo.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                 <span class="badge badge-pill bg-gradient-success">VIEW</span>
                                 </a>
-                                {% else %}
-                                <span class="badge bg-gradient-secondary">No yet</span>
                                 {% endif %}
 
                             </td>
                             <td class="text-end">
-                                {% if trafo.drawing_file %}
-                                <a href="{{ trafo.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                {% if trafo.plate_file %}
+                                <a href="{{ trafo.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                 <span class="badge badge-pill bg-gradient-success">VIEW</span>
                                 </a>
-                                {% else %}
-                                <span class="badge bg-gradient-secondary">No yet</span>
                                 {% endif %}
 
                             </td>
@@ -170,7 +164,7 @@
                                     <i class="fas fa-truck text-success text-lg"></i>
                                 </a>
                                 &ensp;
-                                <a href="{% url 'ventas_app:image_list' trafo.id %}">
+                                <a href="{% url 'ventas_app:detail-item-all' trafo.id %}">
                                     <i class="far fa-images text-info text-lg"></i>
                                 </a>
                                 &ensp;

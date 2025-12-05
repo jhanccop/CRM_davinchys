@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 from django.db.models import OuterRef, Subquery
 
 class ContainerManager(models.Manager):
-    def ListaContainer(self,idTin,intervalo):
+    def ListaContenedoresPorRuc(self,intervalo,idTin):
         """
             Lista de CONTAINER
         """
@@ -21,7 +21,7 @@ class ContainerManager(models.Manager):
 
         result = self.filter(
             created__range=rangeDate,
-            idQuote__idTinReceiving = idTin
+            idPetitioner__company__id = idTin
         )
         return result
 

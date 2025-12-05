@@ -34,11 +34,11 @@
                                 <i class="fas fa-info-circle me-2"></i>Información Básica
                             </h5>
                         </div>
-                        <div class="card-body mb-0 pb-0">
+                        <div class="card-body mb-0 pb-0 pt-2">
                             <div class="info-item mb-3">
                                 <div class="info-item mb-3">
                                         <small class="text-muted">Tipo</small>
-                                        <h4 class="fw-bold text-primary">DT{{ object.get_PHASE_nick|default:"-" }}{{ object.get_COOLING_nick|default:"-" }}{{ object.get_MOUNTING_nick|default:"-" }} </h4>
+                                        <h4 class="fw-bold text-primary"> {{object.idTrafo}}  </h4>
                                     </div>
                             </div>
                             <div class="row">
@@ -55,26 +55,24 @@
                                     </div>
                                 </div>
                             </div>
+                            <h5>Archivos</h5>
+
                             <div class="info-item mb-0">
                                 <div class="info-item mb-2">
                                     {% if object.fat_file %}
                                     <a href="{{ object.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                     <span class="badge bg-gradient-success text-md">VIEW FAT FILE</span>
                                     </a>
-                                    {% else %}
-                                    <span class="badge bg-gradient-secondary text-md">NO FAT FILE</span>
                                     {% endif %}
 
                                 </div>
                             </div>
                             <div class="info-item mb-0">
                                 <div class="info-item mb-2">
-                                        {% if object.drawing_file %}
-                                        <a href="{{ object.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                        {% if object.idTrafo.drawing_file %}
+                                        <a href="{{ object.idTrafo.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                         <span class="badge bg-gradient-success text-md">VIEW DRAWING FILE</span>
                                         </a>
-                                        {% else %}
-                                        <span class="badge bg-gradient-secondary text-md">No DRAWING FILE</span>
                                         {% endif %}
 
                                     </div>
@@ -85,8 +83,6 @@
                                         <a href="{{ object.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
                                         <span class="badge bg-gradient-success text-md">VIEW PLATE FILE</span>
                                         </a>
-                                        {% else %}
-                                        <span class="badge bg-gradient-secondary text-md">No PLATE FILE</span>
                                         {% endif %}
 
                                     </div>
@@ -109,45 +105,45 @@
                                 <div class="col-md-4">
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Capacidad kVA</small>
-                                        <p class="fw-bold text-dark">{{ object.get_KVA_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_KVA_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">HV</small>
-                                        <p class="fw-bold text-dark">{{ object.get_HV_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_HV_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">LV</small>
-                                        <p class="fw-bold text-dark">{{ object.get_LV_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_LV_display|default:"N/A" }}</p>
                                     </div>
                                     
                                 </div>
                                 <div class="col-md-4">
                                     <div class="info-item mb-3">
                                         <small class="text-muted">HZ</small>
-                                        <p class="fw-bold text-dark">{{ object.get_HZ_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_HZ_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">WINDING</small>
-                                        <p class="fw-bold text-dark">{{ object.get_WINDING_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_WINDING_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">CONNECTION</small>
-                                        <p class="fw-bold text-dark">{{ object.get_CONNECTION_display|default:"N/A" }}</p>
+                                        <p class="fw-bold text-dark">{{ object.idTrafo.get_CONNECTION_display|default:"N/A" }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     
                                     <div class="info-item mb-3">
                                         <small class="text-muted">STANDARD</small>
-                                        <p class="fw-bold">{{ object.get_STANDARD_display|default:"N/A" }}</p>
+                                        <p class="fw-bold">{{ object.idTrafo.get_STANDARD_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Montaje</small>
-                                        <p class="fw-bold">{{ object.get_MOUNTING_display|default:"N/A" }}</p>
+                                        <p class="fw-bold">{{ object.idTrafo.get_MOUNTING_display|default:"N/A" }}</p>
                                     </div>
                                     <div class="info-item mb-3">
                                         <small class="text-muted">Enfriamiento</small>
-                                        <p class="fw-bold">{{ object.get_COOLING_display|default:"N/A" }}</p>
+                                        <p class="fw-bold">{{ object.idTrafo.get_COOLING_display|default:"N/A" }}</p>
                                     </div>
                                 </div>
                             </div>

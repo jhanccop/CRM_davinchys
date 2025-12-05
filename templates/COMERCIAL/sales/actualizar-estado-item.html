@@ -80,8 +80,8 @@
 
             </div>
 
-        <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
-            {% if object %}Actualizar{% else %}Crear{% endif %} Item
+        <button type="submit" id="addTrafoBtn" class="btn bg-gradient-success mt-3 mb-0">
+            {% if object %}Actualizar{% else %}Crear{% endif %} evento
         </button>
 
         {% if object %}
@@ -89,7 +89,7 @@
             Cancelar
         </a>
         {% else%}
-        <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
+        <a href="{% url 'ventas_app:detail-item-all' pk %}" class="btn bg-gradient-dark mt-3 mb-0">
             Cancelar
         </a>
         {% endif %}

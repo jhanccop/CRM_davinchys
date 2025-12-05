@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block navbar_main %}Logistica{% endblock %}
+{% block navbar_appName %}Contenedores{% endblock %}
+{% block navbar_Type %} {% if object %}Editar{% else %}Crear{% endif %} - Item  {% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+
+            <h5 class=" mb-4"> 
+                {% if object %}
+                    Editar Contenedor
+                {% else %}
+                    Agregar Contenedor
+                {% endif %}
+            </h5>
+
+            <form id="quoteForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+                <div id="trafoFormContainer">
+
+                    <!-- Campo oculto para idTrafoQuote -->
+                    <div class="row">
+                        <div class="col-12" hidden>
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.idPetitioner.label }}</label>
+                                {{ form.idPetitioner }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row pb-4">
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.containerName.label }}</label>
+                                {{ form.containerName }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label"> {{ form.currency.label }} </label>
+                                {{ form.currency }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label"> {{ form.grossAmount.label }} </label>
+                                {{ form.grossAmount }}
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                            <div class="input-group input-group-outline focused is-focused">
+                                <label class="form-label">{{ form.taxes.label }}</label>
+                                {{ form.taxes }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+                {% if object %}Actualizar{% else %}Crear{% endif %} Item
+            </button>
+
+            {% if object %}
+            <a href="" class="btn btn-secondary mt-3 mb-0">
+                Cancelar
+            </a>
+            {% else%}
+            <a href="" class="btn btn-secondary mt-3 mb-0">
+                Cancelar
+            </a>
+            {% endif %}
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+    // Establecer el valor de idTrafoQuote con el pk de la cotización (solo en creación)
+    document.addEventListener('DOMContentLoaded', function() {
+        const idTrafoQuoteField = document.getElementById("id_idTrafoQuote");
+        if (idTrafoQuoteField && !{{ object|yesno:"true,false" }}) {
+            idTrafoQuoteField.value = "{{pk}}";
+        }
+    });
+</script>
+
+{% endblock JSscripts %}
