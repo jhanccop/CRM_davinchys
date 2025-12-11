@@ -97,6 +97,44 @@ class RegistroAsistenciaForm(forms.ModelForm):
                 'rows': 1
             }),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        empleado = cleaned_data.get('empleado')
+        fecha = cleaned_data.get('fecha')
+        hora_inicio = cleaned_data.get('hora_inicio')
+        hora_final = cleaned_data.get('hora_final')
+        
+        if not all([empleado, fecha, hora_inicio, hora_final]):
+            return cleaned_data
+        
+        # Validar que hora_final > hora_inicio
+        if hora_final <= hora_inicio:
+            raise ValidationError(
+                'La hora final debe ser mayor que la hora de inicio.'
+            )
+        
+        # Buscar superposiciones
+        queryset = RegistroAsistencia.objects.filter(
+            empleado=empleado,
+            fecha=fecha,
+            hora_inicio__lt=hora_final,
+            hora_final__gt=hora_inicio
+        )
+        
+        # Excluir instancia actual en edición
+        if self.instance and self.instance.pk:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        
+        if queryset.exists():
+            registro = queryset.first()
+            raise ValidationError(
+                f'Ya existe un registro el {fecha} entre '
+                f'{registro.hora_inicio.strftime("%H:%M")} y '
+                f'{registro.hora_final.strftime("%H:%M")} que se superpone con el horario ingresado.'
+            )
+        
+        return cleaned_data
 
     #ubicacion = forms.CharField(required=True)
 

@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
+from django.db.models import Q
 
 from model_utils.models import TimeStampedModel
 
@@ -223,8 +224,6 @@ class RegistroAsistencia(TimeStampedModel):
         verbose_name = 'Asistencia'
         verbose_name_plural = "Registro de asistencia"
 
-     
-
     def __str__(self):
         horaria = dict(self.TIPO_JORNADA_HORARIA).get(self.jornada_horaria, '')
         diaria = dict(self.TIPO_JORNADA_DIARIA).get(self.jornada_diaria, '')
@@ -250,7 +249,75 @@ class RegistroAsistencia(TimeStampedModel):
     @property
     def es_horario_extra(self):
         return self.jornada_horaria in [self.HEXTRA1, self.HEXTRA2]
+    
 
+    def clean(self):
+        """
+        Valida que no existan registros superpuestos para el mismo empleado
+        en la misma fecha con rangos de horas que se solapen.
+        """
+        super().clean()
+        
+        # Validar que hora_inicio y hora_final existan
+        if not self.hora_inicio or not self.hora_final:
+            raise ValidationError({
+                'hora_inicio': 'Debe especificar hora de inicio.',
+                'hora_final': 'Debe especificar hora de fin.'
+            })
+        
+        # Validar que hora_final sea mayor que hora_inicio
+        if self.hora_final <= self.hora_inicio:
+            raise ValidationError({
+                'hora_final': 'La hora final debe ser mayor que la hora de inicio.'
+            })
+        
+        # Buscar registros superpuestos
+        registros_superpuestos = self._obtener_registros_superpuestos()
+        
+        if registros_superpuestos.exists():
+            # Obtener detalles del primer registro superpuesto para el mensaje
+            registro = registros_superpuestos.first()
+            raise ValidationError(
+                f'Ya existe un registro para {self.empleado} el {self.fecha} '
+                f'entre {registro.hora_inicio} y {registro.hora_final} que se superpone '
+                f'con el horario ingresado ({self.hora_inicio} - {self.hora_final}).'
+            )
+
+    def _obtener_registros_superpuestos(self):
+        """
+        Obtiene registros que se superponen en fecha y horario para el mismo empleado.
+        
+        La lógica de superposición:
+        - Dos rangos [A_inicio, A_fin] y [B_inicio, B_fin] se superponen si:
+          A_inicio < B_fin AND B_inicio < A_fin
+        """
+        # Query base: mismo empleado y misma fecha
+        queryset = RegistroAsistencia.objects.filter(
+            empleado=self.empleado,
+            fecha=self.fecha
+        )
+        
+        # Excluir el registro actual si está siendo editado
+        if self.pk:
+            queryset = queryset.exclude(pk=self.pk)
+        
+        # Filtrar registros con horas que se superponen
+        # Condición: hora_inicio < otro.hora_final AND otro.hora_inicio < hora_final
+        registros_superpuestos = queryset.filter(
+            Q(hora_inicio__lt=self.hora_final) & 
+            Q(hora_final__gt=self.hora_inicio)
+        )
+        
+        return registros_superpuestos
+
+    def save(self, *args, **kwargs):
+        """
+        Ejecuta validación completa antes de guardar.
+        """
+        # Ejecutar validación
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
 class ActividadDiaria(TimeStampedModel):
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)
     fecha = models.DateField('Fecha')

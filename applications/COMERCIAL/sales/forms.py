@@ -430,6 +430,7 @@ class ItemForm(forms.ModelForm):
             'unitCost',
             'fat_file',
             'plate_file',
+            'plateB_file',
 
         )
         widgets = {
@@ -481,6 +482,15 @@ class ItemForm(forms.ModelForm):
                     'accept':".pdf,.jpg,.jpeg,.png"
                 }
             ),
+            'plateB_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"drawing_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_drawing_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
         }
     
     def clean_fat_file(self):
@@ -500,6 +510,15 @@ class ItemForm(forms.ModelForm):
             if plate_file.size > 5*1024*1024:  # 5 MB limit
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return plate_file
+    
+    def clean_plateB_file(self):
+        plateB_file = self.cleaned_data.get('plateB_file')
+        if plateB_file:
+            if not plateB_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if plateB_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return plateB_file
 
 class ItemTrackingForm(forms.ModelForm):
     class Meta:

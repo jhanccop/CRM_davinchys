@@ -81,7 +81,7 @@
 
                     <div class="row pt-4">
                         <div class="col-12 col-sm-12 mt-sm-0">
-                        <h6 class="mb-0">Adjuntar plate_file</h6>
+                        <h6 class="mb-0">Adjuntar plate_file A</h6>
                         <div class="input-group input-group-outline">
                             <div class="form-group w-100">
                             {{ form.plate_file }}
@@ -89,6 +89,23 @@
                         </div>
                         <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
                         {% for error in form.plate_file.errors %}
+                        <p class="text-xs text-primary mb-0">
+                            {{ error|escape }}
+                        </p>
+                        {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row pt-4">
+                        <div class="col-12 col-sm-12 mt-sm-0">
+                        <h6 class="mb-0">Adjuntar plate_file B</h6>
+                        <div class="input-group input-group-outline">
+                            <div class="form-group w-100">
+                            {{ form.plateB_file }}
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                        {% for error in form.plateB_file.errors %}
                         <p class="text-xs text-primary mb-0">
                             {{ error|escape }}
                         </p>

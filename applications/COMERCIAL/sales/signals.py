@@ -39,6 +39,10 @@ def delete_files_on_delete(sender, instance, **kwargs):
         if os.path.isfile(instance.plate_file.path):
             os.remove(instance.plate_file.path)
 
+    if instance.plateB_file:
+        if os.path.isfile(instance.plateB_file.path):
+            os.remove(instance.plateB_file.path)
+
 # Signal para eliminar archivos cuando se elimina el registro TRAFO
 @receiver(post_delete, sender=Trafo)
 def delete_files_on_delete(sender, instance, **kwargs):
@@ -73,6 +77,10 @@ def delete_old_files_on_update(sender, instance, **kwargs):
     if old_instance.plate_file and old_instance.plate_file != instance.plate_file:
         if os.path.isfile(old_instance.plate_file.path):
             os.remove(old_instance.plate_file.path)
+    
+    if old_instance.plateB_file and old_instance.plateB_file != instance.plateB_file:
+        if os.path.isfile(old_instance.plateB_file.path):
+            os.remove(old_instance.plateB_file.path)
 
 # Signal para eliminar archivos anteriores cuando se actualizan TRAFOA
 @receiver(pre_save, sender=Trafo)

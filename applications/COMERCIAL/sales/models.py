@@ -335,7 +335,7 @@ class Trafo(TimeStampedModel):
         ('4', 'Dzn0'),
         ('5', 'Yd11'),
         ('6', 'lio'),
-        ('6', 'Dyn1/YNyn0'),
+        ('7', 'Dyn1/YNyn0'),
     )
     CONNECTION = models.CharField(
         'CONNECTION',
@@ -404,6 +404,7 @@ class Items(TimeStampedModel):
 
     fat_file = models.FileField(upload_to='fats_docss/',null=True,blank=True)
     plate_file = models.FileField(upload_to='plate_docss/',null=True,blank=True)
+    plateB_file = models.FileField(upload_to='plate_docss/',null=True,blank=True)
 
     def delete(self, *args, **kwargs):
         """
@@ -416,6 +417,9 @@ class Items(TimeStampedModel):
         # Eliminar plate_file
         if self.plate_file:
             self.plate_file.delete(save=False)
+
+        if self.plateB_file:
+            self.plateB_file.delete(save=False)
         
         super(Items, self).delete(*args, **kwargs)
 

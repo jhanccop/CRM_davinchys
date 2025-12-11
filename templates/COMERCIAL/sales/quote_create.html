@@ -111,7 +111,7 @@
                             <select id="id_mounting" class="form-control">
                                 <option value="">Seleccionar</option>
                                 <option value="0">Pole</option>
-                                <option value="1">Pedestal</option>
+                                <option value="1">Pad</option>
                                 <option value="2">Platform</option>
                                 <option value="3">Underground</option>
                                 <option value="4">Substation</option>
@@ -235,6 +235,7 @@
                                 <option value="4">Dzn0</option>
                                 <option value="5">Yd11</option>
                                 <option value="6">lio</option>
+                                <option value="7">Dyn1/YNyn0</option>
                             </select>
                         </div>
                     </div>
@@ -332,7 +333,7 @@ jQuery(document).ready(function($) {
     // Mapeo de valores a textos para mostrar
     const PHASE_MAP = {'0': 'SP', '1': 'TP'};
     const COOLING_MAP = {'0': 'ONAN', '1': 'ONAF', '2': 'KNAN', '3': 'KNAF', '4': 'AN', '5': 'AF', '6': 'OFAN', '7': 'OFAF', '8': 'ONWF', '9': 'OFWF'};
-    const MOUNTING_MAP = {'0': 'Pole', '1': 'Pedestal', '2': 'Platform', '3': 'Underground', '4': 'Substation'};
+    const MOUNTING_MAP = {'0': 'Pole', '1': 'Pad', '2': 'Platform', '3': 'Underground', '4': 'Substation'};
     const KVA_MAP = {'0': '75', '1': '100', '2': '150', '3': '167', '4': '225', '5': '250', '6': '300', '7': '500', '8': '750', '9': '1000', '10': '1500', '11': '2000', '12': '2000/3000', '13': '2500', '14': '2600', '15': '3000', '16': '3000/3750', '17': '3750', '18': '5000'};
 
     // Función para agregar item a la tabla

@@ -4,7 +4,15 @@ from datetime import date, timedelta, datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView
+from django.views.generic import (
+    ListView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+    DetailView,
+    TemplateView,
+    View
+    )
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.db.models import Q, Count, Sum, Avg, When, Value, IntegerField
@@ -187,11 +195,11 @@ class AsistenciaDeleteView(RRHHMixin, DeleteView):
     #permission_required = 'rh.delete_empleado'
     success_url = reverse_lazy('rrhh_app:asistencia-list')
 
-class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, CreateView):
-    model = RegistroAsistencia
+class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, TemplateView):
+    #model = RegistroAsistencia
     template_name = 'RRHH/asistencia/registro_multiple.html'
     success_url = reverse_lazy('rrhh_app:asistencia-user-list')
-    fields = []
+    #fields = []
     
     def get_empleado(self):
         """Obtiene el empleado basado en los parámetros de la URL o el usuario"""
@@ -204,7 +212,7 @@ class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, CreateView):
             RegistroAsistencia,
             fields=['fecha', 'hora_inicio', 'hora_final', 'idLocal', 'observaciones'],
             extra=1,
-            can_delete=False,  # Añadido para evitar campos DELETE
+            can_delete=False,
             widgets={
                 'fecha': forms.DateInput(attrs={
                     'type': 'date', 
@@ -250,68 +258,88 @@ class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, CreateView):
             context['feriados'] = []
         
         return context
-
-    def form_valid(self, form):
-        empleado = self.get_empleado()
-        if not empleado:
-            messages.error(self.request, 'No se pudo identificar al empleado.')
-            return self.form_invalid(form)
+    
+    def post(self, request, *args, **kwargs):
+        """Maneja el POST del formset"""
+        try:
+            #empleado = self.get_empleado()
+            empleado = request.user.empleado
+        except Empleado.DoesNotExist:
+            messages.error(request, 'No se pudo identificar al empleado.')
+            return self.render_to_response(self.get_context_data())
 
         # Obtener el formset con los datos POST
-        formset = self.get_formset(self.request.POST)
+        formset = self.get_formset(request.POST)
+
+        print(formset)
         
         if formset.is_valid():
             registros_guardados = 0
             registros_con_errores = 0
             
-            # CAMBIO CLAVE: Usar commit=False para asignar empleado antes de guardar
-            instances = formset.save(commit=False)
-            
-            for i, instance in enumerate(instances):
-                # Asignar el empleado ANTES de cualquier validación
-                instance.empleado = empleado
+            # Procesar cada formulario del formset
+            for i, form in enumerate(formset):
+                # Verificar que el formulario tenga datos válidos
+                if not form.cleaned_data or not form.cleaned_data.get('fecha'):
+                    continue
                 
                 try:
-                    # Ahora sí validar con el empleado ya asignado
-                    instance.full_clean()
-                    # Guardar (las jornadas se calcularán automáticamente en save())
-                    instance.save()
+                    # SOLUCIÓN: Usar .create() directamente como en la vista que funciona
+                    RegistroAsistencia.objects.create(
+                        empleado=empleado,
+                        fecha=form.cleaned_data.get('fecha'),
+                        hora_inicio=form.cleaned_data.get('hora_inicio'),
+                        hora_final=form.cleaned_data.get('hora_final'),
+                        idLocal=form.cleaned_data.get('idLocal'),
+                        observaciones=form.cleaned_data.get('observaciones', ''),
+                        jornada_diaria='0',  # O el valor que corresponda
+                        estado='0'  # O el valor que corresponda
+                    )
                     registros_guardados += 1
                     
                 except ValidationError as e:
                     registros_con_errores += 1
-                    for field, errors in e.error_dict.items():
-                        for error in errors:
-                            messages.error(
-                                self.request, 
-                                f"Registro {i+1}: Error en {field} - {error}"
-                            )
+                    if hasattr(e, 'error_dict'):
+                        for field, errors in e.error_dict.items():
+                            for error in errors:
+                                error_msg = error.message if hasattr(error, 'message') else str(error)
+                                messages.error(
+                                    request, 
+                                    f"Registro {i+1}: Error en {field} - {error_msg}"
+                                )
+                    else:
+                        messages.error(
+                            request, 
+                            f"Registro {i+1}: {str(e)}"
+                        )
                 except Exception as e:
                     registros_con_errores += 1
                     messages.error(
-                        self.request, 
+                        request, 
                         f"Registro {i+1}: Error inesperado - {str(e)}"
                     )
             
             # Mostrar resumen
             if registros_guardados > 0:
                 messages.success(
-                    self.request, 
+                    request, 
                     f'Se guardaron {registros_guardados} registros de asistencia correctamente.'
                 )
                 return HttpResponseRedirect(self.success_url)
             else:
                 if registros_con_errores == 0:
                     messages.warning(
-                        self.request, 
+                        request, 
                         'No se encontraron registros para guardar.'
                     )
                 else:
                     messages.error(
-                        self.request, 
+                        request, 
                         'No se pudo guardar ningún registro. Verifique los datos ingresados.'
                     )
-                return self.form_invalid(form)
+                context = self.get_context_data()
+                context['formset'] = formset
+                return self.render_to_response(context)
                 
         else:
             # Mostrar errores específicos del formset
@@ -321,29 +349,24 @@ class RegistroAsistenciaMultipleCreateView(LoginRequiredMixin, CreateView):
                         for error in errors:
                             field_label = form_in_formset.fields[field].label if field in form_in_formset.fields else field
                             messages.error(
-                                self.request, 
+                                request, 
                                 f"Registro {i+1}: Error en {field_label} - {error}"
                             )
             
-            # Errores no relacionados con formularios específicos
             if formset.non_form_errors():
                 for error in formset.non_form_errors():
-                    messages.error(self.request, f"Error general: {error}")
-                    
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
-        return super().form_invalid(form)
+                    messages.error(request, f"Error general: {error}")
+            
+            messages.error(request, 'Por favor, corrija los errores en el formulario.')
+            context = self.get_context_data()
+            context['formset'] = formset
+            return self.render_to_response(context)
 
 # =========================== MY ESPACE ===========================
-class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
-    model = RegistroAsistencia
-    fields = ['idLocal', 'observaciones']
-    template_name = 'rrhh/modal_registro_rapido.html'
+class RegistroAsistenciaRapidoView(LoginRequiredMixin, View):
     
-    def form_valid(self, form):
-        empleado = self.request.user.empleado
+    def post(self, request, *args, **kwargs):
+        empleado = request.user.empleado
         hoy = timezone.now().date()
         
         # Verificar si ya existe registro hoy
@@ -352,26 +375,29 @@ class RegistroAsistenciaRapidoView(LoginRequiredMixin,CreateView):
             fecha=hoy, 
             jornada_diaria='0'
         ).exists():
-            messages.warning(self.request, 'Ya tienes un registro de asistencia para hoy')
+            messages.warning(request, 'Ya tienes un registro de asistencia para hoy')
             return redirect('rrhh_app:bienvenida')
         
-        # Auto-completar datos
-        registro = form.save(commit=False)
-        registro.empleado = empleado
-        registro.fecha = hoy
-        registro.hora_inicio = timezone.now().replace(hour=9, minute=00, second=0).time()  # Hora actual
-        registro.hora_final = timezone.now().replace(hour=18, minute=00, second=0).time()  # 18:00
-        registro.jornada_diaria = '0'  # Jornada regular
-        registro.estado = '0'  # Pendiente
+        # Obtener datos del POST
+        hora_inicio = request.POST.get('hora_inicio')
+        hora_final = request.POST.get('hora_final')
+        id_local = request.POST.get('idLocal')
+        observaciones = request.POST.get('observaciones', '')
         
-        registro.save()
-        messages.success(self.request, 'Asistencia registrada exitosamente')
+        # Crear registro
+        RegistroAsistencia.objects.create(
+            empleado=empleado,
+            fecha=hoy,
+            hora_inicio=hora_inicio,
+            hora_final=hora_final,
+            idLocal_id=id_local,
+            observaciones=observaciones,
+            jornada_diaria='0',
+            estado='0'
+        )
+        
+        messages.success(request, 'Asistencia registrada exitosamente')
         return redirect('home_app:bienvenida')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['modal_title'] = 'Registro Rápido de Asistencia'
-        return context
 
 class RegistroHorasExtraView(LoginRequiredMixin,CreateView):
     model = RegistroAsistencia
@@ -484,6 +510,19 @@ class AsistenciaCreateUserView(LoginRequiredMixin, CreateView):
     form_class = RegistroAsistenciaForm
     template_name = 'RRHH/asistencia/asistencia_user_form.html'
     success_url = reverse_lazy('rrhh_app:asistencia-user-list')
+
+    def form_valid(self, form):
+        try:
+            # Validar antes de guardar
+            self.object = form.save(commit=False)
+            self.object.full_clean()
+            self.object.save()
+            return redirect(self.success_url)
+        except ValidationError as e:
+            for field, errors in e.message_dict.items():
+                for error in errors:
+                    form.add_error(field, error)
+            return self.form_invalid(form)
 
 class AsistenciaUpdateUserView(LoginRequiredMixin, UpdateView):
     model = RegistroAsistencia
@@ -1145,80 +1184,102 @@ class ReporteAsistenciaPersonaView(RRHHMixin, TemplateView):
             }
             for permiso in permisos
         ]
-    
+        
     def _generar_resumen_semanas(self, horas_por_dia, fecha_inicio, fecha_fin, feriados_set):
         """Generar resumen semanal considerando solo días laborables"""
-        resumen_semanas = {}
+        from datetime import timedelta
         
-        fecha_actual = fecha_inicio
+        resumen_semanas = []
         hoy = timezone.now().date()
         
-        while fecha_actual <= fecha_fin:
-            # Obtener número de semana
-            semana_num = fecha_actual.isocalendar()[1]
-            año = fecha_actual.year
-            
-            clave_semana = f"{año}-W{semana_num}"
-            
-            if clave_semana not in resumen_semanas:
-                # Calcular días laborables para esta semana
-                dias_laborables_semana = 0
-                fecha_temp = fecha_actual
-                while fecha_temp <= min(fecha_actual + timedelta(days=6), fecha_fin):
-                    if fecha_temp <= hoy and fecha_temp.weekday() < 5 and fecha_temp not in feriados_set:
-                        dias_laborables_semana += 1
-                    fecha_temp += timedelta(days=1)
-                
-                resumen_semanas[clave_semana] = {
-                    'semana_num': semana_num,
-                    'año': año,
-                    'fecha_inicio': fecha_actual,
-                    'fecha_fin': min(fecha_actual + timedelta(days=6), fecha_fin),
-                    'dias_trabajados': 0,
-                    'dias_laborables': dias_laborables_semana,
-                    'horas_totales': 0,
-                    'horas_regulares': 0,
-                    'horas_extra1': 0,
-                    'horas_extra2': 0,
-                    'horas_feriado': 0,
-                    'dias_feriados_laborados': 0
-                }
-            
-            # Acumular datos del día si existe en el reporte
-            if fecha_actual in horas_por_dia:
-                dia_data = horas_por_dia[fecha_actual]
-                resumen_semanas[clave_semana]['dias_trabajados'] += 1
-                resumen_semanas[clave_semana]['horas_totales'] += dia_data['horas_totales']
-                resumen_semanas[clave_semana]['horas_regulares'] += dia_data['horas_regulares']
-                resumen_semanas[clave_semana]['horas_extra1'] += dia_data['horas_extra1']
-                resumen_semanas[clave_semana]['horas_extra2'] += dia_data['horas_extra2']
-                resumen_semanas[clave_semana]['horas_feriado'] += dia_data['horas_feriado']
-                
-                if dia_data['es_feriado']:
-                    resumen_semanas[clave_semana]['dias_feriados_laborados'] += 1
-            
-            fecha_actual += timedelta(days=1)
+        # Encontrar el primer lunes del rango (o fecha_inicio si es después)
+        fecha_actual = fecha_inicio
         
-        # Calcular porcentajes y métricas adicionales para cada semana
-        for semana in resumen_semanas.values():
-            # Porcentaje de asistencia
-            if semana['dias_laborables'] > 0:
-                semana['porcentaje_asistencia'] = round(
-                    (semana['dias_trabajados'] / semana['dias_laborables'] * 100), 1
+        # Ajustar al lunes de la semana
+        if fecha_actual.weekday() != 0:  # Si no es lunes
+            # Retroceder al lunes de esta semana
+            inicio_semana = fecha_actual - timedelta(days=fecha_actual.weekday())
+            # Si ese lunes es antes de fecha_inicio, usar fecha_inicio
+            if inicio_semana < fecha_inicio:
+                inicio_semana = fecha_inicio
+        else:
+            inicio_semana = fecha_actual
+        
+        # Iterar semana por semana (no día por día)
+        while inicio_semana <= fecha_fin:
+            # Calcular fin de semana (domingo)
+            fin_semana = inicio_semana + timedelta(days=6)
+            
+            # Ajustar si excede el rango
+            if fin_semana > fecha_fin:
+                fin_semana = fecha_fin
+            
+            # Calcular días laborables en esta semana
+            dias_laborables_semana = 0
+            fecha_temp = inicio_semana
+            
+            while fecha_temp <= fin_semana:
+                if fecha_temp <= hoy and fecha_temp.weekday() < 5 and fecha_temp not in feriados_set:
+                    dias_laborables_semana += 1
+                fecha_temp += timedelta(days=1)
+            
+            # Inicializar datos de la semana
+            semana_data = {
+                'semana_num': inicio_semana.isocalendar()[1],
+                'año': inicio_semana.year,
+                'fecha_inicio': inicio_semana,
+                'fecha_fin': fin_semana,
+                'dias_trabajados': 0,
+                'dias_laborables': dias_laborables_semana,
+                'horas_totales': 0,
+                'horas_regulares': 0,
+                'horas_extra1': 0,
+                'horas_extra2': 0,
+                'horas_feriado': 0,
+                'dias_feriados_laborados': 0
+            }
+            
+            # Recorrer los días de esta semana y acumular datos
+            fecha_dia = inicio_semana
+            while fecha_dia <= fin_semana:
+                if fecha_dia in horas_por_dia:
+                    dia_data = horas_por_dia[fecha_dia]
+                    semana_data['dias_trabajados'] += 1
+                    semana_data['horas_totales'] += dia_data['horas_totales']
+                    semana_data['horas_regulares'] += dia_data['horas_regulares']
+                    semana_data['horas_extra1'] += dia_data['horas_extra1']
+                    semana_data['horas_extra2'] += dia_data['horas_extra2']
+                    semana_data['horas_feriado'] += dia_data['horas_feriado']
+                    
+                    if dia_data['es_feriado']:
+                        semana_data['dias_feriados_laborados'] += 1
+                
+                fecha_dia += timedelta(days=1)
+            
+            # Calcular porcentajes
+            if semana_data['dias_laborables'] > 0:
+                semana_data['porcentaje_asistencia'] = round(
+                    (semana_data['dias_trabajados'] / semana_data['dias_laborables'] * 100), 1
                 )
             else:
-                semana['porcentaje_asistencia'] = 0
+                semana_data['porcentaje_asistencia'] = 0
             
-            # Horas esperadas (8 horas por día laborable)
-            semana['horas_esperadas'] = semana['dias_laborables'] * 8
+            # Horas esperadas
+            semana_data['horas_esperadas'] = semana_data['dias_laborables'] * 8
             
             # Porcentaje de eficiencia
-            if semana['horas_esperadas'] > 0:
-                semana['porcentaje_eficiencia'] = round(
-                    (semana['horas_totales'] / semana['horas_esperadas'] * 100), 1
+            if semana_data['horas_esperadas'] > 0:
+                semana_data['porcentaje_eficiencia'] = round(
+                    (semana_data['horas_totales'] / semana_data['horas_esperadas'] * 100), 1
                 )
             else:
-                semana['porcentaje_eficiencia'] = 0
+                semana_data['porcentaje_eficiencia'] = 0
+            
+            resumen_semanas.append(semana_data)
+            
+            # Avanzar a la siguiente semana (siguiente lunes)
+            inicio_semana = fin_semana + timedelta(days=1)
         
-        return list(resumen_semanas.values())
-    
+        return resumen_semanas
+
+

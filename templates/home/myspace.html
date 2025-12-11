@@ -311,13 +311,18 @@
             </div>
             <form method="post" action="{% url 'rrhh_app:registro_asistencia_rapido' %}">
                 {% csrf_token %}
+                
+                <!-- Campos hidden para enviar los valores -->
+                <input type="hidden" name="hora_inicio" value="09:00">
+                <input type="hidden" name="hora_final" value="18:00">
+                
                 <div class="modal-body">
                     <div class="row mb-0">
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
-                            <label class="form-label">Hora de Inicio:</label>
-                            <input type="time" class="form-control" value="09:00" readonly>
-                        </div>
+                                <label class="form-label">Hora de Inicio:</label>
+                                <input type="time" class="form-control" value="09:00" readonly>
+                            </div>
                         </div>
                         <div class="col-6">
                             <div class="input-group input-group-outline my-3 is-focused">
@@ -326,7 +331,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <div class="input-group input-group-outline is-focused">
                             <label class="form-label">Ubicación:</label>
@@ -338,11 +342,10 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <div class="input-group input-group-outline is-focused">
                             <label class="form-label">Observaciones:</label>
-                        <textarea name="observaciones" class="form-control" rows="3" placeholder="Observaciones opcionales..."></textarea>
+                            <textarea name="observaciones" class="form-control" rows="3" placeholder="Observaciones opcionales..."></textarea>
                         </div>
                     </div>
                 </div>

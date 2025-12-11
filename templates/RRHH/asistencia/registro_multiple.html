@@ -13,10 +13,10 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">
+                    <h5 class="card-title mb-0">
                         <i class="fas fa-clock me-2"></i>
                         Registro Multiple de Asistencia
-                    </h4>
+                    </h5>
                     <button type="button" class="btn btn-primary btn-sm" id="btnAgregarFila">
                         <i class="fas fa-plus me-1"></i>Agregar Fila
                     </button>
@@ -49,7 +49,10 @@
                                 <tbody id="formset-body">
                                     {% for form in formset %}
                                     <tr class="registro-fila">
-                                        <td>{{ form.fecha }}</td>
+                                        <td>
+                                            {{ form.id }}
+                                            {{ form.fecha }}
+                                        </td>
                                         <td>{{ form.hora_inicio }}</td>
                                         <td>{{ form.hora_final }}</td>
                                         <td>{{ form.idLocal }}</td>
@@ -107,20 +110,32 @@
     </div>
 </div>
 
-<!-- Template para nuevas filas -->
+<!-- Template para nuevas filas - CORREGIDO -->
 <template id="fila-template">
     <tr class="registro-fila">
-        <td><input type="date" name="registros-__prefix__-fecha" class="form-control fecha-input" required onchange="actualizarJornadas(this)"></td>
-        <td><input type="time" name="registros-__prefix__-hora_inicio" class="form-control hora-inicio" onchange="actualizarJornadas(this)"></td>
-        <td><input type="time" name="registros-__prefix__-hora_final" class="form-control hora-final"></td>
         <td>
-            <select name="registros-__prefix__-idLocal" class="form-control" required>
+            <input type="hidden" name="registros-__prefix__-id" id="id_registros-__prefix__-id">
+            <input type="date" name="registros-__prefix__-fecha" id="id_registros-__prefix__-fecha" class="form-control fecha-input datetimepicker flatpickr-input" required>
+        </td>
+        <td>
+            <input type="time" name="registros-__prefix__-hora_inicio" id="id_registros-__prefix__-hora_inicio" class="form-control hora-inicio">
+        </td>
+        <td>
+            <input type="time" name="registros-__prefix__-hora_final" id="id_registros-__prefix__-hora_final" class="form-control hora-final">
+        </td>
+        <td>
+            <select name="registros-__prefix__-idLocal" id="id_registros-__prefix__-idLocal" class="form-control" required>
+                <option value="">---------</option>
                 {% for choice in formset.empty_form.idLocal.field.choices %}
+                    {% if choice.0 %}
                     <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                    {% endif %}
                 {% endfor %}
             </select>
         </td>
-        <td><textarea name="registros-__prefix__-observaciones" class="form-control" rows="2" placeholder="Observaciones"></textarea></td>
+        <td>
+            <textarea name="registros-__prefix__-observaciones" id="id_registros-__prefix__-observaciones" class="form-control" rows="2" placeholder="Observaciones"></textarea>
+        </td>
         <td>
             <span class="jornada-horaria-display badge bg-gradient-secondary" data-jornada="0">-</span>
         </td>
@@ -140,9 +155,9 @@
 {% block JSscripts %}
 
 <script>
-// Datos de feriados desde Django (pasar desde la vista)
+// Datos de feriados desde Django
 const feriados = {{ feriados|safe }};
-const feriadosDates = feriados; // Ya vienen como strings 'YYYY-MM-DD'
+const feriadosDates = feriados;
 
 // Función para determinar jornada horaria según hora
 function determinarJornadaHoraria(horaStr) {
@@ -151,11 +166,10 @@ function determinarJornadaHoraria(horaStr) {
     const [horas, minutos] = horaStr.split(':').map(Number);
     const tiempoMinutos = horas * 60 + minutos;
     
-    // Definir rangos según el modelo Django
-    const INICIO_REGULAR = 9 * 60;    // 09:00 = 540 minutos
-    const FIN_REGULAR = 18 * 60;      // 18:00 = 1080 minutos
-    const FIN_HEXTRA1 = 21 * 60;      // 21:00 = 1260 minutos
-    const FIN_HEXTRA2_NOCHE = 6 * 60; // 06:00 = 360 minutos
+    const INICIO_REGULAR = 9 * 60;
+    const FIN_REGULAR = 18 * 60;
+    const FIN_HEXTRA1 = 21 * 60;
+    const FIN_HEXTRA2_NOCHE = 6 * 60;
     
     if (INICIO_REGULAR <= tiempoMinutos && tiempoMinutos <= FIN_REGULAR) {
         return { tipo: 'Regular', codigo: '0', clase: 'bg-gradient-success' };
@@ -172,20 +186,17 @@ function determinarJornadaHoraria(horaStr) {
 function determinarJornadaDiaria(fechaStr) {
     if (!fechaStr) return { tipo: 'No definida', codigo: '0', clase: 'bg-gradient-secondary' };
     
-    const fecha = new Date(fechaStr);
-    const diaSemana = fecha.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+    const fecha = new Date(fechaStr + 'T00:00:00');
+    const diaSemana = fecha.getDay();
     
-    // Verificar si es feriado
     if (feriadosDates.includes(fechaStr)) {
         return { tipo: 'Feriado', codigo: '1', clase: 'bg-danger' };
     }
     
-    // Verificar si es fin de semana
-    if (diaSemana === 5 || diaSemana === 6) { // 0=domingo, 6=sábado
+    if (diaSemana === 0 || diaSemana === 6) {
         return { tipo: 'Fin de semana', codigo: '2', clase: 'bg-warning' };
     }
     
-    // Por defecto, día laborable
     return { tipo: 'Laborable', codigo: '0', clase: 'bg-success' };
 }
 
@@ -194,12 +205,11 @@ function actualizarJornadas(elemento) {
     const fila = elemento.closest('.registro-fila');
     if (!fila) return;
     
-    const fechaInput = fila.querySelector('.fecha-input');
-    const horaInicioInput = fila.querySelector('.hora-inicio');
+    const fechaInput = fila.querySelector('.fecha-input, input[type="date"]');
+    const horaInicioInput = fila.querySelector('.hora-inicio, input[type="time"]');
     const jornadaHorariaDisplay = fila.querySelector('.jornada-horaria-display');
     const jornadaDiariaDisplay = fila.querySelector('.jornada-diaria-display');
     
-    // Actualizar jornada diaria (solo con fecha)
     if (fechaInput && jornadaDiariaDisplay) {
         const jornadaDiaria = determinarJornadaDiaria(fechaInput.value);
         jornadaDiariaDisplay.textContent = jornadaDiaria.tipo;
@@ -207,7 +217,6 @@ function actualizarJornadas(elemento) {
         jornadaDiariaDisplay.setAttribute('data-jornada', jornadaDiaria.codigo);
     }
     
-    // Actualizar jornada horaria (con hora de inicio)
     if (horaInicioInput && jornadaHorariaDisplay) {
         const jornadaHoraria = determinarJornadaHoraria(horaInicioInput.value);
         jornadaHorariaDisplay.textContent = jornadaHoraria.tipo;
@@ -215,7 +224,6 @@ function actualizarJornadas(elemento) {
         jornadaHorariaDisplay.setAttribute('data-jornada', jornadaHoraria.codigo);
     }
     
-    // Verificar si requiere aprobación
     verificarAprobacion(fila);
 }
 
@@ -228,10 +236,8 @@ function verificarAprobacion(fila) {
         const esHorarioRegular = jornadaHorariaDisplay.getAttribute('data-jornada') === '0';
         const esDiaLaborable = jornadaDiariaDisplay.getAttribute('data-jornada') === '0';
         
-        // Según el modelo: LABORABLE + REGULAR = No requiere aprobación
         const requiereAprobacion = !(esDiaLaborable && esHorarioRegular);
         
-        // Resaltar fila si requiere aprobación
         if (requiereAprobacion) {
             fila.classList.add('table-warning');
             fila.title = 'Requiere aprobación';
@@ -244,8 +250,8 @@ function verificarAprobacion(fila) {
 
 // Configurar eventos para una fila
 function configurarEventosFila(fila) {
-    const fechaInput = fila.querySelector('.fecha-input');
-    const horaInicioInput = fila.querySelector('.hora-inicio');
+    const fechaInput = fila.querySelector('.fecha-input, input[type="date"]');
+    const horaInicioInput = fila.querySelector('.hora-inicio, input[type="time"]');
     
     if (fechaInput) {
         fechaInput.addEventListener('change', function() {
@@ -259,8 +265,10 @@ function configurarEventosFila(fila) {
         });
     }
     
-    // Actualizar al cargar la página
-    actualizarJornadas(fila);
+    // Actualizar al cargar
+    if (fechaInput && fechaInput.value) {
+        actualizarJornadas(fechaInput);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -272,19 +280,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Agregar nueva fila
     btnAgregarFila.addEventListener('click', function() {
-        const newFilaHtml = filaTemplate.innerHTML.replace(/__prefix__/g, totalForms);
-        const newFila = document.createElement('tr');
-        newFila.className = 'registro-fila';
-        newFila.innerHTML = newFilaHtml;
+        const templateContent = filaTemplate.content || filaTemplate;
+        const newFila = templateContent.cloneNode(true);
         
-        formsetBody.appendChild(newFila);
-        configurarEventosFila(newFila);
+        // Si es un DocumentFragment (template moderno)
+        if (newFila instanceof DocumentFragment) {
+            const tr = newFila.querySelector('tr');
+            const html = tr.innerHTML.replace(/__prefix__/g, totalForms);
+            tr.innerHTML = html;
+            formsetBody.appendChild(newFila);
+        } else {
+            // Fallback para navegadores antiguos
+            const newFilaHtml = filaTemplate.innerHTML.replace(/__prefix__/g, totalForms);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFilaHtml;
+            const tr = tempDiv.querySelector('tr');
+            formsetBody.appendChild(tr);
+        }
         
-        // Actualizar contador
+        const ultimaFila = formsetBody.lastElementChild;
+        configurarEventosFila(ultimaFila);
+        
         totalForms++;
         managementForm.value = totalForms;
         
-        // Mostrar todos los botones de eliminar
         document.querySelectorAll('.btn-eliminar').forEach(btn => {
             btn.style.display = 'inline-block';
         });
@@ -301,15 +320,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 totalForms--;
                 managementForm.value = totalForms;
                 
-                // Ocultar botón eliminar si solo queda una fila
                 if (totalForms === 1) {
-                    document.querySelector('.btn-eliminar').style.display = 'none';
+                    const ultimoBoton = document.querySelector('.btn-eliminar');
+                    if (ultimoBoton) ultimoBoton.style.display = 'none';
                 }
             }
         }
     });
 
-    // Configurar eventos para filas existentes al cargar la página
+    // Configurar eventos para filas existentes
     document.querySelectorAll('.registro-fila').forEach(configurarEventosFila);
 });
 </script>
@@ -332,5 +351,17 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: #f8f9fa;
 }
 </style>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+
+<script>
+    // Configuración del datepicker para rango de fechas
+  if (document.querySelector('.datetimepicker')) {
+      flatpickr('.datetimepicker', {
+          allowInput: true,
+          dateFormat: "Y-m-d",
+      });
+  }
+</script>
 
 {% endblock JSscripts %}
