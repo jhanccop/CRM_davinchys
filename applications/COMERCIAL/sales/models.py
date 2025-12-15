@@ -155,6 +155,8 @@ class Trafo(TimeStampedModel):
     OFAF = "7"
     ONWF = "8"
     OFWF = "9"
+    KNAN_KNAF = "10"
+    OFWONAN_ONAFF = "11"
 
     COOLING_CHOICES = (
         (ONAN, 'ONAN'),
@@ -167,6 +169,8 @@ class Trafo(TimeStampedModel):
         (OFAF, 'OFAF'),
         (ONWF, 'ONWF'),
         (OFWF, 'OFWF'),
+        (KNAN_KNAF, 'KNAN/KNAF'),
+        (OFWONAN_ONAFF, 'OFWONAN/ONAFF'),
     )
 
     COOLING_NICK = {
@@ -180,6 +184,8 @@ class Trafo(TimeStampedModel):
         OFAF: '',
         ONWF: '',
         OFWF: '',
+        KNAN_KNAF: 'VM',
+        OFWONAN_ONAFF: 'MO',
     }
 
     COOLING = models.CharField(
