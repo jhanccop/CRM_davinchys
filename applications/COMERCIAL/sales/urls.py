@@ -14,6 +14,8 @@ urlpatterns = [
 
     path('comercial/po/lista/', views.TrafoPoListView.as_view(), name='po-lista'),
 
+    #path('comercial/cotizaciones/plantillas/', views.TrafoTemplatesListView.as_view(), name='plantilla-lista'),
+
     # ==================== ITEMS DE COTIZACION ====================
     path('comercial/cotizaciones/crear/item/<pk>/', views.CreateTrafoItemView.as_view(), name='crear-item'),
     path('comercial/cotizaciones/editar/item/<pk>/', views.UpdateTrafoItemView.as_view(), name='editar-item'),

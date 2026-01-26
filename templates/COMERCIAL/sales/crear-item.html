@@ -11,7 +11,7 @@
     <div class="card">
         <div class="card-body">
 
-            <h5 class=" mb-4"> 
+            <h5 class="mb-4"> 
                 {% if object %}
                     Editar Transformador {{ object.idTrafo }}-{{ object.seq }} de cotización {{object.idTrafoQuote}}
                 {% else %}
@@ -24,110 +24,268 @@
 
                 <div id="trafoFormContainer">
 
-                    <!-- Campo oculto para idTrafoQuote -->
-                    <div class="row">
-                        <div class="col-12" hidden>
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.idTrafoQuote.label }}</label>
-                                {{ form.idTrafoQuote }}
+                    <!-- ========== SECCIÓN: DATOS DEL TRANSFORMADOR (PLANTILLA) ========== -->
+                    <div class="card card-outline card-info mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Especificaciones del Transformador</h6>
+                        </div>
+                        <div class="card-body">
+                            
+                            <div class="row pb-3">
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Fase</label>
+                                        {{ trafo_form.PHASE }}
+                                    </div>
+                                    {% for error in trafo_form.PHASE.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Enfriamiento</label>
+                                        {{ trafo_form.COOLING }}
+                                    </div>
+                                    {% for error in trafo_form.COOLING.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Montaje</label>
+                                        {{ trafo_form.MOUNTING }}
+                                    </div>
+                                    {% for error in trafo_form.MOUNTING.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">KVA</label>
+                                        {{ trafo_form.KVA }}
+                                    </div>
+                                    {% for error in trafo_form.KVA.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
                             </div>
+
+                            <div class="row pb-3">
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">HV (Alta Tensión)</label>
+                                        {{ trafo_form.HV }}
+                                    </div>
+                                    {% for error in trafo_form.HV.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">LV (Baja Tensión)</label>
+                                        {{ trafo_form.LV }}
+                                    </div>
+                                    {% for error in trafo_form.LV.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Frecuencia (HZ)</label>
+                                        {{ trafo_form.HZ }}
+                                    </div>
+                                    {% for error in trafo_form.HZ.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Bobinado</label>
+                                        {{ trafo_form.WINDING }}
+                                    </div>
+                                    {% for error in trafo_form.WINDING.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="row pb-3">
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Conexión</label>
+                                        {{ trafo_form.CONNECTION }}
+                                    </div>
+                                    {% for error in trafo_form.CONNECTION.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-4 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Estándar</label>
+                                        {{ trafo_form.STANDARD }}
+                                    </div>
+                                    {% for error in trafo_form.STANDARD.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <h6 class="mb-0">Plano / Drawing</h6>
+                                    <div class="input-group input-group-outline">
+                                        <div class="form-group w-100">
+                                            {{ trafo_form.drawing_file }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                                    {% for error in trafo_form.drawing_file.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
-                    <div class="row pb-4">
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label"> Tipo de transformador </label>
-                                {{ form.idTrafo }}
-                            </div>
+                    <!-- ========== SECCIÓN: DATOS DEL ITEM ========== -->
+                    <div class="card card-outline card-success mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-boxes me-2"></i>Datos del Item</h6>
                         </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label"> Contenedor </label>
-                                {{ form.idContainer }}
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.seq.label }}</label>
-                                {{ form.seq }}
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.unitCost.label }}</label>
-                                {{ form.unitCost }}
-                            </div>
-                        </div>
-                        
-                    </div>
+                        <div class="card-body">
 
-                    <div class="row pt-4">
-                        <div class="col-12 col-sm-12 mt-sm-0">
-                        <h6 class="mb-0">Adjuntar FAT</h6>
-                        <div class="input-group input-group-outline">
-                            <div class="form-group w-100">
-                            {{ form.fat_file }}
+                            <div class="row pb-3">
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">{{ form.seq.label }}</label>
+                                        {{ form.seq }}
+                                    </div>
+                                    {% for error in form.seq.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">{{ form.unitCost.label }}</label>
+                                        {{ form.unitCost }}
+                                    </div>
+                                    {% for error in form.unitCost.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% if not object %}
+                                <!-- Solo mostrar cantidad en creación -->
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Cantidad de Unidades</label>
+                                        <input type="number" name="quantity" id="id_quantity" 
+                                               class="form-control" value="1" min="1" max="100">
+                                    </div>
+                                    <p class="text-sm text-muted mb-0">Se crearán múltiples items con secuencia automática</p>
+                                </div>
+                                {% endif %}
+                                <div class="col-6 col-sm-3 mt-3 mt-sm-0">
+                                    <div class="input-group input-group-outline focused is-focused">
+                                        <label class="form-label">Contenedor</label>
+                                        {{ form.idContainer }}
+                                    </div>
+                                    {% for error in form.idContainer.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                        {% for error in form.fat_file.errors %}
-                        <p class="text-xs text-primary mb-0">
-                            {{ error|escape }}
-                        </p>
-                        {% endfor %}
-                        </div>
-                    </div>
 
-                    <div class="row pt-4">
-                        <div class="col-12 col-sm-12 mt-sm-0">
-                        <h6 class="mb-0">Adjuntar plate_file A</h6>
-                        <div class="input-group input-group-outline">
-                            <div class="form-group w-100">
-                            {{ form.plate_file }}
-                            </div>
-                        </div>
-                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                        {% for error in form.plate_file.errors %}
-                        <p class="text-xs text-primary mb-0">
-                            {{ error|escape }}
-                        </p>
-                        {% endfor %}
                         </div>
                     </div>
 
-                    <div class="row pt-4">
-                        <div class="col-12 col-sm-12 mt-sm-0">
-                        <h6 class="mb-0">Adjuntar plate_file B</h6>
-                        <div class="input-group input-group-outline">
-                            <div class="form-group w-100">
-                            {{ form.plateB_file }}
-                            </div>
+                    <!-- ========== SECCIÓN: ARCHIVOS DEL ITEM ========== -->
+                    <div class="card card-outline card-warning mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-file-upload me-2"></i>Documentos del Item</h6>
                         </div>
-                        <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
-                        {% for error in form.plateB_file.errors %}
-                        <p class="text-xs text-primary mb-0">
-                            {{ error|escape }}
-                        </p>
-                        {% endfor %}
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <h6 class="mb-0">Adjuntar FAT</h6>
+                                    <div class="input-group input-group-outline">
+                                        <div class="form-group w-100">
+                                            {{ form.fat_file }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                                    {% for error in form.fat_file.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <h6 class="mb-0">Adjuntar Plate File A</h6>
+                                    <div class="input-group input-group-outline">
+                                        <div class="form-group w-100">
+                                            {{ form.plate_file }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                                    {% for error in form.plate_file.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-12 col-sm-4 mt-3 mt-sm-0">
+                                    <h6 class="mb-0">Adjuntar Plate File B</h6>
+                                    <div class="input-group input-group-outline">
+                                        <div class="form-group w-100">
+                                            {{ form.plateB_file }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                                    {% for error in form.plateB_file.errors %}
+                                    <p class="text-xs text-danger mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
+
+                    <!-- ========== RESUMEN (Solo en creación) ========== -->
+                    {% if not object %}
+                    <div class="card card-outline card-secondary mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Resumen</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="mb-1">Cantidad de items a crear: <strong id="summaryQuantity">1</strong></p>
+                                    <p class="mb-1">Costo unitario: <strong>$<span id="summaryUnitCost">0.00</span></strong></p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="mb-1">Total a añadir: <strong class="text-success">$<span id="summaryTotal">0.00</span></strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                 </div>
 
-            <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
-                {% if object %}Actualizar{% else %}Crear{% endif %} Item
-            </button>
+                <!-- ========== BOTONES ========== -->
+                <div class="d-flex gap-2">
+                    <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
+                        <i class="fas fa-save me-2"></i>
+                        {% if object %}Actualizar Item{% else %}Crear Item(s){% endif %}
+                    </button>
 
-            {% if object %}
-            <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id  %}" class="btn btn-secondary mt-3 mb-0">
-                Cancelar
-            </a>
-            {% else%}
-            <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
-                Cancelar
-            </a>
-            {% endif %}
+                    {% if object %}
+                    <a href="{% url 'ventas_app:cotizacion-detalle' object.idTrafoQuote.id %}" class="btn btn-secondary mt-3 mb-0">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    {% else %}
+                    <a href="{% url 'ventas_app:cotizacion-detalle' pk %}" class="btn btn-secondary mt-3 mb-0">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    {% endif %}
+                </div>
 
             </form>
 
@@ -139,13 +297,54 @@
 {% block JSscripts %}
 
 <script>
-    // Establecer el valor de idTrafoQuote con el pk de la cotización (solo en creación)
-    document.addEventListener('DOMContentLoaded', function() {
-        const idTrafoQuoteField = document.getElementById("id_idTrafoQuote");
-        if (idTrafoQuoteField && !{{ object|yesno:"true,false" }}) {
-            idTrafoQuoteField.value = "{{pk}}";
+document.addEventListener('DOMContentLoaded', function() {
+    
+    {% if not object %}
+    // ========== Cálculo de resumen en tiempo real (solo creación) ==========
+    const quantityInput = document.getElementById('id_quantity');
+    const unitCostInput = document.getElementById('id_unitCost');
+    const summaryQuantity = document.getElementById('summaryQuantity');
+    const summaryUnitCost = document.getElementById('summaryUnitCost');
+    const summaryTotal = document.getElementById('summaryTotal');
+    
+    function updateSummary() {
+        const quantity = parseInt(quantityInput?.value) || 1;
+        const unitCost = parseFloat(unitCostInput?.value) || 0;
+        const total = quantity * unitCost;
+        
+        if (summaryQuantity) summaryQuantity.textContent = quantity;
+        if (summaryUnitCost) summaryUnitCost.textContent = unitCost.toFixed(2);
+        if (summaryTotal) summaryTotal.textContent = total.toFixed(2);
+    }
+    
+    if (quantityInput) quantityInput.addEventListener('input', updateSummary);
+    if (unitCostInput) unitCostInput.addEventListener('input', updateSummary);
+    
+    // Inicializar resumen
+    updateSummary();
+    {% endif %}
+    
+    // ========== Validación antes de enviar ==========
+    document.getElementById('quoteForm').addEventListener('submit', function(e) {
+        const unitCost = parseFloat(document.getElementById('id_unitCost')?.value) || 0;
+        
+        if (unitCost <= 0) {
+            e.preventDefault();
+            alert('El costo unitario debe ser mayor a 0');
+            return false;
         }
+        
+        {% if not object %}
+        const quantity = parseInt(document.getElementById('id_quantity')?.value) || 0;
+        if (quantity < 1) {
+            e.preventDefault();
+            alert('La cantidad debe ser al menos 1');
+            return false;
+        }
+        {% endif %}
     });
+    
+});
 </script>
 
 {% endblock JSscripts %}

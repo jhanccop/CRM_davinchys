@@ -278,6 +278,8 @@ class Trafo(TimeStampedModel):
         ('11', '34500'),
         ('12', '2400Delta X 7200Delta X 4160GY/2400 X 12470GY/7200'),
         ('13', '12470 X 24940'),
+        ('14', '14400 X 7200'),
+        ('15', '34500 GrdY/19920')
     )
     HV = models.CharField(
         'HV',
@@ -296,7 +298,8 @@ class Trafo(TimeStampedModel):
         ('4', '277/480Y'),
         ('5', '277'),
         ('6', '480'),
-        ('7', '208')
+        ('7', '208'),
+        ('8', '480/240')
     )
     LV = models.CharField(
         'LV',

@@ -59,7 +59,8 @@ from .forms import (
   ItemForm,
   ItemImageForm,
   MultipleItemImageForm,
-  ItemTrackingForm
+  ItemTrackingForm,
+  trafoForm
   )
 
 class QuotesListView(ComercialMixin,ListView):
@@ -637,7 +638,7 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
         return super().form_invalid(form)
 
 # ================= ITEMS ========================
-class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
+class CreateTrafoItemView1(ComercialFinanzasMixin, CreateView):
     template_name = "COMERCIAL/sales/crear-item.html"
     model = Items
     form_class = ItemForm
@@ -651,6 +652,69 @@ class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
     def get_success_url(self, *args, **kwargs):
         pk = self.kwargs["pk"]
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':pk})
+
+class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
+    template_name = "COMERCIAL/sales/crear-item.html"
+    model = Items
+    form_class = ItemForm
+
+    def get_context_data(self, **kwargs):
+        pk = self.kwargs['pk']
+        context = super().get_context_data(**kwargs)
+        context['pk'] = pk
+        context['quote'] = quotes.objects.get(pk=pk)  # AÑADIR: pasar la cotización al template
+        
+        # AÑADIR: formulario de Trafo si no existe
+        if 'trafo_form' not in context:
+            context['trafo_form'] = trafoForm()  # Necesitas crear este form
+        return context
+    
+    @transaction.atomic
+    def form_valid(self, form):
+        pk = self.kwargs['pk']
+        quote = quotes.objects.get(pk=pk)
+        
+        # AÑADIR: Crear el Trafo primero
+        trafo_form = trafoForm(self.request.POST, self.request.FILES)
+        
+        if not trafo_form.is_valid():
+            return self.form_invalid(form)
+        
+        trafo = trafo_form.save()
+        
+        # AÑADIR: Obtener cantidad y crear items
+        quantity = int(self.request.POST.get('quantity', 1))
+        unit_cost = form.cleaned_data.get('unitCost', 0)
+        base_seq = form.cleaned_data.get('seq', f'TRAFO-{trafo.id:03d}')
+        
+        # Crear un Item por cada unidad
+        for i in range(quantity):
+            item_seq = f"{base_seq}-{i+1:03d}" if quantity > 1 else base_seq
+            
+            Items.objects.create(
+                idTrafoQuote=quote,
+                idTrafo=trafo,
+                seq=item_seq,
+                unitCost=unit_cost,
+            )
+        
+        # AÑADIR: Actualizar monto de la cotización
+        quote.amount += quantity * unit_cost
+        quote.save()
+        
+        messages.success(self.request, f'Se añadieron {quantity} item(s) a la cotización.')
+        return redirect(self.get_success_url())
+    
+    def form_invalid(self, form):
+        # AÑADIR: manejar errores del trafo_form
+        trafo_form = trafoForm(self.request.POST, self.request.FILES)
+        return self.render_to_response(
+            self.get_context_data(form=form, trafo_form=trafo_form)
+        )
+    
+    def get_success_url(self):
+        pk = self.kwargs["pk"]
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': pk})
 
 class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
     template_name = "COMERCIAL/sales/crear-item.html"
@@ -672,17 +736,25 @@ class DetailTrafoItemView(ComercialFinanzasMixin,DetailView):
     model = Items
     template_name = 'COMERCIAL/sales/detalle-item.html'
     #context_object_name = 'quote'
-
-class DeleteTrafoItemView(ComercialFinanzasMixin,DeleteView):
+    
+class DeleteTrafoItemView(ComercialFinanzasMixin, DeleteView):
     model = Items
     template_name = 'COMERCIAL/sales/eliminar-item.html'
-    #success_url = reverse_lazy('ventas_app:cotizaciones-lista')
 
-    def get_success_url(self, *args, **kwargs):
-        pk = self.kwargs["pk"]
-        item = Items.objects.get(id = pk)
-        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+    def delete(self, request, *args, **kwargs):
+        item = self.get_object()
+        quote = item.idTrafoQuote
+        
+        # AÑADIR: Restar del monto total
+        quote.amount -= item.unitCost
+        quote.save()
+        
+        return super().delete(request, *args, **kwargs)
     
+    def get_success_url(self):
+        pk = self.kwargs["pk"]
+        item = Items.objects.get(id=pk)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': item.idTrafoQuote.id})
 
 # ================= IMAGENES ITEMS ========================
 class ItemDetailAllListView(ComercialFinanzasMixin, ListView):
