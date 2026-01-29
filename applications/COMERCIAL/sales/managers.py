@@ -230,3 +230,5 @@ class QuoteTrackingManager(models.Manager):
             idquote__id = idQuote
         ).last()
         return result
+
+#class TrafoManager(models.Manager):

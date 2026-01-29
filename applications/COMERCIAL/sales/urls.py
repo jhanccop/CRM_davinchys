@@ -14,7 +14,12 @@ urlpatterns = [
 
     path('comercial/po/lista/', views.TrafoPoListView.as_view(), name='po-lista'),
 
+    # ==================== CRUD PLANTILLAS ====================
     #path('comercial/cotizaciones/plantillas/', views.TrafoTemplatesListView.as_view(), name='plantilla-lista'),
+    #path('comercial/cotizaciones/plantillas/nuevo', views.TrafoTemplatesCreateView.as_view(), name='plantilla-nuevo'),
+    #path('comercial/cotizaciones/plantillas/editar/<pk>/', views.TrafoTemplatesUpdateView.as_view(), name='plantilla-editar'),
+    #path('comercial/cotizaciones/plantillas/detalle/<pk>/', views.TrafoTemplatesDetailView.as_view(), name='plantilla-editar'),
+    #path('comercial/cotizaciones/plantillas/eliminar/<pk>/', views.TrafoTemplatesDeleteListView.as_view(), name='plantilla-eliminar'),
 
     # ==================== ITEMS DE COTIZACION ====================
     path('comercial/cotizaciones/crear/item/<pk>/', views.CreateTrafoItemView.as_view(), name='crear-item'),
@@ -36,8 +41,6 @@ urlpatterns = [
     # ==================== FAQ SEARCH ====================
     path('comercial/fats-search/',views.DetailSerialNumberView.as_view(),name='detail-serial-number'),
 
-    
-    
     #path('comercial/cotizaciones/editar/<pk>/', views.IncomesEditView.as_view(), name='ventas-editar'),
     #path('comercial/cotizaciones/detalle/<pk>/', views.IncomesDetailView.as_view(), name='ventas-detalle'),
     #path('comercial/cotizaciones/eliminar/<pk>/', views.IncomesDeleteView.as_view(), name='ventas-eliminar'),

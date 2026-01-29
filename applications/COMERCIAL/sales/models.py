@@ -12,7 +12,8 @@ from django.core.exceptions import ValidationError
 from .managers import (
     IncomesManager,
     quotesManager,
-    QuoteTrackingManager
+    QuoteTrackingManager,
+    #TrafoManager
 )
 
 class quotes(TimeStampedModel):
@@ -195,6 +196,7 @@ class Trafo(TimeStampedModel):
         blank=True, 
         null=True
     )
+    
     def get_COOLING_nick(self):
         return self.COOLING_NICK.get(self.COOLING, '-')
     
@@ -228,6 +230,7 @@ class Trafo(TimeStampedModel):
         blank=True, 
         null=True
     )
+    
     def get_MOUNTING_nick(self):
         return self.MOUNTING_NICK.get(self.MOUNTING, '-')
     
@@ -369,6 +372,8 @@ class Trafo(TimeStampedModel):
         null=True
     )
 
+    #objects = TrafoManager()
+
     def delete(self, *args, **kwargs):
         """
         Elimina todos los archivos asociados al modelo antes de eliminar el registro
@@ -431,8 +436,6 @@ class Items(TimeStampedModel):
             self.plateB_file.delete(save=False)
         
         super(Items, self).delete(*args, **kwargs)
-
-    #objects = TrafosManager()
 
     class Meta:
         verbose_name = 'Item'

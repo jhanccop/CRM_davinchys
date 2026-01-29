@@ -45,10 +45,6 @@ from applications.cuentas.models import (
   Tin,
 )
 
-from applications.clientes.models import (
-  Cliente,
-)
-
 from applications.COMERCIAL.stakeholders.models import client
 from applications.PRODUCTION.models import Trafos
 from applications.COMERCIAL.sales.models import Items,ItemTracking, ItemImage
@@ -357,7 +353,6 @@ class IncomesDeleteView(ComercialMixin,DeleteView):
   success_url = reverse_lazy('ventas_app:ventas-lista')
 
 # ================= COTIZACIONES ========================
-
 class QuoteCreateViewV1(ComercialFinanzasMixin,CreateView):
     model = quotes
     form_class = quotesForm
@@ -637,6 +632,22 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
         return super().form_invalid(form)
 
+# ================= CRUD PLANTILLAS ========================
+class TrafoTemplatesListView(ComercialMixin,ListView):
+    template_name = "COMERCIAL/sales/plantilla-lista.html"
+    context_object_name = 'documentos'
+
+    def get_queryset(self,**kwargs):
+        compania_id = self.request.session.get('compania_id')
+        plantilla = Trafo.objects.ListaDocumentosPorTipo(
+            compania_id = compania_id
+            )
+    
+        payload = {}
+        payload["plantilla"] = plantilla
+        
+        return payload
+
 # ================= ITEMS ========================
 class CreateTrafoItemView1(ComercialFinanzasMixin, CreateView):
     template_name = "COMERCIAL/sales/crear-item.html"
@@ -722,9 +733,11 @@ class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
     form_class = ItemForm
 
     def get_context_data(self,**kwargs):
-        pk = self.kwargs['pk']
+        #pk = self.kwargs['pk']
+        #print(self.object.idTrafoQuote.id)
         context = super().get_context_data(**kwargs)
-        context['pk'] = pk
+        if self.object.idTrafoQuote:
+            context['pk'] = self.object.idTrafoQuote.id
         return context
     
     def get_success_url(self, *args, **kwargs):

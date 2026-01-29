@@ -98,6 +98,7 @@ class ItemsAdmin(ImportExportModelAdmin):
 
     list_display = (
         'id',
+        'idTrafoQuote',
         'idTrafo',
         'seq',
     )
