@@ -363,6 +363,7 @@ class Trafo(TimeStampedModel):
         ('1', 'IEEE C57.12.20'), # monofasicos aéreos
         ('2', 'IEEE C57.12.21'), # monofasicos tipo pedestal
         ('3', 'IEEE C57.12.34'), # pedestales
+        ('4', 'IEEE C57.12.38'), # 
     )
     STANDARD = models.CharField(
         'STANDARD',
