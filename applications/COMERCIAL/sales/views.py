@@ -727,7 +727,7 @@ class CreateTrafoItemView(ComercialFinanzasMixin, CreateView):
         pk = self.kwargs["pk"]
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': pk})
 
-class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
+class UpdateTrafoItemView0(ComercialFinanzasMixin, UpdateView):
     template_name = "COMERCIAL/sales/crear-item.html"
     model = Items
     form_class = ItemForm
@@ -744,6 +744,50 @@ class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
         pk = self.kwargs["pk"]
         item = Items.objects.get(id = pk)
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk':item.idTrafoQuote.id})
+
+class UpdateTrafoItemView(ComercialFinanzasMixin, UpdateView):
+    template_name = "COMERCIAL/sales/crear-item.html"
+    model = Items
+    form_class = ItemForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.object.idTrafoQuote:
+            context['pk'] = self.object.idTrafoQuote.id
+        
+        # Añadir el form del transformador para edición
+        if self.object.idTrafo:
+            if self.request.POST:
+                context['trafo_form'] = trafoForm(
+                    self.request.POST, 
+                    self.request.FILES,
+                    instance=self.object.idTrafo,
+                    prefix='trafo'
+                )
+            else:
+                context['trafo_form'] = trafoForm(
+                    instance=self.object.idTrafo,
+                    prefix='trafo'
+                )
+        
+        return context
+    
+    def form_valid(self, form):
+        context = self.get_context_data()
+        trafo_form = context.get('trafo_form')
+        
+        # Validar y guardar el form del transformador si existe
+        if trafo_form and trafo_form.is_valid():
+            trafo_form.save()
+        elif trafo_form:
+            return self.form_invalid(form)
+        
+        return super().form_valid(form)
+    
+    def get_success_url(self, *args, **kwargs):
+        pk = self.kwargs["pk"]
+        item = Items.objects.get(id=pk)
+        return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': item.idTrafoQuote.id})
 
 class DetailTrafoItemView(ComercialFinanzasMixin,DetailView):
     model = Items

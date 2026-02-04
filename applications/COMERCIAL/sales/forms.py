@@ -413,8 +413,8 @@ class trafoForm(forms.ModelForm):
         if drawing_file:
             if not drawing_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
                 raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
-            if drawing_file.size > 5*1024*1024:  # 5 MB limit
-                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+            if drawing_file.size > 8*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 8 MB.")
         return drawing_file
 
 class ItemForm(forms.ModelForm):

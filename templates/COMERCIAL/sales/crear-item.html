@@ -19,6 +19,20 @@
                 {% endif %}
             </h5>
 
+            {% if object and object.idTrafo %}
+            <div class="alert alert-light d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Nota:</strong> Este item usa la plantilla de transformador 
+                    <strong>{{ object.idTrafo }}</strong>. Los cambios en las especificaciones 
+                    afectarán a todos los items que usen esta plantilla.
+                </div>
+                <button type="button" class="btn btn-sm btn-warning" id="toggleTrafoEdit">
+                    <i class="fas fa-edit me-1"></i>Editar Especificaciones
+                </button>
+            </div>
+            {% endif %}
+
             <form id="quoteForm" method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -28,11 +42,11 @@
                 <div id="trafoFormContainer">
 
                     <!-- ========== SECCIÓN: DATOS DEL TRANSFORMADOR (PLANTILLA) ========== -->
-                    <div class="card card-outline card-info mb-4">
+                    <div class="card card-outline card-info mb-4" id="trafoSpecsCard">
                         <div class="card-header">
                             <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Especificaciones del Transformador</h6>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body {% if object %}trafo-readonly{% endif %}">
                             
                             <div class="row pb-3">
                                 <div class="col-6 col-sm-3 mt-3 mt-sm-0">
@@ -138,7 +152,7 @@
                                             {{ trafo_form.drawing_file }}
                                         </div>
                                     </div>
-                                    <p class="text-sm mb-0">Tamaño menor a 5 MB.</p>
+                                    <p class="text-sm mb-0">Tamaño menor a 8 MB.</p>
                                     {% for error in trafo_form.drawing_file.errors %}
                                     <p class="text-xs text-danger mb-0">{{ error }}</p>
                                     {% endfor %}
@@ -300,7 +314,7 @@
 {% block JSscripts %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     
     {% if not object %}
     // ========== Cálculo de resumen en tiempo real (solo creación) ==========
@@ -348,6 +362,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
 });
+
+{% if object %}
+// ========== Control de edición de especificaciones del transformador ==========
+const trafoCard = document.getElementById('trafoSpecsCard');
+const toggleBtn = document.getElementById('toggleTrafoEdit');
+const trafoInputs = trafoCard?.querySelectorAll('select, input[type="file"]');
+
+// Deshabilitar campos inicialmente en modo edición
+trafoInputs?.forEach(input => {
+    input.disabled = true;
+    input.style.opacity = '0.6';
+});
+
+toggleBtn?.addEventListener('click', function() {
+    const isDisabled = trafoInputs[0]?.disabled;
+    
+    trafoInputs?.forEach(input => {
+        input.disabled = !isDisabled;
+        input.style.opacity = isDisabled ? '1' : '0.6';
+    });
+    
+    if (isDisabled) {
+        toggleBtn.innerHTML = '<i class="fas fa-lock me-1"></i>Bloquear Especificaciones';
+        toggleBtn.classList.remove('btn-warning');
+        toggleBtn.classList.add('btn-success');
+        trafoCard.classList.add('border-warning');
+    } else {
+        toggleBtn.innerHTML = '<i class="fas fa-edit me-1"></i>Editar Especificaciones';
+        toggleBtn.classList.remove('btn-success');
+        toggleBtn.classList.add('btn-warning');
+        trafoCard.classList.remove('border-warning');
+    }
+});
+{% endif %}
 </script>
 
 {% endblock JSscripts %}
