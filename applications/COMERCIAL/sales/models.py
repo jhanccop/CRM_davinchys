@@ -249,7 +249,7 @@ class Trafo(TimeStampedModel):
         ('9', '1000'),
         ('10', '1500'),
         ('11', '2000'),
-        ('12', '2000/3000'),
+        ('12', '2000/2300'),
         ('13', '2500'),
         ('14', '2600'),
         ('15', '3000'),
@@ -404,7 +404,7 @@ class Items(TimeStampedModel):
     idTrafo = models.ForeignKey(Trafo, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
     seq = models.CharField(
         "Serial",
-        max_length=20,
+        max_length=25,
         blank=True,
         null=True,
         unique=True
