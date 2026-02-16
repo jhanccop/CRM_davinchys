@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 import json
 import re
+import unicodedata
 
 from django.contrib import messages
 from django.db import transaction
@@ -10,6 +11,8 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render, get_object_or_404, redirect
 
 from django.shortcuts import render
+
+from django.db.models import Q
 
 from applications.users.mixins import (
   ComercialMixin,
@@ -48,6 +51,7 @@ from applications.cuentas.models import (
 from applications.COMERCIAL.stakeholders.models import client
 from applications.PRODUCTION.models import Trafos
 from applications.COMERCIAL.sales.models import Items,ItemTracking, ItemImage
+from applications.LOGISTICA.transport.models import Container
 
 from .forms import (
   IncomesForm,
@@ -984,6 +988,100 @@ def normalize_serial(serial):
     # Convertir a mayúsculas para uniformidad
     serial = serial.upper()
     return serial
+
+class TransformerSearchView(View):
+    template_name = "COMERCIAL/sales/transformer-search.html"
+
+    def get(self, request):
+        query = request.GET.get("order", "").strip()
+
+        payload = {
+            "query": query,
+            "results": [],
+            "not_found": False,
+        }
+
+        if not query:
+            return render(request, self.template_name, {"payload": payload})
+
+        normalized = normalize_serial(query)
+
+        # 1. IDs de quotes que coinciden por poNumber
+        matching_quote_ids = list(
+            quotes.objects.filter(
+                poNumber__icontains=query
+            ).values_list('id', flat=True)
+        )
+
+        # 2. IDs de containers que coinciden por nombre
+        matching_container_ids = list(
+            Container.objects.filter(
+                containerName__icontains=query
+            ).values_list('id', flat=True)
+        )
+
+        # 3. Traer todos los items candidatos de BD
+        qs = Items.objects.select_related(
+            'idTrafoQuote', 'idTrafo', 'idContainer'
+        ).filter(
+            Q(idTrafoQuote__id__in=matching_quote_ids) |
+            Q(idContainer__id__in=matching_container_ids) |
+            Q(seq__isnull=False)
+        ).distinct()
+
+        # 4. Filtrar en Python (serial normalizado + los que ya coinciden por PO/container)
+        results = []
+        seen_ids = set()
+
+        for item in qs:
+            if item.id in seen_ids:
+                continue
+            match_serial = normalize_serial(item.seq) == normalized
+            match_po = item.idTrafoQuote_id in matching_quote_ids
+            match_container = item.idContainer_id in matching_container_ids
+
+            if match_serial or match_po or match_container:
+                results.append(item)
+                seen_ids.add(item.id)
+
+        # 5. Obtener último tracking por item
+        trackings_map = {}
+        if results:
+            trackings_qs = ItemTracking.objects.filter(
+                idItem__in=[i.id for i in results]
+            ).order_by('idItem_id', '-created')
+
+            for t in trackings_qs:
+                if t.idItem_id not in trackings_map:
+                    trackings_map[t.idItem_id] = t
+
+        # 6. Combinar item + tracking en una sola lista
+        payload["results"] = [
+            {"item": item, "tracking": trackings_map.get(item.id)}
+            for item in results
+        ]
+        payload["not_found"] = len(results) == 0
+
+        return render(request, self.template_name, {"payload": payload})
+
+class TransformerItemDetailView(DetailView):
+    model = Items
+    template_name = "COMERCIAL/sales/transformer-detail.html"
+    context_object_name = 'item'
+    pk_url_kwarg = 'pk'
+
+    def get_queryset(self):
+        return Items.objects.select_related(
+            'idTrafoQuote', 'idTrafo', 'idContainer'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['itemTracking'] = ItemTracking.objects.filter(
+            idItem=self.object.id
+        ).last()
+        context['back_query'] = self.request.GET.get('q', '')
+        return context
 
 class DetailSerialNumberView(ListView):
     template_name = "COMERCIAL/sales/detail-serial-number.html"

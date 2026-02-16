@@ -1,0 +1,206 @@
+{% extends 'home/base-home.html' %}
+{% load static %}
+
+{% block title %}{{ item.seq }} – Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Botón volver -->
+  <div class="mb-3">
+    <a href="{% url 'ventas_app:transformer-search' %}{% if back_query %}?order={{ back_query }}{% endif %}"
+       class="btn btn-sm bg-gradient-secondary">
+      ← Back to results
+    </a>
+  </div>
+
+  <div class="row">
+
+    <!-- IMÁGENES -->
+    <div class="col-12 col-lg-5 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Pictures</h6>
+          {% if item.images.first %}
+            <img class="w-100 border-radius-lg shadow-lg"
+                 src="{{ item.images.first.image.url }}"
+                 alt="{{ item.seq }}"
+                 style="max-height:320px; object-fit:cover;">
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              {% for img in item.images.all %}
+              <a href="{{ img.image.url }}" target="_blank">
+                <img src="{{ img.image.url }}"
+                     class="border-radius-lg shadow"
+                     style="height:64px; width:64px; object-fit:cover;">
+              </a>
+              {% endfor %}
+            </div>
+          {% else %}
+          <div class="text-center py-5 text-muted">
+            <span style="font-size:3rem">📷</span>
+            <p class="mt-2 text-sm">No images available yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- DATOS Y ESTADO -->
+    <div class="col-12 col-lg-7 mb-4">
+
+      <!-- Datos técnicos -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header pb-0">
+          <h6>Technical Data</h6>
+        </div>
+        <div class="card-body px-3 pt-0">
+          <div class="row">
+            <div class="col-12 col-sm-6">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  <tr>
+                    <td class="text-xs text-muted">Serial</td>
+                    <td class="text-sm font-weight-bold">{{ item.seq|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">Type</td>
+                    <td class="text-sm">{{ item.idTrafo|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">KVA</td>
+                    <td class="text-sm">{{ item.idTrafo.get_KVA_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">HV</td>
+                    <td class="text-sm">{{ item.idTrafo.get_HV_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">LV</td>
+                    <td class="text-sm">{{ item.idTrafo.get_LV_display|default:"—" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-12 col-sm-6">
+              <table class="table table-sm mb-0">
+                <tbody>
+                  <tr>
+                    <td class="text-xs text-muted">Phase</td>
+                    <td class="text-sm">{{ item.idTrafo.get_PHASE_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">Cooling</td>
+                    <td class="text-sm">{{ item.idTrafo.get_COOLING_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">Winding</td>
+                    <td class="text-sm">{{ item.idTrafo.get_WINDING_display|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">PO Number</td>
+                    <td class="text-sm font-weight-bold">
+                      {% if item.idTrafoQuote.poNumber %}
+                        PO-{{ item.idTrafoQuote.poNumber }}
+                      {% else %}—{% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-xs text-muted">Container</td>
+                    <td class="text-sm">{{ item.idContainer.containerName|default:"—" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado de fabricación -->
+      <div class="card shadow-sm">
+        <div class="card-header pb-0">
+          <h6>Manufacturing Status</h6>
+          {% if itemTracking %}
+          <p class="text-xs text-muted mb-0">Last update: {{ itemTracking.created }}</p>
+          {% endif %}
+        </div>
+        <div class="card-body px-3 pt-2">
+          <div class="row g-3">
+
+            <div class="col-6 col-sm-4">
+              <div class="border rounded-3 p-3 text-center">
+                <p class="text-xs text-muted mb-1">EQUIPMENT</p>
+                {% if itemTracking %}
+                  {% if itemTracking.statusItem == "4" %}
+                    <span class="badge badge-pill bg-gradient-success">{{ itemTracking.get_statusItem_display }}</span>
+                  {% else %}
+                    <span class="badge badge-pill bg-gradient-dark">{{ itemTracking.get_statusItem_display }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge bg-gradient-secondary">N/A</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-6 col-sm-4">
+              <div class="border rounded-3 p-3 text-center">
+                <p class="text-xs text-muted mb-1">PLATE</p>
+                {% if itemTracking %}
+                  {% if itemTracking.statusPlate == "4" %}
+                    <span class="badge badge-pill bg-gradient-success">{{ itemTracking.get_statusPlate_display }}</span>
+                  {% else %}
+                    <span class="badge badge-pill bg-gradient-dark">{{ itemTracking.get_statusPlate_display }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge bg-gradient-secondary">N/A</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-6 col-sm-4">
+              <div class="border rounded-3 p-3 text-center">
+                <p class="text-xs text-muted mb-1">FAT</p>
+                {% if item.fat_file %}
+                  <a href="{{ item.fat_file.url }}" class="text-decoration-none">
+                    <span class="badge badge-pill bg-gradient-success">⬇ Download</span>
+                  </a>
+                {% else %}
+                  <span class="badge bg-gradient-secondary">Pending</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-6 col-sm-4">
+              <div class="border rounded-3 p-3 text-center">
+                <p class="text-xs text-muted mb-1">DRAWING</p>
+                {% if item.drawing_file %}
+                  <a href="{{ item.drawing_file.url }}" class="text-decoration-none">
+                    <span class="badge badge-pill bg-gradient-success">⬇ Download</span>
+                  </a>
+                {% else %}
+                  <span class="badge bg-gradient-secondary">Pending</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-6 col-sm-4">
+              <div class="border rounded-3 p-3 text-center">
+                <p class="text-xs text-muted mb-1">NAMEPLATE</p>
+                {% if item.plate_file %}
+                  <a href="{{ item.plate_file.url }}" class="text-decoration-none">
+                    <span class="badge badge-pill bg-gradient-success">⬇ Download</span>
+                  </a>
+                {% else %}
+                  <span class="badge bg-gradient-secondary">Pending</span>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

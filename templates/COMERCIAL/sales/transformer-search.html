@@ -1,0 +1,141 @@
+{% extends 'home/base-home.html' %}
+{% load static %}
+
+{% block title %}Transformer Tracking{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-7">
+
+  <!-- BUSCADOR -->
+  <div class="row">
+    <div class="col-12 col-lg-7 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-body py-4 px-4">
+          <h5 class="font-weight-bold mb-1">Transformer Tracking</h5>
+          <p class="text-sm text-muted mb-3">
+            Search by <strong>serial number</strong>, <strong>PO number</strong> or <strong>container name</strong>.
+          </p>
+          <form method="GET">
+            <div class="input-group input-group-lg">
+              <input
+                type="text"
+                class="form-control"
+                name="order"
+                value="{{ payload.query }}"
+                placeholder="Serial number · PO number · Container name"
+                autofocus
+              >
+              <button class="btn bg-gradient-dark px-4" type="submit">Search</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  {% if payload.query %}
+  <div class="row mt-4">
+    <div class="col-12 col-lg-10 mx-auto">
+
+      {% if payload.not_found %}
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <span style="font-size:2.5rem">🔎</span>
+          <h6 class="mt-2">No results found for <em>"{{ payload.query }}"</em></h6>
+          <p class="text-sm text-muted">
+            Try with the exact serial number, PO number, or container name.
+          </p>
+        </div>
+      </div>
+
+      {% else %}
+      
+
+      <div class="card shadow-sm">
+        <div class="container mt-2">
+            <div class="d-flex align-items-center mb-3">
+                <span class="text-sm text-muted">
+                <strong>{{ payload.results|length }}</strong>
+                result{{ payload.results|length|pluralize }} for
+                <strong>"{{ payload.query }}"</strong>
+                </span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="text-uppercase text-xs ps-3">Serial</th>
+                <th class="text-uppercase text-xs">Type</th>
+                <th class="text-uppercase text-xs">KVA</th>
+                <th class="text-uppercase text-xs">PO Number</th>
+                <th class="text-uppercase text-xs">Container</th>
+                <th class="text-uppercase text-xs">Equipment</th>
+                <th class="text-uppercase text-xs">FAT</th>
+                <th class="text-uppercase text-xs text-center">Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in payload.results %}
+              {% with item=row.item tracking=row.tracking %}
+              <tr>
+                <td class="ps-3">
+                  <span class="text-sm font-weight-bold">{{ item.seq|default:"—" }}</span>
+                </td>
+                <td>
+                  <span class="text-sm">{{ item.idTrafo|default:"—" }}</span>
+                </td>
+                <td>
+                  <span class="text-sm">{{ item.idTrafo.get_KVA_display|default:"—" }}</span>
+                </td>
+                <td>
+                  <span class="text-sm">
+                    {% if item.idTrafoQuote.poNumber %}
+                      PO-{{ item.idTrafoQuote.poNumber }}
+                    {% else %}—{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <span class="text-sm">{{ item.idContainer.containerName|default:"—" }}</span>
+                </td>
+                <td>
+                  {% if tracking %}
+                    {% if tracking.statusItem == "4" %}
+                      <span class="badge badge-pill bg-gradient-success">{{ tracking.get_statusItem_display }}</span>
+                    {% else %}
+                      <span class="badge badge-pill bg-gradient-dark">{{ tracking.get_statusItem_display }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="badge bg-gradient-secondary">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.fat_file %}
+                    <span class="badge badge-pill bg-gradient-success">✔ Ready</span>
+                  {% else %}
+                    <span class="badge bg-gradient-secondary">Pending</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <a href="{% url 'ventas_app:transformer-detail' item.pk %}?q={{ payload.query }}"
+                     class="btn btn-sm bg-gradient-info mb-0">
+                    View →
+                  </a>
+                </td>
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

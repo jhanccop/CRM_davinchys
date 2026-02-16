@@ -40,6 +40,8 @@ urlpatterns = [
 
     # ==================== FAQ SEARCH ====================
     path('comercial/fats-search/',views.DetailSerialNumberView.as_view(),name='detail-serial-number'),
+    path('comercial/tracking/',views.TransformerSearchView.as_view(), name='transformer-search'),
+    path('comercial/tracking/<int:pk>/',views.TransformerItemDetailView.as_view(), name='transformer-detail'),
 
     #path('comercial/cotizaciones/editar/<pk>/', views.IncomesEditView.as_view(), name='ventas-editar'),
     #path('comercial/cotizaciones/detalle/<pk>/', views.IncomesDetailView.as_view(), name='ventas-detalle'),
