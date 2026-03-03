@@ -64,6 +64,23 @@
                                     <td class="text-muted">Descripción</td>
                                     <td class="fw-bold text-dark">{{quote.shortDescription}}</td>
                                 </tr>
+                                <tr>
+                                    <td class="text-muted">Descripción</td>
+                                    <td class="fw-bold text-dark">
+                                        <div class="info-item mb-0">
+                                            <div class="info-item mb-2">
+                                                {% if quote.pdf_file %}
+                                                <a href="{{ quote.pdf_file.url }}" data-bs-toggle="tooltip" title="Download file">
+                                                    <span class="badge bg-gradient-success text-md">VIEW FAT FILE</span>
+                                                </a>
+                                                {% else %}
+                                                    <span class="badge bg-gradient-secondary">NO PO FILE</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

@@ -1,99 +1,249 @@
 {% extends "base.html" %}
 
 {% load static %}
-{% block navbar_main %}Logistica{% endblock %}
+
+{% block navbar_main %}Logística{% endblock %}
 {% block navbar_appName %}Contenedores{% endblock %}
-{% block navbar_Type %} {% if object %}Editar{% else %}Crear{% endif %} - Item  {% endblock %}
+{% block navbar_Type %}{% if object %}Editar{% else %}Nuevo{% endif %}{% endblock %}
 
 {% block panel-content %}
 
 <div class="container-fluid">
-    <div class="card">
-        <div class="card-body">
+  <div class="row">
+    <div class="col-lg-9 col-12 mx-auto">
+      <div class="card">
 
-            <h5 class=" mb-4"> 
-                {% if object %}
-                    Editar Contenedor
-                {% else %}
-                    Agregar Contenedor
-                {% endif %}
-            </h5>
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">{{ titulo }}</h6>
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{% if object %}{% url 'logistica_app:detalle-contenedor' object.id %}{% else %}{% url 'logistica_app:lista-contenedores' %}{% endif %}">
+            <i class="fas fa-arrow-left me-1"></i> Volver
+          </a>
+        </div>
 
-            <form id="quoteForm" method="post" enctype="multipart/form-data">
+        <div class="card-body pt-4">
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form id="containerForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-                <div id="trafoFormContainer">
+            <!-- ===== SECCIÓN 1: IDENTIFICACIÓN ===== -->
+            <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-3">
+              <i class="fas fa-box me-1"></i> Identificación
+            </p>
 
-                    <!-- Campo oculto para idTrafoQuote -->
-                    <div class="row">
-                        <div class="col-12" hidden>
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.idPetitioner.label }}</label>
-                                {{ form.idPetitioner }}
-                            </div>
-                        </div>
-                    </div>
+            <div class="row">
 
-                    <div class="row pb-4">
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.containerName.label }}</label>
-                                {{ form.containerName }}
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label"> {{ form.currency.label }} </label>
-                                {{ form.currency }}
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label"> {{ form.grossAmount.label }} </label>
-                                {{ form.grossAmount }}
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3 mt-3 mt-sm-0">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">{{ form.taxes.label }}</label>
-                                {{ form.taxes }}
-                            </div>
-                        </div>
-                    </div>
-
+              <!-- Nombre del contenedor -->
+              <div class="col-sm-4 mb-4">
+                <div class="input-group input-group-outline {% if form.containerName.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.containerName.label }}</label>
+                  {{ form.containerName }}
                 </div>
+                {% if form.containerName.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.containerName.errors|join:", " }}</p>
+                {% endif %}
+              </div>
 
-            <button type="submit" id="addTrafoBtn" class="btn btn-primary mt-3 mb-0">
-                {% if object %}Actualizar{% else %}Crear{% endif %} Item
-            </button>
+              <!-- Número de contenedor -->
+              <div class="col-sm-4 mb-4">
+                <div class="input-group input-group-outline {% if form.containerNumber.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.containerNumber.label }}</label>
+                  {{ form.containerNumber }}
+                </div>
+                {% if form.containerNumber.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.containerNumber.errors|join:", " }}</p>
+                {% endif %}
+              </div>
 
-            {% if object %}
-            <a href="" class="btn btn-secondary mt-3 mb-0">
+              <!-- Año -->
+              <div class="col-sm-4 mb-4">
+                <div class="input-group input-group-outline {% if form.year.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.year.label }}</label>
+                  {{ form.year }}
+                </div>
+                {% if form.year.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.year.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+            </div>
+
+            <!-- ===== SECCIÓN 2: MONTOS ===== -->
+            <hr class="horizontal dark my-3">
+            <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-3">
+              <i class="fas fa-dollar-sign me-1"></i> Montos
+            </p>
+
+            <div class="row">
+
+              <!-- Moneda -->
+              <div class="col-sm-3 mb-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">{{ form.currency.label }}</label>
+                  {{ form.currency }}
+                </div>
+                {% if form.currency.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.currency.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+              <!-- Monto Bruto -->
+              <div class="col-sm-3 mb-4">
+                <div class="input-group input-group-outline {% if form.grossAmount.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.grossAmount.label }}</label>
+                  {{ form.grossAmount }}
+                </div>
+                {% if form.grossAmount.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.grossAmount.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+              <!-- Impuestos -->
+              <div class="col-sm-3 mb-4">
+                <div class="input-group input-group-outline {% if form.taxes.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.taxes.label }}</label>
+                  {{ form.taxes }}
+                </div>
+                {% if form.taxes.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.taxes.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+              <!-- Monto Neto (calculado) -->
+              <div class="col-sm-3 mb-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto Neto</label>
+                  <input type="text"
+                         id="id_netAmount_preview"
+                         class="form-control text-success font-weight-bold"
+                         value="{{ object.netAmount|default:'0.00' }}"
+                         readonly
+                         tabindex="-1">
+                </div>
+                <p class="text-xs text-secondary mt-1">Calculado automáticamente</p>
+              </div>
+
+            </div>
+
+            <!-- ===== SECCIÓN 3: DATOS ADICIONALES ===== -->
+            <hr class="horizontal dark my-3">
+            <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-3">
+              <i class="fas fa-info-circle me-1"></i> Datos Adicionales
+            </p>
+
+            <div class="row">
+
+              <!-- Solicitante -->
+              <div class="col-sm-6 mb-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">{{ form.idPetitioner.label }}</label>
+                  {{ form.idPetitioner }}
+                </div>
+                {% if form.idPetitioner.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.idPetitioner.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+              <!-- Descripción -->
+              <div class="col-sm-6 mb-4">
+                <div class="input-group input-group-outline {% if form.shortDescription.value %}is-focused{% endif %}">
+                  <label class="form-label">{{ form.shortDescription.label }}</label>
+                  {{ form.shortDescription }}
+                </div>
+                {% if form.shortDescription.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.shortDescription.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+            </div>
+
+            <!-- Es Orden de Compra -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="form-check d-flex align-items-center gap-2">
+                  {{ form.isOrder }}
+                  <label class="form-check-label text-sm text-dark ms-2" for="{{ form.isOrder.id_for_label }}">
+                    {{ form.isOrder.label }}
+                  </label>
+                </div>
+                {% if form.isOrder.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.isOrder.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- ===== BOTONES ===== -->
+            <hr class="horizontal dark my-3">
+            <div class="d-flex justify-content-end gap-2">
+              <a class="btn btn-outline-secondary"
+                 href="{% if object %}{% url 'logistica_app:detalle-contenedor' object.id %}{% else %}{% url 'logistica_app:lista-contenedores' %}{% endif %}">
                 Cancelar
-            </a>
-            {% else%}
-            <a href="" class="btn btn-secondary mt-3 mb-0">
-                Cancelar
-            </a>
-            {% endif %}
+              </a>
+              <button type="submit" class="btn bg-gradient-dark">
+                <i class="fas fa-save me-1"></i> {{ btn_label }}
+              </button>
+            </div>
 
-            </form>
-
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
 {% endblock panel-content %}
 
 {% block JSscripts %}
-
 <script>
-    // Establecer el valor de idTrafoQuote con el pk de la cotización (solo en creación)
-    document.addEventListener('DOMContentLoaded', function() {
-        const idTrafoQuoteField = document.getElementById("id_idTrafoQuote");
-        if (idTrafoQuoteField && !{{ object|yesno:"true,false" }}) {
-            idTrafoQuoteField.value = "{{pk}}";
-        }
-    });
-</script>
+  // =====================================================
+  // Calculo en tiempo real del Monto Neto
+  // =====================================================
+  (function () {
+    const grossInput  = document.getElementById('id_grossAmount');
+    const taxesInput  = document.getElementById('id_taxes');
+    const netPreview  = document.getElementById('id_netAmount_preview');
 
+    function updateNet() {
+      const gross = parseFloat(grossInput.value) || 0;
+      const taxes = parseFloat(taxesInput.value) || 0;
+      const net   = gross - taxes;
+      netPreview.value = net.toFixed(2);
+      netPreview.classList.toggle('text-danger', net < 0);
+      netPreview.classList.toggle('text-success', net >= 0);
+    }
+
+    grossInput.addEventListener('input', updateNet);
+    taxesInput.addEventListener('input', updateNet);
+
+    // Ejecutar al cargar para que en edición ya muestre el valor correcto
+    updateNet();
+  })();
+
+  // =====================================================
+  // Mantener label flotante activo cuando hay valor
+  // =====================================================
+  document.querySelectorAll('.input-group-outline input, .input-group-outline select').forEach(function (el) {
+    function toggleFocused() {
+      const wrapper = el.closest('.input-group-outline');
+      if (!wrapper) return;
+      if (el.value !== '' && el.value !== null) {
+        wrapper.classList.add('is-focused');
+      } else {
+        wrapper.classList.remove('is-focused');
+      }
+    }
+    el.addEventListener('change', toggleFocused);
+    el.addEventListener('input', toggleFocused);
+    toggleFocused();
+  });
+</script>
 {% endblock JSscripts %}

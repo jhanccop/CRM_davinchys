@@ -6,8 +6,29 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import (
     Container,
-    ContainerTracking
+    ContainerTracking,
+    File
 )
+
+## ==================== Files =====================
+class FileResource(resources.ModelResource):
+    class Meta:
+        model = File
+
+@admin.register(File)
+class FileAdmin(ImportExportModelAdmin):
+    resource_class = FileResource
+    
+    list_display = (
+        'id',
+        'created',
+        'idContainer',
+        'docType',
+        'name',
+    )
+    
+    search_fields = ("idContainer",)
+    list_filter = ('idContainer',)
 
 ## ==================== Container =====================
 class ContainerResource(resources.ModelResource):
@@ -21,6 +42,7 @@ class ContainerAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'created',
+        'containerName',
         'netAmount',
         'isOrder',
         'idPetitioner',

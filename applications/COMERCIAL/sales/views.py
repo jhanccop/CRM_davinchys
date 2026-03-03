@@ -2,6 +2,7 @@ from datetime import date, timedelta
 import json
 import re
 import unicodedata
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.db import transaction
@@ -41,14 +42,16 @@ from .models import (
   Trafo,
   QuoteTracking,
   Items,
-  ItemTracking
+  ItemTracking,
+  IntQuotes,
+  WorkOrder
 )
 
 from applications.cuentas.models import (
   Tin,
 )
 
-from applications.COMERCIAL.stakeholders.models import client
+from applications.COMERCIAL.stakeholders.models import client, supplier
 from applications.PRODUCTION.models import Trafos
 from applications.COMERCIAL.sales.models import Items,ItemTracking, ItemImage
 from applications.LOGISTICA.transport.models import Container
@@ -56,11 +59,14 @@ from applications.LOGISTICA.transport.models import Container
 from .forms import (
   IncomesForm,
   quotesForm,
+  IntQuoteForm,
   ItemForm,
   ItemImageForm,
   MultipleItemImageForm,
   ItemTrackingForm,
-  trafoForm
+  trafoForm,
+  WorkOrderForm,
+  IntQuoteEditForm
   )
 
 class QuotesListView(ComercialMixin,ListView):
@@ -303,8 +309,6 @@ class IncomesCreateView(ComercialMixin,CreateView):
                     'EUR': Incomes.EUROS
                 }
                 fields['typeCurrency'] = currency_mapping.get(currency, Incomes.SOLES)
-            
-            
             
             response_data['success'] = True
             response_data['fields'] = fields
@@ -639,18 +643,11 @@ class QuoteCreateView(ComercialFinanzasMixin, CreateView):
 # ================= CRUD PLANTILLAS ========================
 class TrafoTemplatesListView(ComercialMixin,ListView):
     template_name = "COMERCIAL/sales/plantilla-lista.html"
-    context_object_name = 'documentos'
+    context_object_name = 'trafos'
 
     def get_queryset(self,**kwargs):
-        compania_id = self.request.session.get('compania_id')
-        plantilla = Trafo.objects.ListaDocumentosPorTipo(
-            compania_id = compania_id
-            )
-    
-        payload = {}
-        payload["plantilla"] = plantilla
-        
-        return payload
+        result = Trafo.objects.ListAllDocuments()
+        return result
 
 # ================= ITEMS ========================
 class CreateTrafoItemView1(ComercialFinanzasMixin, CreateView):
@@ -817,6 +814,615 @@ class DeleteTrafoItemView(ComercialFinanzasMixin, DeleteView):
         item = Items.objects.get(id=pk)
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': item.idTrafoQuote.id})
 
+# ================= INT ASIGN QUOTES ITEMS ========================
+class QuoteKanbanView(ComercialFinanzasMixin,DetailView):
+    """
+    Vista Kanban para gestionar la asignación de items a cotizaciones internas.
+    
+    - Lado izquierdo: items sin asignar (pertenecientes a la quote master).
+    - Lado derecho: columnas de IntQuotes con sus items asignados.
+    - Drag & drop para mover items entre columnas.
+    """
+    model = quotes
+    template_name = 'COMERCIAL/sales/agisnar_po_intermedio.html'
+    context_object_name = 'quote'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        quote = self.object
+
+        # Items sin asignar a ninguna IntQuote
+        unassigned_items = Items.objects.filter(
+            idTrafoQuote=quote,
+            idTrafoIntQuote__isnull=True
+        ).select_related('idTrafo')
+
+        # Items ya asignados (agrupados por IntQuote)
+        assigned_items = Items.objects.filter(
+            idTrafoQuote=quote,
+            idTrafoIntQuote__isnull=False
+        ).select_related('idTrafo', 'idTrafoIntQuote', 'idTrafoIntQuote__idTinReceiving')
+
+        # IntQuotes que tienen items de esta quote
+        int_quote_ids = assigned_items.values_list(
+            'idTrafoIntQuote_id', flat=True
+        ).distinct()
+        int_quotes = IntQuotes.objects.filter(
+            id__in=int_quote_ids
+        ).select_related('idTinReceiving', 'idClient')
+
+        # Construir estructura de columnas para el kanban
+        kanban_columns = []
+        for iq in int_quotes:
+            iq_items = assigned_items.filter(idTrafoIntQuote=iq)
+            kanban_columns.append({
+                'int_quote': iq,
+                'items': iq_items,
+                'total': sum(
+                    item.unitCostInt or Decimal('0')
+                    for item in iq_items
+                ),
+            })
+
+        # Todos los items de la quote (para referencia)
+        all_items = Items.objects.filter(
+            idTrafoQuote=quote
+        ).select_related('idTrafo')
+
+        # Formulario para crear nueva IntQuote
+        form = IntQuoteForm(quote=quote)
+
+        # Compañías TIN disponibles
+        tins = Tin.objects.all()
+
+        context.update({
+            'unassigned_items': unassigned_items,
+            'kanban_columns': kanban_columns,
+            'all_items': all_items,
+            'int_quotes': int_quotes,
+            'form': form,
+            'tins': tins,
+            'total_items': all_items.count(),
+            'unassigned_count': unassigned_items.count(),
+        })
+        return context
+
+class CreateIntQuoteAPI(ComercialFinanzasMixin,View):
+    """
+    API endpoint para crear una nueva IntQuote desde el Kanban.
+    Retorna JSON con los datos de la IntQuote creada.
+    """
+
+    def post(self, request, quote_pk):
+        quote = get_object_or_404(quotes, pk=quote_pk)
+
+        form = IntQuoteForm(request.POST, quote=quote)
+        if form.is_valid():
+            int_quote = form.save()
+            return JsonResponse({
+                'success': True,
+                'int_quote': {
+                    'id': int_quote.id,
+                    'tin_name': str(int_quote.idTinReceiving) if int_quote.idTinReceiving else '—',
+                    'currency': int_quote.get_currency_display() if int_quote.currency else '—',
+                    'po_number': int_quote.poNumber or '—',
+                    'pay_method': int_quote.get_payMethod_display() if int_quote.payMethod else '—',
+                }
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors,
+            }, status=400)
+
+class AssignItemsAPI(ComercialFinanzasMixin,View):
+    """
+    API endpoint para asignar/mover items entre IntQuotes (drag & drop).
+    
+    Recibe JSON:
+    {
+        "assignments": [
+            {
+                "item_id": 123,
+                "int_quote_id": 45 | null,  (null = desasignar / volver a sin asignar)
+                "unit_cost_int": "150.00"
+            },
+            ...
+        ]
+    }
+    """
+
+    def post(self, request, quote_pk):
+        quote = get_object_or_404(quotes, pk=quote_pk)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'JSON inválido'
+            }, status=400)
+
+        assignments = data.get('assignments', [])
+        updated_items = []
+        errors = []
+
+        for assignment in assignments:
+            item_id = assignment.get('item_id')
+            int_quote_id = assignment.get('int_quote_id')  # None = desasignar
+            unit_cost_int = assignment.get('unit_cost_int')
+
+            try:
+                item = Items.objects.get(id=item_id, idTrafoQuote=quote)
+            except Items.DoesNotExist:
+                errors.append(f'Item {item_id} no encontrado en esta cotización.')
+                continue
+
+            # Asignar o desasignar IntQuote
+            if int_quote_id is not None:
+                try:
+                    int_quote = IntQuotes.objects.get(id=int_quote_id)
+                    item.idTrafoIntQuote = int_quote
+                except IntQuotes.DoesNotExist:
+                    errors.append(f'IntQuote {int_quote_id} no encontrada.')
+                    continue
+            else:
+                item.idTrafoIntQuote = None
+                item.unitCostInt = None
+
+            # Actualizar costo unitario interno
+            if unit_cost_int is not None and int_quote_id is not None:
+                try:
+                    item.unitCostInt = Decimal(str(unit_cost_int))
+                except (InvalidOperation, ValueError):
+                    errors.append(f'Costo inválido para item {item_id}.')
+                    continue
+
+            item.save(update_fields=['idTrafoIntQuote', 'unitCostInt'])
+            updated_items.append(item.id)
+
+        # Recalcular montos de IntQuotes afectadas
+        affected_iq_ids = set()
+        for assignment in assignments:
+            iq_id = assignment.get('int_quote_id')
+            if iq_id:
+                affected_iq_ids.add(iq_id)
+
+        for iq_id in affected_iq_ids:
+            self._recalculate_int_quote(iq_id)
+
+        return JsonResponse({
+            'success': True,
+            'updated_items': updated_items,
+            'errors': errors,
+        })
+
+    def _recalculate_int_quote(self, int_quote_id):
+        """Recalcula el monto total de una IntQuote basándose en sus items"""
+        try:
+            int_quote = IntQuotes.objects.get(id=int_quote_id)
+            items = Items.objects.filter(idTrafoIntQuote=int_quote)
+            total = sum(
+                item.unitCostInt or Decimal('0')
+                for item in items
+            )
+            int_quote.amount = total
+            int_quote.save(update_fields=['amount'])
+        except IntQuotes.DoesNotExist:
+            pass
+
+class DeleteIntQuoteAPI(ComercialFinanzasMixin,View):
+    """
+    API endpoint para eliminar una IntQuote.
+    Los items asignados vuelven a 'sin asignar'.
+    """
+
+    def post(self, request, int_quote_pk):
+        int_quote = get_object_or_404(IntQuotes, pk=int_quote_pk)
+
+        # Desasignar todos los items de esta IntQuote
+        Items.objects.filter(
+            idTrafoIntQuote=int_quote
+        ).update(idTrafoIntQuote=None, unitCostInt=None)
+
+        int_quote.delete()
+
+        return JsonResponse({'success': True})
+
+class UpdateItemCostAPI(ComercialFinanzasMixin,View):
+    """
+    API endpoint para actualizar el costo unitario interno de un item.
+    """
+
+    def post(self, request, item_pk):
+        item = get_object_or_404(Items, pk=item_pk)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'JSON inválido'
+            }, status=400)
+
+        unit_cost_int = data.get('unit_cost_int')
+        if unit_cost_int is not None:
+            try:
+                item.unitCostInt = Decimal(str(unit_cost_int))
+                item.save(update_fields=['unitCostInt'])
+            except (InvalidOperation, ValueError):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Valor de costo inválido'
+                }, status=400)
+
+        # Recalcular IntQuote si existe
+        if item.idTrafoIntQuote:
+            iq = item.idTrafoIntQuote
+            items = Items.objects.filter(idTrafoIntQuote=iq)
+            iq.amount = sum(i.unitCostInt or Decimal('0') for i in items)
+            iq.save(update_fields=['amount'])
+
+        return JsonResponse({
+            'success': True,
+            'new_cost': str(item.unitCostInt),
+        })
+
+class IntQuoteDetailView(ComercialFinanzasMixin, DetailView):
+    """Vista de detalle de Cotizacion Interna"""
+    model = IntQuotes
+    template_name = 'COMERCIAL/sales/purhaseOrder/intquote_detail.html'
+    context_object_name = 'int_quote'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        iq = self.object
+
+        all_items = Items.objects.filter(
+            idTrafoIntQuote=iq
+        ).select_related(
+            'idTrafo', 'idTrafoQuote', 'idWorkOrder',
+            'idWorkOrder__idSupplier'
+        )
+
+        unassigned_items = all_items.filter(idWorkOrder__isnull=True)
+        assigned_items = all_items.filter(idWorkOrder__isnull=False)
+
+        wo_ids = assigned_items.values_list(
+            'idWorkOrder_id', flat=True
+        ).distinct()
+        work_orders = WorkOrder.objects.filter(
+            id__in=wo_ids
+        ).select_related('idSupplier', 'idTinReceiving')
+
+        wo_groups = []
+        for wo in work_orders:
+            wo_items = assigned_items.filter(idWorkOrder=wo)
+            wo_groups.append({
+                'work_order': wo,
+                'items': wo_items,
+                'total': sum(
+                    item.unitCostWO or Decimal('0')
+                    for item in wo_items
+                ),
+                'count': wo_items.count(),
+            })
+
+        quote_master = None
+        first_item = all_items.first()
+        if first_item and first_item.idTrafoQuote:
+            quote_master = first_item.idTrafoQuote
+
+        total_cost_int = sum(
+            item.unitCostInt or Decimal('0') for item in all_items
+        )
+        total_cost_wo = sum(
+            item.unitCostWO or Decimal('0') for item in assigned_items
+        )
+
+        context.update({
+            'all_items': all_items,
+            'unassigned_items': unassigned_items,
+            'assigned_items': assigned_items,
+            'work_orders': work_orders,
+            'wo_groups': wo_groups,
+            'quote_master': quote_master,
+            'total_items': all_items.count(),
+            'unassigned_count': unassigned_items.count(),
+            'assigned_count': assigned_items.count(),
+            'total_cost_int': total_cost_int,
+            'total_cost_wo': total_cost_wo,
+            'wo_count': work_orders.count(),
+        })
+        return context
+
+class IntQuoteEditView(ComercialFinanzasMixin, UpdateView):
+    """Vista de edicion de Cotizacion Interna"""
+    model = IntQuotes
+    form_class = IntQuoteEditForm
+    template_name = 'COMERCIAL/sales/purhaseOrder/intquote_edit.html'
+    context_object_name = 'int_quote'
+
+    def get_success_url(self):
+        return reverse(
+            'quotes_app:intquote-detail',
+            kwargs={'pk': self.object.pk}
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        first_item = Items.objects.filter(
+            idTrafoIntQuote=self.object
+        ).select_related('idTrafoQuote').first()
+        if first_item and first_item.idTrafoQuote:
+            context['quote_master'] = first_item.idTrafoQuote
+        return context
+
+
+# ================= wo ASINGGNED ITEMS ========================
+
+class IntQuoteWOView(ComercialFinanzasMixin,DetailView):
+    """
+    Vista Kanban para gestionar la asignación de items de una IntQuote
+    hacia WorkOrders (órdenes de trabajo a proveedores).
+    
+    - Lado izquierdo: items de la IntQuote sin WorkOrder asignada.
+    - Lado derecho: columnas de WorkOrders con sus items asignados.
+    - Drag & drop para mover items entre columnas.
+    """
+    model = IntQuotes
+    template_name = 'COMERCIAL/sales/workOrder/asignar_wo_proveedor.html'
+    context_object_name = 'int_quote'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        int_quote = self.object
+
+        # Items de esta IntQuote sin WorkOrder asignada
+        unassigned_items = Items.objects.filter(
+            idTrafoIntQuote=int_quote,
+            idWorkOrder__isnull=True
+        ).select_related('idTrafo', 'idTrafoQuote')
+
+        # Items de esta IntQuote ya asignados a alguna WorkOrder
+        assigned_items = Items.objects.filter(
+            idTrafoIntQuote=int_quote,
+            idWorkOrder__isnull=False
+        ).select_related('idTrafo', 'idTrafoQuote', 'idWorkOrder', 'idWorkOrder__idSupplier', 'idWorkOrder__idTinReceiving')
+
+        # WorkOrders que tienen items de esta IntQuote
+        wo_ids = assigned_items.values_list(
+            'idWorkOrder_id', flat=True
+        ).distinct()
+        work_orders = WorkOrder.objects.filter(
+            id__in=wo_ids
+        ).select_related('idSupplier', 'idTinReceiving')
+
+        # Construir estructura de columnas para el kanban
+        kanban_columns = []
+        for wo in work_orders:
+            wo_items = assigned_items.filter(idWorkOrder=wo)
+            kanban_columns.append({
+                'work_order': wo,
+                'items': wo_items,
+                'total': sum(
+                    item.unitCostWO or Decimal('0')
+                    for item in wo_items
+                ),
+            })
+
+        # Todos los items de la IntQuote
+        all_items = Items.objects.filter(
+            idTrafoIntQuote=int_quote
+        ).select_related('idTrafo')
+
+        # Proveedores y TINs disponibles
+        suppliers = supplier.objects.all()
+        tins = Tin.objects.all()
+
+        # Quote master (para mostrar referencia)
+        # Obtenemos la quote master desde cualquier item
+        quote_master = None
+        first_item = all_items.first()
+        if first_item and first_item.idTrafoQuote:
+            quote_master = first_item.idTrafoQuote
+
+        context.update({
+            'unassigned_items': unassigned_items,
+            'kanban_columns': kanban_columns,
+            'all_items': all_items,
+            'work_orders': work_orders,
+            'suppliers': suppliers,
+            'tins': tins,
+            'quote_master': quote_master,
+            'total_items': all_items.count(),
+            'unassigned_count': unassigned_items.count(),
+        })
+        return context
+
+class CreateWorkOrderAPI(View):
+    """
+    API endpoint para crear una nueva WorkOrder desde el Kanban de IntQuote.
+    Retorna JSON con los datos de la WorkOrder creada.
+    """
+
+    def post(self, request, int_quote_pk):
+        int_quote = get_object_or_404(IntQuotes, pk=int_quote_pk)
+
+        form = WorkOrderForm(request.POST, int_quote=int_quote)
+        if form.is_valid():
+            work_order = form.save()
+            return JsonResponse({
+                'success': True,
+                'work_order': {
+                    'id': work_order.id,
+                    'supplier_name': str(work_order.idSupplier) if work_order.idSupplier else '—',
+                    'tin_name': str(work_order.idTinReceiving) if work_order.idTinReceiving else '—',
+                    'currency': work_order.get_currency_display() if work_order.currency else '—',
+                    'wo_number': work_order.woNumber or '—',
+                    'pay_method': work_order.get_payMethod_display() if work_order.payMethod else '—',
+                }
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors,
+            }, status=400)
+
+class AssignItemsToWOAPI(View):
+    """
+    API endpoint para asignar/mover items entre WorkOrders (drag & drop).
+    
+    Recibe JSON:
+    {
+        "assignments": [
+            {
+                "item_id": 123,
+                "work_order_id": 45 | null,  (null = desasignar)
+                "unit_cost_wo": "150.00"
+            },
+            ...
+        ]
+    }
+    """
+
+    def post(self, request, int_quote_pk):
+        int_quote = get_object_or_404(IntQuotes, pk=int_quote_pk)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'JSON inválido'
+            }, status=400)
+
+        assignments = data.get('assignments', [])
+        updated_items = []
+        errors = []
+
+        for assignment in assignments:
+            item_id = assignment.get('item_id')
+            work_order_id = assignment.get('work_order_id')
+            unit_cost_wo = assignment.get('unit_cost_wo')
+
+            try:
+                item = Items.objects.get(id=item_id, idTrafoIntQuote=int_quote)
+            except Items.DoesNotExist:
+                errors.append(f'Item {item_id} no encontrado en esta cotización interna.')
+                continue
+
+            # Asignar o desasignar WorkOrder
+            if work_order_id is not None:
+                try:
+                    work_order = WorkOrder.objects.get(id=work_order_id)
+                    item.idWorkOrder = work_order
+                except WorkOrder.DoesNotExist:
+                    errors.append(f'WorkOrder {work_order_id} no encontrada.')
+                    continue
+            else:
+                item.idWorkOrder = None
+                item.unitCostWO = None
+
+            # Actualizar costo unitario WO
+            if unit_cost_wo is not None and work_order_id is not None:
+                try:
+                    item.unitCostWO = Decimal(str(unit_cost_wo))
+                except (InvalidOperation, ValueError):
+                    errors.append(f'Costo inválido para item {item_id}.')
+                    continue
+
+            item.save(update_fields=['idWorkOrder', 'unitCostWO'])
+            updated_items.append(item.id)
+
+        # Recalcular montos de WorkOrders afectadas
+        affected_wo_ids = set()
+        for assignment in assignments:
+            wo_id = assignment.get('work_order_id')
+            if wo_id:
+                affected_wo_ids.add(wo_id)
+
+        for wo_id in affected_wo_ids:
+            self._recalculate_work_order(wo_id)
+
+        return JsonResponse({
+            'success': True,
+            'updated_items': updated_items,
+            'errors': errors,
+        })
+
+    def _recalculate_work_order(self, work_order_id):
+        """Recalcula el monto total de una WorkOrder basándose en sus items"""
+        try:
+            wo = WorkOrder.objects.get(id=work_order_id)
+            items = Items.objects.filter(idWorkOrder=wo)
+            total = sum(
+                item.unitCostWO or Decimal('0')
+                for item in items
+            )
+            wo.amount = total
+            wo.save(update_fields=['amount'])
+        except WorkOrder.DoesNotExist:
+            pass
+
+class DeleteWorkOrderAPI(View):
+    """
+    API endpoint para eliminar una WorkOrder.
+    Los items asignados vuelven a 'sin asignar WO'.
+    """
+
+    def post(self, request, wo_pk):
+        work_order = get_object_or_404(WorkOrder, pk=wo_pk)
+
+        # Desasignar todos los items de esta WorkOrder
+        Items.objects.filter(
+            idWorkOrder=work_order
+        ).update(idWorkOrder=None, unitCostWO=None)
+
+        work_order.delete()
+
+        return JsonResponse({'success': True})
+
+class UpdateItemCostWOAPI(View):
+    """
+    API endpoint para actualizar el costo unitario WO de un item.
+    """
+
+    def post(self, request, item_pk):
+        item = get_object_or_404(Items, pk=item_pk)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'JSON inválido'
+            }, status=400)
+
+        unit_cost_wo = data.get('unit_cost_wo')
+        if unit_cost_wo is not None:
+            try:
+                item.unitCostWO = Decimal(str(unit_cost_wo))
+                item.save(update_fields=['unitCostWO'])
+            except (InvalidOperation, ValueError):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Valor de costo inválido'
+                }, status=400)
+
+        # Recalcular WorkOrder si existe
+        if item.idWorkOrder:
+            wo = item.idWorkOrder
+            items = Items.objects.filter(idWorkOrder=wo)
+            wo.amount = sum(i.unitCostWO or Decimal('0') for i in items)
+            wo.save(update_fields=['amount'])
+
+        return JsonResponse({
+            'success': True,
+            'new_cost': str(item.unitCostWO),
+        })
+
+
 # ================= IMAGENES ITEMS ========================
 class ItemDetailAllListView(ComercialFinanzasMixin, ListView):
     """Listado de imágenes de un item específico"""
@@ -971,7 +1577,6 @@ class UpdateTrackingItemView(ComercialFinanzasMixin, CreateView):
         return reverse_lazy('ventas_app:detail-item-all', kwargs={'item_pk':item.id})
 
 # ================= DETAIL ITEMS FOR CLIENT ======================== 
-
 def normalize_serial(serial):
     """
     Normaliza un número de serie para búsqueda:

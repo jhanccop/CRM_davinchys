@@ -54,7 +54,6 @@ class FinancialDocuments(TimeStampedModel):
 
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True)
     idContainer = models.ForeignKey(Container, on_delete=models.CASCADE, null=True, blank=True)
-
     idQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True) # po de cliente
     
     # TYPES

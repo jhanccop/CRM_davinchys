@@ -21,6 +21,15 @@ class Tin(TimeStampedModel):
         'Razón Social',
         max_length=50,
     )
+    HOLDING = '0'
+    SUBSIDIARY = '1'
+
+    COMPANY_TYPE_CHOICES = [
+        (HOLDING, 'Holding'),
+        (SUBSIDIARY, 'Subsidiaria'),
+    ]
+
+    company_type = models.CharField(max_length=1, choices=COMPANY_TYPE_CHOICES, null=True, blank=True)
 
     #objects = TinManager()
 

@@ -1,0 +1,979 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotización Interna{% endblock %}
+{% block navbar_Type %}Órdenes de Trabajo{% endblock %}
+
+{% block panel-content %}
+
+<style>
+  /* ===== KANBAN LAYOUT ===== */
+  .kanban-wrapper {
+    display: flex;
+    gap: 1rem;
+    min-height: 70vh;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .kanban-column {
+    min-width: 320px;
+    max-width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-column .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-column .card-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 0.75rem;
+  }
+
+  /* ===== ITEM CARDS ===== */
+  .kanban-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: grab;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .kanban-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .kanban-item:active { cursor: grabbing; opacity: 0.9; }
+
+  .kanban-item.dragging {
+    opacity: 0.4;
+    transform: rotate(2deg);
+  }
+
+  .kanban-item .item-seq {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #344767;
+    letter-spacing: 0.5px;
+  }
+
+  .kanban-item .item-trafo {
+    font-size: 0.75rem;
+    color: #67748e;
+    margin: 0.25rem 0;
+  }
+
+  .kanban-item .item-cost {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2dce89;
+  }
+
+  .kanban-item .cost-input {
+    width: 100px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid #d2d6da;
+    border-radius: 0.375rem;
+    text-align: right;
+  }
+
+  .kanban-item .cost-input:focus {
+    border-color: #e91e63;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.15);
+  }
+
+  /* ===== DROP ZONE ===== */
+  .kanban-dropzone {
+    min-height: 80px;
+    border: 2px dashed transparent;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    padding: 0.25rem;
+  }
+
+  .kanban-dropzone.drag-over {
+    border-color: #fb6340;
+    background: rgba(251, 99, 64, 0.04);
+  }
+
+  .kanban-dropzone.drag-over .drop-placeholder { display: block; }
+
+  .drop-placeholder {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+    color: #fb6340;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* ===== COLUMN HEADER ===== */
+  .column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  .column-header .badge-count {
+    background: #fb6340;
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  .column-header .badge-count.secondary { background: #7b809a; }
+
+  /* ===== COLUMN FOOTER ===== */
+  .column-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #f0f2f5;
+    background: #fafafa;
+    border-radius: 0 0 0.75rem 0.75rem;
+  }
+
+  /* ===== ADD COLUMN ===== */
+  .add-column-card {
+    min-width: 320px;
+    max-width: 360px;
+    flex-shrink: 0;
+    border: 2px dashed #d2d6da;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 200px;
+  }
+
+  .add-column-card:hover {
+    border-color: #fb6340;
+    background: rgba(251, 99, 64, 0.02);
+  }
+
+  /* ===== SUMMARY BAR ===== */
+  .summary-bar .stat-card { padding: 1rem; text-align: center; }
+  .summary-bar .stat-value { font-size: 1.5rem; font-weight: 700; color: #344767; }
+  .summary-bar .stat-label {
+    font-size: 0.75rem;
+    color: #67748e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== BREADCRUMB INFO ===== */
+  .breadcrumb-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb-info .breadcrumb-chip {
+    background: #f0f2f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    color: #344767;
+    font-weight: 600;
+  }
+
+  .breadcrumb-info .breadcrumb-arrow {
+    color: #d2d6da;
+    font-size: 0.7rem;
+  }
+
+  /* ===== LOADING ===== */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading-overlay.active { display: flex; }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+  }
+
+  @media (max-width: 768px) {
+    .kanban-column, .add-column-card { min-width: 280px; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-border text-warning" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container-fluid py-2">
+
+  <!-- ===== HEADER ===== -->
+  <div class="row mb-3">
+    <div class="col-lg-8 col-12">
+      <!-- Breadcrumb de contexto -->
+      <div class="breadcrumb-info mb-2">
+        {% if quote_master %}
+        <span class="breadcrumb-chip">
+          <i class="fas fa-file-invoice me-1"></i>QUO-{{ quote_master.id }}
+        </span>
+        <i class="fas fa-chevron-right breadcrumb-arrow"></i>
+        {% endif %}
+        <span class="breadcrumb-chip" style="background: #e3f2fd;">
+          <i class="fas fa-exchange-alt me-1"></i>INT-{{ int_quote.id }}
+          {% if int_quote.idTinReceiving %} · {{ int_quote.idTinReceiving }}{% endif %}
+        </span>
+        <i class="fas fa-chevron-right breadcrumb-arrow"></i>
+        <span class="breadcrumb-chip" style="background: #fff3e0;">
+          <i class="fas fa-hard-hat me-1"></i>Órdenes de Trabajo
+        </span>
+      </div>
+
+      <h5 class="font-weight-bolder mb-1">
+        Asignar Items a Órdenes de Trabajo
+      </h5>
+      <p class="text-sm text-secondary mb-0">
+        Compañía: <span class="font-weight-bold">{{ int_quote.idTinReceiving|default:"—" }}</span>
+        <span class="mx-2">•</span>
+        {{ int_quote.get_currency_display|default:"—" }}
+        <span class="mx-2">•</span>
+        PO Interna: <span class="font-weight-bold">{{ int_quote.poNumber|default:"—" }}</span>
+        {% if int_quote.idClient %}
+        <span class="mx-2">•</span>
+        Cliente: <span class="font-weight-bold">{{ int_quote.idClient }}</span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-lg-4 col-12 d-flex ms-auto justify-content-end gap-2 align-items-start mt-2 mt-lg-0">
+      <a class="btn btn-outline-secondary btn-sm" href="javascript:history.back()">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+      </a>
+      <button class="btn bg-gradient-success btn-sm" id="btnSaveAll" onclick="saveAllAssignments()">
+        <i class="fas fa-save me-1"></i> Guardar Todo
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== SUMMARY BAR ===== -->
+  <div class="row summary-bar mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value" id="totalItems">{{ total_items }}</div>
+        <div class="stat-label">Total Items</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value text-warning" id="unassignedCount">{{ unassigned_count }}</div>
+        <div class="stat-label">Sin Orden de Trabajo</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value text-success" id="assignedCount">{{ total_items|add:"-"|add:unassigned_count }}</div>
+        <div class="stat-label">Asignados a OT</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value" style="color: #fb6340;" id="woCount">{{ kanban_columns|length }}</div>
+        <div class="stat-label">Órdenes de Trabajo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KANBAN BOARD ===== -->
+  <div class="kanban-wrapper" id="kanbanBoard">
+
+    <!-- COLUMNA: Items sin WorkOrder (izquierda) -->
+    <div class="kanban-column" id="column-unassigned">
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-inbox me-1 text-warning"></i> Sin Orden de Trabajo
+            </h6>
+          </div>
+          <span class="badge-count secondary" id="countUnassigned">{{ unassigned_items|length }}</span>
+        </div>
+        <div class="card-body kanban-dropzone" id="dropzone-unassigned"
+             data-wo-id=""
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar aquí para desasignar
+          </div>
+
+          {% for item in unassigned_items %}
+          <div class="kanban-item"
+               draggable="true"
+               data-item-id="{{ item.id }}"
+               data-current-wo=""
+               ondragstart="handleDragStart(event)"
+               ondragend="handleDragEnd(event)">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="item-seq">
+                  <i class="fas fa-bolt me-1 text-warning"></i>{{ item.seq|default:"S/N" }}
+                </div>
+                <div class="item-trafo">{{ item.idTrafo|default:"Sin trafo" }}</div>
+              </div>
+              <span class="item-cost">{{ int_quote.get_currency_display }} {{ item.unitCostInt|default:"0.00" }}</span>
+            </div>
+            <div class="mt-1">
+              <small class="text-xs text-secondary">Costo interno:</small>
+              <small class="text-xs font-weight-bold"> {{ item.unitCostInt|default:"0.00" }}</small>
+            </div>
+            {% if item.unitCost %}
+            <div>
+              <small class="text-xs text-secondary">Costo cliente:</small>
+              <small class="text-xs font-weight-bold"> {{ item.unitCost }}</small>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          {% if not unassigned_items %}
+          <div class="text-center py-4" id="emptyUnassigned">
+            <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+            <p class="text-sm text-muted mb-0">Todos los items tienen orden de trabajo</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNAS: WorkOrders existentes -->
+    {% for col in kanban_columns %}
+    <div class="kanban-column" id="column-wo-{{ col.work_order.id }}">
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-hard-hat me-1" style="color: #fb6340;"></i>
+              {{ col.work_order.idSupplier|default:"Sin proveedor" }}
+            </h6>
+            <span class="text-xs text-secondary">
+              WO: {{ col.work_order.woNumber|default:"—" }}
+              · {{ col.work_order.idTinReceiving|default:"" }}
+            </span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-count">{{ col.items|length }}</span>
+            <button class="btn btn-link btn-sm p-0 text-danger"
+                    title="Eliminar orden de trabajo"
+                    onclick="deleteWorkOrder({{ col.work_order.id }})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body kanban-dropzone" id="dropzone-wo-{{ col.work_order.id }}"
+             data-wo-id="{{ col.work_order.id }}"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar item aquí
+          </div>
+
+          {% for item in col.items %}
+          <div class="kanban-item"
+               draggable="true"
+               data-item-id="{{ item.id }}"
+               data-current-wo="{{ col.work_order.id }}"
+               ondragstart="handleDragStart(event)"
+               ondragend="handleDragEnd(event)">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="item-seq">
+                  <i class="fas fa-bolt me-1" style="color: #fb6340;"></i>{{ item.seq|default:"S/N" }}
+                </div>
+                <div class="item-trafo">{{ item.idTrafo|default:"Sin trafo" }}</div>
+              </div>
+              <span class="item-cost">{{ int_quote.get_currency_display }} {{ item.unitCostInt|default:"0.00" }}</span>
+            </div>
+            <div class="mt-1">
+              <small class="text-xs text-secondary">Costo interno:</small>
+              <small class="text-xs font-weight-bold"> {{ item.unitCostInt|default:"0.00" }}</small>
+            </div>
+            <div class="mt-2 d-flex align-items-center justify-content-between">
+              <small class="text-xs text-secondary">Costo OT:</small>
+              <input type="number"
+                     class="cost-input"
+                     step="0.01"
+                     min="0"
+                     value="{{ item.unitCostWO|default:'0.00' }}"
+                     data-item-id="{{ item.id }}"
+                     onchange="markDirty()" />
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="column-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-xs text-secondary font-weight-bold text-uppercase">Total OT</small>
+            <span class="text-sm font-weight-bold text-dark column-total">
+              {{ int_quote.get_currency_display }} {{ col.total }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- BOTÓN: Agregar nueva WorkOrder -->
+    <div class="add-column-card" onclick="openNewWOModal()">
+      <div class="text-center">
+        <i class="fas fa-plus-circle fa-2x" style="color: #d2d6da;"></i>
+        <p class="text-sm text-secondary font-weight-bold mb-0 mt-2">Nueva Orden de Trabajo</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODAL: Nueva WorkOrder ===== -->
+<div class="modal fade" id="newWOModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold">
+          <i class="fas fa-hard-hat me-2" style="color: #fb6340;"></i>Nueva Orden de Trabajo
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="formErrors" class="alert alert-danger d-none"></div>
+
+        <div class="mb-3">
+          <label class="form-label text-xs font-weight-bold text-uppercase">Proveedor *</label>
+          <select class="form-control" id="woSupplier" required>
+            <option value="">-- Seleccionar proveedor --</option>
+            {% for sup in suppliers %}
+            <option value="{{ sup.id }}">{{ sup }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-xs font-weight-bold text-uppercase">Compañía Ejecutora * (PERU)</label>
+          <select class="form-control" id="woTinReceiving">
+            <option value="">-- Seleccionar compañía --</option>
+            {% for tin in tins %}
+            <option value="{{ tin.id }}" {% if int_quote.idTinReceiving and tin.id == int_quote.idTinReceiving.id %}selected{% endif %}>
+              {{ tin }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Moneda</label>
+            <select class="form-control" id="woCurrency">
+              <option value="">--</option>
+              <option value="0" {% if int_quote.currency == "0" %}selected{% endif %}>PEN</option>
+              <option value="1" {% if int_quote.currency == "1" %}selected{% endif %}>USD</option>
+              <option value="2" {% if int_quote.currency == "2" %}selected{% endif %}>EUR</option>
+            </select>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Método de Pago</label>
+            <select class="form-control" id="woPayMethod">
+              <option value="0">Crédito</option>
+              <option value="1">Contado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Fecha Solicitud</label>
+            <input type="date" class="form-control" id="woDateOrder" />
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Fecha Entrega</label>
+            <input type="date" class="form-control" id="woDeadline" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-xs font-weight-bold text-uppercase">Número WO</label>
+          <input type="text" class="form-control" id="woNumber" placeholder="WO-0001" maxlength="20" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-sm text-white" style="background: #fb6340;" onclick="createWorkOrder()">
+          <i class="fas fa-check me-1"></i> Crear Orden de Trabajo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  // ===== CONSTANTS =====
+  const INT_QUOTE_ID = {{ int_quote.id }};
+  const CSRF_TOKEN = '{{ csrf_token }}';
+  const CURRENCY_DISPLAY = '{{ int_quote.get_currency_display }}';
+
+  const URLS = {
+    createWO: '{% url "ventas_app:create-workorder-api" int_quote_pk=int_quote.id %}',
+    assignItems: '{% url "ventas_app:assign-items-wo-api" int_quote_pk=int_quote.id %}',
+    deleteWOBase: '/comercial/ordenes-trabajo/__ID__/delete/',
+  };
+
+  let isDirty = false;
+  let draggedElement = null;
+
+  // ===== DRAG & DROP =====
+  function handleDragStart(e) {
+    draggedElement = e.target.closest('.kanban-item');
+    draggedElement.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedElement.dataset.itemId);
+  }
+
+  function handleDragEnd(e) {
+    const el = e.target.closest('.kanban-item');
+    if (el) el.classList.remove('dragging');
+    document.querySelectorAll('.kanban-dropzone').forEach(dz => {
+      dz.classList.remove('drag-over');
+    });
+    draggedElement = null;
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (dropzone) dropzone.classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (dropzone && !dropzone.contains(e.relatedTarget)) {
+      dropzone.classList.remove('drag-over');
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (!dropzone || !draggedElement) return;
+
+    dropzone.classList.remove('drag-over');
+
+    const targetWOId = dropzone.dataset.woId || '';
+    const sourceWOId = draggedElement.dataset.currentWo || '';
+
+    // Si se suelta en la misma columna, no hacer nada
+    if (targetWOId === sourceWOId) return;
+
+    // Ocultar placeholder vacío si existe
+    const emptyMsg = dropzone.querySelector('#emptyUnassigned, .text-center.py-4');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    // Mover el elemento visualmente
+    dropzone.appendChild(draggedElement);
+    draggedElement.dataset.currentWo = targetWOId;
+
+    // Si se mueve a una WorkOrder, agregar input de costo WO si no existe
+    if (targetWOId) {
+      if (!draggedElement.querySelector('.cost-input')) {
+        const costDiv = document.createElement('div');
+        costDiv.className = 'mt-2 d-flex align-items-center justify-content-between';
+        costDiv.innerHTML = `
+          <small class="text-xs text-secondary">Costo OT:</small>
+          <input type="number" class="cost-input" step="0.01" min="0" value="0.00"
+                 data-item-id="${draggedElement.dataset.itemId}" onchange="markDirty()" />
+        `;
+        draggedElement.appendChild(costDiv);
+      }
+      // Cambiar icono
+      const icon = draggedElement.querySelector('.item-seq i');
+      if (icon) {
+        icon.className = 'fas fa-bolt me-1';
+        icon.style.color = '#fb6340';
+      }
+    } else {
+      // Si se mueve a sin asignar, remover input de costo WO
+      const costDivs = draggedElement.querySelectorAll('.mt-2.d-flex');
+      costDivs.forEach(div => {
+        if (div.querySelector('.cost-input')) div.remove();
+      });
+      // Cambiar icono
+      const icon = draggedElement.querySelector('.item-seq i');
+      if (icon) {
+        icon.className = 'fas fa-bolt me-1 text-warning';
+        icon.style.color = '';
+      }
+    }
+
+    markDirty();
+    updateCounts();
+    updateColumnTotals();
+  }
+
+  // ===== SAVE ALL ASSIGNMENTS =====
+  async function saveAllAssignments() {
+    const assignments = [];
+
+    document.querySelectorAll('.kanban-item').forEach(item => {
+      const itemId = parseInt(item.dataset.itemId);
+      const woId = item.dataset.currentWo || null;
+      const costInput = item.querySelector('.cost-input');
+      const unitCostWO = costInput ? parseFloat(costInput.value) || 0 : null;
+
+      assignments.push({
+        item_id: itemId,
+        work_order_id: woId ? parseInt(woId) : null,
+        unit_cost_wo: unitCostWO,
+      });
+    });
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.assignItems, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: JSON.stringify({ assignments }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('Asignaciones guardadas correctamente', 'success');
+        isDirty = false;
+        updateSaveButton();
+        if (data.errors && data.errors.length > 0) {
+          showToast('Algunos items tuvieron errores: ' + data.errors.join(', '), 'warning');
+        }
+      } else {
+        showToast('Error al guardar: ' + (data.error || 'Error desconocido'), 'danger');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // ===== CREATE WORK ORDER =====
+  function openNewWOModal() {
+    document.getElementById('woSupplier').value = '';
+    document.getElementById('woNumber').value = '';
+    document.getElementById('woDateOrder').value = '';
+    document.getElementById('woDeadline').value = '';
+    document.getElementById('formErrors').classList.add('d-none');
+
+    const modal = new bootstrap.Modal(document.getElementById('newWOModal'));
+    modal.show();
+  }
+
+  async function createWorkOrder() {
+    const supplierId = document.getElementById('woSupplier').value;
+    if (!supplierId) {
+      document.getElementById('formErrors').textContent = 'Seleccione un proveedor.';
+      document.getElementById('formErrors').classList.remove('d-none');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('idSupplier', supplierId);
+    formData.append('idTinReceiving', document.getElementById('woTinReceiving').value);
+    formData.append('currency', document.getElementById('woCurrency').value);
+    formData.append('payMethod', document.getElementById('woPayMethod').value);
+    formData.append('dateOrder', document.getElementById('woDateOrder').value);
+    formData.append('deadline', document.getElementById('woDeadline').value);
+    formData.append('woNumber', document.getElementById('woNumber').value);
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.createWO, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('newWOModal')).hide();
+        addNewColumn(data.work_order);
+        showToast('Orden de trabajo creada', 'success');
+        updateCounts();
+      } else {
+        const errMsg = Object.values(data.errors).flat().join(', ');
+        document.getElementById('formErrors').textContent = errMsg;
+        document.getElementById('formErrors').classList.remove('d-none');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function addNewColumn(wo) {
+    const board = document.getElementById('kanbanBoard');
+    const addBtn = board.querySelector('.add-column-card');
+
+    const col = document.createElement('div');
+    col.className = 'kanban-column';
+    col.id = `column-wo-${wo.id}`;
+    col.innerHTML = `
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-hard-hat me-1" style="color: #fb6340;"></i>
+              ${wo.supplier_name}
+            </h6>
+            <span class="text-xs text-secondary">
+              WO: ${wo.wo_number} · ${wo.tin_name}
+            </span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-count">0</span>
+            <button class="btn btn-link btn-sm p-0 text-danger"
+                    title="Eliminar orden de trabajo"
+                    onclick="deleteWorkOrder(${wo.id})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body kanban-dropzone" id="dropzone-wo-${wo.id}"
+             data-wo-id="${wo.id}"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar item aquí
+          </div>
+        </div>
+        <div class="column-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-xs text-secondary font-weight-bold text-uppercase">Total OT</small>
+            <span class="text-sm font-weight-bold text-dark column-total">${CURRENCY_DISPLAY} 0.00</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    board.insertBefore(col, addBtn);
+  }
+
+  // ===== DELETE WORK ORDER =====
+  async function deleteWorkOrder(woId) {
+    if (!confirm('¿Está seguro de eliminar esta orden de trabajo? Los items volverán a "Sin Orden de Trabajo".')) return;
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.deleteWOBase.replace('__ID__', woId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const col = document.getElementById(`column-wo-${woId}`);
+        const dropzoneUnassigned = document.getElementById('dropzone-unassigned');
+
+        if (col) {
+          col.querySelectorAll('.kanban-item').forEach(item => {
+            item.dataset.currentWo = '';
+            // Remover cost input WO
+            const costDivs = item.querySelectorAll('.mt-2.d-flex');
+            costDivs.forEach(div => {
+              if (div.querySelector('.cost-input')) div.remove();
+            });
+            const icon = item.querySelector('.item-seq i');
+            if (icon) {
+              icon.className = 'fas fa-bolt me-1 text-warning';
+              icon.style.color = '';
+            }
+            dropzoneUnassigned.appendChild(item);
+          });
+          col.remove();
+        }
+
+        showToast('Orden de trabajo eliminada', 'success');
+        updateCounts();
+      } else {
+        showToast('Error al eliminar', 'danger');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // ===== UTILITY FUNCTIONS =====
+  function markDirty() {
+    isDirty = true;
+    updateSaveButton();
+  }
+
+  function updateSaveButton() {
+    const btn = document.getElementById('btnSaveAll');
+    if (isDirty) {
+      btn.classList.remove('bg-gradient-success');
+      btn.classList.add('bg-gradient-warning');
+      btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Guardar Cambios *';
+    } else {
+      btn.classList.remove('bg-gradient-warning');
+      btn.classList.add('bg-gradient-success');
+      btn.innerHTML = '<i class="fas fa-save me-1"></i> Guardar Todo';
+    }
+  }
+
+  function updateCounts() {
+    const unassigned = document.querySelectorAll('#dropzone-unassigned .kanban-item').length;
+    const total = document.querySelectorAll('.kanban-item').length;
+    const assigned = total - unassigned;
+    const woCount = document.querySelectorAll('.kanban-column[id^="column-wo-"]').length;
+
+    document.getElementById('unassignedCount').textContent = unassigned;
+    document.getElementById('assignedCount').textContent = assigned;
+    document.getElementById('woCount').textContent = woCount;
+    document.getElementById('countUnassigned').textContent = unassigned;
+
+    // Update badge counts per column
+    document.querySelectorAll('.kanban-column[id^="column-wo-"]').forEach(col => {
+      const count = col.querySelectorAll('.kanban-item').length;
+      const badge = col.querySelector('.badge-count');
+      if (badge) badge.textContent = count;
+    });
+  }
+
+  function updateColumnTotals() {
+    document.querySelectorAll('.kanban-column[id^="column-wo-"]').forEach(col => {
+      let total = 0;
+      col.querySelectorAll('.cost-input').forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      const totalEl = col.querySelector('.column-total');
+      if (totalEl) totalEl.textContent = `${CURRENCY_DISPLAY} ${total.toFixed(2)}`;
+    });
+  }
+
+  function showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (show) overlay.classList.add('active');
+    else overlay.classList.remove('active');
+  }
+
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const icons = {
+      success: 'fas fa-check-circle',
+      danger: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+    };
+    const bgColors = {
+      success: '#2dce89',
+      danger: '#f5365c',
+      warning: '#fb6340',
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'alert text-white mb-2 shadow-lg';
+    toast.style.cssText = `
+      background: ${bgColors[type] || bgColors.success};
+      min-width: 300px;
+      animation: slideIn 0.3s ease;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    `;
+    toast.innerHTML = `<i class="${icons[type] || icons.success} me-2"></i>${message}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // ===== WARN ON UNSAVED CHANGES =====
+  window.addEventListener('beforeunload', function (e) {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = 'Tiene cambios sin guardar. ¿Desea salir?';
+    }
+  });
+
+  // ===== LISTEN FOR COST INPUT CHANGES =====
+  document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('cost-input')) {
+      updateColumnTotals();
+    }
+  });
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+  if (document.getElementById('woSupplier')) {
+    var element = document.getElementById('woSupplier');
+    const example = new Choices(element, {});
+  }
+  
+</script>
+
+{% endblock panel-content %}

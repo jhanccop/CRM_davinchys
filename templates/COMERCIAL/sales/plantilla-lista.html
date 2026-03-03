@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Transformadores por Empresa{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %}
+
+<!-- ================ EXPORTAR - NUEVO ================= -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-6 col-12 d-flex ms-auto">
+      <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
+        Export CSV
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        
+
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-trafos">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">
+                    ID / Tipo
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">
+                    Fase / Refrigeración
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Montaje
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Capacidad / Tensiones
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Cotización / Serial
+                  </th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for trafo in trafos %}
+                <tr>
+                  <!-- ID / Tipo -->
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">
+                        <a href="">
+                          DT{{ trafo.get_PHASE_nick }}{{ trafo.get_COOLING_nick }}{{ trafo.get_MOUNTING_nick }}
+                        </a>
+                      </h6>
+                      <p class="text-xs font-weight-normal text-secondary mb-0">
+                        ID: {{ trafo.id }}
+                      </p>
+                    </div>
+                  </td>
+
+                  <!-- Fase / Refrigeración -->
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <span class="badge badge-info mb-1">{{ trafo.get_PHASE_display|default:"-" }}</span>
+                      <span class="badge badge-secondary">{{ trafo.get_COOLING_display|default:"-" }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Montaje -->
+                  <td class="text-sm">
+                    <span class="badge badge-primary">
+                      {{ trafo.get_MOUNTING_display|default:"-" }}
+                    </span>
+                  </td>
+
+                  <!-- Capacidad / Tensiones -->
+                  <td class="text-sm">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-sm">{{ trafo.get_KVA_display|default:"-" }} kVA</h6>
+                      <p class="text-xs font-weight-normal text-secondary mb-0">
+                        HV: {{ trafo.get_HV_display|default:"-" }}
+                      </p>
+                      <p class="text-xs font-weight-normal text-secondary mb-0">
+                        LV: {{ trafo.get_LV_display|default:"-" }}
+                      </p>
+                    </div>
+                  </td>
+
+                  <!-- Cotización / Serial -->
+                  <td class="text-sm">
+                    {% for item in trafo.item_Trafo.all %}
+                      <div class="d-flex flex-column mb-1">
+                        <a href="">
+                          <span class="text-xs font-weight-bold text-dark">
+                            QUO-{{ item.idTrafoQuote.id }}
+                          </span>
+                        </a>
+                        <span class="text-xs text-secondary">
+                          Serie: {{ item.seq|default:"-" }}
+                        </span>
+                      </div>
+                    {% empty %}
+                      <span class="text-xs text-secondary">Sin items</span>
+                    {% endfor %}
+                  </td>
+
+                  <!-- Acciones -->
+                  <td>
+                    <a href="">
+                      <i class="far fa-eye text-info text-lg"></i>
+                    </a>
+                    &ensp;
+                    <a href="">
+                      <i class="far fa-edit text-dark text-lg"></i>
+                    </a>
+                    &ensp;
+                    <a href="">
+                      <i class="far fa-trash-alt text-primary text-lg"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-secondary py-4">
+                    No se encontraron transformadores para esta empresa.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTable = new simpleDatatables.DataTable("#datatable-trafos", {
+    searchable: true,
+    fixedHeight: false,
+    perPage: 15
+  });
+
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var type = el.dataset.type;
+      var data = {
+        type: type,
+        filename: "trafos_empresa",
+      };
+      if (type === "csv") {
+        data.columnDelimiter = ",";
+      }
+      dataTable.export(data);
+    });
+  });
+</script>
+
+{% endblock JSscripts %}

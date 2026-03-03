@@ -62,11 +62,10 @@
                     ID / Fecha
                   </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> 
-                    PO relacionados 
+                    POs 
                   </th>
-                  
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
-                    Monto Neto
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> 
+                    Transformadores 
                   </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">
                     Estado
@@ -82,85 +81,96 @@
               
               <tbody>
                 {% for container in containers.listContainer %}
-                <tr>
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-dark mb-0">
-                        <a href="">
-                          {{container.containerName}}
-                        </a>
-                      </p>
-                      <p class="text-sm font-weight-normal text-secondary mb-0">
-                        {{ container.created|date:'d-m-Y H:i' }}
-                      </p>
-                    </div>
-                  </td>
+                  {% regroup container.item_container.all by idTrafoQuote as po_groups %}
 
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                        {% regroup container.item_container.all by idTrafoQuote as trafo_list %}
-                        {% for trafo in trafo_list %}
-                        <span class="badge badge-info me-3">{{ trafo.grouper.poNumber }}</span>
-                        {% endfor %}
-                      
-                    </div>
-                  </td>
+                  {% for po_group in po_groups %}
+                  <tr>
 
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-xs text-dark">
-                        {{container.get_currency_display}} {{container.netAmount|floatformat:2}}
-                      </h6>
-                      <p class="text-sm font-weight-normal text-secondary mb-0">
-                        Bruto: {{container.grossAmount|floatformat:2}}
-                      </p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm">
-                    {% with ultimo_tracking=container.containertracking_set.last %}
-                      {% if ultimo_tracking %}
-                        {% if ultimo_tracking.status == "0" %}
-                          <span class="badge badge-primary"> 
-                            {{ultimo_tracking.get_area_display}} - {{ultimo_tracking.get_status_display}}
-                          </span>
-                        {% elif ultimo_tracking.status == "12" %}
-                          <span class="badge badge-success">
-                            {{ultimo_tracking.get_status_display}}
-                          </span>
-                        {% else %}
-                          <span class="badge badge-secondary">
-                            {{ultimo_tracking.get_status_display}}
-                          </span>
-                        {% endif %}
-                      {% else %}
-                        <span class="badge badge-light">Sin tracking</span>
-                      {% endif %}
-                    {% endwith %}
-                  </td>
-
-                  <td>
-                    {% if container.isOrder %}
-                    <span class="badge badge-success">Orden de Compra</span>
-                    {% else %}
-                    <span class="badge badge-primary">Requerimiento</span>
+                    {# ID/Fecha: solo en la primera fila del contenedor #}
+                    {% if forloop.first %}
+                    <td class="text-sm align-middle" rowspan="{{ po_groups|length }}">
+                      <div class="d-flex flex-column justify-content-center">
+                        <p class="text-sm font-weight-normal text-dark mb-0">
+                          <a href="{% url 'logistica_app:detalle-contenedor' container.id %}">{{container.containerName}} </a>
+                        </p>
+                        <p class="text-sm font-weight-normal text-secondary mb-0">
+                          {{ container.created|date:'d-m-Y H:i' }}
+                        </p>
+                      </div>
+                    </td>
                     {% endif %}
-                  </td>
 
-                  <td>
-                    <a href="">
-                      <i class="far fa-eye text-info text-lg"></i>
-                    </a>
-                    &ensp;
-                    <a href="{% url 'logistica_app:editar-contenedor' container.id %}">
-                      <i class="far fa-edit text-dark text-lg"></i>
-                    </a>
-                    &ensp;
-                    <a href="">
-                      <i class="far fa-trash-alt text-primary text-lg"></i>
-                    </a>
-                  </td>
-                </tr>
+                    {# PO: una fila por cada PO #}
+                    <td class="text-sm">
+                      <div class="d-flex flex-column justify-content-center">
+                        <span class="badge badge-info me-3">{{ po_group.grouper.poNumber }}</span>
+                      </div>
+                    </td>
+
+                    {# Transformadores: los del grupo de esta PO #}
+                    <td class="text-sm">
+
+                      <ul class="text-muted ps-4 mb-0 float-start">
+                        {% for item in po_group.list %}
+                        <li>
+                          <span class="text-sm"> {{ item.idTrafo }} -> {{ item.seq }} </span>
+                        </li>                        
+                        {% endfor %}
+                      </ul>
+                      
+                    </td>
+
+                    {# Monto Neto, Estado, Es Orden, Acciones: solo en la primera fila #}
+                    {% if forloop.first %}
+
+                    <td class="text-sm align-middle" rowspan="{{ po_groups|length }}">
+                      {% with ultimo_tracking=container.containertracking_set.last %}
+                        {% if ultimo_tracking %}
+                          {% if ultimo_tracking.status == "0" %}
+                            <span class="badge badge-primary"> 
+                              {{ultimo_tracking.get_area_display}} - {{ultimo_tracking.get_status_display}}
+                            </span>
+                          {% elif ultimo_tracking.status == "12" %}
+                            <span class="badge badge-success">
+                              {{ultimo_tracking.get_status_display}}
+                            </span>
+                          {% else %}
+                            <span class="badge badge-secondary">
+                              {{ultimo_tracking.get_status_display}}
+                            </span>
+                          {% endif %}
+                        {% else %}
+                          <span class="badge badge-light">Sin tracking</span>
+                        {% endif %}
+                      {% endwith %}
+                    </td>
+
+                    <td rowspan="{{ po_groups|length }}">
+                      {% if container.isOrder %}
+                      <span class="badge badge-success">Orden de Compra</span>
+                      {% else %}
+                      <span class="badge badge-primary">Requerimiento</span>
+                      {% endif %}
+                    </td>
+
+                    <td rowspan="{{ po_groups|length }}">
+                      <a href="">
+                        <i class="far fa-eye text-info text-lg"></i>
+                      </a>
+                      &ensp;
+                      <a href="{% url 'logistica_app:editar-contenedor' container.id %}">
+                        <i class="far fa-edit text-dark text-lg"></i>
+                      </a>
+                      &ensp;
+                      <a href="">
+                        <i class="far fa-trash-alt text-primary text-lg"></i>
+                      </a>
+                    </td>
+                    {% endif %}
+
+                  </tr>
+                  {% endfor %}
+
                 {% empty %}
                 <tr>
                   <td colspan="7" class="text-center py-4">

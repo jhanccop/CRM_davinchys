@@ -20,7 +20,7 @@ class ContainerManager(models.Manager):
             rangeDate[1] = intervals[1] + timedelta(days = 1)
 
         result = self.filter(
-            created__range=rangeDate,
+            created__range = rangeDate,
             idPetitioner__company__id = idTin
         )
         return result

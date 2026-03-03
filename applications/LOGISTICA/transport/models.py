@@ -1,10 +1,12 @@
 from model_utils.models import TimeStampedModel
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 
 from .managers import ContainerManager
 
 # ================== CONTENEDORES ==================
+
 class Container(TimeStampedModel):
     idPetitioner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,related_name="logistic_user")
 
@@ -13,6 +15,18 @@ class Container(TimeStampedModel):
         max_length = 50, 
         null = True,
         blank = True
+    )
+
+    containerNumber = models.PositiveIntegerField(
+        "Número de contenedor",
+        null=True,
+        blank=True
+    )
+
+    year = models.PositiveIntegerField(
+        "Año",
+        null=True,
+        blank=True
     )
 
     # === CATEGORIA MONEDA ====
@@ -83,6 +97,55 @@ class Container(TimeStampedModel):
 
     def __str__(self):
         return f"{self.containerName}"
+
+class File(TimeStampedModel):
+    BOOKING = "0"
+    FACTURA = "1"
+    GUIA = "2"
+    CERTORIGEN = "3"
+    MANDATO = "4"
+    BL = "5"
+    HBL = "6"
+    OTRO = "7"
+
+    TIPO_DOCUMENTO = [
+        (BOOKING, 'Booking'),
+        (FACTURA, 'Factura'),
+        (GUIA, 'Guia'),
+        (CERTORIGEN, 'Certificado de origen'),
+        (MANDATO, 'Mandato'),
+        (BL, 'BL'),
+        (HBL, 'HBL'),
+        (OTRO, 'Otro'),
+    ]
+    
+    idContainer = models.ForeignKey(Container, on_delete=models.CASCADE)
+    docType = models.CharField("Tipo de documento",max_length=20, choices=TIPO_DOCUMENTO)
+    name = models.CharField("Nombre de documento",max_length=200)
+    con_file = models.FileField(
+        upload_to='container_docs/',
+        validators=[FileExtensionValidator(['pdf', 'doc', 'docx', 'jpg', 'png'])]
+    )
+    date = models.DateField("Fecha de emisión")
+    description = models.TextField("Descripción del documento",blank=True)
+    
+    #objects = FileManager()
+
+    class Meta:
+        ordering = ['-date']
+
+    def delete(self, *args, **kwargs):
+        """
+        Elimina todos los archivos asociados al modelo antes de eliminar el registro
+        """
+        # Eliminar fat_file
+        if self.con_file:
+            self.con_file.delete(save=False)
+        
+        super(File, self).delete(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.idContainer} - {self.docType} - {self.name}"
 
 class ContainerTracking(TimeStampedModel):
     """ Modelo de seguimiento de requerimientos """

@@ -1,0 +1,940 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones{% endblock %}
+{% block navbar_Type %}Kanban{% endblock %}
+
+{% block panel-content %}
+
+<style>
+  /* ===== KANBAN LAYOUT ===== */
+  .kanban-wrapper {
+    display: flex;
+    gap: 1rem;
+    min-height: 70vh;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .kanban-column {
+    min-width: 320px;
+    max-width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-column .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-column .card-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 0.75rem;
+  }
+
+  /* ===== ITEM CARDS ===== */
+  .kanban-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: grab;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .kanban-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .kanban-item:active {
+    cursor: grabbing;
+    opacity: 0.9;
+  }
+
+  .kanban-item.dragging {
+    opacity: 0.4;
+    transform: rotate(2deg);
+  }
+
+  .kanban-item .item-seq {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #344767;
+    letter-spacing: 0.5px;
+  }
+
+  .kanban-item .item-trafo {
+    font-size: 0.75rem;
+    color: #67748e;
+    margin: 0.25rem 0;
+  }
+
+  .kanban-item .item-cost {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2dce89;
+  }
+
+  .kanban-item .cost-input {
+    width: 100px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid #d2d6da;
+    border-radius: 0.375rem;
+    text-align: right;
+  }
+
+  .kanban-item .cost-input:focus {
+    border-color: #e91e63;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.15);
+  }
+
+  /* ===== DROP ZONE ===== */
+  .kanban-dropzone {
+    min-height: 80px;
+    border: 2px dashed transparent;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    padding: 0.25rem;
+  }
+
+  .kanban-dropzone.drag-over {
+    border-color: #e91e63;
+    background: rgba(233, 30, 99, 0.04);
+  }
+
+  .kanban-dropzone.drag-over .drop-placeholder {
+    display: block;
+  }
+
+  .drop-placeholder {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+    color: #e91e63;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* ===== COLUMN HEADER ===== */
+  .column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  .column-header .badge-count {
+    background: #e91e63;
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  .column-header .badge-count.secondary {
+    background: #7b809a;
+  }
+
+  /* ===== COLUMN FOOTER - TOTAL ===== */
+  .column-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #f0f2f5;
+    background: #fafafa;
+    border-radius: 0 0 0.75rem 0.75rem;
+  }
+
+  /* ===== ADD COLUMN BUTTON ===== */
+  .add-column-card {
+    min-width: 320px;
+    max-width: 360px;
+    flex-shrink: 0;
+    border: 2px dashed #d2d6da;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 200px;
+  }
+
+  .add-column-card:hover {
+    border-color: #e91e63;
+    background: rgba(233, 30, 99, 0.02);
+  }
+
+  /* ===== SUMMARY BAR ===== */
+  .summary-bar .stat-card {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .summary-bar .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #344767;
+  }
+
+  .summary-bar .stat-label {
+    font-size: 0.75rem;
+    color: #67748e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .kanban-column, .add-column-card {
+      min-width: 280px;
+    }
+  }
+
+  /* ===== LOADING OVERLAY ===== */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading-overlay.active {
+    display: flex;
+  }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+  }
+</style>
+</style>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container-fluid py-2">
+
+  <!-- ===== HEADER ===== -->
+  <div class="row mb-3">
+    <div class="col-lg-8 col-12">
+      <h5 class="font-weight-bolder mb-1">
+        QUO-{{ quote.id }} — {{ quote.idClient }}
+      </h5>
+      <p class="text-sm text-secondary mb-0">
+        {{ quote.shortDescription|default:"Sin descripción" }}
+        <span class="mx-2">•</span>
+        <span class="font-weight-bold">{{ quote.get_currency_display }}</span>
+        <span class="mx-2">•</span>
+        PO: <span class="font-weight-bold">{{ quote.poNumber|default:"—" }}</span>
+      </p>
+    </div>
+    <div class="col-lg-4 col-12 d-flex ms-auto justify-content-end gap-2 align-items-start">
+      <a class="btn btn-outline-secondary btn-sm" href="javascript:history.back()">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+      </a>
+      <button class="btn bg-gradient-success btn-sm" id="btnSaveAll" onclick="saveAllAssignments()">
+        <i class="fas fa-save me-1"></i> Guardar Todo
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== SUMMARY BAR ===== -->
+  <div class="row summary-bar mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value" id="totalItems">{{ total_items }}</div>
+        <div class="stat-label">Total Items</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value text-warning" id="unassignedCount">{{ unassigned_count }}</div>
+        <div class="stat-label">Sin Asignar</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value text-success" id="assignedCount">{{ total_items|add:"-"|add:unassigned_count }}</div>
+        <div class="stat-label">Asignados</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="card stat-card">
+        <div class="stat-value text-info" id="intQuoteCount">{{ kanban_columns|length }}</div>
+        <div class="stat-label">Cotizaciones Internas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KANBAN BOARD ===== -->
+  <div class="kanban-wrapper" id="kanbanBoard">
+
+    <!-- COLUMNA: Items sin asignar (izquierda) -->
+    <div class="kanban-column" id="column-unassigned">
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-inbox me-1 text-warning"></i> Sin Asignar
+            </h6>
+          </div>
+          <span class="badge-count secondary" id="countUnassigned">{{ unassigned_items|length }}</span>
+        </div>
+        <div class="card-body kanban-dropzone" id="dropzone-unassigned"
+             data-intquote-id=""
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar aquí para desasignar
+          </div>
+
+          {% for item in unassigned_items %}
+          <div class="kanban-item"
+               draggable="true"
+               data-item-id="{{ item.id }}"
+               data-current-intquote=""
+               ondragstart="handleDragStart(event)"
+               ondragend="handleDragEnd(event)">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="item-seq">
+                  <i class="fas fa-bolt me-1 text-warning"></i>{{ item.seq|default:"S/N" }}
+                </div>
+                <div class="item-trafo">{{ item.idTrafo|default:"Sin trafo" }}</div>
+              </div>
+              <span class="item-cost">{{ quote.get_currency_display }} {{ item.unitCost|default:"0.00" }}</span>
+            </div>
+            {% if item.unitCost %}
+            <div class="mt-2">
+              <small class="text-xs text-secondary">Costo cliente:</small>
+              <small class="text-xs font-weight-bold"> {{ item.unitCost }}</small>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          {% if not unassigned_items %}
+          <div class="text-center py-4" id="emptyUnassigned">
+            <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+            <p class="text-sm text-muted mb-0">Todos los items están asignados</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNAS: IntQuotes existentes -->
+    {% for col in kanban_columns %}
+    <div class="kanban-column" id="column-iq-{{ col.int_quote.id }}">
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-building me-1 text-info"></i>
+              {{ col.int_quote.idTinReceiving|default:"Sin compañía" }}
+            </h6>
+            <span class="text-xs text-secondary">
+              PO: {{ col.int_quote.poNumber|default:"—" }}
+            </span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-count">{{ col.items|length }}</span>
+            <button class="btn btn-link btn-sm p-0 text-danger"
+                    title="Eliminar cotización"
+                    onclick="deleteIntQuote({{ col.int_quote.id }})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body kanban-dropzone" id="dropzone-iq-{{ col.int_quote.id }}"
+             data-intquote-id="{{ col.int_quote.id }}"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar item aquí
+          </div>
+
+          {% for item in col.items %}
+          <div class="kanban-item"
+               draggable="true"
+               data-item-id="{{ item.id }}"
+               data-current-intquote="{{ col.int_quote.id }}"
+               ondragstart="handleDragStart(event)"
+               ondragend="handleDragEnd(event)">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="item-seq">
+                  <i class="fas fa-bolt me-1 text-info"></i>{{ item.seq|default:"S/N" }}
+                </div>
+                <div class="item-trafo">{{ item.idTrafo|default:"Sin trafo" }}</div>
+              </div>
+              <span class="item-cost">{{ quote.get_currency_display }} {{ item.unitCost|default:"0.00" }}</span>
+            </div>
+            <div class="mt-2 d-flex align-items-center justify-content-between">
+              <small class="text-xs text-secondary">Costo interno:</small>
+              <input type="number"
+                     class="cost-input"
+                     step="0.01"
+                     min="0"
+                     value="{{ item.unitCostInt|default:'0.00' }}"
+                     data-item-id="{{ item.id }}"
+                     onchange="markDirty()" />
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="column-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-xs text-secondary font-weight-bold text-uppercase">Total</small>
+            <span class="text-sm font-weight-bold text-dark column-total">
+              {{ quote.get_currency_display }} {{ col.total }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- BOTÓN: Agregar nueva columna IntQuote -->
+    <div class="add-column-card" onclick="openNewIntQuoteModal()">
+      <div class="text-center">
+        <i class="fas fa-plus-circle fa-2x text-secondary mb-2"></i>
+        <p class="text-sm text-secondary font-weight-bold mb-0">Nueva Cotización Interna</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODAL: Nueva IntQuote ===== -->
+<div class="modal fade" id="newIntQuoteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold">
+          <i class="fas fa-plus-circle me-2 text-primary"></i>Nueva Cotización Interna
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="formErrors" class="alert alert-danger d-none"></div>
+
+        <div class="mb-3">
+          <label class="form-label text-xs font-weight-bold text-uppercase">Compañía Subsidiaria *</label>
+          <select class="form-control" id="iqTinReceiving" required>
+            <option value="">-- Seleccionar compañía --</option>
+            {% for tin in tins %}
+            <option value="{{ tin.id }}">{{ tin }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Moneda</label>
+            <select class="form-control" id="iqCurrency">
+              <option value="">--</option>
+              <option value="0">PEN</option>
+              <option value="1">USD</option>
+              <option value="2">EUR</option>
+            </select>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Método de Pago</label>
+            <select class="form-control" id="iqPayMethod">
+              <option value="0">Crédito</option>
+              <option value="1">Contado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Fecha Solicitud</label>
+            <input type="date" class="form-control" id="iqDateOrder" />
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label text-xs font-weight-bold text-uppercase">Fecha Entrega</label>
+            <input type="date" class="form-control" id="iqDeadline" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-xs font-weight-bold text-uppercase">Número PO</label>
+          <input type="text" class="form-control" id="iqPoNumber" placeholder="PO-0001" maxlength="10" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn bg-gradient-primary btn-sm" onclick="createIntQuote()">
+          <i class="fas fa-check me-1"></i> Crear Cotización
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+
+<script>
+  // ===== CONSTANTS =====
+  const QUOTE_ID = {{ quote.id }};
+  const CSRF_TOKEN = '{{ csrf_token }}';
+  const CURRENCY_DISPLAY = '{{ quote.get_currency_display }}';
+
+  const URLS = {
+    createIntQuote: '{% url "ventas_app:create-intquote-api" quote_pk=quote.id %}',
+    assignItems: '{% url "ventas_app:assign-items-api" quote_pk=quote.id %}',
+    deleteIntQuoteBase: 'comercial/cotizaciones/intquote/__ID__/delete/',  // Se reemplaza __ID__ dinámicamente
+  };
+
+  let isDirty = false;
+  let draggedElement = null;
+
+  // ===== DRAG & DROP =====
+  function handleDragStart(e) {
+    draggedElement = e.target.closest('.kanban-item');
+    draggedElement.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedElement.dataset.itemId);
+  }
+
+  function handleDragEnd(e) {
+    const el = e.target.closest('.kanban-item');
+    if (el) el.classList.remove('dragging');
+    document.querySelectorAll('.kanban-dropzone').forEach(dz => {
+      dz.classList.remove('drag-over');
+    });
+    draggedElement = null;
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (dropzone) dropzone.classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (dropzone && !dropzone.contains(e.relatedTarget)) {
+      dropzone.classList.remove('drag-over');
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const dropzone = e.target.closest('.kanban-dropzone');
+    if (!dropzone || !draggedElement) return;
+
+    dropzone.classList.remove('drag-over');
+
+    const targetIntQuoteId = dropzone.dataset.intquoteId || '';
+    const sourceIntQuoteId = draggedElement.dataset.currentIntquote || '';
+
+    // Si se suelta en la misma columna, no hacer nada
+    if (targetIntQuoteId === sourceIntQuoteId) return;
+
+    // Mover el elemento visualmente
+    // Ocultar placeholder vacío si existe
+    const emptyMsg = dropzone.querySelector('#emptyUnassigned, .text-center.py-4');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    dropzone.appendChild(draggedElement);
+    draggedElement.dataset.currentIntquote = targetIntQuoteId;
+
+    // Si se mueve a una IntQuote, agregar input de costo si no existe
+    if (targetIntQuoteId) {
+      if (!draggedElement.querySelector('.cost-input')) {
+        const costDiv = document.createElement('div');
+        costDiv.className = 'mt-2 d-flex align-items-center justify-content-between';
+        costDiv.innerHTML = `
+          <small class="text-xs text-secondary">Costo interno:</small>
+          <input type="number" class="cost-input" step="0.01" min="0" value="0.00"
+                 data-item-id="${draggedElement.dataset.itemId}" onchange="markDirty()" />
+        `;
+        draggedElement.appendChild(costDiv);
+      }
+      // Cambiar icono a info
+      const icon = draggedElement.querySelector('.item-seq i');
+      if (icon) {
+        icon.className = 'fas fa-bolt me-1 text-info';
+      }
+    } else {
+      // Si se mueve a sin asignar, remover input de costo
+      const costDiv = draggedElement.querySelector('.mt-2.d-flex');
+      if (costDiv && costDiv.querySelector('.cost-input')) {
+        costDiv.remove();
+      }
+      // Cambiar icono a warning
+      const icon = draggedElement.querySelector('.item-seq i');
+      if (icon) {
+        icon.className = 'fas fa-bolt me-1 text-warning';
+      }
+    }
+
+    markDirty();
+    updateCounts();
+    updateColumnTotals();
+  }
+
+  // ===== SAVE ALL ASSIGNMENTS =====
+  async function saveAllAssignments() {
+    const assignments = [];
+
+    document.querySelectorAll('.kanban-item').forEach(item => {
+      const itemId = parseInt(item.dataset.itemId);
+      const intQuoteId = item.dataset.currentIntquote || null;
+      const costInput = item.querySelector('.cost-input');
+      const unitCostInt = costInput ? parseFloat(costInput.value) || 0 : null;
+
+      assignments.push({
+        item_id: itemId,
+        int_quote_id: intQuoteId ? parseInt(intQuoteId) : null,
+        unit_cost_int: unitCostInt,
+      });
+    });
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.assignItems, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: JSON.stringify({ assignments }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('Asignaciones guardadas correctamente', 'success');
+        isDirty = false;
+        updateSaveButton();
+        if (data.errors && data.errors.length > 0) {
+          showToast('Algunos items tuvieron errores: ' + data.errors.join(', '), 'warning');
+        }
+      } else {
+        showToast('Error al guardar: ' + (data.error || 'Error desconocido'), 'danger');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // ===== CREATE INT QUOTE =====
+  function openNewIntQuoteModal() {
+    // Reset form
+    document.getElementById('iqTinReceiving').value = '';
+    document.getElementById('iqCurrency').value = '';
+    document.getElementById('iqPayMethod').value = '0';
+    document.getElementById('iqDateOrder').value = '';
+    document.getElementById('iqDeadline').value = '';
+    document.getElementById('iqPoNumber').value = '';
+    document.getElementById('formErrors').classList.add('d-none');
+
+    const modal = new bootstrap.Modal(document.getElementById('newIntQuoteModal'));
+    modal.show();
+  }
+
+  async function createIntQuote() {
+    const tinId = document.getElementById('iqTinReceiving').value;
+    if (!tinId) {
+      document.getElementById('formErrors').textContent = 'Seleccione una compañía subsidiaria.';
+      document.getElementById('formErrors').classList.remove('d-none');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('idTinReceiving', tinId);
+    formData.append('currency', document.getElementById('iqCurrency').value);
+    formData.append('payMethod', document.getElementById('iqPayMethod').value);
+    formData.append('dateOrder', document.getElementById('iqDateOrder').value);
+    formData.append('deadline', document.getElementById('iqDeadline').value);
+    formData.append('poNumber', document.getElementById('iqPoNumber').value);
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.createIntQuote, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Cerrar modal
+        bootstrap.Modal.getInstance(document.getElementById('newIntQuoteModal')).hide();
+
+        // Crear nueva columna en el kanban
+        addNewColumn(data.int_quote);
+        showToast('Cotización interna creada', 'success');
+        updateCounts();
+      } else {
+        const errMsg = Object.values(data.errors).flat().join(', ');
+        document.getElementById('formErrors').textContent = errMsg;
+        document.getElementById('formErrors').classList.remove('d-none');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function addNewColumn(iq) {
+    const board = document.getElementById('kanbanBoard');
+    const addBtn = board.querySelector('.add-column-card');
+
+    const col = document.createElement('div');
+    col.className = 'kanban-column';
+    col.id = `column-iq-${iq.id}`;
+    col.innerHTML = `
+      <div class="card border shadow-sm">
+        <div class="column-header">
+          <div>
+            <h6 class="mb-0 text-sm font-weight-bold">
+              <i class="fas fa-building me-1 text-info"></i>
+              ${iq.tin_name}
+            </h6>
+            <span class="text-xs text-secondary">PO: ${iq.po_number}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-count">0</span>
+            <button class="btn btn-link btn-sm p-0 text-danger"
+                    title="Eliminar cotización"
+                    onclick="deleteIntQuote(${iq.id})">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body kanban-dropzone" id="dropzone-iq-${iq.id}"
+             data-intquote-id="${iq.id}"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+          <div class="drop-placeholder">
+            <i class="fas fa-arrow-down"></i> Soltar item aquí
+          </div>
+        </div>
+        <div class="column-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-xs text-secondary font-weight-bold text-uppercase">Total</small>
+            <span class="text-sm font-weight-bold text-dark column-total">${CURRENCY_DISPLAY} 0.00</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    board.insertBefore(col, addBtn);
+  }
+
+  // ===== DELETE INT QUOTE =====
+  async function deleteIntQuote(iqId) {
+    if (!confirm('¿Está seguro de eliminar esta cotización interna? Los items volverán a "Sin Asignar".')) return;
+
+    showLoading(true);
+
+    try {
+      const response = await fetch(URLS.deleteIntQuoteBase.replace('__ID__', iqId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Mover items de regreso a sin asignar
+        const col = document.getElementById(`column-iq-${iqId}`);
+        const dropzoneUnassigned = document.getElementById('dropzone-unassigned');
+
+        if (col) {
+          col.querySelectorAll('.kanban-item').forEach(item => {
+            item.dataset.currentIntquote = '';
+            // Remover cost input
+            const costDiv = item.querySelector('.mt-2.d-flex');
+            if (costDiv && costDiv.querySelector('.cost-input')) {
+              costDiv.remove();
+            }
+            const icon = item.querySelector('.item-seq i');
+            if (icon) icon.className = 'fas fa-bolt me-1 text-warning';
+            dropzoneUnassigned.appendChild(item);
+          });
+          col.remove();
+        }
+
+        showToast('Cotización interna eliminada', 'success');
+        updateCounts();
+      } else {
+        showToast('Error al eliminar', 'danger');
+      }
+    } catch (err) {
+      showToast('Error de conexión: ' + err.message, 'danger');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // ===== UTILITY FUNCTIONS =====
+  function markDirty() {
+    isDirty = true;
+    updateSaveButton();
+  }
+
+  function updateSaveButton() {
+    const btn = document.getElementById('btnSaveAll');
+    if (isDirty) {
+      btn.classList.remove('bg-gradient-success');
+      btn.classList.add('bg-gradient-warning');
+      btn.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Guardar Cambios *';
+    } else {
+      btn.classList.remove('bg-gradient-warning');
+      btn.classList.add('bg-gradient-success');
+      btn.innerHTML = '<i class="fas fa-save me-1"></i> Guardar Todo';
+    }
+  }
+
+  function updateCounts() {
+    const unassigned = document.querySelectorAll('#dropzone-unassigned .kanban-item').length;
+    const total = document.querySelectorAll('.kanban-item').length;
+    const assigned = total - unassigned;
+    const intQuotes = document.querySelectorAll('.kanban-column[id^="column-iq-"]').length;
+
+    document.getElementById('unassignedCount').textContent = unassigned;
+    document.getElementById('assignedCount').textContent = assigned;
+    document.getElementById('intQuoteCount').textContent = intQuotes;
+    document.getElementById('countUnassigned').textContent = unassigned;
+
+    // Update badge counts per column
+    document.querySelectorAll('.kanban-column[id^="column-iq-"]').forEach(col => {
+      const count = col.querySelectorAll('.kanban-item').length;
+      const badge = col.querySelector('.badge-count');
+      if (badge) badge.textContent = count;
+    });
+  }
+
+  function updateColumnTotals() {
+    document.querySelectorAll('.kanban-column[id^="column-iq-"]').forEach(col => {
+      let total = 0;
+      col.querySelectorAll('.cost-input').forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      const totalEl = col.querySelector('.column-total');
+      if (totalEl) totalEl.textContent = `${CURRENCY_DISPLAY} ${total.toFixed(2)}`;
+    });
+  }
+
+  function showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (show) overlay.classList.add('active');
+    else overlay.classList.remove('active');
+  }
+
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const icons = {
+      success: 'fas fa-check-circle',
+      danger: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+    };
+    const bgColors = {
+      success: '#2dce89',
+      danger: '#f5365c',
+      warning: '#fb6340',
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'alert text-white mb-2 shadow-lg';
+    toast.style.cssText = `
+      background: ${bgColors[type] || bgColors.success};
+      min-width: 300px;
+      animation: slideIn 0.3s ease;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    `;
+    toast.innerHTML = `<i class="${icons[type] || icons.success} me-2"></i>${message}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // ===== WARN ON UNSAVED CHANGES =====
+  window.addEventListener('beforeunload', function (e) {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = 'Tiene cambios sin guardar. ¿Desea salir?';
+    }
+  });
+
+  // ===== LISTEN FOR COST INPUT CHANGES =====
+  document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('cost-input')) {
+      updateColumnTotals();
+    }
+  });
+</script>
+
+<script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+<script type="text/javascript">
+  if (document.getElementById('iqTinReceiving')) {
+    var element = document.getElementById('iqTinReceiving');
+    const example = new Choices(element, {});
+  }
+</script>
+
+<style>
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+
+{% endblock JSscripts %}
+

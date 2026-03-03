@@ -14,9 +14,36 @@ urlpatterns = [
 
     path('comercial/po/lista/', views.TrafoPoListView.as_view(), name='po-lista'),
 
+    # ==================== COTIZACIONES DE INTERMEDIO QUOTES ====================
+    # Vista Kanban principal
+    path('comercial/cotizaciones/<int:pk>/asignar/', views.QuoteKanbanView.as_view(),name='quote-assignment'),
+    # API: Crear nueva IntQuote
+    path('comercial/cotizaciones/<int:quote_pk>/intquote/create/', views.CreateIntQuoteAPI.as_view(),name='create-intquote-api'),
+    # API: Asignar items (drag & drop)
+    path('comercial/cotizaciones/<int:quote_pk>/assign-items/', views.AssignItemsAPI.as_view(),name='assign-items-api'),
+    # API: Eliminar IntQuote
+    path('comercial/cotizaciones/intquote/<int:int_quote_pk>/delete/', views.DeleteIntQuoteAPI.as_view(),name='delete-intquote-api'),
+    # API: Actualizar costo unitario de item
+    path('comercial/cotizaciones/item/<int:item_pk>/update-cost/', views.UpdateItemCostAPI.as_view(),name='update-item-cost-api'),
+    path('intquote/<int:pk>/', views.IntQuoteDetailView.as_view(), name='intquote-detail' ),
+    path('intquote/<int:pk>/editar/', views.IntQuoteEditView.as_view(), name='intquote-edit' ),
+
+    # ==================== WORK ORDERS asignned ====================
+    
+    # Vista Kanban: IntQuote -> WorkOrders
+    path('comercial/ordenes-trabajo/<int:pk>/asignar/', views.IntQuoteWOView.as_view(),name='intquote-wo-assignment'),
+    # API: Crear nueva WorkOrder
+    path('comercial/ordenes-trabajo/<int:int_quote_pk>/workorder/create/', views.CreateWorkOrderAPI.as_view(), name='create-workorder-api'),
+    # API: Asignar items a WorkOrders (drag & drop)
+    path('comercial/ordenes-trabajo/<int:int_quote_pk>/assign-items-wo/', views.AssignItemsToWOAPI.as_view(), name='assign-items-wo-api' ),
+    # API: Eliminar WorkOrder
+    path('comercial/ordenes-trabajo/<int:wo_pk>/delete/',  views.DeleteWorkOrderAPI.as_view(), name='delete-workorder-api'),
+    # API: Actualizar costo unitario WO de un item
+    path('comercial/ordenes-trabajo/<int:item_pk>/update-cost-wo/', views.UpdateItemCostWOAPI.as_view(), name='update-item-cost-wo-api'),
+
     # ==================== CRUD PLANTILLAS ====================
-    #path('comercial/cotizaciones/plantillas/', views.TrafoTemplatesListView.as_view(), name='plantilla-lista'),
-    #path('comercial/cotizaciones/plantillas/nuevo', views.TrafoTemplatesCreateView.as_view(), name='plantilla-nuevo'),
+    path('comercial/cotizaciones/plantillas/', views.TrafoTemplatesListView.as_view(), name='plantilla-lista'),
+    #path('comercial/cotizaciones/plantillas/nuevo/', views.TrafoTemplatesCreateView.as_view(), name='plantilla-nuevo'),
     #path('comercial/cotizaciones/plantillas/editar/<pk>/', views.TrafoTemplatesUpdateView.as_view(), name='plantilla-editar'),
     #path('comercial/cotizaciones/plantillas/detalle/<pk>/', views.TrafoTemplatesDetailView.as_view(), name='plantilla-editar'),
     #path('comercial/cotizaciones/plantillas/eliminar/<pk>/', views.TrafoTemplatesDeleteListView.as_view(), name='plantilla-eliminar'),

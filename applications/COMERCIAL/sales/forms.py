@@ -5,14 +5,18 @@ from django.core.exceptions import ValidationError
 from .models import (
     Incomes,
     quotes,
+    IntQuotes,
     Items,
     ItemTracking,
     ItemImage,
-    Trafo
+    Trafo,
+    WorkOrder
 )
 
 from django.forms import inlineformset_factory
 from applications.users.models import User
+from applications.cuentas.models import Tin
+from applications.COMERCIAL.stakeholders.models import supplier
 
 class IncomesForm(forms.ModelForm):
     class Meta:
@@ -211,7 +215,7 @@ class quotesForm(forms.ModelForm):
         model = quotes
         fields = (
             'idTinReceiving',
-            'idTinExecuting',
+            #'idTinExecuting',
             'idClient',
 
             'dateOrder',
@@ -224,7 +228,8 @@ class quotesForm(forms.ModelForm):
             
             'shortDescription',
             'isPO',
-            'poNumber'
+            'poNumber',
+            'pdf_file'
         )
         
         widgets = {
@@ -234,12 +239,12 @@ class quotesForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            'idTinExecuting': forms.Select(
-                attrs = {
-                    'placeholder': '',
-                    'class': 'input-group-field form-control',
-                }
-            ),
+            #'idTinExecuting': forms.Select(
+            #    attrs = {
+            #        'placeholder': '',
+            #        'class': 'input-group-field form-control',
+            #    }
+            #),
             'idClient': forms.Select(
                 attrs = {
                     'placeholder': '',
@@ -303,6 +308,15 @@ class quotesForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
         }
 
         labels = {
@@ -317,6 +331,16 @@ class quotesForm(forms.ModelForm):
             'isPO': '¿Es PO?',
             'poNumber':'Número de PO'
         }
+
+    def clean_pdf_file(self):
+        pdf_file = self.cleaned_data.get('pdf_file')
+        if pdf_file:
+            if not pdf_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if pdf_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return pdf_file
+    
 
     #def __init__(self, *args, **kwargs):
     #    super(quotesForm, self).__init__(*args, **kwargs)
@@ -644,3 +668,136 @@ class MultipleItemImageForm(forms.Form):
 #    can_delete=True,
 #    fields='__all__'
 #)
+
+# =========================== INT QUOTES FORM ===========================
+
+class IntQuoteForm(forms.ModelForm):
+    """Formulario para crear/editar cotizaciones internas (IntQuotes)"""
+
+    class Meta:
+        model = IntQuotes
+        fields = [
+            'idTinReceiving',
+            'currency',
+            'dateOrder',
+            'deadline',
+            'payMethod',
+            'poNumber',
+        ]
+        widgets = {
+            'idTinReceiving': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Seleccione compañía',
+            }),
+            'currency': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'dateOrder': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'deadline': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'payMethod': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'poNumber': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número PO',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.quote = kwargs.pop('quote', None)
+        super().__init__(*args, **kwargs)
+        # Mostrar todas las compañías TIN disponibles
+        self.fields['idTinReceiving'].queryset = Tin.objects.all()
+        self.fields['idTinReceiving'].label = 'Compañía Subsidiaria'
+        self.fields['idTinReceiving'].empty_label = '-- Seleccionar compañía --'
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.quote:
+            instance.idClient = self.quote.idClient
+        if commit:
+            instance.save()
+        return instance
+    
+class IntQuoteEditForm(forms.ModelForm):
+    """Formulario para editar cotizaciones internas existentes"""
+
+    class Meta:
+        model = IntQuotes
+        fields = [
+            'idClient',
+            'idTinReceiving',
+            'currency',
+            'dateOrder',
+            'deadline',
+            'payMethod',
+            'poNumber',
+        ]
+        widgets = {
+            'idClient': forms.Select(attrs={'class': 'form-control'}),
+            'idTinReceiving': forms.Select(attrs={'class': 'form-control'}),
+            'currency': forms.Select(attrs={'class': 'form-control'}),
+            'dateOrder': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'payMethod': forms.Select(attrs={'class': 'form-control'}),
+            'poNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PO-0001'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['idTinReceiving'].queryset = Tin.objects.all()
+        self.fields['idTinReceiving'].label = 'Compania Subsidiaria'
+        self.fields['idTinReceiving'].empty_label = '-- Seleccionar compania --'
+        self.fields['idClient'].label = 'Cliente'
+        self.fields['idClient'].empty_label = '-- Seleccionar cliente --'
+
+    
+class WorkOrderForm(forms.ModelForm):
+    """Formulario para crear/editar órdenes de trabajo (WorkOrder)"""
+
+    class Meta:
+        model = WorkOrder
+        fields = [
+            'idSupplier',
+            'idTinReceiving',
+            'currency',
+            'dateOrder',
+            'deadline',
+            'payMethod',
+            'woNumber',
+        ]
+        widgets = {
+            'idSupplier': forms.Select(attrs={'class': 'form-control'}),
+            'idTinReceiving': forms.Select(attrs={'class': 'form-control'}),
+            'currency': forms.Select(attrs={'class': 'form-control'}),
+            'dateOrder': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'payMethod': forms.Select(attrs={'class': 'form-control'}),
+            'woNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'WO-0001'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.int_quote = kwargs.pop('int_quote', None)
+        super().__init__(*args, **kwargs)
+        self.fields['idSupplier'].queryset = supplier.objects.all()
+        self.fields['idSupplier'].label = 'Proveedor'
+        self.fields['idSupplier'].empty_label = '-- Seleccionar proveedor --'
+        self.fields['idTinReceiving'].queryset = Tin.objects.all()
+        self.fields['idTinReceiving'].label = 'Compañía Ejecutora'
+        self.fields['idTinReceiving'].empty_label = '-- Seleccionar compañía --'
+
+        # Pre-llenar compañía ejecutora desde la IntQuote
+        if self.int_quote and self.int_quote.idTinReceiving:
+            self.fields['idTinReceiving'].initial = self.int_quote.idTinReceiving.id
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+        return instance

@@ -8,7 +8,6 @@
 
 {% block panel-content %}
 
-
 <!-- ================ EXPORTAR - NUEVO ================= -->
 <div class="container-fluid">
   <div class="row">
@@ -61,7 +60,7 @@
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> Cliente </th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Es PO?</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento - Cot</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Tipo - Serie</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Import PO - Tipo - Serie</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                 </tr>
               </thead>
@@ -71,17 +70,19 @@
                 <tr>
                   <td class="text-sm">
                     <div class="d-flex flex-column justify-content-center">
+
+                      <h6 class="mb-0 text-sm">
+                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
+                          {{t.poNumber|default:"-"}}
+                        </a>
+                      </h6>
                       
                       <p class="text-sm font-weight-normal text-dark mb-0">
                         <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
                           QUO-{{t.id}}
                         </a>
                       </p>
-                      <h6 class="mb-0 text-sm">
-                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          {{t.poNumber|default:"-"}}
-                        </a>
-                      </h6>
+                      
                       <p class="text-sm font-weight-normal text-secondary mb-0">
                         {{ t.dateOrder|date:'d-m-Y' }}
                       </p>
@@ -118,12 +119,31 @@
                   </td>
 
                   <td>
-                      {% for r in t.item_Quote.all %}
-                      <a href="{% url 'ventas_app:detail-item-all' r.id %}"><p class="pt-0 mb-0">{{r}}</p></a>
-                      {% endfor%}
+                    {% for r in t.item_Quote.all %}
+                    <span class="d-flex align-items-center">
+                      {% if r.idTrafoIntQuote %}
+                      <a href="{% url 'ventas_app:intquote-detail' r.idTrafoIntQuote.id %}" class="mr-2">
+                        <p class="pt-0 mb-0"> 
+                          <span class="badge badge-success">{{r.idTrafoIntQuote }}</span>
+                        </p>
+                      </a>
+                      {% else %}
+                      <span class="badge badge-secondary">no assigned</span>
+                      {% endif %}
+                      &ensp;
+                      <a href="{% url 'ventas_app:detail-item-all' r.id %}">
+                        <p class="pt-0 mb-0"> {{r}}</p>
+                      </a>
+                    </span>
+                    
+                    {% endfor%}
                   </td>
 
                   <td>
+                      <a href="{% url 'ventas_app:quote-assignment' t.id %}">
+                        <i class="fas fa-tasks text-success text-lg"></i>
+                      </a>
+                      &ensp;
                       <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
                           <i class="far fa-eye text-info text-lg"></i>
                       </a>

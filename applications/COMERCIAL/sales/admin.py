@@ -5,7 +5,9 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import (
     Incomes,
+    IntQuotes,
     quotes,
+    WorkOrder,
     QuoteTracking,
     Items,
     ItemImage,
@@ -58,7 +60,7 @@ class quotesAdmin(ImportExportModelAdmin):
         'created',
         'idClient',
         'idTinReceiving',
-        'idTinExecuting',
+        #'idTinExecuting',
         'amount',
         'deadline',
         'isPO',
@@ -66,6 +68,50 @@ class quotesAdmin(ImportExportModelAdmin):
     )
     search_fields = ('idClient',)
     list_filter = ('idClient',)
+    #autocomplete_fields = ['idPetitioner',]
+
+## ==================== INTQUOTES =====================
+class IntQuotesResource(resources.ModelResource):
+    class Meta:
+        model = IntQuotes
+
+@admin.register(IntQuotes)
+class IntQuotesAdmin(ImportExportModelAdmin):
+    resource_class = IntQuotesResource
+
+    list_display = (
+        'id',
+        'created',
+        'idClient',
+        'idTinReceiving',
+        'amount',
+        'deadline',
+        'poNumber'
+    )
+    search_fields = ('idClient',)
+    list_filter = ('idClient',)
+    #autocomplete_fields = ['idPetitioner',]
+
+## ==================== WORK ORDERS =====================
+class WorkOrderResource(resources.ModelResource):
+    class Meta:
+        model = WorkOrder
+
+@admin.register(WorkOrder)
+class WorkOrderAdmin(ImportExportModelAdmin):
+    resource_class = WorkOrderResource
+
+    list_display = (
+        'id',
+        'created',
+        'idSupplier',
+        'idTinReceiving',
+        'amount',
+        'deadline',
+        'woNumber'
+    )
+    search_fields = ('idSupplier',)
+    list_filter = ('idSupplier',)
     #autocomplete_fields = ['idPetitioner',]
 
 ## ==================== TRANSFORMADORES =====================
@@ -98,6 +144,7 @@ class ItemsAdmin(ImportExportModelAdmin):
 
     list_display = (
         'id',
+        'idContainer',
         'idTrafoQuote',
         'idTrafo',
         'seq',

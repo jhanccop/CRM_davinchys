@@ -86,7 +86,10 @@ class IncomesManager(models.Manager):
        return self.filter(id = id).annotate(per = F("amountReconcilied") * 100 / F("amount"),diff =  F("amount") - F("amountReconcilied"))[0]
 
     def DocumentosPorRUC(self,ruc):
-       return self.filter(idClient__ruc = ruc).order_by("created")
+        result = self.filter(
+            idBankMovements__id = movimiento
+        ).order_by("date")
+        return result
     
 class quotesManager(models.Manager):
     def ListaPOs(self,intervalo):
@@ -222,7 +225,73 @@ class quotesManager(models.Manager):
         ).prefetch_related(items_prefetch)
 
         return result
+
+    # ================== quotes master ==================
+    def get_quote_with_items(self, quote_id):
+        """Obtiene una quote con todos sus items y trafos relacionados"""
+        return self.select_related(
+            'idClient', 'idTinReceiving'
+        ).prefetch_related(
+            'item_Quote__idTrafo',
+            'item_Quote__idTrafoIntQuote',
+        ).get(id=quote_id)
+
+    def get_items_for_quote(self, quote_id):
+        """Retorna los items asociados a una quote específica"""
+        from .models import Items  # Lazy import para evitar circular
+        return Items.objects.filter(
+            idTrafoQuote_id=quote_id
+        ).select_related('idTrafo', 'idTrafoIntQuote', 'idWorkOrder')
+
+    def get_unassigned_items(self, quote_id):
+        """Retorna items de una quote que NO tienen IntQuote asignada"""
+        from .models import Items
+        return Items.objects.filter(
+            idTrafoQuote_id=quote_id,
+            idTrafoIntQuote__isnull=True
+        ).select_related('idTrafo')
+
+    def get_assigned_items(self, quote_id, int_quote_id):
+        """Retorna items asignados a una IntQuote específica"""
+        from .models import Items
+        return Items.objects.filter(
+            idTrafoQuote_id=quote_id,
+            idTrafoIntQuote_id=int_quote_id
+        ).select_related('idTrafo')
+
+class IntQuotesManager(models.Manager):
+    """Manager para IntQuotes (PO Internas/Subsidiarias)"""
+
+    def get_int_quotes_for_quote(self, quote_id):
+        """Retorna todas las IntQuotes cuyos items pertenecen a una quote master"""
+        from .models import Items
+        int_quote_ids = Items.objects.filter(
+            idTrafoQuote_id=quote_id,
+            idTrafoIntQuote__isnull=False
+        ).values_list('idTrafoIntQuote_id', flat=True).distinct()
+        return self.filter(id__in=int_quote_ids).select_related(
+            'idClient', 'idTinReceiving'
+        ).prefetch_related('item_IntQuote__idTrafo')
+
+    def create_int_quote(self, data):
+        """Crea una nueva IntQuote con los datos proporcionados"""
+        return self.create(**data)
+
+# ======================================= TRAFO PLANTILLAS =======================================
+class TrafoManager(models.Manager):
+    def ListAllDocuments(self):
+        return self.all()
+
+    def ListaDocumentosPorEmpresa(self,compania_id):
+        print(compania_id)
+        result = self.filter(
+            #item_Trafo__idTrafoQuote__idTinReceiving = compania_id
+            item_Trafo__idTrafoQuote__idTinExecuting = compania_id
+        )
+        return result
     
+    def get_trafo_display(self, trafo_id):
+        return self.get(id=trafo_id)
 
 class QuoteTrackingManager(models.Manager):
     def UltimoEstadoTracking(self,idQuote):

@@ -5,6 +5,7 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import *
 
+
 ## ==================== Departamento =====================
 class DepartamentoResource(resources.ModelResource):
     class Meta:
@@ -53,6 +54,7 @@ class EmpleadoAdmin(ImportExportModelAdmin):
     list_display = (
         'id',
         'user',
+        'company',
         'departamento',
         'fecha_contratacion',
         'tipo_contrato',

@@ -82,6 +82,7 @@ class Empleado(TimeStampedModel):
     ]
     
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='empleado')
+    company = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
     departamento = models.ForeignKey(Departamento, on_delete=models.SET_NULL, null=True)
     fecha_contratacion = models.DateField("Fecha de ingreso",blank=True)
     tipo_contrato = models.CharField("Tipo de contrato",max_length=1,choices=TIPO_CONTRATO,default=FIJO,blank=True)

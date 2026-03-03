@@ -82,6 +82,12 @@ def menu_navigation(request):
                     'url_name': 'ventas_app:po-lista',
                     'mini_icon': 'PO',
                     'permission': 'ventas.view_purchaseorder'
+                },
+                {
+                    'name': 'Ordenes Trabajo',
+                    'url_name': '',
+                    'mini_icon': 'WO',
+                    'permission': 'ventas.view_purchaseorder'
                 }
             ]
         },

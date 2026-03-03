@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones Internas{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
+
+{% block panel-content %}
+
+<style>
+  .breadcrumb-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .breadcrumb-info .breadcrumb-chip {
+    background: #f0f2f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    color: #344767;
+    font-weight: 600;
+  }
+  .breadcrumb-info .breadcrumb-arrow {
+    color: #d2d6da;
+    font-size: 0.7rem;
+  }
+  .stat-mini {
+    text-align: center;
+    padding: 1rem 0.5rem;
+  }
+  .stat-mini .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #344767;
+    line-height: 1;
+  }
+  .stat-mini .stat-label {
+    font-size: 0.7rem;
+    color: #67748e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+  }
+  .wo-card {
+    border-left: 3px solid #fb6340;
+    transition: all 0.2s;
+  }
+  .wo-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+</style>
+
+<div class="container-fluid">
+
+  <!-- ===== HEADER - ACCIONES ===== -->
+  <div class="row mb-3">
+    <div class="col-lg-7 col-12">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-info mb-2">
+        {% if quote_master %}
+        <a href="{% url 'ventas_app:quote-assignment' pk=quote_master.id %}" class="breadcrumb-chip text-decoration-none">
+          <i class="fas fa-file-invoice me-1"></i>QUO-{{ quote_master.id }}
+        </a>
+        <i class="fas fa-chevron-right breadcrumb-arrow"></i>
+        {% endif %}
+        <span class="breadcrumb-chip" style="background: #e3f2fd;">
+          <i class="fas fa-exchange-alt me-1"></i>INT-{{ int_quote.id }}
+        </span>
+      </div>
+      <h5 class="font-weight-bolder mb-0">
+        Cotizaci&oacute;n Interna INT-{{ int_quote.id }}
+      </h5>
+    </div>
+    <div class="col-lg-5 col-12 d-flex ms-auto justify-content-end gap-2 align-items-start mt-2 mt-lg-0">
+      <a class="btn btn-outline-secondary btn-sm" href="javascript:history.back()">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+      </a>
+      <a class="btn bg-gradient-secondary btn-sm" href="{% url 'ventas_app:intquote-edit' pk=int_quote.id %}">
+        <i class="far fa-edit me-1"></i> Editar
+      </a>
+      <a class="btn bg-gradient-dark btn-sm" href="">
+        <i class="fas fa-columns me-1"></i> Kanban OT
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== FILA 1: INFO GENERAL + RESUMEN ===== -->
+  <div class="row">
+
+    <!-- Info general -->
+    <div class="col-lg-7 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Informaci&oacute;n de la Cotizaci&oacute;n Interna</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Compa&ntilde;&iacute;a Subsidiaria</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.idTinReceiving|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Cliente</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.idClient|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Moneda</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.get_currency_display|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">M&eacute;todo de Pago</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.get_payMethod_display|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">N&uacute;mero PO</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.poNumber|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Inicial</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.get_currency_display }} {{ int_quote.initialAmount|default:"0.00" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Total</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">
+                {{ int_quote.get_currency_display }} {{ int_quote.amount|default:"0.00" }}
+              </p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">PO Master</p>
+              <p class="text-sm mb-0">
+                {% if quote_master %}
+                <a href="{% url 'ventas_app:cotizacion-detalle' pk=quote_master.id %}" class="text-info font-weight-bold">
+                  {{ quote_master }}
+                </a>
+                {% else %}
+                <span class="text-muted">&mdash;</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Fecha de Solicitud</p>
+              <p class="text-sm text-dark mb-0">
+                {{ int_quote.dateOrder|date:'d-m-Y'|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Fecha de Entrega</p>
+              <p class="text-sm text-dark mb-0">
+                {{ int_quote.deadline|date:'d-m-Y'|default:"&mdash;" }}
+              </p>
+            </div>
+            <div class="col-sm-6">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Fecha de Creaci&oacute;n</p>
+              <p class="text-sm text-dark mb-0">
+                {{ int_quote.created|date:'d-m-Y H:i' }}
+              </p>
+            </div>
+            <div class="col-sm-6">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">&Uacute;ltima Modificaci&oacute;n</p>
+              <p class="text-sm text-dark mb-0">
+                {{ int_quote.modified|date:'d-m-Y H:i' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen numerico -->
+    <div class="col-lg-5 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Resumen</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row">
+            <div class="col-6 col-sm-3">
+              <div class="stat-mini">
+                <div class="stat-value">{{ total_items }}</div>
+                <div class="stat-label">Items</div>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="stat-mini">
+                <div class="stat-value text-warning">{{ unassigned_count }}</div>
+                <div class="stat-label">Sin OT</div>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="stat-mini">
+                <div class="stat-value text-success">{{ assigned_count }}</div>
+                <div class="stat-label">Con OT</div>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="stat-mini">
+                <div class="stat-value" style="color: #fb6340;">{{ wo_count }}</div>
+                <div class="stat-label">&Oacute;rdenes</div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="horizontal dark my-3">
+
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Total Costo Interno</p>
+              <p class="text-lg font-weight-bold text-dark mb-0">
+                {{ int_quote.get_currency_display }} {{ total_cost_int }}
+              </p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Total Costo OT</p>
+              <p class="text-lg font-weight-bold mb-0" style="color: #fb6340;">
+                {{ int_quote.get_currency_display }} {{ total_cost_wo }}
+              </p>
+            </div>
+          </div>
+
+          {% if int_quote.pdf_file %}
+          <hr class="horizontal dark my-3">
+          <div>
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Documento PDF</p>
+            <a href="{{ int_quote.pdf_file.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+              <i class="fas fa-file-pdf me-1"></i> Ver PDF
+            </a>
+          </div>
+          {% endif %}
+
+          <hr class="horizontal dark my-3">
+          <div class="text-center">
+            <a href=""
+               class="btn bg-gradient-dark btn-sm w-100">
+              <i class="fas fa-columns me-1"></i> Gestionar &Oacute;rdenes de Trabajo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FILA 2: ITEMS + ORDENES DE TRABAJO ===== -->
+  <div class="row">
+
+    <!-- Todos los Items -->
+    <div class="col-lg-6 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Items ({{ total_items }})</h6>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-3">Serial</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Transformador</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Costo Int.</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Costo OT</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Orden Trabajo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in all_items %}
+                <tr>
+                  <td class="ps-3">
+                    <p class="text-sm font-weight-bold text-dark mb-0">{{ item.seq|default:"S/N" }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm font-weight-normal text-dark mb-0">
+                      {{ item.idTrafo|default:"&mdash;" }}
+                    </p>
+                  </td>
+                  <td class="text-end">
+                    <p class="text-sm font-weight-bold text-dark mb-0">
+                      {{ item.unitCostInt|default:"&mdash;" }}
+                    </p>
+                  </td>
+                  <td class="text-end">
+                    <p class="text-sm font-weight-bold mb-0" style="color: #fb6340;">
+                      {{ item.unitCostWO|default:"&mdash;" }}
+                    </p>
+                  </td>
+                  <td>
+                    {% if item.idWorkOrder %}
+                      <span class="badge" style="background: #fb6340; color: #fff;">
+                        WO-{{ item.idWorkOrder.id }}
+                      </span>
+                      <br>
+                      <small class="text-xs text-secondary">{{ item.idWorkOrder.idSupplier|default:"" }}</small>
+                    {% else %}
+                      <span class="badge badge-warning">Sin asignar</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-4">
+                    <p class="text-muted text-sm">Sin items registrados</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ordenes de Trabajo asociadas -->
+    <div class="col-lg-6 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">&Oacute;rdenes de Trabajo ({{ wo_count }})</h6>
+          <a class="btn btn-sm bg-gradient-dark"
+             href="">
+            <i class="fas fa-plus me-1"></i> Gestionar
+          </a>
+        </div>
+        <div class="card-body pt-3">
+          {% for group in wo_groups %}
+          <div class="card wo-card mb-3 shadow-none border">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h6 class="text-sm font-weight-bold mb-0">
+                    <i class="fas fa-hard-hat me-1" style="color: #fb6340;"></i>
+                    {{ group.work_order.idSupplier|default:"Sin proveedor" }}
+                  </h6>
+                  <span class="text-xs text-secondary">
+                    WO: {{ group.work_order.woNumber|default:"&mdash;" }}
+                    &middot; {{ group.work_order.idTinReceiving|default:"" }}
+                  </span>
+                </div>
+                <div class="text-end">
+                  <span class="badge" style="background: #fb6340; color: #fff;">
+                    {{ group.count }} items
+                  </span>
+                </div>
+              </div>
+
+              <!-- Items de esta WO -->
+              <div class="table-responsive">
+                <table class="table table-sm table-flush mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-xs text-secondary font-weight-bolder">Serial</th>
+                      <th class="text-uppercase text-xs text-secondary font-weight-bolder">Trafo</th>
+                      <th class="text-uppercase text-xs text-secondary font-weight-bolder text-end">Costo OT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in group.items %}
+                    <tr>
+                      <td class="text-sm">{{ item.seq|default:"S/N" }}</td>
+                      <td class="text-sm text-secondary">{{ item.idTrafo|default:"&mdash;" }}</td>
+                      <td class="text-sm font-weight-bold text-end" style="color: #fb6340;">
+                        {{ item.unitCostWO|default:"0.00" }}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2" class="text-end text-xs font-weight-bolder text-uppercase">Total</td>
+                      <td class="text-sm font-weight-bold text-end text-dark">
+                        {{ int_quote.get_currency_display }} {{ group.total }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-4">
+            <i class="fas fa-hard-hat fa-2x text-secondary mb-2"></i>
+            <p class="text-sm text-muted mb-2">No hay &oacute;rdenes de trabajo</p>
+            <a href=""
+               class="btn btn-sm bg-gradient-dark">
+              <i class="fas fa-plus me-1"></i> Crear primera OT
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock panel-content %}

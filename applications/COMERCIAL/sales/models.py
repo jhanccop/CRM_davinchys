@@ -13,16 +13,19 @@ from .managers import (
     IncomesManager,
     quotesManager,
     QuoteTrackingManager,
-    #TrafoManager
+    TrafoManager
 )
 
 class quotes(TimeStampedModel):
     """
-        COTIZACIONES DE FABRICACION
+        PURCHASE ORDER - MASTER - COTIZACION
+        
+        Orden de Compra. Puede ser:
+        - CLIENTE: emitida por cliente a DAV LLC
     """
     idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True,related_name="quote_client")
     idTinReceiving = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_receiving")
-    idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
+    #idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
     shortDescription = models.CharField(
         'Descripción',
         max_length = 100,
@@ -106,14 +109,220 @@ class quotes(TimeStampedModel):
         blank = True
     )
 
+    pdf_file = models.FileField(upload_to='po_pdfs/',null=True,blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(quotes, self).delete(*args, **kwargs)
+
     objects = quotesManager()
 
     class Meta:
-        verbose_name = 'Cotización'
-        verbose_name_plural = 'Cotizaciones'
+        verbose_name = 'Cotización master'
+        verbose_name_plural = 'Cotizaciones master'
     
     def __str__(self):
-        return f"QUO-{self.id} | {self.idClient}"
+        return f"{self.poNumber} | {self.idClient}"
+
+class IntQuotes(TimeStampedModel):
+    """
+        PURCHASE ORDER - SUBSIDIARY IMPORT - COTIZACION
+        
+        Orden de Compra. Puede ser:
+        - CLIENTE: emitida por DAV LLC a SUBSIDIARIAS
+    """
+    idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True,related_name="int_client")
+    idTinReceiving = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="int_company_receiving")
+    #idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
+
+    # === CATEGORIA MONEDA ====
+    PEN = '0'
+    USD = '1'
+    EUR = '2'
+
+    CURRENCY_CHOICES = [
+        (PEN,'PEN'),
+        (USD,'USD'),
+        (EUR,'EUR'),
+    ]
+
+    currency = models.CharField(
+        'Moneda',
+        max_length = 1, 
+        choices = CURRENCY_CHOICES,
+        null = True,
+        blank = True
+    )
+
+    initialAmount = models.DecimalField(
+        'Monto inicial', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0,
+        null = True,
+        blank = True
+    )
+
+    amount = models.DecimalField(
+        'Monto', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0,
+        null = True,
+        blank = True
+    )
+
+    dateOrder = models.DateField(
+        'Fecha de solicitud',
+        null=True,
+        blank=True
+    )
+
+    deadline = models.DateField(
+        'Fecha de entrega',
+        null=True,
+        blank=True
+    )
+
+    # METHOD PAYMENT
+    CASH = "1"
+    CREDIT = "0"
+
+    PAY_METHOD_CHOICES = [
+        (CASH, 'Contado'),
+        (CREDIT, 'Credito'),
+    ]
+
+    payMethod = models.CharField(
+        'Método de pago',
+        default="0",
+        max_length=1, 
+        choices=PAY_METHOD_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    poNumber = models.CharField(
+        'PO number',
+        max_length = 10, 
+        null = True,
+        blank = True
+    )
+
+    pdf_file = models.FileField(upload_to='intpo_pdfs/',null=True,blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(quotes, self).delete(*args, **kwargs)
+
+    #objects = quotesManager()
+
+    class Meta:
+        verbose_name = 'Cotización Interna'
+        verbose_name_plural = 'Cotizaciones Internas'
+    
+    def __str__(self):
+        return f"PO-{self.poNumber}"
+
+class WorkOrder(TimeStampedModel):
+    """
+        WORK ORDER - SUPPLIER - COTIZACION
+        
+        Orden de TRABAJO. Puede ser:
+        - CLIENTE: emitida por SUBSIDIARIAS a proveedores
+    """
+    idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True,related_name="id_supplier")
+    idTinReceiving = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="int_company_executing")
+    #idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
+
+    # === CATEGORIA MONEDA ====
+    PEN = '0'
+    USD = '1'
+    EUR = '2'
+
+    CURRENCY_CHOICES = [
+        (PEN,'PEN'),
+        (USD,'USD'),
+        (EUR,'EUR'),
+    ]
+
+    currency = models.CharField(
+        'Moneda',
+        max_length = 1, 
+        choices = CURRENCY_CHOICES,
+        null = True,
+        blank = True
+    )
+
+    initialAmount = models.DecimalField(
+        'Monto inicial', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0,
+        null = True,
+        blank = True
+    )
+
+    amount = models.DecimalField(
+        'Monto', 
+        max_digits=10, 
+        decimal_places=2,
+        default=0,
+        null = True,
+        blank = True
+    )
+
+    dateOrder = models.DateField(
+        'Fecha de solicitud',
+        null=True,
+        blank=True
+    )
+
+    deadline = models.DateField(
+        'Fecha de entrega',
+        null=True,
+        blank=True
+    )
+
+    # METHOD PAYMENT
+    CASH = "1"
+    CREDIT = "0"
+
+    PAY_METHOD_CHOICES = [
+        (CASH, 'Contado'),
+        (CREDIT, 'Credito'),
+    ]
+
+    payMethod = models.CharField(
+        'Método de pago',
+        default="0",
+        max_length=1, 
+        choices=PAY_METHOD_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    woNumber = models.CharField(
+        'WO number',
+        max_length = 20, 
+        null = True,
+        blank = True
+    )
+
+    pdf_file = models.FileField(upload_to='Wo_pdfs/',null=True,blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.pdf_file.delete()
+        super(WorkOrder, self).delete(*args, **kwargs)
+
+    #objects = quotesManager()
+
+    class Meta:
+        verbose_name = 'Orden de trabajo'
+        verbose_name_plural = 'Ordenes de Trabajos'
+    
+    def __str__(self):
+        return f"WO-{self.id} | {self.idSupplier}"
 
 class Trafo(TimeStampedModel):
     """
@@ -373,7 +582,7 @@ class Trafo(TimeStampedModel):
         null=True
     )
 
-    #objects = TrafoManager()
+    objects = TrafoManager()
 
     def delete(self, *args, **kwargs):
         """
@@ -387,8 +596,8 @@ class Trafo(TimeStampedModel):
         super(Items, self).delete(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Transformador'
-        verbose_name_plural = 'Transformadores'
+        verbose_name = 'Plantilla trafo'
+        verbose_name_plural = 'Plantillas trafos'
 
     def __str__(self):
         return f"DT{self.PHASE_NICK.get(self.PHASE, '')}{self.COOLING_NICK.get(self.COOLING, '')}{self.MOUNTING_NICK.get(self.MOUNTING, '')} {self.get_KVA_display()} - {self.id}"
@@ -401,7 +610,9 @@ class Items(TimeStampedModel):
 
     # ========== DATOS COMERCIALES ==========
     idTrafoQuote = models.ForeignKey(quotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
-    idTrafo = models.ForeignKey(Trafo, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Quote")
+    idTrafoIntQuote = models.ForeignKey(IntQuotes, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_IntQuote")
+    idWorkOrder = models.ForeignKey(WorkOrder, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_WorkOrder")
+    idTrafo = models.ForeignKey(Trafo, on_delete=models.CASCADE, null=True, blank=True, related_name = "item_Trafo")
     seq = models.CharField(
         "Serial",
         max_length=25,
@@ -411,6 +622,22 @@ class Items(TimeStampedModel):
     )
     unitCost = models.DecimalField(
         'Costo unitario', 
+        max_digits=10, 
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+
+    unitCostInt = models.DecimalField(
+        'Costo unitario interno', 
+        max_digits=10, 
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+
+    unitCostWO = models.DecimalField(
+        'Costo unitario interno', 
         max_digits=10, 
         decimal_places=2,
         blank=True,

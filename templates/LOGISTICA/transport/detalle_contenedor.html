@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Logística{% endblock %}
+{% block navbar_appName %}Contenedores{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+
+  <!-- ================ HEADER - ACCIONES ================= -->
+  <div class="row mb-3">
+    <div class="col-lg-6 col-12 d-flex ms-auto justify-content-end gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'logistica_app:lista-contenedores' %}">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+      </a>
+      <a class="btn bg-gradient-secondary" href="{% url 'logistica_app:editar-contenedor' container.id %}">
+        <i class="far fa-edit me-1"></i> Editar
+      </a>
+    </div>
+  </div>
+
+  <!-- ================ FILA 1: INFO GENERAL + TRACKING ================= -->
+  <div class="row">
+
+    <!-- Info general del contenedor -->
+    <div class="col-lg-7 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Información del Contenedor</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row">
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Nombre</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.containerName }}</p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Número de Contenedor</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.containerNumber|default:"—" }}</p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Año</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.year|default:"—" }}</p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Moneda</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.get_currency_display|default:"—" }}</p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Bruto</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.grossAmount }}</p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Impuestos</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.taxes }}</p>
+            </div>
+            <div class="col-sm-4 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Neto</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.netAmount }}</p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Tipo</p>
+              <p class="text-sm mb-0">
+                {% if container.isOrder %}
+                  <span class="badge badge-success">Orden de Compra</span>
+                {% else %}
+                  <span class="badge badge-primary">Requerimiento</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Solicitante</p>
+              <p class="text-sm font-weight-bold text-dark mb-0">{{ container.idPetitioner.get_full_name|default:container.idPetitioner }}</p>
+            </div>
+            <div class="col-12 mb-3">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Descripción</p>
+              <p class="text-sm text-dark mb-0">{{ container.shortDescription|default:"Sin descripción" }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Fecha de creación</p>
+              <p class="text-sm text-dark mb-0">{{ container.created|date:'d-m-Y H:i' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking -->
+    <div class="col-lg-5 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Tracking</h6>
+          <a class="btn btn-sm bg-gradient-dark" href="{% url 'logistica_app:nuevo-tracking' container_pk=container.id %}">
+            <i class="fas fa-plus me-1"></i> Nuevo Estado
+          </a>
+        </div>
+        <div class="card-body pt-3 px-0 pb-2">
+          <div class="table-responsive px-3">
+            <table class="table table-flush mb-0 align-items-center">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Fecha</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Área</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for track in tracking %}
+                <tr>
+                  <td class="text-sm">
+                    <p class="text-sm font-weight-normal text-secondary mb-0">
+                      {{ track.created|date:'d-m-Y H:i' }}
+                    </p>
+                  </td>
+                  <td class="text-sm">
+                    <p class="text-sm font-weight-normal text-dark mb-0">
+                      {{ track.get_area_display|default:"—" }}
+                    </p>
+                  </td>
+                  <td class="text-sm">
+                    {% if track.status == "0" %}
+                      <span class="badge badge-primary">{{ track.get_status_display }}</span>
+                    {% elif track.status == "12" %}
+                      <span class="badge badge-success">{{ track.get_status_display }}</span>
+                    {% else %}
+                      <span class="badge badge-secondary">{{ track.get_status_display }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center py-4">
+                    <p class="text-muted text-sm">Sin registros de tracking</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================ FILA 2: ITEMS + DOCUMENTOS ================= -->
+  <div class="row">
+
+    <!-- Items del Contenedor -->
+    <div class="col-lg-5 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Items del Contenedor</h6>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">PO</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Transformadores</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% regroup container.item_container.all by idTrafoQuote as po_groups %}
+                {% for po_group in po_groups %}
+                <tr>
+                  <td class="text-sm align-middle ps-2">
+                    <span class="badge badge-info">{{ po_group.grouper.poNumber }}</span>
+                  </td>
+                  <td class="text-sm align-middle">
+                    <ul class="text-muted ps-4 mb-0 float-start">
+                        {% for item in po_group.list %}
+                        <li> {{ item.idTrafo }}</li>
+                        {% endfor %}
+                    </ul>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="2" class="text-center py-4">
+                    <p class="text-muted text-sm">Sin ítems registrados</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentos -->
+    <div class="col-lg-7 col-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Documentos</h6>
+          <a class="btn btn-sm bg-gradient-dark" href="{% url 'logistica_app:nuevo-documento' container_pk=container.id %}">
+            <i class="fas fa-plus me-1"></i> Agregar Documento
+          </a>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Nombre</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Fecha</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Descripción</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for doc in documentos %}
+                <tr>
+                  <td class="text-sm ps-2">
+                    <span class="badge badge-secondary">{{ doc.get_docType_display }}</span>
+                  </td>
+                  <td class="text-sm">
+                    <p class="text-sm font-weight-normal text-dark mb-0">{{ doc.name }}</p>
+                  </td>
+                  <td class="text-sm ps-2">
+                    <p class="text-sm font-weight-normal text-secondary mb-0">{{ doc.date|date:'d-m-Y' }}</p>
+                  </td>
+                  <td class="text-sm">
+                    <p class="text-sm font-weight-normal text-secondary mb-0">
+                      {{ doc.description|default:"—"|truncatechars:40 }}
+                    </p>
+                  </td>
+                  <td class="ps-2">
+                    <a href="{{ doc.con_file.url }}" target="_blank" title="Ver documento">
+                      <i class="far fa-eye text-info text-lg"></i>
+                    </a>
+                    &ensp;
+                    
+                    <form method="POST" action="{% url 'logistica_app:eliminar-documento' doc.id %}" 
+                        style="display:inline;"
+                        onsubmit="return confirm('¿Está seguro de eliminar este documento?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0 m-0" title="Eliminar documento">
+                        <i class="far fa-trash-alt text-primary text-lg"></i>
+                    </button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-4">
+                    <p class="text-muted text-sm">No hay documentos registrados</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock panel-content %}

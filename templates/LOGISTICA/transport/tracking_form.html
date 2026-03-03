@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block navbar_main %}Logística{% endblock %}
+{% block navbar_appName %}Contenedores{% endblock %}
+{% block navbar_Type %}Tracking{% endblock %}
+
+{% block panel-content %}
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-5 col-12 mx-auto">
+      <div class="card">
+
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">{{ titulo }}</h6>
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{% url 'logistica_app:detalle-contenedor' container.id %}">
+            <i class="fas fa-arrow-left me-1"></i> Volver
+          </a>
+        </div>
+
+        <div class="card-body pt-4">
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <!-- Referencia al contenedor -->
+          <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-1">Contenedor</p>
+          <p class="text-sm font-weight-bold text-dark mb-4">{{ container.containerName }}</p>
+
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- ===== ÁREA Y ESTADO ===== -->
+            <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-3">
+              <i class="fas fa-map-marker-alt me-1"></i> Área y Estado
+            </p>
+
+            <div class="row">
+
+              <!-- Área -->
+              <div class="col-12 mb-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">{{ form.area.label }}</label>
+                  {{ form.area }}
+                </div>
+                {% if form.area.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.area.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+              <!-- Estado -->
+              <div class="col-12 mb-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">{{ form.status.label }}</label>
+                  {{ form.status }}
+                </div>
+                {% if form.status.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.status.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+
+            </div>
+
+            <!-- ===== ESTADO ACTUAL DEL CONTENEDOR ===== -->
+            {% with ultimo=container.containertracking_set.last %}
+            {% if ultimo %}
+            <hr class="horizontal dark my-3">
+            <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-2">
+              <i class="fas fa-history me-1"></i> Estado Actual
+            </p>
+            <div class="d-flex align-items-center gap-2 mb-4">
+              <span class="badge badge-secondary">{{ ultimo.get_area_display|default:"—" }}</span>
+              {% if ultimo.status == "0" %}
+                <span class="badge badge-primary">{{ ultimo.get_status_display }}</span>
+              {% elif ultimo.status == "12" %}
+                <span class="badge badge-success">{{ ultimo.get_status_display }}</span>
+              {% else %}
+                <span class="badge badge-secondary">{{ ultimo.get_status_display }}</span>
+              {% endif %}
+              <span class="text-xs text-secondary ms-auto">{{ ultimo.created|date:'d-m-Y H:i' }}</span>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- ===== BOTONES ===== -->
+            <hr class="horizontal dark my-3">
+            <div class="d-flex justify-content-end gap-2">
+              <a class="btn btn-outline-secondary"
+                 href="{% url 'logistica_app:detalle-contenedor' container.id %}">
+                Cancelar
+              </a>
+              <button type="submit" class="btn bg-gradient-dark">
+                <i class="fas fa-save me-1"></i> {{ btn_label }}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+  // Mantener label flotante activo en selects con valor
+  document.querySelectorAll('.input-group-outline select').forEach(function (el) {
+    function toggleFocused() {
+      const wrapper = el.closest('.input-group-outline');
+      if (!wrapper) return;
+      wrapper.classList.toggle('is-focused', el.value !== '');
+    }
+    el.addEventListener('change', toggleFocused);
+    toggleFocused();
+  });
+</script>
+{% endblock JSscripts %}

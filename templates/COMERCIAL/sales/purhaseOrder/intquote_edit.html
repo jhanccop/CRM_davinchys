@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Cotizaciones Internas{% endblock %}
+{% block navbar_Type %}Editar{% endblock %}
+
+{% block panel-content %}
+
+<style>
+  .breadcrumb-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .breadcrumb-info .breadcrumb-chip {
+    background: #f0f2f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    color: #344767;
+    font-weight: 600;
+  }
+  .breadcrumb-info .breadcrumb-arrow {
+    color: #d2d6da;
+    font-size: 0.7rem;
+  }
+</style>
+
+<div class="container-fluid">
+
+  <!-- ===== HEADER ===== -->
+  <div class="row mb-3">
+    <div class="col-lg-7 col-12">
+      <div class="breadcrumb-info mb-2">
+        {% if quote_master %}
+        <span class="breadcrumb-chip">
+          <i class="fas fa-file-invoice me-1"></i>QUO-{{ quote_master.id }}
+        </span>
+        <i class="fas fa-chevron-right breadcrumb-arrow"></i>
+        {% endif %}
+        <span class="breadcrumb-chip" style="background: #e3f2fd;">
+          <i class="fas fa-exchange-alt me-1"></i>INT-{{ int_quote.id }}
+        </span>
+        <i class="fas fa-chevron-right breadcrumb-arrow"></i>
+        <span class="breadcrumb-chip" style="background: #fff8e1;">
+          <i class="far fa-edit me-1"></i>Editar
+        </span>
+      </div>
+      <h5 class="font-weight-bolder mb-0">
+        Editar Cotizaci&oacute;n Interna INT-{{ int_quote.id }}
+      </h5>
+    </div>
+    <div class="col-lg-5 col-12 d-flex ms-auto justify-content-end gap-2 align-items-start mt-2 mt-lg-0">
+      <a class="btn btn-outline-secondary btn-sm"
+         href="{% url 'quotes_app:intquote-detail' pk=int_quote.id %}">
+        <i class="fas fa-times me-1"></i> Cancelar
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== FORMULARIO ===== -->
+  <div class="row">
+    <div class="col-lg-8 col-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Datos de la Cotizaci&oacute;n</h6>
+          <p class="text-xs text-secondary mb-0">
+            Modifique los campos necesarios y guarde los cambios.
+          </p>
+        </div>
+        <div class="card-body pt-3">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="alert alert-danger text-sm">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              Por favor corrija los siguientes errores:
+              <ul class="mb-0 mt-1">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                  <li>{{ field }}: {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+
+            <div class="row">
+              <div class="col-sm-6 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">Cliente</label>
+                {{ form.idClient }}
+              </div>
+              <div class="col-sm-6 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">Compa&ntilde;&iacute;a Subsidiaria</label>
+                {{ form.idTinReceiving }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-4 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">Moneda</label>
+                {{ form.currency }}
+              </div>
+              <div class="col-sm-4 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">M&eacute;todo de Pago</label>
+                {{ form.payMethod }}
+              </div>
+              <div class="col-sm-4 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">N&uacute;mero PO</label>
+                {{ form.poNumber }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">Fecha de Solicitud</label>
+                {{ form.dateOrder }}
+              </div>
+              <div class="col-sm-6 mb-3">
+                <label class="form-label text-xs font-weight-bold text-uppercase">Fecha de Entrega</label>
+                {{ form.deadline }}
+              </div>
+            </div>
+
+            <hr class="horizontal dark my-3">
+
+            <div class="d-flex justify-content-end gap-2">
+              <a class="btn btn-outline-secondary btn-sm"
+                 href="{% url 'quotes_app:intquote-detail' pk=int_quote.id %}">
+                Cancelar
+              </a>
+              <button type="submit" class="btn bg-gradient-primary btn-sm">
+                <i class="fas fa-save me-1"></i> Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel lateral: Referencia -->
+    <div class="col-lg-4 col-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6 class="mb-0 text-sm">Referencia</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">ID</p>
+            <p class="text-sm font-weight-bold text-dark mb-0">INT-{{ int_quote.id }}</p>
+          </div>
+          {% if quote_master %}
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Quote Master</p>
+            <p class="text-sm font-weight-bold text-info mb-0">QUO-{{ quote_master.id }}</p>
+          </div>
+          {% endif %}
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Actual</p>
+            <p class="text-sm font-weight-bold text-dark mb-0">
+              {{ int_quote.get_currency_display }} {{ int_quote.amount|default:"0.00" }}
+            </p>
+          </div>
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Creado</p>
+            <p class="text-sm text-dark mb-0">{{ int_quote.created|date:'d-m-Y H:i' }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Modificado</p>
+            <p class="text-sm text-dark mb-0">{{ int_quote.modified|date:'d-m-Y H:i' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock panel-content %}
