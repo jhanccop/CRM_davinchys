@@ -1,165 +1,201 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block navbar_main %}Comercial{% endblock %}
-{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
+{% block navbar_appName %}Cotizaciones{% endblock %}
 {% block navbar_Type %}Lista{% endblock %}
 
 {% block panel-content %}
 
-<!-- ================ EXPORTAR - NUEVO ================= -->
+<style>
+  .nav-tabs-custom .nav-link {
+    border: none; padding: 0.6rem 1.2rem; font-size: 0.8rem;
+    font-weight: 600; color: #67748e; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .nav-tabs-custom .nav-link.active { color: #344767; border-bottom: 2px solid #e91e63; background: transparent; }
+  .nav-tabs-custom .nav-link:hover { color: #344767; }
+  .nav-tabs-custom .tab-badge {
+    display: inline-block; background: #f0f2f5; padding: 0.1rem 0.45rem;
+    border-radius: 0.5rem; font-size: 0.65rem; font-weight: 700; margin-left: 0.3rem; color: #67748e;
+  }
+  .nav-tabs-custom .nav-link.active .tab-badge { background: #e91e63; color: #fff; }
+  .flow-chain { display: flex; align-items: center; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.2rem; }
+  .flow-chain .flow-item {
+    font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 0.4rem;
+    font-weight: 600; text-decoration: none; transition: opacity 0.15s;
+  }
+  .flow-chain .flow-item:hover { opacity: 0.8; }
+  .flow-arrow { color: #d2d6da; font-size: 0.55rem; }
+  .badge-quo { background: #e8f5e9; color: #2e7d32; }
+  .badge-int { background: #e3f2fd; color: #1565c0; }
+  .badge-wo  { background: #fff3e0; color: #e65100; }
+  .badge-na  { background: #f5f5f5; color: #9e9e9e; }
+  .progress-mini { height: 4px; border-radius: 2px; background: #f0f2f5; overflow: hidden; min-width: 60px; }
+  .progress-mini .bar { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .company-badge {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.4rem;
+    font-size: 0.68rem; font-weight: 600; background: #f8f9fa; color: #344767; border: 1px solid #e9ecef;
+  }
+  .company-badge.holding { border-color: #e91e63; color: #e91e63; }
+  .company-badge.subsidiary { border-color: #1565c0; color: #1565c0; }
+</style>
+
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-6 col-12 d-flex ms-auto">
-      <a class="export btn btn-icon btn-outline-secondary ms-auto" data-type="csv" type="button">
-        Export CSV
+
+  <!-- HEADER -->
+  <div class="row mb-3">
+    <div class="col-lg-4 col-12">
+      <h5 class="font-weight-bolder mb-1">Cotizaciones</h5>
+      <p class="text-sm text-secondary mb-0">
+        {% if is_holding %}
+        <span class="company-badge holding"><i class="fas fa-crown me-1"></i>Holding &mdash; Vista global</span>
+        {% else %}
+        <span class="company-badge subsidiary"><i class="fas fa-building me-1"></i>{{ company_tin|default:"Mi compania" }}</span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-lg-8 col-12 d-flex justify-content-end align-items-start gap-2 mt-2 mt-lg-0">
+      <form method="GET" class="d-flex align-items-center gap-2">
+        <div class="input-group input-group-outline" style="max-width: 260px;">
+          <input class="form-control datetimepicker text-center text-dark text-sm"
+                 value="{{ intervalDate }}" placeholder="Rango de fechas" id="dateKword" name="dateKword">
+        </div>
+        <button class="btn bg-gradient-dark btn-sm mb-0" type="submit">
+          <i class="fas fa-search me-1"></i> Buscar
+        </button>
+      </form>
+      <a class="export btn btn-icon btn-outline-secondary btn-sm mb-0" data-type="csv">
+        <i class="fas fa-download me-1"></i> CSV
       </a>
-      <div class="dropleft ms-3">
-        <a class="btn bg-gradient-secondary" href="{% url 'ventas_app:cotizacion-nuevo' %}">
-          NUEVO
-        </a>
-      </div>
+      <a class="btn bg-gradient-success btn-sm mb-0" href="{% url 'ventas_app:cotizacion-nuevo' %}">
+        <i class="fas fa-plus me-1"></i> Nueva
+      </a>
     </div>
   </div>
 
+  <!-- CARD + TABS -->
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <div class="card-header pb-0 ">
-          <div class="row">
-            <div class="col-lg-5 col-md-3">
-              
-            </div>
-            <div class="col-lg-7 col-md-9">
-              <form method="GET" class="">{% csrf_token %}
-                <div class="d-flex align-items-center">
-                  
-                  <div class="input-group input-group-outline">
-                    <input class="form-control datetimepicker text-center text-dark" value="{{object_list.intervalDate}}"
-                      placeholder="today" id="dateKword" name="dateKword">
-                  </div>
-                  &emsp;
-                  <div class="pt-3 pb-0">
-                    <button class="btn bg-gradient-dark" type="submit"> Buscar </button>
-                  </div>
-
-                </div>
-              </form>
-            </div>
-          </div>
+        <div class="card-header pb-0">
+          <ul class="nav nav-tabs-custom" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">
+                <i class="fas fa-file-invoice me-1"></i> Cotizaciones Master
+                <span class="tab-badge">{{ quotes_data|length }}</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'ventas_app:intquote-lista' %}">
+                <i class="fas fa-exchange-alt me-1"></i> Cot. Internas
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'ventas_app:workorder-lista' %}">
+                <i class="fas fa-hard-hat me-1"></i> Ordenes de Trabajo
+              </a>
+            </li>
+          </ul>
         </div>
-        
         <div class="card-body pt-0 px-0 pb-2">
           <div class="table-responsive p-0">
-            <table class="table table-flush mb-0 align-items-center" id="datatable-move">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-main">
               <thead class="thead-light">
                 <tr>
-                  <th class="text-uppercase text-dark text-xs text-center font-weight-bolder opacity-7 ps-2">RFK / PO / Fecha
-                  </th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7"> Cliente </th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Es PO?</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Seguimiento - Cot</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Import PO - Tipo - Serie</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-3">RFK / PO / Fecha</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Cliente</th>
+                  {% if is_holding %}
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Compania</th>
+                  {% endif %}
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Estado</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Progreso</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Flujo Cotizaciones</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
                 </tr>
               </thead>
-              
               <tbody>
-                {% for t in quotes.listQuotes %}
+                {% for t in quotes_data %}
                 <tr>
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-
-                      <h6 class="mb-0 text-sm">
-                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          {{t.poNumber|default:"-"}}
-                        </a>
-                      </h6>
-                      
-                      <p class="text-sm font-weight-normal text-dark mb-0">
-                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          QUO-{{t.id}}
-                        </a>
-                      </p>
-                      
-                      <p class="text-sm font-weight-normal text-secondary mb-0">
-                        {{ t.dateOrder|date:'d-m-Y' }}
-                      </p>
+                  <td class="ps-3">
+                    <div class="d-flex flex-column">
+                      <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}" class="text-sm font-weight-bold text-dark mb-0">{{ t.poNumber|default:"-" }}</a>
+                      <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}" class="text-xs text-info font-weight-bold">QUO-{{ t.id }}</a>
+                      <span class="text-xs text-secondary">{{ t.dateOrder|date:'d-m-Y' }}</span>
                     </div>
                   </td>
-
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-xs text-secondary"> <a
-                        href="{% url 'ventas_app:cotizacion-detalle' t.id %}">{{t.idClient.tradeName}} </a>
-                      </h6>
-                      <p class="text-sm font-weight-normal text-secondary mb-0">
-                        {{t.idClient.numberIdClient|default:"-"}}
-                      </p>
+                  <td>
+                    <div class="d-flex flex-column">
+                      <span class="text-sm font-weight-bold text-dark">{{ t.idClient.tradeName|default:t.idClient|default:"-" }}</span>
+                      <span class="text-xs text-secondary">{{ t.idClient.numberIdClient|default:"-" }}</span>
                     </div>
                   </td>
-
+                  {% if is_holding %}
+                  <td><span class="company-badge">{{ t.idTinReceiving.tinName|default:"-" }}</span></td>
+                  {% endif %}
                   <td>
                     {% if t.isPO %}
                     <span class="badge badge-success">PO</span>
                     {% else %}
-                    <span class="badge badge-primary">no PO</span>
+                    <span class="badge badge-primary">Cotizacion</span>
                     {% endif %}
                   </td>
-
-                  <td class="text-sm">
-                    {% if t.ultimo_evento == "0" %}
-                    <span class="badge badge-primary"> {{t.ultimo_area_display}} - {{t.ultimo_evento_display}}</span>
-                    {% elif t.ultimo_evento == "12" %}
-                    <span class="badge badge-success">{{t.ultimo_evento_display}}</span>
-                    {% else %}
-                    <span class="badge badge-secondary">{{t.ultimo_evento_display}}</span>
-                    {% endif %}
-                  </td>
-
                   <td>
-                    {% for r in t.item_Quote.all %}
-                    <span class="d-flex align-items-center">
-                      {% if r.idTrafoIntQuote %}
-                      <a href="{% url 'ventas_app:intquote-detail' r.idTrafoIntQuote.id %}" class="mr-2">
-                        <p class="pt-0 mb-0"> 
-                          <span class="badge badge-success">{{r.idTrafoIntQuote }}</span>
-                        </p>
-                      </a>
+                    {% with total=t.total_items iq=t.items_with_intquote wo=t.items_with_wo %}
+                    <div class="d-flex flex-column" style="min-width: 90px;">
+                      <div class="d-flex align-items-center gap-1 mb-1">
+                        <span class="text-xs text-secondary" style="width: 20px;">IP</span>
+                        <div class="progress-mini flex-grow-1">
+                          {% if total > 0 %}<div class="bar bg-info" style="width: {% widthratio iq total 100 %}%;"></div>{% endif %}
+                        </div>
+                        <span class="text-xs font-weight-bold" style="width: 30px;">{{ iq }}/{{ total }}</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-1">
+                        <span class="text-xs text-secondary" style="width: 20px;">WO</span>
+                        <div class="progress-mini flex-grow-1">
+                          {% if total > 0 %}<div class="bar" style="width: {% widthratio wo total 100 %}%; background: #fb6340;"></div>{% endif %}
+                        </div>
+                        <span class="text-xs font-weight-bold" style="width: 30px;">{{ wo }}/{{ total }}</span>
+                      </div>
+                    </div>
+                    {% endwith %}
+                  </td>
+                  <td>
+                    {% for item in t.item_Quote.all %}
+                    <div class="flow-chain">
+                      {% if item.idTrafoIntQuote %}
+                      <a href="{% url 'ventas_app:intquote-detail' item.idTrafoIntQuote.id %}" class="flow-item badge-int">{{ item.idTrafoIntQuote.poNumber }}</a>
                       {% else %}
-                      <span class="badge badge-secondary">no assigned</span>
+                      <span class="flow-item badge-na">sin IP</span>
                       {% endif %}
-                      &ensp;
-                      <a href="{% url 'ventas_app:detail-item-all' r.id %}">
-                        <p class="pt-0 mb-0"> {{r}}</p>
-                      </a>
-                    </span>
-                    
-                    {% endfor%}
+                      <i class="fas fa-chevron-right flow-arrow"></i>
+                      {% if item.idWorkOrder %}
+                      <a href="{% url 'ventas_app:workorder-detail' item.idWorkOrder.id %}" class="flow-item badge-wo">{{ item.idWorkOrder.woNumber }}</a>
+                      {% else %}
+                      <span class="flow-item badge-na">sin WO</span>
+                      {% endif %}
+                      <i class="fas fa-chevron-right flow-arrow"></i>
+                      <a href="{% url 'ventas_app:detail-item-all' item.id %}" class="flow-item badge-quo">{{ item.seq|default:"S/N" }}</a>
+                    </div>
+                    {% endfor %}
                   </td>
-
                   <td>
-                      <a href="{% url 'ventas_app:quote-assignment' t.id %}">
-                        <i class="fas fa-tasks text-success text-lg"></i>
-                      </a>
-                      &ensp;
-                      <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          <i class="far fa-eye text-info text-lg"></i>
-                      </a>
-                      &ensp;
-                      <a href="{% url 'ventas_app:cotizacion-editar' t.id %}">
-                          <i class="far fa-edit text-dark text-lg"></i>
-                      </a>
-                      &ensp;
-                      <a href="{% url 'ventas_app:cotizacion-eliminar' t.id %}">
-                          <i class="far fa-trash-alt text-primary text-lg"></i>
-                      </a>
+                    <div class="d-flex align-items-center gap-2">
+                      <a href="{% url 'ventas_app:quote-assignment' t.id %}" title="Kanban"><i class="fas fa-columns text-primary text-lg"></i></a>
+                      <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}" title="Detalle"><i class="far fa-eye text-info text-lg"></i></a>
+                      <a href="{% url 'ventas_app:cotizacion-editar' t.id %}" title="Editar"><i class="far fa-edit text-dark text-lg"></i></a>
+                      <a href="{% url 'ventas_app:cotizacion-eliminar' t.id %}" title="Eliminar"><i class="far fa-trash-alt text-danger text-lg"></i></a>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="{% if is_holding %}7{% else %}6{% endif %}" class="text-center py-4">
+                    <i class="fas fa-inbox fa-2x text-secondary mb-2"></i>
+                    <p class="text-sm text-muted mb-0">No se encontraron cotizaciones</p>
                   </td>
                 </tr>
                 {% endfor %}
               </tbody>
-              
             </table>
           </div>
         </div>
@@ -168,46 +204,22 @@
   </div>
 </div>
 
-{% endblock panel-content %}
-
-{% block JSscripts %}
-
 <script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
-    if (document.querySelector('.datetimepicker')) {
-        flatpickr('.datetimepicker', {
-            allowInput: true,
-            mode: "range"
-        }); // flatpickr
-    }
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true, mode: "range" });
+  }
 </script>
-
 <script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
 <script>
-  /* PROYECTOS */
-  const dataTable= new simpleDatatables.DataTable("#datatable-move", {
-    searchable: true,
-    fixedHeight: false,
-    perPage: 15
-  });
-
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
   document.querySelectorAll(".export").forEach(function (el) {
     el.addEventListener("click", function (e) {
-      var type = el.dataset.type;
-
-      var data = {
-        type: type,
-        filename: "movimientos",
-      };
-
-      if (type === "csv") {
-        data.columnDelimiter = ",";
-      }
-
+      var data = { type: el.dataset.type, filename: "cotizaciones" };
+      if (el.dataset.type === "csv") { data.columnDelimiter = ","; }
       dataTable.export(data);
     });
   });
-
 </script>
 
-{% endblock JSscripts %}
+{% endblock panel-content %}

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block navbar_main %}Comercial{% endblock %}
-{% block navbar_appName %}Cotizaciones Internas{% endblock %}
+{% block navbar_appName %}Ordenes de Trabajo{% endblock %}
 {% block navbar_Type %}Editar{% endblock %}
 
 {% block panel-content %}
@@ -13,17 +13,19 @@
   <div class="row mb-3">
     <div class="col-lg-8 col-12">
       <h5 class="font-weight-bolder mb-1">
-        Editar Cotizaci&oacute;n Interna INT-{{ int_quote.id }}
+        Editar Orden de Trabajo {{ work_order }} 
       </h5>
       <p class="text-sm text-secondary mb-0">
         {% if quote_master %}QUO-{{ quote_master.id }}{% endif %}
-        {% if quote_master %} &rarr; {% endif %}
-        INT-{{ int_quote.id }} &rarr; Editar
+        {% if quote_master and int_quote_ref %} &rarr; {% endif %}
+        {% if int_quote_ref %}INT-{{ int_quote_ref.id }}{% endif %}
+        {% if quote_master or int_quote_ref %} &rarr; {% endif %}
+        WO-{{ work_order.id }} &rarr; Editar
       </p>
     </div>
     <div class="col-lg-4 col-12 d-flex ms-auto justify-content-end align-items-start mt-2 mt-lg-0">
       <a class="btn btn-sm btn-outline-secondary"
-         href="{% url 'ventas_app:intquote-detail' pk=int_quote.id %}">
+         href="{% url 'ventas_app:workorder-detail' pk=work_order.id %}">
         <i class="fas fa-arrow-left me-1"></i> Volver
       </a>
     </div>
@@ -35,7 +37,7 @@
       <div class="card">
 
         <div class="card-header pb-0">
-          <h6 class="mb-0">Datos de la Cotizaci&oacute;n</h6>
+          <h6 class="mb-0">Datos de la Orden de Trabajo</h6>
           <p class="text-xs text-secondary mb-0">
             Modifique los campos necesarios y guarde los cambios.
           </p>
@@ -66,31 +68,31 @@
           </div>
           {% endif %}
 
-          <form method="POST" enctype="multipart/form-data">
+          <form id="workOrderForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <!-- ===== SECCIÓN 1: CLIENTE Y COMPAÑÍA ===== -->
+            <!-- ===== SECCIÓN 1: PROVEEDOR Y COMPAÑÍA ===== -->
             <p class="text-xs text-uppercase font-weight-bolder text-secondary mb-3">
-              <i class="fas fa-building me-1"></i> Cliente y Compa&ntilde;&iacute;a
+              <i class="fas fa-building me-1"></i> Proveedor y Compa&ntilde;&iacute;a
             </p>
 
             <div class="row">
 
-              <!-- Cliente -->
+              <!-- Proveedor -->
               <div class="col-sm-6 mb-4">
                 <div class="input-group input-group-outline is-focused">
-                  <label class="form-label">Cliente</label>
-                  {{ form.idClient }}
+                  <label class="form-label">Proveedor</label>
+                  {{ form.idSupplier }}
                 </div>
-                {% if form.idClient.errors %}
-                  <p class="text-danger text-xs mt-1">{{ form.idClient.errors|join:", " }}</p>
+                {% if form.idSupplier.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.idSupplier.errors|join:", " }}</p>
                 {% endif %}
               </div>
 
-              <!-- Compañía Subsidiaria -->
+              <!-- Compañía Ejecutora -->
               <div class="col-sm-6 mb-4">
                 <div class="input-group input-group-outline is-focused">
-                  <label class="form-label">Compa&ntilde;&iacute;a Subsidiaria</label>
+                  <label class="form-label">Compa&ntilde;&iacute;a Ejecutora</label>
                   {{ form.idTinReceiving }}
                 </div>
                 {% if form.idTinReceiving.errors %}
@@ -130,14 +132,14 @@
                 {% endif %}
               </div>
 
-              <!-- Número PO -->
+              <!-- Número WO -->
               <div class="col-sm-4 mb-4">
-                <div class="input-group input-group-outline {% if form.poNumber.value %}is-focused{% endif %}">
-                  <label class="form-label">N&uacute;mero PO</label>
-                  {{ form.poNumber }}
+                <div class="input-group input-group-outline {% if form.woNumber.value %}is-focused{% endif %}">
+                  <label class="form-label">N&uacute;mero WO</label>
+                  {{ form.woNumber }}
                 </div>
-                {% if form.poNumber.errors %}
-                  <p class="text-danger text-xs mt-1">{{ form.poNumber.errors|join:", " }}</p>
+                {% if form.woNumber.errors %}
+                  <p class="text-danger text-xs mt-1">{{ form.woNumber.errors|join:", " }}</p>
                 {% endif %}
               </div>
 
@@ -198,7 +200,7 @@
             <hr class="horizontal dark my-3">
             <div class="d-flex justify-content-end gap-2">
               <a class="btn btn-outline-secondary"
-                 href="{% url 'ventas_app:intquote-detail' pk=int_quote.id %}">
+                 href="{% url 'ventas_app:workorder-detail' pk=work_order.id %}">
                 Cancelar
               </a>
               <button type="submit" class="btn bg-gradient-dark">
@@ -220,8 +222,18 @@
         <div class="card-body pt-3">
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">ID</p>
-            <p class="text-sm font-weight-bold text-dark mb-0">INT-{{ int_quote.id }}</p>
+            <p class="text-sm font-weight-bold text-dark mb-0">{{ work_order.woNumber }}</p>
           </div>
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Proveedor Actual</p>
+            <p class="text-sm font-weight-bold text-dark mb-0">{{ work_order.idSupplier|default:"&mdash;" }}</p>
+          </div>
+          {% if int_quote_ref %}
+          <div class="mb-3">
+            <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Cotizacion Interna</p>
+            <p class="text-sm font-weight-bold text-info mb-0">INT-{{ int_quote_ref.id }}</p>
+          </div>
+          {% endif %}
           {% if quote_master %}
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Quote Master</p>
@@ -231,16 +243,16 @@
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Actual</p>
             <p class="text-sm font-weight-bold mb-0" style="color: #fb6340;">
-              {{ int_quote.get_currency_display }} {{ int_quote.amount|default:"0.00" }}
+              {{ work_order.get_currency_display }} {{ work_order.amount|default:"0.00" }}
             </p>
           </div>
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Creado</p>
-            <p class="text-sm text-dark mb-0">{{ int_quote.created|date:'d-m-Y H:i' }}</p>
+            <p class="text-sm text-dark mb-0">{{ work_order.created|date:'d-m-Y H:i' }}</p>
           </div>
           <div>
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Modificado</p>
-            <p class="text-sm text-dark mb-0">{{ int_quote.modified|date:'d-m-Y H:i' }}</p>
+            <p class="text-sm text-dark mb-0">{{ work_order.modified|date:'d-m-Y H:i' }}</p>
           </div>
         </div>
       </div>
@@ -277,7 +289,10 @@
     if (document.querySelector('.datetimepicker')) {
         flatpickr('.datetimepicker', {
             allowInput: true,
-        });
+            //noCalendar: true,
+            //maxDate: "today"
+            //mode: "range"
+        }); // flatpickr
     }
 </script>
 {% endblock JSscripts %}

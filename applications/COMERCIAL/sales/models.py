@@ -104,7 +104,7 @@ class quotes(TimeStampedModel):
 
     poNumber = models.CharField(
         'PO number',
-        max_length = 10, 
+        max_length = 20, 
         null = True,
         blank = True
     )
@@ -322,7 +322,7 @@ class WorkOrder(TimeStampedModel):
         verbose_name_plural = 'Ordenes de Trabajos'
     
     def __str__(self):
-        return f"WO-{self.id} | {self.idSupplier}"
+        return f"{self.woNumber} | {self.idSupplier}"
 
 class Trafo(TimeStampedModel):
     """

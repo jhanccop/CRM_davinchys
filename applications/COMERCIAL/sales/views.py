@@ -13,7 +13,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from django.shortcuts import render
 
-from django.db.models import Q
+from django.db.models import Count, Sum, Q, Prefetch
 
 from applications.users.mixins import (
   ComercialMixin,
@@ -66,7 +66,8 @@ from .forms import (
   ItemTrackingForm,
   trafoForm,
   WorkOrderForm,
-  IntQuoteEditForm
+  IntQuoteEditForm,
+  WorkOrderEditForm
   )
 
 class QuotesListView(ComercialMixin,ListView):
@@ -444,18 +445,133 @@ class AddTrafoToQuoteView(ComercialFinanzasMixin,View):
                 'errors': form.errors
             })
 
-class QuoteDetailView(ComercialFinanzasMixin,DetailView):
+class QuoteDetailView(ComercialFinanzasMixin, DetailView):
     model = quotes
     template_name = 'COMERCIAL/sales/quote-detalle.html'
     context_object_name = 'quote'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['trafos'] = self.object.item_Quote.all().order_by("-created")
+
+        # Items asociados a esta PO/QUO
+        items = self.object.item_Quote.all().order_by("-created")
+        context['trafos'] = items
+
+        # Tracking de la cotización
         context['tracking'] = QuoteTracking.objects.filter(idquote=self.object)
+
+        # IntQuotes: cotizaciones internas vinculadas a través de los items
+        int_quote_ids = items.values_list(
+            'idTrafoIntQuote', flat=True
+        ).exclude(idTrafoIntQuote__isnull=True).distinct()
+        context['int_quotes'] = IntQuotes.objects.filter(
+            id__in=int_quote_ids
+        ).select_related('idClient', 'idTinReceiving')
+
+        # WorkOrders: órdenes de trabajo vinculadas a través de los items
+        wo_ids = items.values_list(
+            'idWorkOrder', flat=True
+        ).exclude(idWorkOrder__isnull=True).distinct()
+        context['work_orders'] = WorkOrder.objects.filter(
+            id__in=wo_ids
+        ).select_related('idSupplier', 'idTinReceiving')
+
         return context
 
-class TrafoQuoteListView(ComercialFinanzasMixin,ListView):
+class TrafoQuoteListView(ComercialFinanzasMixin, ListView):
+    """
+    Lista de Cotizaciones Master (quotes).
+    - Holding: ve TODAS las quotes de todas las companias.
+    - Subsidiaria: ve solo las quotes donde idTinReceiving = su compania.
+    Incluye resumen de IntQuotes y WorkOrders por cada quote.
+    """
+    template_name = 'COMERCIAL/sales/lista-cotizaciones.html'
+    context_object_name = 'quotes_data'
+
+    def get_queryset(self):
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+        else:
+            parts = interval_date.split(' to ')
+            if len(parts) == 2:
+                start = parts[0].strip()
+                end = parts[1].strip()
+            else:
+                start = date.today() - timedelta(days=90)
+                end = date.today()
+
+        # Base queryset
+        qs = quotes.objects.select_related(
+            'idClient', 'idTinReceiving'
+        ).prefetch_related(
+            Prefetch(
+                'item_Quote',
+                queryset=Items.objects.select_related(
+                    'idTrafo', 'idTrafoIntQuote',
+                    'idTrafoIntQuote__idTinReceiving',
+                    'idWorkOrder', 'idWorkOrder__idSupplier'
+                )
+            ),
+        ).filter(
+            dateOrder__range=[start, end]
+        ).order_by('-dateOrder', '-id')
+
+        # Filtrar por tipo de compania
+        if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
+            qs = qs.filter(idTinReceiving=company_tin)
+
+        # Annotate counts
+        qs = qs.annotate(
+            total_items=Count('item_Quote', distinct=True),
+            items_with_intquote=Count(
+                'item_Quote',
+                filter=Q(item_Quote__idTrafoIntQuote__isnull=False),
+                distinct=True
+            ),
+            items_with_wo=Count(
+                'item_Quote',
+                filter=Q(item_Quote__idWorkOrder__isnull=False),
+                distinct=True
+            ),
+            total_amount_sum=Sum('item_Quote__unitCost'),
+        )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+
+        is_holding = (
+            company_tin and company_tin.company_type == Tin.HOLDING
+        ) if company_tin else False
+
+        qs = context['quotes_data']
+
+        context.update({
+            'intervalDate': interval_date,
+            'is_holding': is_holding,
+            'company_tin': company_tin,
+            'total_quotes': qs.count() if hasattr(qs, 'count') else len(qs),
+        })
+        return context
+
+class TrafoQuoteListView0(ComercialFinanzasMixin,ListView):
     template_name = 'COMERCIAL/sales/lista-cotizaciones.html'
     context_object_name = 'quotes'
     
@@ -815,6 +931,84 @@ class DeleteTrafoItemView(ComercialFinanzasMixin, DeleteView):
         return reverse_lazy('ventas_app:cotizacion-detalle', kwargs={'pk': item.idTrafoQuote.id})
 
 # ================= INT ASIGN QUOTES ITEMS ========================
+class IntQuoteListView(ComercialFinanzasMixin, ListView):
+    """
+    Lista de Cotizaciones Internas (IntQuotes).
+    - Holding: ve todas las IntQuotes.
+    - Subsidiaria: ve solo IntQuotes donde idTinReceiving = su compania.
+    """
+    template_name = 'COMERCIAL/sales/purhaseOrder/intquote_list.html'
+    context_object_name = 'intquotes_data'
+
+    def get_queryset(self):
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+        else:
+            parts = interval_date.split(' to ')
+            if len(parts) == 2:
+                start = parts[0].strip()
+                end = parts[1].strip()
+            else:
+                start = date.today() - timedelta(days=90)
+                end = date.today()
+
+        qs = IntQuotes.objects.select_related(
+            'idClient', 'idTinReceiving'
+        ).prefetch_related(
+            Prefetch(
+                'item_IntQuote',
+                queryset=Items.objects.select_related(
+                    'idTrafo', 'idWorkOrder', 'idWorkOrder__idSupplier'
+                )
+            ),
+        ).filter(
+            dateOrder__range=[start, end]
+        ).order_by('-dateOrder', '-id')
+
+        if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
+            qs = qs.filter(idTinReceiving=company_tin)
+
+        qs = qs.annotate(
+            total_items=Count('item_IntQuote', distinct=True),
+            items_with_wo=Count(
+                'item_IntQuote',
+                filter=Q(item_IntQuote__idWorkOrder__isnull=False),
+                distinct=True
+            ),
+        )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+
+        is_holding = (
+            company_tin and company_tin.company_type == Tin.HOLDING
+        ) if company_tin else False
+
+        context.update({
+            'intervalDate': interval_date,
+            'is_holding': is_holding,
+            'company_tin': company_tin,
+        })
+        return context
+
 class QuoteKanbanView(ComercialFinanzasMixin,DetailView):
     """
     Vista Kanban para gestionar la asignación de items a cotizaciones internas.
@@ -1145,7 +1339,7 @@ class IntQuoteEditView(ComercialFinanzasMixin, UpdateView):
 
     def get_success_url(self):
         return reverse(
-            'quotes_app:intquote-detail',
+            'ventas_app:intquote-detail',
             kwargs={'pk': self.object.pk}
         )
 
@@ -1159,8 +1353,80 @@ class IntQuoteEditView(ComercialFinanzasMixin, UpdateView):
         return context
 
 
-# ================= wo ASINGGNED ITEMS ========================
+# ================= INTQUOTES TO WO ITEMS ========================
+class WorkOrderListView(ComercialFinanzasMixin, ListView):
+    """
+    Lista de Ordenes de Trabajo (WorkOrder).
+    - Holding: ve todas las WO.
+    - Subsidiaria: ve solo WO donde idTinReceiving = su compania.
+    """
+    template_name = 'COMERCIAL/sales/workOrder/workorder_list.html'
+    context_object_name = 'workorders_data'
 
+    def get_queryset(self):
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+        else:
+            parts = interval_date.split(' to ')
+            if len(parts) == 2:
+                start = parts[0].strip()
+                end = parts[1].strip()
+            else:
+                start = date.today() - timedelta(days=90)
+                end = date.today()
+
+        qs = WorkOrder.objects.select_related(
+            'idSupplier', 'idTinReceiving'
+        ).prefetch_related(
+            Prefetch(
+                'item_WorkOrder',
+                queryset=Items.objects.select_related(
+                    'idTrafo', 'idTrafoIntQuote'
+                )
+            ),
+        ).filter(
+            dateOrder__range=[start, end]
+        ).order_by('-dateOrder', '-id')
+
+        if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
+            qs = qs.filter(idTinReceiving=company_tin)
+
+        qs = qs.annotate(
+            total_items=Count('item_WorkOrder', distinct=True),
+        )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        company = getattr(user, 'empleado', None)
+        company_tin = company.company if company else None
+
+        interval_date = self.request.GET.get('dateKword', '')
+        if not interval_date or interval_date == 'today':
+            start = date.today() - timedelta(days=90)
+            end = date.today()
+            interval_date = f"{start} to {end}"
+
+        is_holding = (
+            company_tin and company_tin.company_type == Tin.HOLDING
+        ) if company_tin else False
+
+        context.update({
+            'intervalDate': interval_date,
+            'is_holding': is_holding,
+            'company_tin': company_tin,
+        })
+        return context
+    
 class IntQuoteWOView(ComercialFinanzasMixin,DetailView):
     """
     Vista Kanban para gestionar la asignación de items de una IntQuote
@@ -1421,6 +1687,113 @@ class UpdateItemCostWOAPI(View):
             'success': True,
             'new_cost': str(item.unitCostWO),
         })
+
+# ================= WORKORDERS ========================
+class WorkOrderDetailView(DetailView):
+    """Vista de detalle de Orden de Trabajo"""
+    model = WorkOrder
+    template_name = 'COMERCIAL/sales/workOrder/workorder_detail.html'
+    context_object_name = 'work_order'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        wo = self.object
+
+        # Items asignados a esta WorkOrder
+        all_items = Items.objects.filter(
+            idWorkOrder=wo
+        ).select_related(
+            'idTrafo', 'idTrafoQuote', 'idTrafoIntQuote',
+            'idTrafoIntQuote__idTinReceiving'
+        )
+
+        # Totales
+        total_cost_wo = sum(
+            item.unitCostWO or Decimal('0') for item in all_items
+        )
+        total_cost_int = sum(
+            item.unitCostInt or Decimal('0') for item in all_items
+        )
+        total_cost_client = sum(
+            item.unitCost or Decimal('0') for item in all_items
+        )
+
+        # IntQuotes asociadas (los items pueden venir de distintas IntQuotes)
+        iq_ids = all_items.values_list(
+            'idTrafoIntQuote_id', flat=True
+        ).distinct()
+        int_quotes = IntQuotes.objects.filter(
+            id__in=iq_ids
+        ).select_related('idTinReceiving', 'idClient')
+
+        # Agrupado por IntQuote
+        iq_groups = []
+        for iq in int_quotes:
+            iq_items = all_items.filter(idTrafoIntQuote=iq)
+            iq_groups.append({
+                'int_quote': iq,
+                'items': iq_items,
+                'total': sum(
+                    item.unitCostWO or Decimal('0')
+                    for item in iq_items
+                ),
+                'count': iq_items.count(),
+            })
+
+        # Quote master
+        quote_master = None
+        first_item = all_items.first()
+        if first_item and first_item.idTrafoQuote:
+            quote_master = first_item.idTrafoQuote
+
+        # IntQuote principal (la primera)
+        int_quote_ref = int_quotes.first() if int_quotes.exists() else None
+
+        # Margen: diferencia entre costo interno y costo OT
+        margin = total_cost_int - total_cost_wo
+
+        context.update({
+            'all_items': all_items,
+            'total_items': all_items.count(),
+            'total_cost_wo': total_cost_wo,
+            'total_cost_int': total_cost_int,
+            'total_cost_client': total_cost_client,
+            'margin': margin,
+            'int_quotes': int_quotes,
+            'iq_groups': iq_groups,
+            'quote_master': quote_master,
+            'int_quote_ref': int_quote_ref,
+        })
+        return context
+
+class WorkOrderEditView(UpdateView):
+    """Vista de edicion de Orden de Trabajo"""
+    model = WorkOrder
+    form_class = WorkOrderEditForm
+    template_name = 'COMERCIAL/sales/workOrder/workorder_edit.html'
+    context_object_name = 'work_order'
+
+    def get_success_url(self):
+        return reverse(
+            'ventas_app:workorder-detail',
+            kwargs={'pk': self.object.pk}
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Breadcrumb references
+        first_item = Items.objects.filter(
+            idWorkOrder=self.object
+        ).select_related(
+            'idTrafoQuote', 'idTrafoIntQuote'
+        ).first()
+        if first_item:
+            if first_item.idTrafoQuote:
+                context['quote_master'] = first_item.idTrafoQuote
+            if first_item.idTrafoIntQuote:
+                context['int_quote_ref'] = first_item.idTrafoIntQuote
+        return context
+
 
 
 # ================= IMAGENES ITEMS ========================

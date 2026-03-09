@@ -61,16 +61,16 @@
       <div class="breadcrumb-info mb-2">
         {% if quote_master %}
         <a href="{% url 'ventas_app:quote-assignment' pk=quote_master.id %}" class="breadcrumb-chip text-decoration-none">
-          <i class="fas fa-file-invoice me-1"></i>QUO-{{ quote_master.id }}
+          <i class="fas fa-file-invoice me-1"></i>PO-{{ quote_master }}
         </a>
         <i class="fas fa-chevron-right breadcrumb-arrow"></i>
         {% endif %}
         <span class="breadcrumb-chip" style="background: #e3f2fd;">
-          <i class="fas fa-exchange-alt me-1"></i>INT-{{ int_quote.id }}
+          <i class="fas fa-exchange-alt me-1"></i>{{ int_quote }}
         </span>
       </div>
       <h5 class="font-weight-bolder mb-0">
-        Cotizaci&oacute;n Interna INT-{{ int_quote.id }}
+        {{ int_quote }}
       </h5>
     </div>
     <div class="col-lg-5 col-12 d-flex ms-auto justify-content-end gap-2 align-items-start mt-2 mt-lg-0">
@@ -79,9 +79,6 @@
       </a>
       <a class="btn bg-gradient-secondary btn-sm" href="{% url 'ventas_app:intquote-edit' pk=int_quote.id %}">
         <i class="far fa-edit me-1"></i> Editar
-      </a>
-      <a class="btn bg-gradient-dark btn-sm" href="">
-        <i class="fas fa-columns me-1"></i> Kanban OT
       </a>
     </div>
   </div>
@@ -130,13 +127,13 @@
             <div class="col-sm-4 mb-3">
               <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Inicial</p>
               <p class="text-sm font-weight-bold text-dark mb-0">
-                {{ int_quote.get_currency_display }} {{ int_quote.initialAmount|default:"0.00" }}
+                {{ int_quote.get_currency_display }} {{ int_quote.initialAmount|floatformat:"2g"|default:"0.00" }}
               </p>
             </div>
             <div class="col-sm-4 mb-3">
               <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Monto Total</p>
               <p class="text-sm font-weight-bold text-dark mb-0">
-                {{ int_quote.get_currency_display }} {{ int_quote.amount|default:"0.00" }}
+                {{ int_quote.get_currency_display }} {{ int_quote.amount|floatformat:"2g"|default:"0.00" }}
               </p>
             </div>
             <div class="col-sm-4 mb-3">
@@ -197,19 +194,19 @@
             <div class="col-6 col-sm-3">
               <div class="stat-mini">
                 <div class="stat-value text-warning">{{ unassigned_count }}</div>
-                <div class="stat-label">Sin OT</div>
+                <div class="stat-label">Sin WO</div>
               </div>
             </div>
             <div class="col-6 col-sm-3">
               <div class="stat-mini">
                 <div class="stat-value text-success">{{ assigned_count }}</div>
-                <div class="stat-label">Con OT</div>
+                <div class="stat-label">Con WO</div>
               </div>
             </div>
             <div class="col-6 col-sm-3">
               <div class="stat-mini">
                 <div class="stat-value" style="color: #fb6340;">{{ wo_count }}</div>
-                <div class="stat-label">&Oacute;rdenes</div>
+                <div class="stat-label">WO</div>
               </div>
             </div>
           </div>
@@ -220,13 +217,13 @@
             <div class="col-sm-6 mb-3">
               <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Total Costo Interno</p>
               <p class="text-lg font-weight-bold text-dark mb-0">
-                {{ int_quote.get_currency_display }} {{ total_cost_int }}
+                {{ int_quote.get_currency_display }} {{ total_cost_int|floatformat:"2g" }}
               </p>
             </div>
             <div class="col-sm-6 mb-3">
-              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Total Costo OT</p>
+              <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Total Costo WO</p>
               <p class="text-lg font-weight-bold mb-0" style="color: #fb6340;">
-                {{ int_quote.get_currency_display }} {{ total_cost_wo }}
+                {{ int_quote.get_currency_display }} {{ total_cost_wo|floatformat:"2g" }}
               </p>
             </div>
           </div>
@@ -243,9 +240,9 @@
 
           <hr class="horizontal dark my-3">
           <div class="text-center">
-            <a href=""
+            <a href="{% url 'ventas_app:intquote-wo-assignment' int_quote.id %}"
                class="btn bg-gradient-dark btn-sm w-100">
-              <i class="fas fa-columns me-1"></i> Gestionar &Oacute;rdenes de Trabajo
+              <i class="fas fa-columns me-1 text-sm"></i> Gestionar WO
             </a>
           </div>
         </div>
@@ -271,8 +268,8 @@
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-3">Serial</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Transformador</th>
                   <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Costo Int.</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Costo OT</th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Orden Trabajo</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Costo WO</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Work Order</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,18 +285,18 @@
                   </td>
                   <td class="text-end">
                     <p class="text-sm font-weight-bold text-dark mb-0">
-                      {{ item.unitCostInt|default:"&mdash;" }}
+                      {{ item.unitCostInt|floatformat:"2g"|default:"&mdash;" }}
                     </p>
                   </td>
                   <td class="text-end">
                     <p class="text-sm font-weight-bold mb-0" style="color: #fb6340;">
-                      {{ item.unitCostWO|default:"&mdash;" }}
+                      {{ item.unitCostWO|floatformat:"2g"|default:"&mdash;" }}
                     </p>
                   </td>
                   <td>
                     {% if item.idWorkOrder %}
                       <span class="badge" style="background: #fb6340; color: #fff;">
-                        WO-{{ item.idWorkOrder.id }}
+                        {{ item.idWorkOrder.woNumber }}
                       </span>
                       <br>
                       <small class="text-xs text-secondary">{{ item.idWorkOrder.idSupplier|default:"" }}</small>
@@ -326,9 +323,8 @@
     <div class="col-lg-6 col-12 mb-4">
       <div class="card h-100">
         <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-          <h6 class="mb-0">&Oacute;rdenes de Trabajo ({{ wo_count }})</h6>
-          <a class="btn btn-sm bg-gradient-dark"
-             href="">
+          <h6 class="mb-0">WO ({{ wo_count }})</h6>
+          <a class="btn btn-sm bg-gradient-dark" href="{% url 'ventas_app:intquote-wo-assignment' int_quote.id %}">
             <i class="fas fa-plus me-1"></i> Gestionar
           </a>
         </div>
@@ -343,7 +339,7 @@
                     {{ group.work_order.idSupplier|default:"Sin proveedor" }}
                   </h6>
                   <span class="text-xs text-secondary">
-                    WO: {{ group.work_order.woNumber|default:"&mdash;" }}
+                    <a href="{% url 'ventas_app:workorder-detail' group.work_order.id %}">WO: {{ group.work_order.woNumber|default:"&mdash;" }}</a>
                     &middot; {{ group.work_order.idTinReceiving|default:"" }}
                   </span>
                 </div>
@@ -361,7 +357,7 @@
                     <tr>
                       <th class="text-uppercase text-xs text-secondary font-weight-bolder">Serial</th>
                       <th class="text-uppercase text-xs text-secondary font-weight-bolder">Trafo</th>
-                      <th class="text-uppercase text-xs text-secondary font-weight-bolder text-end">Costo OT</th>
+                      <th class="text-uppercase text-xs text-secondary font-weight-bolder text-end">Costo WO</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -370,7 +366,7 @@
                       <td class="text-sm">{{ item.seq|default:"S/N" }}</td>
                       <td class="text-sm text-secondary">{{ item.idTrafo|default:"&mdash;" }}</td>
                       <td class="text-sm font-weight-bold text-end" style="color: #fb6340;">
-                        {{ item.unitCostWO|default:"0.00" }}
+                        {{ item.unitCostWO|floatformat:"2g"|default:"0.00" }}
                       </td>
                     </tr>
                     {% endfor %}
@@ -379,7 +375,7 @@
                     <tr>
                       <td colspan="2" class="text-end text-xs font-weight-bolder text-uppercase">Total</td>
                       <td class="text-sm font-weight-bold text-end text-dark">
-                        {{ int_quote.get_currency_display }} {{ group.total }}
+                        {{ int_quote.get_currency_display }} {{ group.total|floatformat:"2g" }}
                       </td>
                     </tr>
                   </tfoot>
@@ -390,10 +386,10 @@
           {% empty %}
           <div class="text-center py-4">
             <i class="fas fa-hard-hat fa-2x text-secondary mb-2"></i>
-            <p class="text-sm text-muted mb-2">No hay &oacute;rdenes de trabajo</p>
-            <a href=""
+            <p class="text-sm text-muted mb-2">No hay WO</p>
+            <a href="{% url 'ventas_app:intquote-wo-assignment' int_quote.id %}"
                class="btn btn-sm bg-gradient-dark">
-              <i class="fas fa-plus me-1"></i> Crear primera OT
+              <i class="fas fa-plus me-1"></i> Crear primera WO
             </a>
           </div>
           {% endfor %}

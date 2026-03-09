@@ -15,6 +15,7 @@ urlpatterns = [
     path('comercial/po/lista/', views.TrafoPoListView.as_view(), name='po-lista'),
 
     # ==================== COTIZACIONES DE INTERMEDIO QUOTES ====================
+    path('comercial/cotizaciones/cotizaciones-internas/', views.IntQuoteListView.as_view(),name='intquote-lista' ),
     # Vista Kanban principal
     path('comercial/cotizaciones/<int:pk>/asignar/', views.QuoteKanbanView.as_view(),name='quote-assignment'),
     # API: Crear nueva IntQuote
@@ -28,8 +29,8 @@ urlpatterns = [
     path('intquote/<int:pk>/', views.IntQuoteDetailView.as_view(), name='intquote-detail' ),
     path('intquote/<int:pk>/editar/', views.IntQuoteEditView.as_view(), name='intquote-edit' ),
 
-    # ==================== WORK ORDERS asignned ====================
-    
+    # ==================== INQUOTES TIO WORK ORDERS ====================
+    path('ordenes-trabajo/', views.WorkOrderListView.as_view(), name='workorder-lista' ),
     # Vista Kanban: IntQuote -> WorkOrders
     path('comercial/ordenes-trabajo/<int:pk>/asignar/', views.IntQuoteWOView.as_view(),name='intquote-wo-assignment'),
     # API: Crear nueva WorkOrder
@@ -40,6 +41,11 @@ urlpatterns = [
     path('comercial/ordenes-trabajo/<int:wo_pk>/delete/',  views.DeleteWorkOrderAPI.as_view(), name='delete-workorder-api'),
     # API: Actualizar costo unitario WO de un item
     path('comercial/ordenes-trabajo/<int:item_pk>/update-cost-wo/', views.UpdateItemCostWOAPI.as_view(), name='update-item-cost-wo-api'),
+
+    # ==================== WORK ORDERS ====================
+    path('comercial/ordenes-trabajo/<int:pk>/', views.WorkOrderDetailView.as_view(), name='workorder-detail' ),
+    path('comercial/ordenes-trabajo/<int:pk>/editar/', views.WorkOrderEditView.as_view(), name='workorder-edit' ),
+    path('comercial/ordenes-trabajo/<int:item_pk>/update-cost-wo/', views.UpdateItemCostWOAPI.as_view(), name='update-item-cost-wo-api' ),
 
     # ==================== CRUD PLANTILLAS ====================
     path('comercial/cotizaciones/plantillas/', views.TrafoTemplatesListView.as_view(), name='plantilla-lista'),

@@ -39,7 +39,9 @@
         <div class="sidenav-header">
             <a class="navbar-brand m-0" href="{% url 'home_app:home' %}">
                 <img src="{% static 'assets/img/logo-ct.png' %}" class="navbar-brand-img h-100" alt="CRM Davinchys">
-                <span class="ms-1 font-weight-bold text-white">ERP Davinchys</span>
+                <span class="ms-1 font-weight-bold text-white"> {{ user.empleado.company.tinName }}
+                    <p>{{ user.empleado.company.get_company_type_display }}</p>
+                </span>
             </a>
         </div>
         
@@ -106,7 +108,7 @@
                 <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                     <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                         <i class="fas fa-user-alt me-sm-1"></i>
-                        &ensp;{{ user|default:"" }} &ensp; <b> {{ user.get_position_display|default:"Usuario" }}</b>
+                        &ensp;{{ user|default:"" }} &ensp; <b> {{  user.empleado.departamento.get_idArea_display|default:"Usuario" }}</b>
                     </div>
 
                     <ul class="navbar-nav justify-content-end">

@@ -215,7 +215,6 @@ class quotesForm(forms.ModelForm):
         model = quotes
         fields = (
             'idTinReceiving',
-            #'idTinExecuting',
             'idClient',
 
             'dateOrder',
@@ -239,12 +238,6 @@ class quotesForm(forms.ModelForm):
                     'class': 'input-group-field form-control',
                 }
             ),
-            #'idTinExecuting': forms.Select(
-            #    attrs = {
-            #        'placeholder': '',
-            #        'class': 'input-group-field form-control',
-            #    }
-            #),
             'idClient': forms.Select(
                 attrs = {
                     'placeholder': '',
@@ -254,15 +247,15 @@ class quotesForm(forms.ModelForm):
             'dateOrder': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs = {
-                    'type': 'date',
-                    'class': 'input-group-field form-control',
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
                 }
             ),
             'deadline': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs = {
-                    'type': 'date',
-                    'class': 'input-group-field form-control',
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
                 }
             ),
             'shortDescription': forms.Textarea(
@@ -659,16 +652,6 @@ class MultipleItemImageForm(forms.Form):
         
         return images
 
-#ItemsFormSet = inlineformset_factory(
-#    quotes,
-#    Items,
-#    #Trafos,
-#    form=TrafoForm,
-#    extra=1,
-#    can_delete=True,
-#    fields='__all__'
-#)
-
 # =========================== INT QUOTES FORM ===========================
 
 class IntQuoteForm(forms.ModelForm):
@@ -738,15 +721,37 @@ class IntQuoteEditForm(forms.ModelForm):
             'deadline',
             'payMethod',
             'poNumber',
+            'pdf_file'
         ]
         widgets = {
             'idClient': forms.Select(attrs={'class': 'form-control'}),
             'idTinReceiving': forms.Select(attrs={'class': 'form-control'}),
             'currency': forms.Select(attrs={'class': 'form-control'}),
-            'dateOrder': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'dateOrder': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'deadline': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
             'payMethod': forms.Select(attrs={'class': 'form-control'}),
             'poNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PO-0001'}),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -757,7 +762,7 @@ class IntQuoteEditForm(forms.ModelForm):
         self.fields['idClient'].label = 'Cliente'
         self.fields['idClient'].empty_label = '-- Seleccionar cliente --'
 
-    
+# =========================== WorkOrders FORM ===========================
 class WorkOrderForm(forms.ModelForm):
     """Formulario para crear/editar órdenes de trabajo (WorkOrder)"""
 
@@ -776,8 +781,20 @@ class WorkOrderForm(forms.ModelForm):
             'idSupplier': forms.Select(attrs={'class': 'form-control'}),
             'idTinReceiving': forms.Select(attrs={'class': 'form-control'}),
             'currency': forms.Select(attrs={'class': 'form-control'}),
-            'dateOrder': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'dateOrder': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'deadline': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
             'payMethod': forms.Select(attrs={'class': 'form-control'}),
             'woNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'WO-0001'}),
         }
@@ -801,3 +818,69 @@ class WorkOrderForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+class WorkOrderEditForm(forms.ModelForm):
+    """Formulario para editar ordenes de trabajo existentes"""
+
+    class Meta:
+        model = WorkOrder
+        fields = [
+            'idSupplier',
+            'idTinReceiving',
+            'currency',
+            'dateOrder',
+            'deadline',
+            'payMethod',
+            'woNumber',
+            'pdf_file'
+        ]
+        widgets = {
+            'idSupplier': forms.Select(attrs={'class': 'form-control'}),
+            'idTinReceiving': forms.Select(attrs={'class': 'form-control'}),
+            'currency': forms.Select(attrs={'class': 'form-control'}),
+            'dateOrder': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            'deadline': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control datetimepicker text-center text-dark flatpickr-input',
+                }
+            ),
+            #'dateOrder': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            #'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'payMethod': forms.Select(attrs={'class': 'form-control'}),
+            'woNumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'WO-0001'}),
+            'pdf_file': forms.ClearableFileInput(
+                attrs = {
+                    'type':"file",
+                    'name':"pdf_file",
+                    'class': 'form-control text-dark',
+                    'id':"id_pdf_file",
+                    'accept':".pdf,.jpg,.jpeg,.png"
+                }
+            ),
+        }
+    
+    def clean_pdf_file(self):
+        pdf_file = self.cleaned_data.get('pdf_file')
+        if pdf_file:
+            if not pdf_file.name.endswith(('.pdf', '.jpg', '.jpeg', '.png')):
+                raise forms.ValidationError("Archivos permitidos .pdf, .jpg, .jpeg, .png")
+            if pdf_file.size > 5*1024*1024:  # 5 MB limit
+                raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
+        return pdf_file
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['idSupplier'].queryset = supplier.objects.all()
+        self.fields['idSupplier'].label = 'Proveedor'
+        self.fields['idSupplier'].empty_label = '-- Seleccionar proveedor --'
+        self.fields['idTinReceiving'].queryset = Tin.objects.all()
+        self.fields['idTinReceiving'].label = 'Compania Ejecutora'
+        self.fields['idTinReceiving'].empty_label = '-- Seleccionar compania --'

@@ -5,23 +5,14 @@ from django.http import HttpResponseRedirect
 from django.views.generic import View
 #
 from .models import User
+from applications.RRHH.models import Departamento
 
 def check_ocupation_user(position, user_position):
-    if (position == User.ADMINISTRADOR or position == user_position or position == User.CEOGLOBAL):
+    if (position == Departamento.ADMINISTRADOR or position == user_position or position == Departamento.CEOGLOBAL):
         return True
     else:
         return False
     
-
-def check_ocupation_user2(position, user_position, user_position2):
-    #
-    
-    if (position == User.ADMINISTRADOR or position == User.CEOGLOBAL or position == user_position or position == user_position2):
-        
-        return True
-    else:
-        return False
-
 def check_ocupation_user3(position, user_position, user_position2, user_position3):
     if (position == User.ADMINISTRADOR or position == user_position or position == user_position2 or position == user_position3):
         return True
@@ -30,6 +21,14 @@ def check_ocupation_user3(position, user_position, user_position2, user_position
 
 def check_ocupation_user4(position, user_position, user_position2, user_position3, user_position4):
     if (position == User.ADMINISTRADOR or position == user_position or position == user_position2 or position == user_position3 or position == user_position4):
+        return True
+    else:
+        return False
+
+def check_ocupation_user2(position, user_position, user_position2):
+    #
+    if (position == Departamento.ADMINISTRADOR or position == Departamento.CEOGLOBAL or position == user_position or position == user_position2):
+        
         return True
     else:
         return False
@@ -58,7 +57,7 @@ class ComercialMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.COMERCIAL):
+        if not check_ocupation_user(request.user.empleado.departamento.idArea, Departamento.COMERCIAL):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -75,7 +74,7 @@ class FinanzasMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.FINANZAS):
+        if not check_ocupation_user(request.user.empleado.departamento.idArea, Departamento.FINANZAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -91,8 +90,9 @@ class ComercialFinanzasMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
+        
         #
-        if not check_ocupation_user2(request.user.position, User.COMERCIAL, User.FINANZAS):
+        if not check_ocupation_user2(request.user.empleado.departamento.idArea, Departamento.COMERCIAL, Departamento.FINANZAS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -109,7 +109,7 @@ class LogisticaMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.LOGISTICA):
+        if not check_ocupation_user(request.user.empleado.departamento.idArea, Departamento.LOGISTICA):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(
@@ -126,7 +126,7 @@ class RRHHMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         #
-        if not check_ocupation_user(request.user.position, User.RECURSOSHUMANOS):
+        if not check_ocupation_user(request.user.empleado.departamento.idArea, Departamento.RECURSOSHUMANOS):
             # no tiene autorizacion
             return HttpResponseRedirect(
                 reverse(

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Ordenes de Trabajo{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %}
+
+<style>
+  .nav-tabs-custom .nav-link {
+    border: none; padding: 0.6rem 1.2rem; font-size: 0.8rem;
+    font-weight: 600; color: #67748e; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .nav-tabs-custom .nav-link.active { color: #344767; border-bottom: 2px solid #fb6340; background: transparent; }
+  .nav-tabs-custom .nav-link:hover { color: #344767; }
+  .nav-tabs-custom .tab-badge {
+    display: inline-block; background: #f0f2f5; padding: 0.1rem 0.45rem;
+    border-radius: 0.5rem; font-size: 0.65rem; font-weight: 700; margin-left: 0.3rem; color: #67748e;
+  }
+  .nav-tabs-custom .nav-link.active .tab-badge { background: #fb6340; color: #fff; }
+  .company-badge {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.4rem;
+    font-size: 0.68rem; font-weight: 600; background: #f8f9fa; color: #344767; border: 1px solid #e9ecef;
+  }
+  .company-badge.holding { border-color: #e91e63; color: #e91e63; }
+  .company-badge.subsidiary { border-color: #1565c0; color: #1565c0; }
+</style>
+
+<div class="container-fluid">
+
+  <div class="row mb-3">
+    <div class="col-lg-4 col-12">
+      <h5 class="font-weight-bolder mb-1">Ordenes de Trabajo</h5>
+      <p class="text-sm text-secondary mb-0">
+        {% if is_holding %}
+        <span class="company-badge holding"><i class="fas fa-crown me-1"></i>Holding</span>
+        {% else %}
+        <span class="company-badge subsidiary"><i class="fas fa-building me-1"></i>{{ company_tin|default:"Mi compania" }}</span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-lg-8 col-12 d-flex justify-content-end align-items-start gap-2 mt-2 mt-lg-0">
+      <form method="GET" class="d-flex align-items-center gap-2">
+        <div class="input-group input-group-outline" style="max-width: 260px;">
+          <input class="form-control datetimepicker text-center text-dark text-sm"
+                 value="{{ intervalDate }}" placeholder="Rango de fechas" id="dateKword" name="dateKword">
+        </div>
+        <button class="btn bg-gradient-dark btn-sm mb-0" type="submit"><i class="fas fa-search me-1"></i> Buscar</button>
+      </form>
+      <a class="export btn btn-icon btn-outline-secondary btn-sm mb-0" data-type="csv"><i class="fas fa-download me-1"></i> CSV</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <ul class="nav nav-tabs-custom" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'ventas_app:cotizaciones-lista' %}?dateKword={{ intervalDate }}">
+                <i class="fas fa-file-invoice me-1"></i> Cotizaciones Master
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'ventas_app:intquote-lista' %}?dateKword={{ intervalDate }}">
+                <i class="fas fa-exchange-alt me-1"></i> Cot. Internas
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="#">
+                <i class="fas fa-hard-hat me-1"></i> Ordenes de Trabajo
+                <span class="tab-badge">{{ workorders_data|length }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table table-flush mb-0 align-items-center" id="datatable-main">
+              <thead class="thead-light">
+                <tr>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-3">WO / Fecha</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Proveedor</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Compania Ejecutora</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Moneda</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 text-end">Monto</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Pago</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Items</th>
+                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for wo in workorders_data %}
+                <tr>
+                  <td class="ps-3">
+                    <div class="d-flex flex-column">
+                      <a href="{% url 'ventas_app:workorder-detail' wo.id %}" class="text-sm font-weight-bold text-dark mb-0">{{ wo.woNumber|default:"-" }}</a>
+                      <a href="{% url 'ventas_app:workorder-detail' wo.id %}" class="text-xs font-weight-bold" style="color: #e65100;">WO-{{ wo.id }}</a>
+                      <span class="text-xs text-secondary">{{ wo.dateOrder|date:'d-m-Y' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="text-sm font-weight-bold text-dark">{{ wo.idSupplier|default:"-" }}</span>
+                  </td>
+                  <td><span class="company-badge">{{ wo.idTinReceiving.tinName|default:"-" }}</span></td>
+                  <td><span class="text-sm">{{ wo.get_currency_display|default:"-" }}</span></td>
+                  <td class="text-end">
+                    <span class="text-sm font-weight-bold" style="color: #fb6340;">{{ wo.amount|default:"0.00" }}</span>
+                  </td>
+                  <td>
+                    {% if wo.payMethod == "1" %}
+                    <span class="badge badge-success">Contado</span>
+                    {% else %}
+                    <span class="badge badge-primary">Credito</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge badge-sm badge-secondary">
+                      <i class="fas fa-bolt me-1"></i>{{ wo.total_items }}
+                    </span>
+                    {% for item in wo.item_WorkOrder.all %}
+                    <div class="mt-1">
+                      <span class="text-xs text-secondary">{{ item.seq|default:"S/N" }} &middot; {{ item.idTrafo|default:"" }}</span>
+                    </div>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <a href="{% url 'ventas_app:workorder-detail' wo.id %}" title="Detalle"><i class="far fa-eye text-info text-lg"></i></a>
+                      <a href="{% url 'ventas_app:workorder-edit' wo.id %}" title="Editar"><i class="far fa-edit text-dark text-lg"></i></a>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <i class="fas fa-inbox fa-2x text-secondary mb-2"></i>
+                    <p class="text-sm text-muted mb-0">No se encontraron ordenes de trabajo</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) { flatpickr('.datetimepicker', { allowInput: true, mode: "range" }); }
+</script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+  document.querySelectorAll(".export").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      var data = { type: el.dataset.type, filename: "ordenes_trabajo" };
+      if (el.dataset.type === "csv") { data.columnDelimiter = ","; }
+      dataTable.export(data);
+    });
+  });
+</script>
+
+{% endblock panel-content %}
