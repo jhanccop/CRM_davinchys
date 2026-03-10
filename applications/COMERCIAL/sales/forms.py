@@ -334,6 +334,10 @@ class quotesForm(forms.ModelForm):
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return pdf_file
     
+    def __init__(self, *args, **kwargs):
+        super(quotesForm, self).__init__(*args, **kwargs)
+        self.fields['idTinReceiving'].disabled = True
+    
 
     #def __init__(self, *args, **kwargs):
     #    super(quotesForm, self).__init__(*args, **kwargs)
@@ -761,6 +765,7 @@ class IntQuoteEditForm(forms.ModelForm):
         self.fields['idTinReceiving'].empty_label = '-- Seleccionar compania --'
         self.fields['idClient'].label = 'Cliente'
         self.fields['idClient'].empty_label = '-- Seleccionar cliente --'
+        self.fields['idTinReceiving'].disabled = True
 
 # =========================== WorkOrders FORM ===========================
 class WorkOrderForm(forms.ModelForm):
@@ -884,3 +889,4 @@ class WorkOrderEditForm(forms.ModelForm):
         self.fields['idTinReceiving'].queryset = Tin.objects.all()
         self.fields['idTinReceiving'].label = 'Compania Ejecutora'
         self.fields['idTinReceiving'].empty_label = '-- Seleccionar compania --'
+        self.fields['idTinReceiving'].disabled = True

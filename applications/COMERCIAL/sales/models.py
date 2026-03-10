@@ -133,7 +133,6 @@ class IntQuotes(TimeStampedModel):
     """
     idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True,related_name="int_client")
     idTinReceiving = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="int_company_receiving")
-    #idTinExecuting = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True,related_name="company_executing")
 
     # === CATEGORIA MONEDA ====
     PEN = '0'

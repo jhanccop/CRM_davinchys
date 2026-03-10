@@ -125,9 +125,9 @@
                     {% for item in iq.item_IntQuote.all %}
                     <div class="d-flex align-items-center gap-1 mb-1">
                       {% if item.idWorkOrder %}
-                      <a href="{% url 'ventas_app:workorder-detail' item.idWorkOrder.id %}" class="badge-wo" style="text-decoration:none;">WO-{{ item.idWorkOrder.id }}</a>
+                      <a href="{% url 'ventas_app:workorder-detail' item.idWorkOrder.id %}" class="badge-wo" style="text-decoration:none;">{{ item.idWorkOrder.woNumber }}</a>
                       {% else %}
-                      <span style="font-size:0.68rem; color:#9e9e9e;">sin OT</span>
+                      <span style="font-size:0.68rem; color:#9e9e9e;">sin WO</span>
                       {% endif %}
                       <span class="text-xs text-secondary">{{ item.seq|default:"S/N" }}</span>
                     </div>
@@ -135,7 +135,7 @@
                   </td>
                   <td>
                     <div class="d-flex align-items-center gap-2">
-                      <a href="{% url 'ventas_app:quote-assignment' iq.id %}" title="Kanban OT"><i class="fas fa-columns text-primary text-lg"></i></a>
+                      <a href="{% url 'ventas_app:intquote-wo-assignment' iq.id %}" title="Kanban OT"><i class="fas fa-columns text-primary text-lg"></i></a>
                       <a href="{% url 'ventas_app:intquote-detail' iq.id %}" title="Detalle"><i class="far fa-eye text-info text-lg"></i></a>
                       <a href="{% url 'ventas_app:intquote-edit' iq.id %}" title="Editar"><i class="far fa-edit text-dark text-lg"></i></a>
                     </div>
