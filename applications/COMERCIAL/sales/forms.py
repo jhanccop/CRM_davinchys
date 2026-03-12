@@ -315,7 +315,6 @@ class quotesForm(forms.ModelForm):
         labels = {
             'idClient': 'Cliente',
             'idTinReceiving': 'Empresa receptora',
-            'idTinExecuting': 'Empresa ejecutora',
             'shortDescription': 'Descripción',
             'currency': 'Moneda',
             'dateOrder': 'Fecha de solicitud',
