@@ -606,16 +606,6 @@ jQuery(document).ready(function($) {
 });
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Establecer la empresa receptora por defecto
-        var tinReceivingField = document.getElementById("id_idTinReceiving");
-        if (tinReceivingField) {
-            tinReceivingField.value = "{{user.empleado.company.id}}";
-        }
-    });
-</script>
-
 <script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
     if (document.querySelector('.datetimepicker')) {

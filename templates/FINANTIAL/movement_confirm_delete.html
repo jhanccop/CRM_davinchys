@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Eliminar MOV-{{ movement.id }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Banco{% endblock %}
+{% block navbar_Type %}Eliminar{% endblock %}
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card border-0 shadow-lg">
+        <div class="card-body text-center p-5">
+          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+            <i class="material-icons text-white" style="font-size:2rem">delete_forever</i>
+          </div>
+          <h5 class="font-weight-bolder text-danger mb-1">¿Eliminar este movimiento?</h5>
+          <p class="text-secondary text-sm mb-3">Esta acción también eliminará sus conciliaciones vinculadas.</p>
+          <div class="bg-light rounded p-3 text-start mb-4">
+            <div class="row g-2">
+              <div class="col-6"><p class="text-xxs text-secondary mb-0">ID</p><p class="text-xs font-weight-bold mb-0">MOV-{{ movement.id }}</p></div>
+              <div class="col-6 text-end">{% if movement.conciliated %}<span class="badge bg-gradient-success">Conciliado</span>{% else %}<span class="badge bg-gradient-danger">Pendiente</span>{% endif %}</div>
+              <div class="col-6"><p class="text-xxs text-secondary mb-0">Monto</p><p class="text-xs font-weight-bold mb-0">{{ movement.amount|floatformat:2 }}</p></div>
+              <div class="col-6 text-end"><p class="text-xxs text-secondary mb-0">Fecha</p><p class="text-xs mb-0">{{ movement.date|date:"d/m/Y" }}</p></div>
+            </div>
+          </div>
+          {% if movement.conciliated %}
+          <div class="alert alert-warning text-xs py-2 mb-4 text-start">
+            <i class="material-icons text-sm align-middle me-1">warning</i>
+            Este movimiento ya está <strong>conciliado</strong>. Al eliminarlo se eliminarán sus conciliaciones y los documentos vinculados quedarán sin conciliar.
+          </div>
+          {% endif %}
+          <form method="POST" class="d-flex justify-content-center gap-3">
+            {% csrf_token %}
+            <a href="{% url 'finantial:movement-detail' movement.pk %}" class="btn btn-outline-secondary mb-0"><i class="material-icons text-sm align-middle me-1">arrow_back</i> Cancelar</a>
+            <button type="submit" class="btn bg-gradient-danger shadow mb-0"><i class="material-icons text-sm align-middle me-1">delete</i> Sí, eliminar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

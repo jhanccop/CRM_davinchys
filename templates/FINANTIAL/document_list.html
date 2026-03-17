@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Comprobantes{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Comprobantes{% endblock %}
+{% block navbar_Type %}Listado{% endblock %}
+
+{% block extra_css %}
+<style>
+  .filter-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .3rem; }
+  .filter-label .material-icons { font-size: .85rem; vertical-align: middle; }
+  .tbl-badge { font-size: .58rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; letter-spacing: .03em; }
+  .table-actions a { color: #8392ab; transition: color .15s; }
+  .table-actions a:hover { color: #344767; }
+  .table tbody tr:hover { background: rgba(0,0,0,.025); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <!-- HEADER -->
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Comprobantes de Pago</h5>
+      <p class="text-secondary text-sm mb-0">
+        {% if is_holding %}
+          <span class="badge bg-gradient-primary" style="font-size:.58rem">HOLDING</span> Vista corporativa
+        {% else %}
+          <span class="badge bg-gradient-dark" style="font-size:.58rem">{{ user_tin.tinName|default:"Empresa" }}</span>
+        {% endif %}
+        {% if page_obj %}&nbsp;·&nbsp; {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}{% endif %}
+      </p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:document-create' %}" class="btn btn-sm bg-gradient-primary shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">add</i> Nuevo
+      </a>
+      <a href="{% url 'finantial:dashboard' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">dashboard</i>
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <form method="GET">
+        <div class="row g-2 align-items-end">
+          {% if is_holding %}
+          <div class="col-md-2 col-sm-4">
+            <p class="filter-label mb-1"><i class="material-icons">business</i> Empresa</p>
+            {{ filter_form.tin }}
+          </div>
+          {% endif %}
+          <div class="col-md-1 col-sm-4">
+            <p class="filter-label mb-1">Dirección</p>
+            {{ filter_form.direction }}
+          </div>
+          <div class="col-md-2 col-sm-4">
+            <p class="filter-label mb-1">Estado</p>
+            {{ filter_form.status }}
+          </div>
+          <div class="col-md-1 col-sm-3">
+            <p class="filter-label mb-1">Moneda</p>
+            {{ filter_form.currency }}
+          </div>
+          <div class="col-md-2 col-sm-4">
+            <p class="filter-label mb-1"><i class="material-icons">event</i> Desde</p>
+            {{ filter_form.date_from }}
+          </div>
+          <div class="col-md-2 col-sm-4">
+            <p class="filter-label mb-1"><i class="material-icons">event</i> Hasta</p>
+            {{ filter_form.date_to }}
+          </div>
+          <div class="col-md-2 col-sm-8">
+            <p class="filter-label mb-1"><i class="material-icons">search</i> Buscar</p>
+            <div class="input-group input-group-sm">
+              {{ filter_form.search }}
+              <button type="submit" class="btn bg-gradient-dark mb-0 px-2"><i class="material-icons text-sm">search</i></button>
+              <a href="{% url 'finantial:document-list' %}" class="btn btn-outline-secondary mb-0 px-2"><i class="material-icons text-sm">clear</i></a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card">
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">#</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tipo / Nro.</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Dir.</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Emisor</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Receptor</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Fecha</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Bruto</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Neto</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pagado</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pendiente</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+              <th class="text-secondary text-xxs font-weight-bolder text-center">Acc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for doc in documents %}
+            <tr>
+              <td class="ps-3"><span class="text-xxs text-secondary">#{{ doc.id }}</span></td>
+              <td>
+                <p class="text-xs font-weight-bold mb-0">{{ doc.get_doc_type_display }}</p>
+                <p class="text-xxs text-secondary mb-0">{{ doc.doc_number|default:"—" }}</p>
+              </td>
+              <td>
+                {% if doc.direction == 'IN' %}<span class="badge badge-sm bg-gradient-success tbl-badge">▼ IN</span>
+                {% elif doc.direction == 'OUT' %}<span class="badge badge-sm bg-gradient-danger tbl-badge">▲ OUT</span>
+                {% else %}<span class="badge badge-sm bg-gradient-info tbl-badge">⇄ INT</span>{% endif %}
+              </td>
+              <td><span class="text-xs">{{ doc.tin_issuer.tinName|default:doc.client|default:"—"|truncatechars:18 }}</span></td>
+              <td><span class="text-xs">{{ doc.tin_receiver.tinName|default:doc.supplier|default:"—"|truncatechars:18 }}</span></td>
+              <td><span class="text-xs text-secondary">{{ doc.issue_date|date:"d/m/Y"|default:"—" }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs text-secondary">{{ doc.currency }} {{ doc.gross_amount|floatformat:2 }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs font-weight-bold">{{ doc.currency }} {{ doc.net_amount|floatformat:2 }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs text-success font-weight-bold">{{ doc.currency }} {{ doc.paid_amount|floatformat:2 }}</span></td>
+              <td class="text-end pe-3">
+                {% if doc.pending_amount > 0 %}
+                  <span class="text-xs text-danger font-weight-bold">{{ doc.currency }} {{ doc.pending_amount|floatformat:2 }}</span>
+                {% else %}
+                  <i class="material-icons text-success text-sm">check_circle</i>
+                {% endif %}
+              </td>
+              <td>
+                {% if doc.status == 'PAID' %}<span class="badge badge-sm bg-gradient-success tbl-badge">Pagado</span>
+                {% elif doc.status == 'PARTIAL' %}<span class="badge badge-sm bg-gradient-warning tbl-badge">Parcial</span>
+                {% elif doc.status == 'PENDING' %}<span class="badge badge-sm bg-gradient-danger tbl-badge">Pendiente</span>
+                {% elif doc.status == 'CANCELLED' %}<span class="badge badge-sm bg-gradient-secondary tbl-badge">Anulado</span>
+                {% else %}<span class="badge badge-sm bg-gradient-secondary tbl-badge">{{ doc.get_status_display }}</span>{% endif %}
+              </td>
+              <td class="text-center pe-3 table-actions">
+                <a href="{% url 'finantial:document-detail' doc.pk %}" class="me-1" data-bs-toggle="tooltip" title="Ver"><i class="material-icons text-sm">visibility</i></a>
+                <a href="{% url 'finantial:document-update' doc.pk %}" class="me-1" data-bs-toggle="tooltip" title="Editar"><i class="material-icons text-sm">edit</i></a>
+                <a href="{% url 'finantial:document-delete' doc.pk %}" data-bs-toggle="tooltip" title="Eliminar"><i class="material-icons text-sm text-danger">delete</i></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="12" class="text-center py-5">
+                <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">inbox</i>
+                <p class="text-sm text-secondary mb-2">Sin comprobantes con estos filtros</p>
+                <a href="{% url 'finantial:document-create' %}" class="btn btn-sm bg-gradient-primary"><i class="material-icons text-sm align-middle me-1">add</i>Registrar primero</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer py-3 d-flex justify-content-between align-items-center">
+      <span class="text-xs text-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} &nbsp;·&nbsp; {{ page_obj.paginator.count }} registros</span>
+      <nav>
+        <ul class="pagination pagination-sm mb-0 gap-1">
+          {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_left</i></a></li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}<li class="page-item active"><span class="page-link rounded bg-gradient-primary border-0">{{ num }}</span></li>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}<li class="page-item"><a class="page-link border-0 rounded" href="?page={{ num }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_right</i></a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

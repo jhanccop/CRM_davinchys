@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}TX-{{ transaction.id }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Transacciones{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
+
+{% block extra_css %}
+<style>
+  .info-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .2rem; }
+  .info-value { font-size: .82rem; font-weight: 600; color: #344767; margin-bottom: 0; }
+  .sticky-side { position: sticky; top: 1.5rem; }
+  .tbl-sm td, .tbl-sm th { font-size: .75rem; padding: .5rem .75rem; vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        {% if transaction.status == 'CONFIRMED' %}<span class="badge bg-gradient-success"><i class="material-icons text-sm align-middle me-1">check_circle</i>Confirmado</span>
+        {% elif transaction.status == 'DRAFT' %}<span class="badge bg-gradient-secondary"><i class="material-icons text-sm align-middle me-1">drafts</i>Borrador</span>
+        {% else %}<span class="badge bg-gradient-danger">Revertido</span>{% endif %}
+
+        <h5 class="font-weight-bolder mb-0">Transacción TX-{{ transaction.id }}</h5>
+      </div>
+      <p class="text-secondary text-xs mb-0 mt-1">
+        {{ transaction.transaction_date|date:"d \d\e F Y" }}
+        &nbsp;·&nbsp; {{ transaction.get_pay_method_display }}
+        {% if transaction.reference %} &nbsp;·&nbsp; Ref: <strong>{{ transaction.reference }}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="col-auto d-flex gap-2 flex-wrap mt-2 mt-lg-0">
+      {% if transaction.status == 'DRAFT' %}
+      <form method="POST" action="{% url 'finantial:transaction-confirm' transaction.pk %}" class="d-inline" id="confirmForm">
+        {% csrf_token %}
+        <button type="button" class="btn btn-sm bg-gradient-success shadow mb-0" id="confirmBtn">
+          <i class="material-icons text-sm align-middle me-1">check_circle</i> Confirmar y aplicar pagos
+        </button>
+      </form>
+      <a href="{% url 'finantial:transaction-update' transaction.pk %}" class="btn btn-sm bg-gradient-warning mb-0">
+        <i class="material-icons text-sm align-middle me-1">edit</i> Editar
+      </a>
+      <a href="{% url 'finantial:transaction-delete' transaction.pk %}" class="btn btn-sm bg-gradient-danger mb-0">
+        <i class="material-icons text-sm align-middle me-1">delete</i>
+      </a>
+      {% endif %}
+      <a href="{% url 'finantial:transaction-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">arrow_back</i>
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- ══ COLUMNA PRINCIPAL ══ -->
+    <div class="col-lg-8">
+
+      <!-- Datos de la transacción -->
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-success">payments</i>Datos de la Transacción</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row g-3">
+            <div class="col-sm-3"><p class="info-label">Fecha</p><p class="info-value">{{ transaction.transaction_date|date:"d/m/Y" }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Método</p><p class="info-value">{{ transaction.get_pay_method_display }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Moneda</p><p class="info-value">{{ transaction.currency }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Tipo de cambio</p><p class="info-value">{{ transaction.exchange_rate }}</p></div>
+            <div class="col-sm-3">
+              <p class="info-label">Monto total</p>
+              <p class="info-value text-success font-weight-bolder" style="font-size:1rem">{{ transaction.currency }} {{ transaction.amount|floatformat:2 }}</p>
+            </div>
+            <div class="col-sm-3">
+              <p class="info-label">Conciliado</p>
+              <p class="info-value {% if transaction.reconciled_amount >= transaction.amount %}text-success{% else %}text-warning{% endif %}">
+                {{ transaction.currency }} {{ transaction.reconciled_amount|floatformat:2 }}
+              </p>
+            </div>
+            <div class="col-sm-3"><p class="info-label">Referencia</p><p class="info-value">{{ transaction.reference|default:"—" }}</p></div>
+            {% if transaction.bank_movement %}
+            <div class="col-sm-3">
+              <p class="info-label">Movimiento bancario</p>
+              <p class="info-value">
+                <span class="badge bg-gradient-success">MOV-{{ transaction.bank_movement.id }}</span>
+                <br><small class="text-xxs text-secondary">{{ transaction.bank_movement.date|date:"d/m/Y" }} | {{ transaction.bank_movement.description|default:""|truncatechars:25 }}</small>
+              </p>
+            </div>
+            {% endif %}
+            <div class="col-sm-3">
+              <p class="info-label">Cuenta bancaria</p>
+              <p class="info-value">
+                {% if transaction.bank_account %}
+                  [{{ transaction.bank_account.nickName }}] {{ transaction.bank_account.idTin.tinName }}
+                  <br><small class="text-xxs text-secondary">{{ transaction.bank_account.accountNumber }}</small>
+                {% else %}—{% endif %}
+              </p>
+            </div>
+            <div class="col-sm-4"><p class="info-label">Pagador</p><p class="info-value">{{ transaction.tin_payer.tinName|default:transaction.client|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Receptor</p><p class="info-value">{{ transaction.tin_receiver.tinName|default:transaction.supplier|default:"—" }}</p></div>
+            {% if transaction.notes %}
+            <div class="col-12"><p class="info-label">Notas</p><p class="info-value text-secondary">{{ transaction.notes }}</p></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Líneas — comprobantes liquidados -->
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-info">link</i>Comprobantes Liquidados</h6>
+        </div>
+        <div class="card-body px-0 pb-2">
+          <div class="table-responsive">
+            <table class="table tbl-sm align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Comprobante</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Dirección</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tipo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Monto aplicado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado comprobante</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for line in lines %}
+                <tr>
+                  <td class="ps-4">
+                    <p class="text-xs font-weight-bold mb-0">{{ line.document.doc_number|default:"—" }}</p>
+                    <p class="text-xxs text-secondary mb-0">{{ line.document.issue_date|date:"d/m/Y"|default:"—" }}</p>
+                  </td>
+                  <td>
+                    {% if line.document.direction == 'IN' %}<span class="badge badge-sm bg-gradient-success">IN</span>
+                    {% elif line.document.direction == 'OUT' %}<span class="badge badge-sm bg-gradient-danger">OUT</span>
+                    {% else %}<span class="badge badge-sm bg-gradient-info">INT</span>{% endif %}
+                  </td>
+                  <td><span class="text-xs">{{ line.document.get_doc_type_display }}</span></td>
+                  <td class="text-end pe-4">
+                    <span class="font-weight-bold text-success">{{ transaction.currency }} {{ line.amount_applied|floatformat:2 }}</span>
+                  </td>
+                  <td>
+                    {% if line.document.status == 'PAID' %}<span class="badge badge-sm bg-gradient-success">Pagado</span>
+                    {% elif line.document.status == 'PARTIAL' %}<span class="badge badge-sm bg-gradient-warning">Parcial</span>
+                    {% else %}<span class="badge badge-sm bg-gradient-danger">Pendiente</span>{% endif %}
+                  </td>
+                  <td class="pe-3">
+                    <a href="{% url 'finantial:document-detail' line.document.pk %}" class="text-secondary"><i class="material-icons text-sm">open_in_new</i></a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-secondary text-xs">Sin líneas registradas</td></tr>
+                {% endfor %}
+              </tbody>
+              {% if lines %}
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="ps-4 text-xs font-weight-bolder text-secondary text-uppercase">Total aplicado</td>
+                  <td class="text-end pe-4 text-sm font-weight-bolder text-success">
+                    {% with total_applied=lines|length %}
+                    {{ transaction.currency }}
+                    {% endwith %}
+                    {% for line in lines %}{{ line.amount_applied }}{% if not forloop.last %} + {% endif %}{% endfor %}
+                  </td>
+                  <td colspan="2"></td>
+                </tr>
+              </tfoot>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ SIDEBAR ══ -->
+    <div class="col-lg-4">
+      <div class="sticky-side d-flex flex-column gap-3">
+
+        <!-- Estado visual -->
+        <div class="card text-center">
+          <div class="card-body py-4">
+            {% if transaction.status == 'CONFIRMED' %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.5rem">check_circle</i>
+            </div>
+            <h5 class="text-success font-weight-bolder mb-0">CONFIRMADO</h5>
+            <p class="text-xxs text-secondary mt-1">Pagos aplicados a los comprobantes</p>
+            {% elif transaction.status == 'DRAFT' %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(195deg,#8898aa,#abb5be);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.5rem">pending_actions</i>
+            </div>
+            <h5 class="text-secondary font-weight-bolder mb-0">BORRADOR</h5>
+            <p class="text-xxs text-secondary mt-1 mb-3">Aún no se han aplicado los pagos</p>
+            <button type="button" class="btn btn-sm bg-gradient-success w-100 shadow mb-0" id="confirmBtn2">
+              <i class="material-icons text-sm align-middle me-1">check_circle</i> Confirmar ahora
+            </button>
+            {% else %}
+            <h5 class="text-danger font-weight-bolder mb-0">REVERTIDO</h5>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Resumen financiero -->
+        <div class="card">
+          <div class="card-body p-3">
+            <p class="info-label mb-2">Resumen</p>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-xs text-secondary">Monto total</span>
+              <span class="text-xs font-weight-bold">{{ transaction.currency }} {{ transaction.amount|floatformat:2 }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-xs text-secondary">Conciliado</span>
+              <span class="text-xs font-weight-bold text-success">{{ transaction.currency }} {{ transaction.reconciled_amount|floatformat:2 }}</span>
+            </div>
+            {% if transaction.amount > 0 %}
+            {% widthratio transaction.reconciled_amount transaction.amount 100 as rpct %}
+            <div class="progress mt-2 mb-2" style="height:6px;border-radius:3px">
+              <div class="progress-bar bg-gradient-success" style="width:{{ rpct }}%"></div>
+            </div>
+            <p class="text-xs text-secondary mb-0 text-end">{{ rpct }}% conciliado</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Voucher -->
+        {% if transaction.voucher_file %}
+        <div class="card">
+          <div class="card-body p-3">
+            <a href="{{ transaction.voucher_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-0">
+              <i class="material-icons text-sm align-middle me-1">receipt</i> Ver Voucher
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Auditoría -->
+        <div class="card">
+          <div class="card-body p-3">
+            <p class="info-label mb-2">Auditoría</p>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-xxs text-secondary">Registrado por</span>
+              <span class="text-xs font-weight-bold">{{ transaction.created_by|default:"—" }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-xxs text-secondary">Creado</span>
+              <span class="text-xs">{{ transaction.created|date:"d/m/Y H:i" }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmación -->
+{% if transaction.status == 'DRAFT' %}
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center p-4">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+          <i class="material-icons text-white">check_circle</i>
+        </div>
+        <h6 class="font-weight-bolder mb-1">Confirmar TX-{{ transaction.id }}</h6>
+        <p class="text-xs text-secondary mb-3">Se aplicarán los pagos a los {{ lines|length }} comprobante{{ lines|length|pluralize }} vinculado{{ lines|length|pluralize }}. Esta acción no se puede deshacer.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary mb-0" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-sm bg-gradient-success shadow mb-0" id="confirmSubmit">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block JSscripts %}
+{% if transaction.status == 'DRAFT' %}
+<script>
+const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+document.getElementById('confirmBtn')?.addEventListener('click', () => modal.show());
+document.getElementById('confirmBtn2')?.addEventListener('click', () => modal.show());
+document.getElementById('confirmSubmit')?.addEventListener('click', () => {
+  document.getElementById('confirmForm').submit();
+});
+</script>
+{% endif %}
+{% endblock %}

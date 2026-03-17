@@ -28,6 +28,15 @@ class AccountManager(models.Manager):
             idTin = idCompany
         ).order_by("id")
     
+    def for_tin(self, tin):
+        return self.filter(idTin=tin, state=True)
+
+    def active(self):
+        return self.filter(state=True)
+
+    def cajas_chicas(self):
+        return self.filter(cajaChica=True, state=True)
+    
 
 class TinManager(models.Manager):
     def allCompanies(self):

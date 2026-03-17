@@ -333,14 +333,34 @@ class quotesForm(forms.ModelForm):
                 raise forms.ValidationError("El tamaño del archivo no debe superar los 5 MB.")
         return pdf_file
     
-    def __init__(self, *args, **kwargs):
-        super(quotesForm, self).__init__(*args, **kwargs)
-        self.fields['idTinReceiving'].disabled = True
-    
-
     #def __init__(self, *args, **kwargs):
     #    super(quotesForm, self).__init__(*args, **kwargs)
-    #    self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
+    #    self.fields['idTinReceiving'].disabled = True
+    
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Recibir el user
+        super(quotesForm, self).__init__(*args, **kwargs)
+
+        if self.user and hasattr(self.user, 'empleado') and self.user.empleado.company:
+            company = self.user.empleado.company
+            # Forzar el queryset a solo la empresa del usuario
+            #self.fields['idTinReceiving'].queryset = Tin.objects.filter(pk=company.pk)
+            # Setear el valor inicial
+            #self.fields['idTinReceiving'].initial = company.pk
+            # Deshabilitarlo visualmente
+            #self.fields['idTinReceiving'].widget.attrs['disabled'] = 'disabled'
+
+    #def clean_idTinReceiving(self):
+    #    """
+    #    Como 'disabled' no envía el valor, lo forzamos aquí.
+    #    """
+    #    if self.user and hasattr(self.user, 'empleado') and self.user.empleado.company:
+    #        return self.user.empleado.company
+    #    # Si ya existe la instancia (edición), mantener el valor original
+    #    if self.instance and self.instance.pk:
+    #        return self.instance.idTinReceiving
+    #    return self.cleaned_data.get('idTinReceiving')
 
 class trafoForm(forms.ModelForm):
     class Meta:

@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from .models import Items, ItemTracking, Trafo
+from django.db.models import Sum
 import os
 
 @receiver(post_save, sender=Items)
@@ -100,3 +101,24 @@ def delete_old_files_on_update(sender, instance, **kwargs):
     if old_instance.drawing_file and old_instance.drawing_file != instance.drawing_file:
         if os.path.isfile(old_instance.drawing_file.path):
             os.remove(old_instance.drawing_file.path)
+
+# =========== actualizar valor en de aqmount en quotes desde items signals.py
+
+def update_quote_amount(quote):
+    """Recalcula el amount de una cotización sumando unitCost de sus items."""
+    if quote:
+        total = quote.item_Quote.aggregate(
+            total=Sum('unitCost')
+        )['total'] or 0
+        quote.amount = total
+        quote.save(update_fields=['amount'])
+
+
+@receiver(post_save, sender=Items)
+def item_saved(sender, instance, **kwargs):
+    update_quote_amount(instance.idTrafoQuote)
+
+
+@receiver(post_delete, sender=Items)
+def item_deleted(sender, instance, **kwargs):
+    update_quote_amount(instance.idTrafoQuote)

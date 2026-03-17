@@ -362,59 +362,6 @@ class IncomesDeleteView(ComercialMixin,DeleteView):
   success_url = reverse_lazy('ventas_app:ventas-lista')
 
 # ================= COTIZACIONES ========================
-class QuoteCreateViewV1(ComercialFinanzasMixin,CreateView):
-    model = quotes
-    form_class = quotesForm
-    template_name = 'COMERCIAL/sales/quote-crear.html'
-    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['trafo_form'] = TrafoForm()
-        return context
-    
-    @transaction.atomic
-    def form_valid(self, form):
-        # Guardar la cotización
-        self.object = form.save()
-        
-        # Obtener transformadores del campo oculto
-        trafos_json = self.request.POST.get('trafos_data', '[]')
-        trafos_data = json.loads(trafos_json)
-        
-        # Crear los transformadores asociados
-        for trafo_data in trafos_data:
-            trafo = Trafos(
-                idTrafoQuote=self.object,
-                serialNumber=trafo_data.get('serialNumber'),
-                quantity=trafo_data.get('quantity'),
-                unitCost=trafo_data.get('unitCost'),
-                KVA=trafo_data.get('KVA'),
-                KTapHV=trafo_data.get('KTapHV'),
-                HVTAP=trafo_data.get('HVTAP'),
-                LV=trafo_data.get('LV'),
-                FIXHV=trafo_data.get('FIXHV'),
-                HZ=trafo_data.get('HZ'),
-                TYPE=trafo_data.get('TYPE'),
-                MOUNTING=trafo_data.get('MOUNTING'),
-                COOLING=trafo_data.get('COOLING'),
-                WINDING=trafo_data.get('WINDING'),
-                INSULAT=trafo_data.get('INSULAT'),
-                CONNECTION=trafo_data.get('CONNECTION'),
-                STANDARD=trafo_data.get('STANDARD')
-            )
-            trafo.save()
-        
-        # Crear registro de tracking
-        QuoteTracking.objects.create(
-            idquote=self.object,
-            status=QuoteTracking.CREADO,
-            area=QuoteTracking.TECHNICIAN
-        )
-        
-        messages.success(self.request, 'Cotización creada exitosamente.')
-        return super().form_valid(form)
-
 @method_decorator(csrf_exempt, name='dispatch')
 class AddTrafoToQuoteView(ComercialFinanzasMixin,View):
     def post(self, request, *args, **kwargs):
@@ -477,6 +424,144 @@ class QuoteDetailView(ComercialFinanzasMixin, DetailView):
         ).select_related('idSupplier', 'idTinReceiving')
 
         return context
+
+class QuoteCreateView(ComercialFinanzasMixin, CreateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote_create.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    @transaction.atomic
+    def form_valid(self, form):
+        try:
+            self.object = form.save(commit=False)
+            
+            items_data = self.request.POST.get('items_data', '[]')
+            files_metadata = self.request.POST.get('files_metadata', '{}')
+            
+            total_amount = 0
+            
+            import json
+            items_list = json.loads(items_data)
+            files_metadata_dict = json.loads(files_metadata)
+            
+            if not items_list:
+                form.add_error(None, 'Debe agregar al menos un transformador')
+                return self.form_invalid(form)
+            
+            file_mapping = {}
+            for file_id, metadata in files_metadata_dict.items():
+                file_mapping[metadata['item_index']] = {
+                    'file_id': file_id,
+                    'file_name': metadata['file_name']
+                }
+            
+            for index, item_data in enumerate(items_list):
+                quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
+                total_amount += quantity * unit_cost
+            
+            self.object.amount = total_amount
+            self.object.initialAmount = total_amount
+            self.object.save()  # Aquí ya se guarda con idTinReceiving correcto
+            
+            # ... resto del código igual ...
+            for index, item_data in enumerate(items_list):
+                quantity = int(item_data.get('quantity', 1))
+                unit_cost = float(item_data.get('unit_cost', 0))
+                
+                drawing_file = None
+                if index in file_mapping:
+                    file_id = file_mapping[index]['file_id']
+                    drawing_file = self.request.FILES.get(file_id)
+                
+                trafo = Trafo.objects.create(
+                    PHASE=item_data.get('phase'),
+                    COOLING=item_data.get('cooling'),
+                    MOUNTING=item_data.get('mounting'),
+                    KVA=item_data.get('kva'),
+                    HV=item_data.get('hv'),
+                    LV=item_data.get('lv'),
+                    HZ=item_data.get('hz'),
+                    WINDING=item_data.get('winding'),
+                    CONNECTION=item_data.get('connection'),
+                    STANDARD=item_data.get('standard'),
+                    drawing_file=drawing_file
+                )
+                
+                base_seq = item_data.get('seq', f'TRAFO-{index+1:03d}')
+                
+                for i in range(quantity):
+                    item_seq = f"{base_seq}-{i+1:03d}" if quantity > 1 else base_seq
+                    item = Items.objects.create(
+                        idTrafoQuote=self.object,
+                        idTrafo=trafo,
+                        seq=item_seq,
+                        unitCost=unit_cost,
+                    )
+            
+            QuoteTracking.objects.create(
+                idquote=self.object,
+                status=QuoteTracking.ESPERA,
+                area=QuoteTracking.COMERCIAL
+            )
+            
+            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': str(self.success_url),
+                    'message': f'Cotización creada con {len(items_list)} transformador(es)'
+                })
+            
+            messages.success(self.request, f'Cotización creada exitosamente.')
+            return redirect(self.success_url)
+            
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            form.add_error(None, f'Error al procesar la cotización: {str(e)}')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Por favor corrige los errores en el formulario.',
+                'errors': form.errors.as_json()
+            })
+        print("Errores:", form.errors)
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        return super().form_invalid(form)
+
+class QuoteUpdateView(ComercialFinanzasMixin, UpdateView):
+    model = quotes
+    form_class = quotesForm
+    template_name = 'COMERCIAL/sales/quote-editar.html'
+    context_object_name = 'quote'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Cotización actualizada exitosamente.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['trafos'] = self.object.item_Quote.all()
+        return context
+
+class QuoteDeleteView(ComercialFinanzasMixin,DeleteView):
+    model = quotes
+    template_name = 'COMERCIAL/sales/quote-eliminar.html'
+    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
 
 class TrafoQuoteListView(ComercialFinanzasMixin, ListView):
     """
@@ -588,30 +673,6 @@ class TrafoQuoteListView0(ComercialFinanzasMixin,ListView):
         payload["listQuotes"] = Quotes
         return payload
 
-class QuoteUpdateView(ComercialFinanzasMixin,UpdateView):
-    model = quotes
-    form_class = quotesForm
-    template_name = 'COMERCIAL/sales/quote-editar.html'
-    context_object_name = 'quote'
-    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-    
-    #def get_success_url(self):
-    #    return reverse_lazy('ventas_app:detalle-cotizacion', kwargs={'pk': self.object.id})
-    
-    def form_valid(self, form):
-        messages.success(self.request, 'Cotización actualizada exitosamente.')
-        return super().form_valid(form)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['trafos'] = self.object.item_Quote.all()
-        return context
-
-class QuoteDeleteView(ComercialFinanzasMixin,DeleteView):
-    model = quotes
-    template_name = 'COMERCIAL/sales/quote-eliminar.html'
-    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-
 class TrafoPoListView(ComercialFinanzasMixin,ListView):
     template_name = 'COMERCIAL/sales/lista-po.html'
     context_object_name = 'quotes'
@@ -630,131 +691,6 @@ class TrafoPoListView(ComercialFinanzasMixin,ListView):
         return payload
 
 # ======================================
-class QuoteCreateView(ComercialFinanzasMixin, CreateView):
-    model = quotes
-    form_class = quotesForm
-    template_name = 'COMERCIAL/sales/quote_create.html'
-    success_url = reverse_lazy('ventas_app:cotizaciones-lista')
-    
-    @transaction.atomic
-    def form_valid(self, form):
-        try:
-            # Guardar la cotización primero
-            self.object = form.save(commit=False)
-            
-            # Procesar items desde el frontend
-            items_data = self.request.POST.get('items_data', '[]')
-            files_metadata = self.request.POST.get('files_metadata', '{}')
-            
-            total_amount = 0
-            
-            import json
-            items_list = json.loads(items_data)
-            files_metadata_dict = json.loads(files_metadata)
-            
-            if not items_list:
-                form.add_error(None, 'Debe agregar al menos un transformador')
-                return self.form_invalid(form)
-            
-            # Mapeo inverso para archivos
-            file_mapping = {}
-            for file_id, metadata in files_metadata_dict.items():
-                file_mapping[metadata['item_index']] = {
-                    'file_id': file_id,
-                    'file_name': metadata['file_name']
-                }
-            
-            # Calcular monto total y crear items
-            for index, item_data in enumerate(items_list):
-                quantity = int(item_data.get('quantity', 1))
-                unit_cost = float(item_data.get('unit_cost', 0))
-                total_amount += quantity * unit_cost
-            
-            # Guardar cotización
-            self.object.amount = total_amount
-            self.object.initialAmount = total_amount
-            self.object.save()
-            
-            # Procesar cada transformador
-            for index, item_data in enumerate(items_list):
-                quantity = int(item_data.get('quantity', 1))
-                unit_cost = float(item_data.get('unit_cost', 0))
-                
-                # Obtener archivo si existe
-                drawing_file = None
-                if index in file_mapping:
-                    file_id = file_mapping[index]['file_id']
-                    drawing_file = self.request.FILES.get(file_id)
-                
-                # Crear el Transformador (Trafo)
-                trafo = Trafo.objects.create(
-                    PHASE=item_data.get('phase'),
-                    COOLING=item_data.get('cooling'),
-                    MOUNTING=item_data.get('mounting'),
-                    KVA=item_data.get('kva'),
-                    HV=item_data.get('hv'),
-                    LV=item_data.get('lv'),
-                    HZ=item_data.get('hz'),
-                    WINDING=item_data.get('winding'),
-                    CONNECTION=item_data.get('connection'),
-                    STANDARD=item_data.get('standard'),
-                    drawing_file=drawing_file
-                )
-                
-                # Crear Items (uno por cada unidad)
-                base_seq = item_data.get('seq', f'TRAFO-{index+1:03d}')
-                
-                for i in range(quantity):
-                    item_seq = f"{base_seq}-{i+1:03d}" if quantity > 1 else base_seq
-                    
-                    item = Items.objects.create(
-                        idTrafoQuote=self.object,
-                        idTrafo=trafo,  # Relación con el transformador
-                        seq=item_seq,
-                        unitCost=unit_cost,
-                    )
-                    
-                    # Crear tracking para el item
-                    #ItemTracking.objects.create(
-                    #    idItem=item,
-                    #    statusItem=ItemTracking.SOLICITADO,
-                    #    statusPlate=ItemTracking.SOLICITADO
-                    #)
-            
-            # Crear tracking de la cotización
-            QuoteTracking.objects.create(
-                idquote=self.object,
-                status=QuoteTracking.ESPERA,
-                area=QuoteTracking.COMERCIAL
-            )
-            
-            # Si es AJAX request
-            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'redirect_url': str(self.success_url),
-                    'message': f'Cotización creada con {len(items_list)} transformador(es) y {sum(int(i.get("quantity", 1)) for i in items_list)} item(s)'
-                })
-            
-            messages.success(self.request, f'Cotización creada exitosamente con {len(items_list)} transformador(es).')
-            return redirect(self.success_url)
-            
-        except Exception as e:
-            print(f"ERROR: {str(e)}")
-            form.add_error(None, f'Error al procesar la cotización: {str(e)}')
-            return self.form_invalid(form)
-    
-    def form_invalid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'Por favor corrige los errores en el formulario.',
-                'errors': form.errors.as_json()
-            })
-        
-        print("Errores:", form.errors)
-        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
-        return super().form_invalid(form)
 
 # ================= CRUD PLANTILLAS ========================
 class TrafoTemplatesListView(ComercialMixin,ListView):

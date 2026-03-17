@@ -55,5 +55,7 @@ urlpatterns = [
 
     # RRHH app
     re_path('', include('applications.RRHH.urls')),
+
+    re_path('', include('applications.FINANTIAL.urls')),
 ]
 

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Eliminar TX-{{ transaction.id }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Transacciones{% endblock %}
+{% block navbar_Type %}Eliminar{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card border-0 shadow-lg">
+        <div class="card-body text-center p-5">
+
+          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+            <i class="material-icons text-white" style="font-size:2rem">delete_forever</i>
+          </div>
+
+          <h5 class="font-weight-bolder text-danger mb-1">¿Eliminar esta transacción?</h5>
+          <p class="text-secondary text-sm mb-3">Esta acción no se puede deshacer.</p>
+
+          <div class="bg-light rounded p-3 text-start mb-4">
+            <div class="row g-2">
+              <div class="col-6">
+                <p class="text-xxs text-secondary mb-0">ID</p>
+                <p class="text-xs font-weight-bold mb-0">TX-{{ transaction.id }}</p>
+              </div>
+              <div class="col-6 text-end">
+                {% if transaction.status == 'CONFIRMED' %}<span class="badge bg-gradient-success">Confirmado</span>
+                {% elif transaction.status == 'DRAFT' %}<span class="badge bg-gradient-secondary">Borrador</span>
+                {% else %}<span class="badge bg-gradient-danger">Revertido</span>{% endif %}
+              </div>
+              <div class="col-6">
+                <p class="text-xxs text-secondary mb-0">Monto</p>
+                <p class="text-xs font-weight-bold mb-0">{{ transaction.currency }} {{ transaction.amount|floatformat:2 }}</p>
+              </div>
+              <div class="col-6 text-end">
+                <p class="text-xxs text-secondary mb-0">Fecha</p>
+                <p class="text-xs mb-0">{{ transaction.transaction_date|date:"d/m/Y" }}</p>
+              </div>
+            </div>
+          </div>
+
+          {% if transaction.status == 'CONFIRMED' %}
+          <div class="alert alert-danger text-xs py-2 mb-4 text-start">
+            <i class="material-icons text-sm align-middle me-1">warning</i>
+            Esta transacción ya fue <strong>confirmada</strong> y los pagos ya se aplicaron a los comprobantes vinculados. Eliminarla <strong>no revertirá</strong> los montos pagados automáticamente.
+          </div>
+          {% endif %}
+
+          <form method="POST" class="d-flex justify-content-center gap-3">
+            {% csrf_token %}
+            <a href="{% url 'finantial:transaction-detail' transaction.pk %}" class="btn btn-outline-secondary mb-0">
+              <i class="material-icons text-sm align-middle me-1">arrow_back</i> Cancelar
+            </a>
+            <button type="submit" class="btn bg-gradient-danger shadow mb-0">
+              <i class="material-icons text-sm align-middle me-1">delete</i> Sí, eliminar
+            </button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

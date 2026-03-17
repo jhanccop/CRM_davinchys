@@ -30,6 +30,8 @@ DJANGO_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django.contrib.humanize'
 )
 
 LOCAL_APPS = (
@@ -67,6 +69,8 @@ LOCAL_APPS = (
 
     # AREA RRHH
     'applications.RRHH',
+
+    'applications.FINANTIAL',
 
     'multiselectfield',
     'import_export',

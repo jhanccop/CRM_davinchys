@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Movimientos Bancarios{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Banco{% endblock %}
+{% block navbar_Type %}Movimientos{% endblock %}
+
+{% block extra_css %}
+<style>
+  .flow-in  { color: #2dce89; font-weight: 700; }
+  .flow-out { color: #f5365c; font-weight: 700; }
+  .tbl-badge { font-size: .58rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; }
+  .table-actions a { color: #8392ab; transition: color .15s; }
+  .table-actions a:hover { color: #344767; }
+  .table tbody tr:hover { background: rgba(0,0,0,.025); }
+  .filter-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .3rem; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <!-- HEADER -->
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Movimientos Bancarios</h5>
+      <p class="text-secondary text-sm mb-0">
+        {% if is_holding %}<span class="badge bg-gradient-primary" style="font-size:.58rem">HOLDING</span> Vista corporativa
+        {% else %}<span class="badge bg-gradient-dark" style="font-size:.58rem">{{ user_tin.tinName|default:"Empresa" }}</span>{% endif %}
+        {% if page_obj %}&nbsp;·&nbsp; {{ page_obj.paginator.count }} movimiento{{ page_obj.paginator.count|pluralize }}{% endif %}
+      </p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:movement-create' %}" class="btn btn-sm bg-gradient-info shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">add</i> Nuevo
+      </a>
+      <a href="{% url 'finantial:dashboard' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">dashboard</i>
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <form method="GET">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <p class="filter-label mb-1">Cuenta bancaria</p>
+            <select name="account" class="form-select form-select-sm">
+              <option value="">Todas</option>
+              {% for acc in accounts %}
+              <option value="{{ acc.id }}" {% if sel_account == acc.id|stringformat:"s" %}selected{% endif %}>
+                [{{ acc.nickName }}] {{ acc.idTin.tinName|default:"" }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Flujo</p>
+            <select name="flow" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="1" {% if sel_flow == '1' %}selected{% endif %}>▼ Ingreso</option>
+              <option value="0" {% if sel_flow == '0' %}selected{% endif %}>▲ Egreso</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Estado</p>
+            <select name="conciliated" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="0" {% if sel_conciliated == '0' %}selected{% endif %}>Pendiente</option>
+              <option value="1" {% if sel_conciliated == '1' %}selected{% endif %}>Conciliado</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <p class="filter-label mb-1">Buscar</p>
+            <div class="input-group input-group-sm">
+              <input type="text" name="q" class="form-control" placeholder="Descripción, nro. operación…" value="{{ q }}">
+              <button type="submit" class="btn bg-gradient-dark mb-0"><i class="material-icons text-sm">search</i></button>
+              <a href="{% url 'finantial:movement-list' %}" class="btn btn-outline-secondary mb-0"><i class="material-icons text-sm">clear</i></a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card">
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">#</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Fecha</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cuenta</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Empresa</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tipo</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Descripción</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nro. Op.</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Monto</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Conciliado</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pendiente</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+              <th class="text-secondary text-xxs text-center">Acc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mov in movements %}
+            <tr>
+              <td class="ps-3"><span class="text-xxs text-secondary">#{{ mov.id }}</span></td>
+              <td><span class="text-xs">{{ mov.date|date:"d/m/Y" }}</span></td>
+              <td>
+                <p class="text-xs font-weight-bold mb-0">{{ mov.idAccount.nickName|default:"—" }}</p>
+                <p class="text-xxs text-secondary mb-0">{{ mov.idAccount.bankName|default:"" }}</p>
+              </td>
+              <td><span class="text-xs">{{ mov.tin.tinName|default:"—" }}</span></td>
+              <td>
+                {% if mov.movementType %}
+                  {% if mov.movementType.is_ingreso %}
+                    <span class="badge badge-sm bg-gradient-success tbl-badge">▼ {{ mov.movementType.name }}</span>
+                  {% else %}
+                    <span class="badge badge-sm bg-gradient-danger tbl-badge">▲ {{ mov.movementType.name }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-xxs text-secondary">—</span>
+                {% endif %}
+              </td>
+              <td><span class="text-xs">{{ mov.description|default:"—"|truncatechars:30 }}</span></td>
+              <td><span class="text-xs text-secondary">{{ mov.opNumber|default:"—" }}</span></td>
+              <td class="text-end pe-3">
+                {% if mov.movementType and mov.movementType.is_ingreso %}
+                  <span class="text-xs flow-in">+ {{ mov.idAccount.currency_label }} {{ mov.amount|floatformat:2 }}</span>
+                {% else %}
+                  <span class="text-xs flow-out">- {{ mov.idAccount.currency_label }} {{ mov.amount|floatformat:2 }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs text-success">{{ mov.idAccount.currency_label }} {{ mov.amountReconcilied|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                {% if mov.pending_reconciliation > 0 %}
+                <span class="text-xs text-danger font-weight-bold">{{ mov.idAccount.currency_label }} {{ mov.pending_reconciliation|floatformat:2 }}</span>
+                {% else %}
+                <i class="material-icons text-success text-sm">check_circle</i>
+                {% endif %}
+              </td>
+              <td>
+                {% if mov.conciliated %}
+                  <span class="badge badge-sm bg-gradient-success tbl-badge">Conciliado</span>
+                {% else %}
+                  <span class="badge badge-sm bg-gradient-danger tbl-badge">Pendiente</span>
+                {% endif %}
+                {% if mov.payment_transaction_id %}
+                  <span class="badge badge-sm bg-gradient-info tbl-badge ms-1">TX-{{ mov.payment_transaction_id }}</span>
+                {% endif %}
+              </td>
+              <td class="text-center pe-3 table-actions">
+                <a href="{% url 'finantial:movement-detail' mov.pk %}" class="me-1" data-bs-toggle="tooltip" title="Ver"><i class="material-icons text-sm">visibility</i></a>
+                <a href="{% url 'finantial:movement-update' mov.pk %}" class="me-1" data-bs-toggle="tooltip" title="Editar"><i class="material-icons text-sm">edit</i></a>
+                <a href="{% url 'finantial:movement-delete' mov.pk %}" data-bs-toggle="tooltip" title="Eliminar"><i class="material-icons text-sm text-danger">delete</i></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="12" class="text-center py-5">
+                <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">account_balance</i>
+                <p class="text-sm text-secondary mb-2">Sin movimientos con estos filtros</p>
+                <a href="{% url 'finantial:movement-create' %}" class="btn btn-sm bg-gradient-info"><i class="material-icons text-sm align-middle me-1">add</i>Registrar movimiento</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer py-3 d-flex justify-content-between align-items-center">
+      <span class="text-xs text-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      <nav>
+        <ul class="pagination pagination-sm mb-0 gap-1">
+          {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_left</i></a></li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}<li class="page-item active"><span class="page-link rounded bg-gradient-primary border-0">{{ num }}</span></li>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+            <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ num }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.next_page_number }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_right</i></a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Comprobante #{{ document.id }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Comprobantes{% endblock %}
+{% block navbar_Type %}Detalle{% endblock %}
+
+{% block extra_css %}
+<style>
+  .info-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .2rem; }
+  .info-value { font-size: .82rem; font-weight: 600; color: #344767; margin-bottom: 0; }
+  .sticky-side { position: sticky; top: 1.5rem; }
+  .progress-bar-pay { height: 10px; border-radius: 5px; }
+  .badge-order { font-size: .6rem; padding: 3px 8px; border-radius: 20px; }
+  .tbl-sm td, .tbl-sm th { font-size: .75rem; padding: .5rem .75rem; vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <!-- HEADER BREADCRUMB -->
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        {% if document.direction == 'IN' %}<span class="badge bg-gradient-success"><i class="material-icons text-sm align-middle me-1">south</i>Ingreso</span>
+        {% elif document.direction == 'OUT' %}<span class="badge bg-gradient-danger"><i class="material-icons text-sm align-middle me-1">north</i>Egreso</span>
+        {% else %}<span class="badge bg-gradient-info"><i class="material-icons text-sm align-middle me-1">swap_horiz</i>Interno</span>{% endif %}
+
+        <h5 class="font-weight-bolder mb-0">{{ document.get_doc_type_display }} — {{ document.doc_number|default:"Sin número" }}</h5>
+
+        {% if document.status == 'PAID' %}<span class="badge bg-gradient-success">Pagado</span>
+        {% elif document.status == 'PARTIAL' %}<span class="badge bg-gradient-warning">Parcial</span>
+        {% elif document.status == 'PENDING' %}<span class="badge bg-gradient-danger">Pendiente</span>
+        {% elif document.status == 'CANCELLED' %}<span class="badge bg-gradient-secondary">Anulado</span>{% endif %}
+      </div>
+      <p class="text-secondary text-xs mb-0 mt-1">
+        <i class="material-icons text-xs align-middle">tag</i> ID {{ document.id }}
+        &nbsp;·&nbsp; Creado {{ document.created|date:"d/m/Y H:i" }}
+        {% if document.created_by %} &nbsp;·&nbsp; por <strong>{{ document.created_by }}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="col-auto d-flex gap-2 flex-wrap mt-2 mt-lg-0">
+      {% if document.status == 'PENDING' or document.status == 'PARTIAL' %}
+      <a href="{% url 'finantial:transaction-create' %}?doc={{ document.pk }}" class="btn btn-sm bg-gradient-success shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">payments</i> Pagar ahora
+      </a>
+      {% endif %}
+      <a href="{% url 'finantial:document-update' document.pk %}" class="btn btn-sm bg-gradient-warning mb-0">
+        <i class="material-icons text-sm align-middle me-1">edit</i> Editar
+      </a>
+      <a href="{% url 'finantial:document-delete' document.pk %}" class="btn btn-sm bg-gradient-danger mb-0">
+        <i class="material-icons text-sm align-middle me-1">delete</i>
+      </a>
+      <a href="{% url 'finantial:document-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">arrow_back</i>
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- ══ COLUMNA PRINCIPAL ══ -->
+    <div class="col-lg-8">
+
+      <!-- Datos generales -->
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-primary">receipt</i>Datos del Comprobante</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row g-3">
+            <div class="col-sm-3"><p class="info-label">Tipo</p><p class="info-value">{{ document.get_doc_type_display }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Número</p><p class="info-value">{{ document.doc_number|default:"—" }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Emisión</p><p class="info-value">{{ document.issue_date|date:"d/m/Y"|default:"—" }}</p></div>
+            <div class="col-sm-3">
+              <p class="info-label">Vencimiento</p>
+              <p class="info-value {% if document.due_date %}text-danger{% endif %}">{{ document.due_date|date:"d/m/Y"|default:"—" }}</p>
+            </div>
+            <div class="col-sm-4"><p class="info-label">Emisor</p><p class="info-value">{{ document.tin_issuer.tinName|default:document.client|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Receptor</p><p class="info-value">{{ document.tin_receiver.tinName|default:document.supplier|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Anotación</p><p class="info-value">{{ document.get_annotation_display|default:"—" }}</p></div>
+            {% if document.short_description %}
+            <div class="col-12"><p class="info-label">Descripción</p><p class="info-value text-secondary">{{ document.short_description }}</p></div>
+            {% endif %}
+          </div>
+
+          {% with rq=document.related_quotes riq=document.related_int_quotes rwo=document.related_work_orders %}
+          {% if rq or riq or rwo %}
+          <hr class="horizontal dark my-3">
+          <p class="info-label mb-2"><i class="material-icons text-sm align-middle me-1">link</i>Pedidos vinculados (inferidos desde ítems)</p>
+          <div class="d-flex flex-wrap gap-1">
+            {% for q in rq %}<span class="badge bg-gradient-primary badge-order">QUO-{{ q.id }}</span>{% endfor %}
+            {% for iq in riq %}<span class="badge bg-gradient-info badge-order">INT-{{ iq.id }}</span>{% endfor %}
+            {% for wo in rwo %}<span class="badge bg-gradient-dark badge-order">WO-{{ wo.id }}</span>{% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
+      <!-- Montos y progreso de pago -->
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-success">account_balance_wallet</i>Montos y Estado de Pago</h6>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row g-3 mb-3">
+            <div class="col text-center">
+              <p class="info-label">Moneda</p>
+              <span class="badge bg-gradient-dark">{{ document.currency }}</span>
+              <p class="text-xxs text-secondary mt-1 mb-0">TC: {{ document.exchange_rate }}</p>
+            </div>
+            <div class="col text-center">
+              <p class="info-label">Bruto</p>
+              <p class="info-value">{{ document.gross_amount|floatformat:2 }}</p>
+            </div>
+            <div class="col text-center">
+              <p class="info-label">IGV/IVA</p>
+              <p class="info-value">{{ document.tax_amount|floatformat:2 }}</p>
+            </div>
+            <div class="col text-center border-start border-end">
+              <p class="info-label">Neto</p>
+              <p class="info-value font-weight-bolder text-dark" style="font-size:1rem">{{ document.net_amount|floatformat:2 }}</p>
+            </div>
+            <div class="col text-center">
+              <p class="info-label">Pagado</p>
+              <p class="info-value text-success font-weight-bolder">{{ document.paid_amount|floatformat:2 }}</p>
+            </div>
+            <div class="col text-center">
+              <p class="info-label">Pendiente</p>
+              <p class="info-value {% if document.pending_amount > 0 %}text-danger{% else %}text-success{% endif %} font-weight-bolder">{{ document.pending_amount|floatformat:2 }}</p>
+            </div>
+          </div>
+          {% if document.net_amount > 0 %}
+          {% widthratio document.paid_amount document.net_amount 100 as ppct %}
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-xs text-secondary">Progreso de pago</span>
+            <span class="text-xs font-weight-bolder {% if ppct >= 100 %}text-success{% elif ppct >= 50 %}text-warning{% else %}text-danger{% endif %}">{{ ppct }}%</span>
+          </div>
+          <div class="progress" style="height:8px;border-radius:4px">
+            <div class="progress-bar {% if ppct >= 100 %}bg-gradient-success{% elif ppct >= 50 %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}" style="width:{{ ppct }}%;border-radius:4px"></div>
+          </div>
+          {% endif %}
+          {% if document.has_detraction or document.has_retention %}
+          <div class="row g-3 mt-2">
+            {% if document.has_detraction %}
+            <div class="col-md-4">
+              <span class="badge badge-sm bg-gradient-warning me-1">Detracción</span>
+              <span class="text-xs font-weight-bold">{{ document.currency }} {{ document.detraction_amount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            {% if document.has_retention %}
+            <div class="col-md-4">
+              <span class="badge badge-sm bg-gradient-warning me-1">Retención</span>
+              <span class="text-xs font-weight-bold">{{ document.currency }} {{ document.retention_amount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Ítems asignados -->
+      {% if allocations %}
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-warning">layers</i>Ítems Cubiertos por este Comprobante</h6>
+        </div>
+        <div class="card-body px-0 pb-2">
+          <div class="table-responsive">
+            <table class="table tbl-sm align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Serial</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Transformador</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Pedido</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Asignado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nota</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for alloc in allocations %}
+                <tr>
+                  <td class="ps-4"><span class="font-weight-bold">{{ alloc.item.seq|default:alloc.item.id }}</span></td>
+                  <td>{{ alloc.item.idTrafo|default:"—" }}</td>
+                  <td>
+                    {% with kind=alloc.order_context.0 order=alloc.order_context.1 %}
+                    {% if kind %}
+                      <span class="badge badge-sm {% if kind == 'QUO' %}bg-gradient-primary{% elif kind == 'INT' %}bg-gradient-info{% else %}bg-gradient-dark{% endif %}">{{ kind }}-{{ order.id }}</span>
+                    {% else %}—{% endif %}
+                    {% endwith %}
+                  </td>
+                  <td class="text-end pe-4"><span class="font-weight-bold text-primary">{{ document.currency }} {{ alloc.allocated_amount|floatformat:2 }}</span></td>
+                  <td><span class="text-secondary">{{ alloc.notes|default:"—" }}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Transacciones aplicadas -->
+      {% if tx_lines %}
+      <div class="card mb-3">
+        <div class="card-header pb-0">
+          <h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-info">swap_horiz</i>Pagos Aplicados a este Comprobante</h6>
+        </div>
+        <div class="card-body px-0 pb-2">
+          <div class="table-responsive">
+            <table class="table tbl-sm align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Transacción</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Fecha</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Método</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Monto aplicado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for line in tx_lines %}
+                <tr>
+                  <td class="ps-4">
+                    <a href="{% url 'finantial:transaction-detail' line.transaction.pk %}" class="text-primary font-weight-bold">TX-{{ line.transaction.id }}</a>
+                  </td>
+                  <td>{{ line.transaction.transaction_date|date:"d/m/Y" }}</td>
+                  <td>{{ line.transaction.get_pay_method_display }}</td>
+                  <td class="text-end pe-4"><span class="text-success font-weight-bold">{{ line.transaction.currency }} {{ line.amount_applied|floatformat:2 }}</span></td>
+                  <td>
+                    {% if line.transaction.status == 'CONFIRMED' %}<span class="badge badge-sm bg-gradient-success">Confirmado</span>
+                    {% elif line.transaction.status == 'DRAFT' %}<span class="badge badge-sm bg-gradient-secondary">Borrador</span>
+                    {% else %}<span class="badge badge-sm bg-gradient-danger">Revertido</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ══ SIDEBAR ══ -->
+    <div class="col-lg-4">
+      <div class="sticky-side d-flex flex-column gap-3">
+
+        <!-- Widget de estado visual -->
+        <div class="card text-center">
+          <div class="card-body py-4">
+            {% if document.status == 'PAID' %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.5rem">check_circle</i>
+            </div>
+            <h5 class="text-success font-weight-bolder mb-0">PAGADO</h5>
+            {% elif document.status == 'PARTIAL' %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(195deg,#fb6340,#fba940);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.5rem">hourglass_bottom</i>
+            </div>
+            <h5 class="text-warning font-weight-bolder mb-0">PAGO PARCIAL</h5>
+            {% elif document.status == 'PENDING' %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.5rem">pending_actions</i>
+            </div>
+            <h5 class="text-danger font-weight-bolder mb-0">PENDIENTE</h5>
+            {% else %}
+            <h5 class="text-secondary font-weight-bolder mb-0">{{ document.get_status_display|upper }}</h5>
+            {% endif %}
+            <p class="text-xxs text-secondary mt-1">{{ document.get_annotation_display|default:"" }}</p>
+            {% if document.status == 'PENDING' or document.status == 'PARTIAL' %}
+            <a href="{% url 'finantial:transaction-create' %}?doc={{ document.pk }}" class="btn btn-sm bg-gradient-success w-100 mt-2 shadow mb-0">
+              <i class="material-icons text-sm align-middle me-1">payments</i> Registrar Pago
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Archivos -->
+        {% if document.pdf_file or document.xml_file %}
+        <div class="card">
+          <div class="card-header pb-0"><h6 class="mb-0 text-sm">Archivos</h6></div>
+          <div class="card-body pt-2 d-flex flex-column gap-2">
+            {% if document.pdf_file %}
+            <a href="{{ document.pdf_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger w-100 mb-0">
+              <i class="material-icons text-sm align-middle me-1">picture_as_pdf</i> Ver PDF
+            </a>
+            {% endif %}
+            {% if document.xml_file %}
+            <a href="{{ document.xml_file.url }}" target="_blank" class="btn btn-sm btn-outline-secondary w-100 mb-0">
+              <i class="material-icons text-sm align-middle me-1">code</i> Descargar XML
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Contabilidad -->
+        {% if document.account_category or document.cost_center or document.declare_month %}
+        <div class="card">
+          <div class="card-header pb-0"><h6 class="mb-0 text-sm">Clasificación Contable</h6></div>
+          <div class="card-body pt-2">
+            {% if document.account_category %}
+            <div class="mb-2"><p class="info-label">Categoría</p><p class="info-value">{{ document.get_account_category_display }}</p></div>
+            {% endif %}
+            {% if document.cost_center %}
+            <div class="mb-2"><p class="info-label">Centro de costo</p><p class="info-value">{{ document.cost_center }}</p></div>
+            {% endif %}
+            {% if document.declare_month %}
+            <div><p class="info-label">Período</p><p class="info-value">{{ document.declare_month }}/{{ document.declare_year|default:"—" }}</p></div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Auditoría -->
+        <div class="card">
+          <div class="card-body p-3">
+            <p class="info-label mb-2">Auditoría</p>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-xxs text-secondary">Registrado por</span>
+              <span class="text-xs font-weight-bold">{{ document.created_by|default:"—" }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-xxs text-secondary">Creado</span>
+              <span class="text-xs">{{ document.created|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-xxs text-secondary">Modificado</span>
+              <span class="text-xs">{{ document.modified|date:"d/m/Y H:i" }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

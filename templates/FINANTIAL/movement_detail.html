@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}MOV-{{ movement.id }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Banco{% endblock %}
+{% block navbar_Type %}Movimiento{% endblock %}
+{% block extra_css %}
+<style>
+  .info-label { font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8392ab;margin-bottom:.2rem; }
+  .info-value { font-size:.82rem;font-weight:600;color:#344767;margin-bottom:0; }
+  .sticky-side { position:sticky;top:1.5rem; }
+  .conc-row { border-bottom:1px solid #f1f2f4;padding:.5rem .75rem; }
+  .conc-row:last-child { border-bottom:none; }
+</style>
+{% endblock %}
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        {% if movement.movementType %}
+          {% if movement.movementType.is_ingreso %}
+            <span class="badge bg-gradient-success"><i class="material-icons text-sm align-middle me-1">south</i>Ingreso</span>
+          {% else %}
+            <span class="badge bg-gradient-danger"><i class="material-icons text-sm align-middle me-1">north</i>Egreso</span>
+          {% endif %}
+        {% endif %}
+        <h5 class="font-weight-bolder mb-0">MOV-{{ movement.id }} — {{ movement.description|default:"Sin descripción" }}</h5>
+        {% if movement.conciliated %}<span class="badge bg-gradient-success">Conciliado</span>
+        {% else %}<span class="badge bg-gradient-danger">Pendiente</span>{% endif %}
+      </div>
+      <p class="text-secondary text-xs mb-0 mt-1">{{ movement.date|date:"d \d\e F Y" }} &nbsp;·&nbsp; {{ movement.idAccount }} &nbsp;·&nbsp; {{ movement.tin.tinName|default:"—" }}</p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:movement-update' movement.pk %}" class="btn btn-sm bg-gradient-warning mb-0"><i class="material-icons text-sm align-middle me-1">edit</i></a>
+      <a href="{% url 'finantial:movement-delete' movement.pk %}" class="btn btn-sm bg-gradient-danger mb-0"><i class="material-icons text-sm align-middle">delete</i></a>
+      <a href="{% url 'finantial:movement-list' %}" class="btn btn-sm btn-outline-secondary mb-0"><i class="material-icons text-sm align-middle">arrow_back</i></a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <!-- Datos del movimiento -->
+      <div class="card mb-3">
+        <div class="card-header pb-0"><h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-info">account_balance</i>Datos del Movimiento</h6></div>
+        <div class="card-body pt-3">
+          <div class="row g-3">
+            <div class="col-sm-3"><p class="info-label">Fecha</p><p class="info-value">{{ movement.date|date:"d/m/Y" }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Cuenta</p><p class="info-value">{{ movement.idAccount.nickName|default:"—" }}<br><small class="text-xxs text-secondary">{{ movement.idAccount.accountNumber|default:"" }}</small></p></div>
+            <div class="col-sm-3"><p class="info-label">Banco</p><p class="info-value">{{ movement.idAccount.bankName|default:"—" }}</p></div>
+            <div class="col-sm-3"><p class="info-label">Empresa</p><p class="info-value">{{ movement.tin.tinName|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Tipo</p><p class="info-value">{{ movement.movementType|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Nro. Operación</p><p class="info-value">{{ movement.opNumber|default:"—" }}</p></div>
+            <div class="col-sm-4"><p class="info-label">Origen / Destino</p><p class="info-value">{{ movement.originDestination|default:"—" }}</p></div>
+            {% if movement.justification %}
+            <div class="col-12"><p class="info-label">Justificación</p><p class="info-value text-secondary">{{ movement.justification }}</p></div>
+            {% endif %}
+          </div>
+          <hr class="horizontal dark my-3">
+          <div class="row g-3">
+            <div class="col-sm-3 text-center"><p class="info-label">Monto</p><p class="info-value font-weight-bolder" style="font-size:1rem">{{ movement.idAccount.currency_label }} {{ movement.amount|floatformat:2 }}</p></div>
+            <div class="col-sm-3 text-center"><p class="info-label">Conciliado</p><p class="info-value text-success font-weight-bolder">{{ movement.idAccount.currency_label }} {{ movement.amountReconcilied|floatformat:2 }}</p></div>
+            <div class="col-sm-3 text-center"><p class="info-label">Pendiente</p><p class="info-value {% if movement.pending_reconciliation > 0 %}text-danger{% else %}text-success{% endif %} font-weight-bolder">{{ movement.idAccount.currency_label }} {{ movement.pending_reconciliation|floatformat:2 }}</p></div>
+            <div class="col-sm-3 text-center">
+              {% if movement.payment_transaction_id %}
+              <p class="info-label">TX Pago</p>
+              <a href="{% url 'finantial:transaction-detail' movement.payment_transaction_id %}" class="badge bg-gradient-info text-decoration-none">TX-{{ movement.payment_transaction_id }}</a>
+              {% endif %}
+            </div>
+          </div>
+          {% if movement.amount > 0 %}
+          {% widthratio movement.amountReconcilied movement.amount 100 as pct %}
+          <div class="progress mt-3" style="height:8px;border-radius:4px">
+            <div class="progress-bar {% if pct >= 100 %}bg-gradient-success{% elif pct >= 50 %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}" style="width:{{ pct }}%"></div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Conciliaciones -->
+      {% if conciliations %}
+      <div class="card">
+        <div class="card-header pb-0"><h6 class="mb-0"><i class="material-icons text-sm align-middle me-1 text-success">sync_alt</i>Conciliaciones</h6></div>
+        <div class="card-body p-0">
+          {% for c in conciliations %}
+          <div class="conc-row d-flex justify-content-between align-items-center">
+            <div>
+              <span class="badge badge-sm {% if c.type == '0' %}bg-gradient-primary{% elif c.type == '1' %}bg-gradient-info{% else %}bg-gradient-secondary{% endif %} me-2">{{ c.get_type_display }}</span>
+              {% if c.idDoc %}<span class="text-xs">{{ c.idDoc.docType }} {{ c.idDoc.docNumber }}</span>{% endif %}
+              {% if c.idMovArrival %}<span class="text-xs">MOV-{{ c.idMovArrival.id }}</span>{% endif %}
+              {% if c.source == 'PAYMENT' %}<span class="badge badge-sm bg-gradient-success ms-1" style="font-size:.55rem">Auto</span>{% endif %}
+            </div>
+            <span class="text-xs font-weight-bold text-success">{{ c.amountReconcilied|floatformat:2 }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <div class="sticky-side d-flex flex-column gap-3">
+        <div class="card text-center">
+          <div class="card-body py-4">
+            {% if movement.conciliated %}
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.4rem">check_circle</i>
+            </div>
+            <h5 class="text-success font-weight-bolder mb-0">CONCILIADO</h5>
+            {% else %}
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+              <i class="material-icons text-white" style="font-size:1.4rem">pending_actions</i>
+            </div>
+            <h5 class="text-danger font-weight-bolder mb-0">PENDIENTE</h5>
+            {% endif %}
+          </div>
+        </div>
+        {% if movement.pdf_file %}
+        <div class="card">
+          <div class="card-body p-3">
+            <a href="{{ movement.pdf_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger w-100 mb-0">
+              <i class="material-icons text-sm align-middle me-1">picture_as_pdf</i> Ver Voucher
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="card">
+          <div class="card-body p-3">
+            <p class="info-label mb-2">Auditoría</p>
+            <div class="d-flex justify-content-between mb-1"><span class="text-xxs text-secondary">Creado</span><span class="text-xs">{{ movement.created|date:"d/m/Y H:i" }}</span></div>
+            <div class="d-flex justify-content-between"><span class="text-xxs text-secondary">Modificado</span><span class="text-xs">{{ movement.modified|date:"d/m/Y H:i" }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

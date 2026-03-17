@@ -246,7 +246,6 @@ class Conciliation(TimeStampedModel):
     def __str__(self):
         return f"{str(self.id)} | {str(self.type)}"
     
-
 ## ======================================== SIGNALS ==================================
 @receiver(pre_save, sender = BankMovements)
 def search_tinAccounts(sender, instance, **kwargs):

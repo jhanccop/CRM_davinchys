@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Comprobantes{% endblock %}
+{% block navbar_Type %}{% if action == 'create' %}Nuevo{% else %}Editar{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .field-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; display: block; margin-bottom: .35rem; }
+  .section-divider { border-top: 2px dashed #e9ecef; margin: 1.5rem 0 1rem; padding-top: 1rem; }
+  .section-divider h6 { color: #344767; margin-bottom: 0; }
+  .formset-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem 1rem .5rem; position: relative; margin-bottom: .75rem; }
+  .formset-row:hover { border-color: #dee2e6; }
+  .formset-remove { position: absolute; top: .6rem; right: .75rem; }
+  .sidebar-tip { background: linear-gradient(135deg, #f8f9fa, #fff); border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem; margin-bottom: 1rem; }
+  .tip-item { display: flex; gap: .5rem; margin-bottom: .5rem; font-size: .72rem; color: #67748e; }
+  .tip-icon { color: #fb6340; flex-shrink: 0; font-size: .85rem; margin-top: .05rem; }
+  .sticky-wrap { position: sticky; top: 1.5rem; }
+  .pending-badge { display: none; background: #e8f5e9; color: #2dce89; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: .35rem; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">{{ title }}</h5>
+      <p class="text-secondary text-sm mb-0">Complete los datos del comprobante y asigne los ítems cubiertos</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:document-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle me-1">arrow_back</i> Volver
+      </a>
+    </div>
+  </div>
+
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3" role="alert">
+    <i class="material-icons text-sm align-middle me-1">{% if 'error' in msg.tags %}error{% else %}info{% endif %}</i>
+    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <form method="POST" enctype="multipart/form-data" id="docForm" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+      <!-- ══ COLUMNA PRINCIPAL ══ -->
+      <div class="col-lg-8">
+
+        <!-- CARD 1: Identificación -->
+        <div class="card mb-3">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#42424a,#191919);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">description</i>
+              </div>
+              <h6 class="mb-0">Identificación del Comprobante</h6>
+            </div>
+          </div>
+          <div class="card-body pt-3">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="field-label">Tipo de documento *</label>
+                {{ form.doc_type }}
+                {% if form.doc_type.errors %}<p class="text-danger text-xxs mt-1">{{ form.doc_type.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="field-label">Número</label>
+                {{ form.doc_number }}
+                {% if form.doc_number.errors %}<p class="text-danger text-xxs mt-1">{{ form.doc_number.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="field-label">Dirección del flujo *</label>
+                {{ form.direction }}
+                <small class="text-xxs text-info mt-1 d-block" id="dir-hint"></small>
+              </div>
+            </div>
+            <div class="section-divider">
+              <h6><i class="material-icons text-sm align-middle me-1">group</i>Partes Involucradas</h6>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="field-label">Empresa Emisora (TIN)</label>{{ form.tin_issuer }}
+              </div>
+              <div class="col-md-6">
+                <label class="field-label">Empresa Receptora (TIN)</label>{{ form.tin_receiver }}
+              </div>
+              <div class="col-md-6">
+                <label class="field-label">Cliente externo</label>{{ form.client }}
+              </div>
+              <div class="col-md-6">
+                <label class="field-label">Proveedor externo</label>{{ form.supplier }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: Montos -->
+        <div class="card mb-3">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">attach_money</i>
+              </div>
+              <h6 class="mb-0">Montos e Impuestos</h6>
+            </div>
+          </div>
+          <div class="card-body pt-3">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="field-label">Moneda *</label>{{ form.currency }}
+              </div>
+              <div class="col-md-3">
+                <label class="field-label">Tipo de cambio</label>{{ form.exchange_rate }}
+              </div>
+              <div class="col-md-2">
+                <label class="field-label">Monto bruto *</label>{{ form.gross_amount }}
+              </div>
+              <div class="col-md-2">
+                <label class="field-label">IGV / IVA</label>{{ form.tax_amount }}
+              </div>
+              <div class="col-md-2">
+                <label class="field-label">Neto</label>{{ form.net_amount }}
+                <small class="text-xxs text-secondary">Auto-calculado</small>
+              </div>
+            </div>
+            <div class="section-divider">
+              <h6><i class="material-icons text-sm align-middle me-1">percent</i>Retenciones y Detracciones</h6>
+            </div>
+            <div class="row g-3 align-items-center">
+              <div class="col-auto">
+                <div class="form-check form-switch">
+                  {{ form.has_detraction }}
+                  <label class="form-check-label text-xs" for="{{ form.has_detraction.id_for_label }}">Detracción</label>
+                </div>
+              </div>
+              <div class="col-md-3" id="colDetraction">
+                <label class="field-label">Monto detracción</label>{{ form.detraction_amount }}
+              </div>
+              <div class="col-auto">
+                <div class="form-check form-switch">
+                  {{ form.has_retention }}
+                  <label class="form-check-label text-xs" for="{{ form.has_retention.id_for_label }}">Retención</label>
+                </div>
+              </div>
+              <div class="col-md-3" id="colRetention">
+                <label class="field-label">Monto retención</label>{{ form.retention_amount }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: Fechas y Contabilidad -->
+        <div class="card mb-3">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#1171ef,#11cdef);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">event_note</i>
+              </div>
+              <h6 class="mb-0">Fechas y Clasificación Contable</h6>
+            </div>
+          </div>
+          <div class="card-body pt-3">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="field-label">Fecha emisión</label>{{ form.issue_date }}
+              </div>
+              <div class="col-md-3">
+                <label class="field-label">Fecha vencimiento</label>{{ form.due_date }}
+              </div>
+              <div class="col-md-2">
+                <label class="field-label">Mes declaración</label>{{ form.declare_month }}
+              </div>
+              <div class="col-md-2">
+                <label class="field-label">Año declaración</label>{{ form.declare_year }}
+              </div>
+              <div class="col-md-3">
+                <label class="field-label">Categoría contable</label>{{ form.account_category }}
+              </div>
+              <div class="col-md-3">
+                <label class="field-label">Centro de costo</label>{{ form.cost_center }}
+              </div>
+              <div class="col-md-3">
+                <label class="field-label">Anotación</label>{{ form.annotation }}
+              </div>
+              <div class="col-md-6">
+                <label class="field-label">Descripción corta</label>{{ form.short_description }}
+              </div>
+              <div class="col-12">
+                <label class="field-label">Descripción detallada</label>{{ form.description }}
+              </div>
+            </div>
+            <div class="section-divider">
+              <h6><i class="material-icons text-sm align-middle me-1">attach_file</i>Archivos Adjuntos</h6>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="field-label">PDF del comprobante</label>{{ form.pdf_file }}
+              </div>
+              <div class="col-md-6">
+                <label class="field-label">XML (SUNAT / SAT)</label>{{ form.xml_file }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 4: Items / Allocations -->
+        <div class="card mb-3">
+          <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#fb6340,#fba940);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">layers</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Ítems cubiertos</h6>
+                <p class="text-xxs text-secondary mb-0">Un comprobante puede cubrir uno o varios transformadores</p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm bg-gradient-warning shadow mb-0" id="addItemBtn">
+              <i class="material-icons text-sm align-middle me-1">add</i> Agregar ítem
+            </button>
+          </div>
+          <div class="card-body pt-3">
+            {{ allocation_formset.management_form }}
+            <div id="allocationContainer">
+              {% for af in allocation_formset %}
+              <div class="formset-row" data-index="{{ forloop.counter0 }}">
+                {{ af.id }}
+                <button type="button" class="btn btn-link text-danger formset-remove p-0 mb-0" style="font-size:.75rem">
+                  <i class="material-icons" style="font-size:1rem">cancel</i>
+                </button>
+                <div class="row g-3">
+                  <div class="col-md-5">
+                    <label class="field-label">Ítem (serial / transformador)</label>
+                    {{ af.item }}
+                    <span class="pending-badge" id="pb_{{ forloop.counter0 }}"></span>
+                    {% if af.item.errors %}<p class="text-danger text-xxs mt-1">{{ af.item.errors.0 }}</p>{% endif %}
+                  </div>
+                  <div class="col-md-3">
+                    <label class="field-label">Monto asignado</label>{{ af.allocated_amount }}
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Nota</label>{{ af.notes }}
+                  </div>
+                </div>
+                {% if allocation_formset.can_delete %}<div class="d-none">{{ af.DELETE }}</div>{% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVE BUTTONS -->
+        <div class="d-flex justify-content-end gap-2 mb-4">
+          <a href="{% url 'finantial:document-list' %}" class="btn btn-outline-secondary mb-0">Cancelar</a>
+          <button type="submit" class="btn bg-gradient-primary shadow mb-0">
+            <i class="material-icons text-sm align-middle me-1">save</i>
+            {% if action == 'create' %}Guardar Comprobante{% else %}Actualizar{% endif %}
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ══ SIDEBAR ══ -->
+      <div class="col-lg-4">
+        <div class="sticky-wrap">
+
+          {% if action == 'update' and form.instance.pk %}
+          <div class="card mb-3">
+            <div class="card-body p-3">
+              <p class="text-xxs font-weight-bolder text-secondary text-uppercase mb-2">Estado actual · #{{ form.instance.id }}</p>
+              {% with s=form.instance.status %}
+              {% if s == 'PAID' %}<span class="badge bg-gradient-success mb-2">Pagado</span>
+              {% elif s == 'PARTIAL' %}<span class="badge bg-gradient-warning mb-2">Pago parcial</span>
+              {% elif s == 'PENDING' %}<span class="badge bg-gradient-danger mb-2">Pendiente</span>
+              {% else %}<span class="badge bg-gradient-secondary mb-2">{{ form.instance.get_status_display }}</span>{% endif %}
+              {% endwith %}
+              <div class="row text-center g-0">
+                <div class="col-4 p-2 border-end">
+                  <p class="text-xxs text-secondary mb-0">Neto</p>
+                  <p class="text-xs font-weight-bold mb-0">{{ form.instance.net_amount|floatformat:2 }}</p>
+                </div>
+                <div class="col-4 p-2 border-end">
+                  <p class="text-xxs text-secondary mb-0">Pagado</p>
+                  <p class="text-xs font-weight-bold text-success mb-0">{{ form.instance.paid_amount|floatformat:2 }}</p>
+                </div>
+                <div class="col-4 p-2">
+                  <p class="text-xxs text-secondary mb-0">Pendiente</p>
+                  <p class="text-xs font-weight-bold text-danger mb-0">{{ form.instance.pending_amount|floatformat:2 }}</p>
+                </div>
+              </div>
+              {% if form.instance.net_amount > 0 %}
+              {% widthratio form.instance.paid_amount form.instance.net_amount 100 as pp %}
+              <div class="progress mt-2" style="height:5px;border-radius:3px">
+                <div class="progress-bar bg-gradient-success" style="width:{{ pp }}%"></div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="sidebar-tip">
+            <p class="text-xs font-weight-bolder text-dark mb-2"><i class="material-icons text-sm align-middle me-1 text-warning">lightbulb</i>Guía de flujos</p>
+            <div class="d-flex flex-column gap-2">
+              <div class="d-flex gap-2 align-items-start">
+                <span class="badge bg-gradient-success mt-1" style="font-size:.55rem;min-width:28px">IN</span>
+                <span class="text-xxs text-secondary"><strong>Cliente → DAV LLC</strong><br>Factura por cotización master</span>
+              </div>
+              <div class="d-flex gap-2 align-items-start">
+                <span class="badge bg-gradient-danger mt-1" style="font-size:.55rem;min-width:28px">OUT</span>
+                <span class="text-xxs text-secondary"><strong>Subsidiaria → Proveedor</strong><br>Factura por Work Order</span>
+              </div>
+              <div class="d-flex gap-2 align-items-start">
+                <span class="badge bg-gradient-info mt-1" style="font-size:.55rem;min-width:28px">INT</span>
+                <span class="text-xxs text-secondary"><strong>Holding ↔ Subsidiaria</strong><br>Transferencia interna</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-tip">
+            <p class="text-xs font-weight-bolder text-dark mb-2"><i class="material-icons text-sm align-middle me-1 text-info">info</i>Cómo funciona</p>
+            <div class="tip-item"><i class="material-icons tip-icon">calculate</i>El monto neto se calcula automáticamente como Bruto − IGV</div>
+            <div class="tip-item"><i class="material-icons tip-icon">link</i>El vínculo con QUO/INT/WO se infiere desde el ítem seleccionado</div>
+            <div class="tip-item"><i class="material-icons tip-icon">split_screen</i>Puede cubrir varios ítems (pago split o cuotas)</div>
+            <div class="tip-item mb-0"><i class="material-icons tip-icon">refresh</i>El estado se actualiza al confirmar una transacción</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+// Auto-calcular neto
+function recalcNet() {
+  const g = parseFloat(document.querySelector('[name="gross_amount"]')?.value) || 0;
+  const t = parseFloat(document.querySelector('[name="tax_amount"]')?.value) || 0;
+  const n = document.querySelector('[name="net_amount"]');
+  if (n) n.value = (g - t).toFixed(2);
+}
+document.querySelector('[name="gross_amount"]')?.addEventListener('input', recalcNet);
+document.querySelector('[name="tax_amount"]')?.addEventListener('input', recalcNet);
+
+// Hint de dirección
+const hints = { IN:'Cobro: Cliente → DAV LLC', OUT:'Pago: Subsidiaria → Proveedor', INT:'Transferencia interna Holding ↔ Subsidiaria' };
+const dirSel = document.querySelector('[name="direction"]');
+const hint = document.getElementById('dir-hint');
+dirSel?.addEventListener('change', () => { if (hint) hint.textContent = hints[dirSel.value] || ''; });
+if (dirSel && hint) hint.textContent = hints[dirSel.value] || '';
+
+// Toggle detracción / retención
+function toggleAmt(cbName, colId) {
+  const cb = document.querySelector(`[name="${cbName}"]`);
+  const col = document.getElementById(colId);
+  if (!cb || !col) return;
+  const upd = () => { col.style.opacity = cb.checked ? '1' : '.4'; col.querySelector('input').disabled = !cb.checked; };
+  cb.addEventListener('change', upd); upd();
+}
+toggleAmt('has_detraction', 'colDetraction');
+toggleAmt('has_retention', 'colRetention');
+
+// Formset dinámico
+const container = document.getElementById('allocationContainer');
+const totalForms = document.querySelector('[name="allocations-TOTAL_FORMS"]');
+
+document.getElementById('addItemBtn')?.addEventListener('click', () => {
+  const idx = parseInt(totalForms.value);
+  const first = container.querySelector('.formset-row');
+  if (!first) return;
+  const clone = first.cloneNode(true);
+  clone.dataset.index = idx;
+  clone.querySelectorAll('[name],[id],[for]').forEach(el => {
+    ['name','id','for'].forEach(a => {
+      const v = el.getAttribute(a);
+      if (v) el.setAttribute(a, v.replace(/-\d+-/, `-${idx}-`));
+    });
+    if (['INPUT','SELECT'].includes(el.tagName)) { el.value = ''; if (el.type === 'checkbox') el.checked = false; }
+  });
+  clone.querySelectorAll('.pending-badge').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+  container.appendChild(clone);
+  totalForms.value = idx + 1;
+  bindItem(clone);
+});
+
+container.addEventListener('click', e => {
+  const btn = e.target.closest('.formset-remove');
+  if (!btn) return;
+  const row = btn.closest('.formset-row');
+  const del = row?.querySelector('input[name$="-DELETE"]');
+  if (del) { del.checked = true; row.style.display = 'none'; } else row?.remove();
+});
+
+function bindItem(row) {
+  const sel = row.querySelector('select[name$="-item"]');
+  if (!sel) return;
+  sel.addEventListener('change', function () {
+    const pb = row.querySelector('.pending-badge');
+    const amt = row.querySelector('input[name$="-allocated_amount"]');
+    if (!this.value) return;
+    fetch(`{% url 'finantial:api-item-pending' 0 %}`.replace('/0/', `/${this.value}/`))
+      .then(r => r.json()).then(d => {
+        if (amt) amt.value = d.pending.toFixed(2);
+        if (pb) { pb.textContent = `Costo: ${d.unit_cost.toFixed(2)} | Pend.: ${d.pending.toFixed(2)}`; pb.style.display = 'inline-block'; }
+      });
+  });
+}
+container.querySelectorAll('.formset-row').forEach(bindItem);
+</script>
+{% endblock %}
