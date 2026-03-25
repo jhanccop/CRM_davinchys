@@ -8,15 +8,55 @@ from applications.RRHH.models import Departamento
 __all__ = ['LoginRequiredMixin']
 
 
+# Fallback: cuando idArea está vacío, intenta inferirlo por coincidencia
+# parcial en el nombre del departamento (case-insensitive).
+_NOMBRE_TO_AREA = {
+    'admin':     Departamento.ADMINISTRADOR,
+    'comercial': Departamento.COMERCIAL,
+    'ventas':    Departamento.COMERCIAL,
+    'finanz':    Departamento.FINANZAS,
+    'contab':    Departamento.FINANZAS,
+    'producc':   Departamento.PRODUCCION,
+    'almac':     Departamento.PRODUCCION,
+    'gerenc':    Departamento.GERENCIA,
+    'logist':    Departamento.LOGISTICA,
+    'compras':   Departamento.LOGISTICA,
+    'recursos':  Departamento.RECURSOSHUMANOS,
+    'rrhh':      Departamento.RECURSOSHUMANOS,
+    'ceo':       Departamento.CEOGLOBAL,
+    'ti':        Departamento.TI,
+    'tecno':     Departamento.TI,
+}
+
+
+def _resolve_area(departamento):
+    """
+    Devuelve el idArea efectivo del departamento.
+    Si idArea está vacío (blank), lo infiere por el nombre del departamento.
+    """
+    area = (departamento.idArea or '').strip()
+    if area:
+        return area
+    nombre = (departamento.nombre or '').lower()
+    for keyword, mapped_area in _NOMBRE_TO_AREA.items():
+        if keyword in nombre:
+            return mapped_area
+    return ''
+
+
 def _has_area_access(user, *areas):
     """
     Returns True if the user's department area is in `areas`,
     or if the user is ADMINISTRADOR or CEOGLOBAL (always allowed).
+    Falls back to nombre-based inference when idArea is blank.
     """
     try:
-        user_area = user.empleado.departamento.idArea
+        departamento = user.empleado.departamento
     except AttributeError:
         return False
+    if departamento is None:
+        return False
+    user_area = _resolve_area(departamento)
     if user_area in (Departamento.ADMINISTRADOR, Departamento.CEOGLOBAL):
         return True
     return user_area in areas
