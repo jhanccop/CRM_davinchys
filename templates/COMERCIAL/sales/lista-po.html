@@ -73,7 +73,7 @@
                       
                       <p class="text-sm font-weight-normal text-dark mb-0">
                         <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}">
-                          QUO-{{t.id}}
+                          {{t.poNumber|default:t.id}}
                         </a>
                       </p>
                       <h6 class="mb-0 text-sm">

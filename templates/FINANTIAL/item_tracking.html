@@ -1,42 +1,469 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Eliminar MOV-{{ movement.id }}{% endblock %}
+
+{% block title %}Seguimiento de Pagos por Ítem{% endblock %}
 {% block navbar_main %}Finanzas{% endblock %}
-{% block navbar_appName %}Banco{% endblock %}
-{% block navbar_Type %}Eliminar{% endblock %}
+{% block navbar_appName %}Pagos{% endblock %}
+{% block navbar_Type %}Seguimiento{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
 {% block panel-content %}
 <div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-5 col-md-7">
-      <div class="card border-0 shadow-lg">
-        <div class="card-body text-center p-5">
-          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
-            <i class="material-icons text-white" style="font-size:2rem">delete_forever</i>
+
+  <!-- HEADER -->
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">
+        <i class="material-icons align-middle me-2 text-info">track_changes</i>Seguimiento de Pagos por Ítem
+      </h5>
+      <p class="text-secondary text-sm mb-0">
+        Cobertura de pago por nivel de costo (Cliente → Holding → Subsidiaria → Proveedor).
+        {% if not is_holding %}<span class="badge bg-gradient-dark ms-1" style="font-size:.58rem">{{ user_tin.tinName }}</span>{% endif %}
+      </p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:document-list' %}" class="btn btn-sm btn-outline-primary mb-0">
+        <i class="material-icons text-sm align-middle me-1">receipt_long</i> Comprobantes
+      </a>
+      <a href="{% url 'finantial:dashboard' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">dashboard</i>
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <form method="GET">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <p class="filter-label mb-1"><i class="material-icons text-sm align-middle">description</i> Cotización master (QUO)</p>
+            <select name="quote" class="form-select form-select-sm">
+              <option value="">Todas</option>
+              {% for q in quotes %}
+              <option value="{{ q.id }}" {% if selected_quote == q.id|stringformat:"s" %}selected{% endif %}>
+                {{ q.poNumber|default:q.id }} {% if q.idClient %}· {{ q.idClient }}{% endif %}
+              </option>
+              {% endfor %}
+            </select>
           </div>
-          <h5 class="font-weight-bolder text-danger mb-1">¿Eliminar este movimiento?</h5>
-          <p class="text-secondary text-sm mb-3">Esta acción también eliminará sus conciliaciones vinculadas.</p>
-          <div class="bg-light rounded p-3 text-start mb-4">
-            <div class="row g-2">
-              <div class="col-6"><p class="text-xxs text-secondary mb-0">ID</p><p class="text-xs font-weight-bold mb-0">MOV-{{ movement.id }}</p></div>
-              <div class="col-6 text-end">{% if movement.conciliated %}<span class="badge bg-gradient-success">Conciliado</span>{% else %}<span class="badge bg-gradient-danger">Pendiente</span>{% endif %}</div>
-              <div class="col-6"><p class="text-xxs text-secondary mb-0">Monto</p><p class="text-xs font-weight-bold mb-0">{{ movement.amount|floatformat:2 }}</p></div>
-              <div class="col-6 text-end"><p class="text-xxs text-secondary mb-0">Fecha</p><p class="text-xs mb-0">{{ movement.date|date:"d/m/Y" }}</p></div>
-            </div>
+          <div class="col-md-3">
+            <p class="filter-label mb-1"><i class="material-icons text-sm align-middle">sync_alt</i> Cotización interna (INT)</p>
+            <select name="int_quote" class="form-select form-select-sm">
+              <option value="">Todas</option>
+              {% for iq in int_quotes %}
+              <option value="{{ iq.id }}" {% if selected_int_quote == iq.id|stringformat:"s" %}selected{% endif %}>
+                {{ iq.poNumber|default:iq.id }}
+              </option>
+              {% endfor %}
+            </select>
           </div>
-          {% if movement.conciliated %}
-          <div class="alert alert-warning text-xs py-2 mb-4 text-start">
-            <i class="material-icons text-sm align-middle me-1">warning</i>
-            Este movimiento ya está <strong>conciliado</strong>. Al eliminarlo se eliminarán sus conciliaciones y los documentos vinculados quedarán sin conciliar.
+          <div class="col-md-3">
+            <p class="filter-label mb-1"><i class="material-icons text-sm align-middle">engineering</i> Orden de trabajo (WO)</p>
+            <select name="work_order" class="form-select form-select-sm">
+              <option value="">Todas</option>
+              {% for wo in work_orders %}
+              <option value="{{ wo.id }}" {% if selected_wo == wo.id|stringformat:"s" %}selected{% endif %}>
+                {{ wo.woNumber|default:wo.id }}
+              </option>
+              {% endfor %}
+            </select>
           </div>
-          {% endif %}
-          <form method="POST" class="d-flex justify-content-center gap-3">
-            {% csrf_token %}
-            <a href="{% url 'finantial:movement-detail' movement.pk %}" class="btn btn-outline-secondary mb-0"><i class="material-icons text-sm align-middle me-1">arrow_back</i> Cancelar</a>
-            <button type="submit" class="btn bg-gradient-danger shadow mb-0"><i class="material-icons text-sm align-middle me-1">delete</i> Sí, eliminar</button>
-          </form>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-sm bg-gradient-info mb-0 flex-fill">
+              <i class="material-icons text-sm align-middle me-1">filter_alt</i> Filtrar
+            </button>
+            <a href="{% url 'finantial:item-tracking' %}" class="btn btn-sm btn-outline-secondary mb-0">
+              <i class="material-icons text-sm align-middle">clear</i>
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LEYENDA -->
+  <div class="d-flex gap-3 mb-3 flex-wrap align-items-center">
+    <span class="text-xs text-secondary"><span class="legend-dot bg-gradient-success me-1"></span>100% cubierto</span>
+    <span class="text-xs text-secondary"><span class="legend-dot me-1" style="background:#fb6340"></span>Parcial</span>
+    <span class="text-xs text-secondary"><span class="legend-dot bg-gradient-danger me-1"></span>Sin pago</span>
+    <span class="ms-3 d-flex gap-2 align-items-center flex-wrap">
+      <span class="lvl-quo">QUO</span><span class="text-xxs text-secondary">unitCost — Cliente → Holding</span>
+      <span class="lvl-int ms-2">INT</span><span class="text-xxs text-secondary">unitCostInt — Subsidiaria ↔ Holding</span>
+      <span class="lvl-wo ms-2">WO</span><span class="text-xxs text-secondary">unitCostWO — Holding → Proveedor</span>
+    </span>
+  </div>
+
+  <!-- TABLA PRINCIPAL -->
+  {% if enriched_items %}
+  <div class="card">
+    <div class="card-header pb-0">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Ítems con seguimiento de pago</h6>
+        <span class="badge bg-gradient-dark">{{ enriched_items|length }} ítem{{ enriched_items|length|pluralize }}</span>
+      </div>
+    </div>
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table class="table tbl-sm align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Serial / ID</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Transformador</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nivel de costo</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Partes</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Costo</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pagado</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pendiente</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder" style="min-width:120px">Cobertura</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Comprobantes</th>
+              <th class="text-secondary text-xxs"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ei in enriched_items %}
+
+            {# ─── item header row ─────────────────────────────────────────── #}
+            <tr class="item-row-header">
+              <td class="ps-4" rowspan="{% if ei.level_quo and ei.level_int and ei.level_wo %}4{% elif ei.level_quo and ei.level_int or ei.level_quo and ei.level_wo or ei.level_int and ei.level_wo %}3{% elif ei.level_quo or ei.level_int or ei.level_wo %}2{% else %}1{% endif %}">
+                <p class="text-xs font-weight-bold mb-0">{{ ei.item.seq|default:ei.item.id }}</p>
+                <p class="text-xxs text-secondary mb-0">#{{ ei.item.id }}</p>
+                {% if ei.all_covered %}<i class="material-icons text-success text-sm" title="Todos los niveles cubiertos">check_circle</i>{% endif %}
+                {% if ei.any_overpay %}<i class="material-icons text-danger text-sm" title="Sobre-asignación">warning</i>{% endif %}
+              </td>
+              <td rowspan="{% if ei.level_quo and ei.level_int and ei.level_wo %}4{% elif ei.level_quo and ei.level_int or ei.level_quo and ei.level_wo or ei.level_int and ei.level_wo %}3{% elif ei.level_quo or ei.level_int or ei.level_wo %}2{% else %}1{% endif %}">
+                <p class="text-xs mb-0 font-weight-bold">{{ ei.item.idTrafo|default:"—" }}</p>
+                {% if ei.item.idTrafoQuote %}<span class="badge badge-sm bg-gradient-primary" style="font-size:.56rem">{{ ei.item.idTrafoQuote.poNumber|default:ei.item.idTrafoQuote_id }}</span>{% endif %}
+                {% if ei.item.idTrafoIntQuote %}<span class="badge badge-sm bg-gradient-info" style="font-size:.56rem">{{ ei.item.idTrafoIntQuote.poNumber|default:ei.item.idTrafoIntQuote_id }}</span>{% endif %}
+                {% if ei.item.idWorkOrder %}<span class="badge badge-sm bg-gradient-dark" style="font-size:.56rem">{{ ei.item.idWorkOrder.woNumber|default:ei.item.idWorkOrder_id }}</span>{% endif %}
+              </td>
+              {# header row: estado de cobertura por nivel — sin suma combinada (flujos distintos) #}
+              <td colspan="8" class="text-xxs text-secondary" style="padding-top:.5rem;padding-bottom:.5rem;">
+                {% if ei.all_covered %}
+                  <span class="badge badge-sm bg-gradient-success" style="font-size:.58rem">
+                    <i class="material-icons" style="font-size:.65rem;vertical-align:middle">check_circle</i> Todos los niveles cubiertos
+                  </span>
+                {% else %}
+                  {% if ei.level_quo %}<span class="me-2"><span class="lvl-quo">QUO</span> <span class="{% if ei.level_quo.coverage_pct >= 100 %}text-success{% elif ei.level_quo.coverage_pct > 0 %}text-warning{% else %}text-danger{% endif %} font-weight-bold">{{ ei.level_quo.coverage_pct }}%</span></span>{% endif %}
+                  {% if ei.level_int %}<span class="me-2"><span class="lvl-int">INT</span> <span class="{% if ei.level_int.coverage_pct >= 100 %}text-success{% elif ei.level_int.coverage_pct > 0 %}text-warning{% else %}text-danger{% endif %} font-weight-bold">{{ ei.level_int.coverage_pct }}%</span></span>{% endif %}
+                  {% if ei.level_wo  %}<span class="me-2"><span class="lvl-wo">WO</span>  <span class="{% if ei.level_wo.coverage_pct  >= 100 %}text-success{% elif ei.level_wo.coverage_pct  > 0 %}text-warning{% else %}text-danger{% endif %} font-weight-bold">{{ ei.level_wo.coverage_pct }}%</span></span>{% endif %}
+                {% endif %}
+                {% if ei.any_overpay %}<span class="badge badge-sm bg-gradient-danger ms-2" style="font-size:.55rem"><i class="material-icons" style="font-size:.6rem;vertical-align:middle">warning</i> Sobre-asignación</span>{% endif %}
+              </td>
+            </tr>
+
+            {# ─── QUO level sub-row ───────────────────────────────────────── #}
+            {% if ei.level_quo %}
+            {% with lv=ei.level_quo %}
+            <tr class="level-row">
+              <td><span class="lvl-quo">QUO</span></td>
+              <td>
+                <span class="text-xxs text-secondary">Cliente</span>
+                <i class="material-icons text-secondary" style="font-size:.7rem;vertical-align:middle">arrow_forward</i>
+                <span class="text-xxs text-secondary">Holding</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs font-weight-bold">{{ lv.unit_cost|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs text-success font-weight-bold">{{ lv.confirmed_paid|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                {% if lv.pending > 0 %}
+                <span class="text-xs text-danger font-weight-bold">{{ lv.pending|floatformat:2 }}</span>
+                {% else %}
+                <i class="material-icons text-success text-sm">check_circle</i>
+                {% endif %}
+              </td>
+              <td style="min-width:120px">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="flex-grow-1">
+                    <div class="progress progress-item bg-gray-200">
+                      <div class="progress-bar {% if lv.overpay_alert %}bg-gradient-danger{% elif lv.coverage_pct >= 100 %}bg-gradient-success{% elif lv.coverage_pct > 0 %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}"
+                           style="width:{{ lv.coverage_pct }}%"></div>
+                    </div>
+                  </div>
+                  <span class="text-xs font-weight-bold {% if lv.overpay_alert %}text-danger{% elif lv.coverage_pct >= 100 %}text-success{% elif lv.coverage_pct > 0 %}text-warning{% else %}text-danger{% endif %}" style="width:36px;text-align:right">
+                    {% if lv.overpay_alert %}>100%{% else %}{{ lv.coverage_pct }}%{% endif %}
+                  </span>
+                </div>
+                {% if lv.overpay_alert %}
+                <span class="badge badge-sm bg-gradient-danger mt-1 d-block" style="font-size:.54rem">
+                  <i class="material-icons" style="font-size:.6rem;vertical-align:middle">warning</i>
+                  {{ lv.total_assigned|floatformat:2 }} / {{ lv.unit_cost|floatformat:2 }}
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% for alloc in lv.allocations %}
+                <a href="{% url 'finantial:document-detail' alloc.document.pk %}"
+                   class="badge badge-sm {% if alloc.document.status == 'PAID' %}bg-gradient-success{% elif alloc.document.status == 'PARTIAL' %}bg-gradient-warning{% else %}bg-gradient-secondary{% endif %} me-1 text-decoration-none"
+                   data-bs-toggle="tooltip"
+                   title="{{ alloc.document.get_doc_type_display }} {{ alloc.document.doc_number|default:'' }} · {{ alloc.allocated_amount|floatformat:2 }}">
+                  {{ alloc.document.get_doc_type_display|slice:":3" }}
+                </a>
+                {% empty %}
+                <span class="text-xxs text-secondary">Sin docs</span>
+                {% endfor %}
+              </td>
+              <td class="pe-3">
+                <a href="{% url 'finantial:document-create' %}?item={{ ei.item.pk }}&cost_level=QUO"
+                   class="text-secondary" data-bs-toggle="tooltip" title="Nuevo comprobante nivel QUO">
+                  <i class="material-icons text-sm">add_circle_outline</i>
+                </a>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endif %}
+
+            {# ─── INT level sub-row ───────────────────────────────────────── #}
+            {% if ei.level_int %}
+            {% with lv=ei.level_int %}
+            <tr class="level-row">
+              <td><span class="lvl-int">INT</span></td>
+              <td>
+                <span class="text-xxs text-secondary">Subsidiaria</span>
+                <i class="material-icons text-secondary" style="font-size:.7rem;vertical-align:middle">sync_alt</i>
+                <span class="text-xxs text-secondary">Holding</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs font-weight-bold">{{ lv.unit_cost|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs text-success font-weight-bold">{{ lv.confirmed_paid|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                {% if lv.pending > 0 %}
+                <span class="text-xs text-danger font-weight-bold">{{ lv.pending|floatformat:2 }}</span>
+                {% else %}
+                <i class="material-icons text-success text-sm">check_circle</i>
+                {% endif %}
+              </td>
+              <td style="min-width:120px">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="flex-grow-1">
+                    <div class="progress progress-item bg-gray-200">
+                      <div class="progress-bar {% if lv.overpay_alert %}bg-gradient-danger{% elif lv.coverage_pct >= 100 %}bg-gradient-success{% elif lv.coverage_pct > 0 %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}"
+                           style="width:{{ lv.coverage_pct }}%"></div>
+                    </div>
+                  </div>
+                  <span class="text-xs font-weight-bold {% if lv.overpay_alert %}text-danger{% elif lv.coverage_pct >= 100 %}text-success{% elif lv.coverage_pct > 0 %}text-warning{% else %}text-danger{% endif %}" style="width:36px;text-align:right">
+                    {% if lv.overpay_alert %}>100%{% else %}{{ lv.coverage_pct }}%{% endif %}
+                  </span>
+                </div>
+                {% if lv.overpay_alert %}
+                <span class="badge badge-sm bg-gradient-danger mt-1 d-block" style="font-size:.54rem">
+                  <i class="material-icons" style="font-size:.6rem;vertical-align:middle">warning</i>
+                  {{ lv.total_assigned|floatformat:2 }} / {{ lv.unit_cost|floatformat:2 }}
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% for alloc in lv.allocations %}
+                <a href="{% url 'finantial:document-detail' alloc.document.pk %}"
+                   class="badge badge-sm {% if alloc.document.status == 'PAID' %}bg-gradient-success{% elif alloc.document.status == 'PARTIAL' %}bg-gradient-warning{% else %}bg-gradient-secondary{% endif %} me-1 text-decoration-none"
+                   data-bs-toggle="tooltip"
+                   title="{{ alloc.document.get_doc_type_display }} {{ alloc.document.doc_number|default:'' }} · {{ alloc.allocated_amount|floatformat:2 }}">
+                  {{ alloc.document.get_doc_type_display|slice:":3" }}
+                </a>
+                {% empty %}
+                <span class="text-xxs text-secondary">Sin docs</span>
+                {% endfor %}
+              </td>
+              <td class="pe-3">
+                <a href="{% url 'finantial:document-create' %}?item={{ ei.item.pk }}&cost_level=INT"
+                   class="text-secondary" data-bs-toggle="tooltip" title="Nuevo comprobante nivel INT">
+                  <i class="material-icons text-sm">add_circle_outline</i>
+                </a>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endif %}
+
+            {# ─── WO level sub-row ────────────────────────────────────────── #}
+            {% if ei.level_wo %}
+            {% with lv=ei.level_wo %}
+            <tr class="level-row">
+              <td><span class="lvl-wo">WO</span></td>
+              <td>
+                <span class="text-xxs text-secondary">Holding</span>
+                <i class="material-icons text-secondary" style="font-size:.7rem;vertical-align:middle">arrow_forward</i>
+                <span class="text-xxs text-secondary">Proveedor</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs font-weight-bold">{{ lv.unit_cost|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                <span class="text-xs text-success font-weight-bold">{{ lv.confirmed_paid|floatformat:2 }}</span>
+              </td>
+              <td class="text-end pe-3">
+                {% if lv.pending > 0 %}
+                <span class="text-xs text-danger font-weight-bold">{{ lv.pending|floatformat:2 }}</span>
+                {% else %}
+                <i class="material-icons text-success text-sm">check_circle</i>
+                {% endif %}
+              </td>
+              <td style="min-width:120px">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="flex-grow-1">
+                    <div class="progress progress-item bg-gray-200">
+                      <div class="progress-bar {% if lv.overpay_alert %}bg-gradient-danger{% elif lv.coverage_pct >= 100 %}bg-gradient-success{% elif lv.coverage_pct > 0 %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}"
+                           style="width:{{ lv.coverage_pct }}%"></div>
+                    </div>
+                  </div>
+                  <span class="text-xs font-weight-bold {% if lv.overpay_alert %}text-danger{% elif lv.coverage_pct >= 100 %}text-success{% elif lv.coverage_pct > 0 %}text-warning{% else %}text-danger{% endif %}" style="width:36px;text-align:right">
+                    {% if lv.overpay_alert %}>100%{% else %}{{ lv.coverage_pct }}%{% endif %}
+                  </span>
+                </div>
+                {% if lv.overpay_alert %}
+                <span class="badge badge-sm bg-gradient-danger mt-1 d-block" style="font-size:.54rem">
+                  <i class="material-icons" style="font-size:.6rem;vertical-align:middle">warning</i>
+                  {{ lv.total_assigned|floatformat:2 }} / {{ lv.unit_cost|floatformat:2 }}
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% for alloc in lv.allocations %}
+                <a href="{% url 'finantial:document-detail' alloc.document.pk %}"
+                   class="badge badge-sm {% if alloc.document.status == 'PAID' %}bg-gradient-success{% elif alloc.document.status == 'PARTIAL' %}bg-gradient-warning{% else %}bg-gradient-secondary{% endif %} me-1 text-decoration-none"
+                   data-bs-toggle="tooltip"
+                   title="{{ alloc.document.get_doc_type_display }} {{ alloc.document.doc_number|default:'' }} · {{ alloc.allocated_amount|floatformat:2 }}">
+                  {{ alloc.document.get_doc_type_display|slice:":3" }}
+                </a>
+                {% empty %}
+                <span class="text-xxs text-secondary">Sin docs</span>
+                {% endfor %}
+              </td>
+              <td class="pe-3">
+                <a href="{% url 'finantial:document-create' %}?item={{ ei.item.pk }}&cost_level=WO"
+                   class="text-secondary" data-bs-toggle="tooltip" title="Nuevo comprobante nivel WO">
+                  <i class="material-icons text-sm">add_circle_outline</i>
+                </a>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endif %}
+
+            {% endfor %}{# enriched_items #}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN TOTALES -->
+  <!-- Fila 1: contadores generales -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body py-3">
+          <p class="text-xxs text-secondary text-uppercase font-weight-bolder mb-1">Ítems totales</p>
+          <h5 class="font-weight-bolder mb-0">{{ enriched_items|length }}</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body py-3">
+          <p class="text-xxs text-secondary text-uppercase font-weight-bolder mb-1">Todos los niveles cubiertos</p>
+          <h5 class="font-weight-bolder mb-0 text-success">{{ summary_paid_full }}</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center {% if summary_no_docs > 0 %}border-warning{% endif %}">
+        <div class="card-body py-3">
+          <p class="text-xxs text-secondary text-uppercase font-weight-bolder mb-1">Sin comprobante</p>
+          <h5 class="font-weight-bolder mb-0 text-warning">{{ summary_no_docs }}</h5>
         </div>
       </div>
     </div>
   </div>
+  <!-- Fila 2: totales por nivel (flujos independientes — no se suman entre sí) -->
+  <div class="row g-3 mt-1">
+    {% if summary_quo_cost %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="lvl-quo">QUO — Cliente → Holding</span>
+            <span class="text-xxs text-secondary">unitCost</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div><p class="text-xxs text-secondary mb-0">Total facturado</p><p class="text-sm font-weight-bold mb-0">{{ summary_quo_cost|floatformat:2 }}</p></div>
+            <div class="text-end"><p class="text-xxs text-secondary mb-0">Cobrado</p><p class="text-sm font-weight-bold text-success mb-0">{{ summary_quo_paid|floatformat:2 }}</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if summary_int_cost %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="lvl-int">INT — Subsidiaria ↔ Holding</span>
+            <span class="text-xxs text-secondary">unitCostInt</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div><p class="text-xxs text-secondary mb-0">Total transferencia</p><p class="text-sm font-weight-bold mb-0">{{ summary_int_cost|floatformat:2 }}</p></div>
+            <div class="text-end"><p class="text-xxs text-secondary mb-0">Transferido</p><p class="text-sm font-weight-bold text-info mb-0">{{ summary_int_paid|floatformat:2 }}</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if summary_wo_cost %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="lvl-wo">WO — Holding → Proveedor</span>
+            <span class="text-xxs text-secondary">unitCostWO</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div><p class="text-xxs text-secondary mb-0">Total a pagar</p><p class="text-sm font-weight-bold mb-0">{{ summary_wo_cost|floatformat:2 }}</p></div>
+            <div class="text-end"><p class="text-xxs text-secondary mb-0">Pagado</p><p class="text-sm font-weight-bold text-warning mb-0">{{ summary_wo_paid|floatformat:2 }}</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% if summary_overpay %}
+  <div class="alert alert-danger text-sm d-flex align-items-center gap-3 mt-3 mb-0">
+    <i class="material-icons" style="font-size:1.5rem">warning</i>
+    <div>
+      <strong>{{ summary_overpay }} ítem{{ summary_overpay|pluralize }} con sobre-asignación detectada.</strong>
+      Los montos asignados en comprobantes superan el costo unitario del nivel correspondiente. Revise y corrija las asignaciones.
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="card">
+    <div class="card-body text-center py-6">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(195deg,#e9ecef,#dee2e6);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+        <i class="material-icons text-secondary" style="font-size:2rem">search_off</i>
+      </div>
+      <h6 class="text-secondary mb-2">Sin ítems para los filtros seleccionados</h6>
+      <p class="text-xs text-secondary mb-3">Seleccione un pedido en los filtros o limpie los filtros para ver todos los ítems.</p>
+      <a href="{% url 'finantial:item-tracking' %}" class="btn btn-sm bg-gradient-info mb-0">
+        <i class="material-icons text-sm align-middle me-1">clear</i> Limpiar filtros
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
 </div>
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+  // Activate tooltips
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+    new bootstrap.Tooltip(el, { boundary: 'window' });
+  });
+</script>
 {% endblock %}

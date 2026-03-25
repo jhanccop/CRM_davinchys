@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Cierres{% endblock %}
+{% block navbar_Type %}Nuevo período{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">
+        <i class="material-icons align-middle me-2 text-primary">lock_clock</i>{{ title }}
+      </h5>
+      <p class="text-secondary text-sm mb-0">Defina el período y el saldo inicial de apertura</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:closure-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle me-1">arrow_back</i> Volver
+      </a>
+    </div>
+  </div>
+
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3">
+    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+      <!-- ── Card principal ─────────────────────────────────────────────── -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#11cdef,#1171ef);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">lock_clock</i>
+              </div>
+              <h6 class="mb-0">Datos del Período</h6>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-2">
+
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.account.id_for_label }}">
+                    Cuenta bancaria <span class="req-star">*</span>
+                  </label>
+                  {{ form.account }}
+                </div>
+                {% if form.account.errors %}<p class="text-danger text-xxs mt-1">{{ form.account.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.tin.id_for_label }}">
+                    Empresa <span class="req-star">*</span>
+                  </label>
+                  {{ form.tin }}
+                </div>
+                {% if form.tin.errors %}<p class="text-danger text-xxs mt-1">{{ form.tin.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-3">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.period_year.id_for_label }}">
+                    Año <span class="req-star">*</span>
+                  </label>
+                  {{ form.period_year }}
+                </div>
+                {% if form.period_year.errors %}<p class="text-danger text-xxs mt-1">{{ form.period_year.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-3">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.period_month.id_for_label }}">
+                    Mes <span class="req-star">*</span>
+                  </label>
+                  {{ form.period_month }}
+                </div>
+                {% if form.period_month.errors %}<p class="text-danger text-xxs mt-1">{{ form.period_month.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.opening_balance.id_for_label }}">
+                    Saldo inicial de apertura
+                  </label>
+                  {{ form.opening_balance }}
+                </div>
+                <small class="text-xxs text-secondary ms-1">Saldo de la cuenta al inicio del período</small>
+              </div>
+
+              <div class="col-12">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" for="{{ form.notes.id_for_label }}">Notas</label>
+                  {{ form.notes }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3 mb-4">
+          <a href="{% url 'finantial:closure-list' %}" class="btn btn-outline-secondary mb-0">Cancelar</a>
+          <button type="submit" class="btn bg-gradient-primary shadow mb-0">
+            <i class="material-icons text-sm align-middle me-1">save</i> Crear Período
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Sidebar tips ───────────────────────────────────────────────── -->
+      <div class="col-lg-4">
+        <div class="card" style="border:1px solid #e9ecef;border-radius:.75rem">
+          <div class="card-body p-3">
+            <p class="text-xs font-weight-bolder mb-2">
+              <i class="material-icons text-sm align-middle me-1 text-info">info</i>Flujo SAP F.16
+            </p>
+            <div class="tip-item"><i class="material-icons tip-icon">looks_one</i><span><strong>Crear</strong> el período (estado OPEN)</span></div>
+            <div class="tip-item"><i class="material-icons tip-icon">looks_two</i><span>Registrar movimientos normalmente</span></div>
+            <div class="tip-item"><i class="material-icons tip-icon">looks_3</i><span><strong>Cerrar</strong> → calcula totales y bloquea edición</span></div>
+            <div class="tip-item"><i class="material-icons tip-icon">looks_4</i><span><strong>Aprobar</strong> → firma gerencial del cierre</span></div>
+            <div class="tip-item mb-0"><i class="material-icons tip-icon">looks_5</i><span><strong>Reabrir</strong> solo con justificación auditada</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+  document.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Catálogos SAP{% endblock %}
+{% block navbar_Type %}Nuevo{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">{{ title }}</h5>
+    </div>
+    <div class="col-auto">
+      <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle me-1">arrow_back</i> Volver
+      </a>
+    </div>
+  </div>
+
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3">
+    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header pb-0 pt-3">
+          <h6 class="mb-0">{{ title }}</h6>
+        </div>
+        <div class="card-body pt-2">
+          <form method="POST" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+            {% if field.field.widget.input_type == 'checkbox' %}
+            <div class="form-check my-3">
+              {{ field }}
+              <label class="form-check-label text-sm ms-1" for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+              {% if field.errors %}<p class="text-danger text-xxs mt-1">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% else %}
+            <div class="input-group input-group-outline my-3 is-focused">
+              <label class="form-label" for="{{ field.id_for_label }}">
+                {{ field.label }}{% if field.field.required %}<span class="req-star">*</span>{% endif %}
+              </label>
+              {{ field }}
+            </div>
+            {% if field.errors %}<p class="text-danger text-xxs mt-1 ms-1">{{ field.errors.0 }}</p>{% endif %}
+            {% if field.help_text %}<small class="text-xxs text-secondary ms-1">{{ field.help_text }}</small>{% endif %}
+            {% endif %}
+            {% endfor %}
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <a href="{{ back_url }}" class="btn btn-outline-secondary mb-0">Cancelar</a>
+              <button type="submit" class="btn bg-gradient-primary shadow mb-0">
+                <i class="material-icons text-sm align-middle me-1">save</i> Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+</script>
+<script>
+  /* Marca is-filled cuando el campo tiene valor al cargar */
+  document.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',    () => wrap.classList.add('focused'));
+      el.addEventListener('blur',     () => wrap.classList.remove('focused'));
+      el.addEventListener('input',    () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change',   () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+</script>
+{% endblock %}

@@ -6,27 +6,16 @@
 {% block navbar_appName %}Transacciones{% endblock %}
 {% block navbar_Type %}{% if action == 'create' %}Nueva{% else %}Editar{% endif %}{% endblock %}
 
-{% block extra_css %}
-<style>
-  .field-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; display: block; margin-bottom: .35rem; }
-  .section-divider { border-top: 2px dashed #e9ecef; margin: 1.5rem 0 1rem; }
-  .section-divider h6 { color: #344767; padding-top: 1rem; margin-bottom: 0; }
-  .formset-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem; position: relative; margin-bottom: .75rem; }
-  .formset-remove { position: absolute; top: .6rem; right: .75rem; }
-  .sticky-wrap { position: sticky; top: 1.5rem; }
-  .pending-doc-row { cursor: pointer; transition: background .15s; }
-  .pending-doc-row:hover { background: rgba(17,205,239,.06); }
-  .step-badge { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; flex-shrink: 0; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
 
+  <!-- HEADER -->
   <div class="row align-items-center mb-3">
     <div class="col">
       <h5 class="font-weight-bolder mb-0">{{ title }}</h5>
-      <p class="text-secondary text-sm mb-0">Registre el movimiento bancario y asigne los comprobantes que liquida</p>
+      <p class="text-secondary text-sm mb-0">Registre el movimiento y asigne los comprobantes que liquida</p>
     </div>
     <div class="col-auto">
       <a href="{% url 'finantial:transaction-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
@@ -35,86 +24,267 @@
     </div>
   </div>
 
+  <!-- MENSAJES -->
   {% for msg in messages %}
-  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3">
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3" role="alert">
+    <i class="material-icons text-sm align-middle me-1">
+      {% if 'error' in msg.tags %}error{% elif 'warning' in msg.tags %}warning{% else %}info{% endif %}
+    </i>
     {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
   {% endfor %}
 
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger text-xs py-2 mb-3">
+    <i class="material-icons text-sm align-middle me-1">error</i>
+    {% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %} · {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+
   <form method="POST" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
-    {% endif %}
-
     <div class="row g-3">
-      <!-- ══ COLUMNA PRINCIPAL ══ -->
+
+      <!-- ══ COLUMNA PRINCIPAL ══════════════════════════════════════ -->
       <div class="col-lg-8">
 
-        <!-- CARD 1: Datos del pago -->
-        <div class="card mb-3">
+        <!-- CARD 1: Método de pago -->
+        <div class="card mb-3" id="cardMethod" style="border:2px solid #e9ecef">
           <div class="card-header pb-0">
             <div class="d-flex align-items-center gap-2">
               <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center">
                 <i class="material-icons text-white" style="font-size:.9rem">payments</i>
               </div>
-              <h6 class="mb-0">Datos de la Transacción</h6>
+              <div>
+                <h6 class="mb-0">Paso 1 — Método de pago</h6>
+                <p class="text-xxs text-secondary mb-0">El método determina qué campos son requeridos</p>
+              </div>
             </div>
           </div>
           <div class="card-body pt-3">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="field-label">Referencia / Nro. operación</label>{{ form.reference }}
+
+            <!-- Botones visuales de método -->
+            <div class="row g-2 mb-2">
+              <div class="col-md col-sm-4">
+                <button type="button" class="method-btn" data-method="TRANSFER">
+                  <div class="method-icon bg-gradient-primary"><i class="material-icons text-white" style="font-size:.85rem">account_balance</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-primary mb-0">Transferencia</p>
+                    <p class="text-xxs text-secondary mb-0">Banco a banco</p>
+                  </div>
+                </button>
               </div>
-              <div class="col-md-4">
-                <label class="field-label">Método de pago *</label>{{ form.pay_method }}
+              <div class="col-md col-sm-4">
+                <button type="button" class="method-btn" data-method="CHECK">
+                  <div class="method-icon bg-gradient-info"><i class="material-icons text-white" style="font-size:.85rem">receipt_long</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-info mb-0">Cheque</p>
+                    <p class="text-xxs text-secondary mb-0">Número requerido</p>
+                  </div>
+                </button>
               </div>
-              <div class="col-md-4">
-                <label class="field-label">Fecha de pago *</label>{{ form.transaction_date }}
+              <div class="col-md col-sm-4">
+                <button type="button" class="method-btn" data-method="CASH">
+                  <div class="method-icon bg-gradient-success"><i class="material-icons text-white" style="font-size:.85rem">money</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-success mb-0">Efectivo</p>
+                    <p class="text-xxs text-secondary mb-0">Caja chica</p>
+                  </div>
+                </button>
               </div>
-              <div class="col-md-3">
-                <label class="field-label">Moneda *</label>{{ form.currency }}
+              <div class="col-md col-sm-4">
+                <button type="button" class="method-btn" data-method="CARD">
+                  <div class="method-icon bg-gradient-warning"><i class="material-icons text-white" style="font-size:.85rem">credit_card</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-warning mb-0">Tarjeta</p>
+                    <p class="text-xxs text-secondary mb-0">Débito / crédito</p>
+                  </div>
+                </button>
               </div>
-              <div class="col-md-3">
-                <label class="field-label">Tipo de cambio</label>{{ form.exchange_rate }}
-              </div>
-              <div class="col-md-3">
-                <label class="field-label">Monto total *</label>{{ form.amount }}
-              </div>
-              <div class="col-md-3">
-                <label class="field-label">Cuenta bancaria</label>{{ form.bank_account }}
+              <div class="col-md col-sm-4">
+                <button type="button" class="method-btn" data-method="OTHER">
+                  <div class="method-icon bg-gradient-secondary"><i class="material-icons text-white" style="font-size:.85rem">more_horiz</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-secondary mb-0">Otro</p>
+                    <p class="text-xxs text-secondary mb-0">Libre</p>
+                  </div>
+                </button>
               </div>
             </div>
-            <div class="section-divider">
-              <h6><i class="material-icons text-sm align-middle me-1">group</i>Partes Involucradas</h6>
-            </div>
-            <div class="row g-3">
-              <div class="col-md-6"><label class="field-label">Empresa Pagadora (TIN)</label>{{ form.tin_payer }}</div>
-              <div class="col-md-6"><label class="field-label">Empresa Receptora (TIN)</label>{{ form.tin_receiver }}</div>
-              <div class="col-md-6"><label class="field-label">Cliente externo</label>{{ form.client }}</div>
-              <div class="col-md-6"><label class="field-label">Proveedor externo</label>{{ form.supplier }}</div>
-              <div class="col-md-6">
-                <label class="field-label"><i class="material-icons text-sm align-middle me-1">account_balance</i>Cuenta bancaria</label>
-                {{ form.bank_account }}
-                <small class="text-xxs text-secondary mt-1 d-block">Centro de costo: la cuenta define la empresa y moneda</small>
-              </div>
-              <div class="col-md-6">
-                <label class="field-label"><i class="material-icons text-sm align-middle me-1">sync_alt</i>Movimiento bancario vinculado</label>
-                {{ form.bank_movement }}
-                <small class="text-xxs text-secondary mt-1 d-block">Opcional: vincula para conciliación automática al confirmar</small>
-              </div>
-            </div>
-            <div class="section-divider">
-              <h6><i class="material-icons text-sm align-middle me-1">attach_file</i>Voucher y Notas</h6>
-            </div>
-            <div class="row g-3">
-              <div class="col-md-6"><label class="field-label">Comprobante de pago (archivo)</label>{{ form.voucher_file }}</div>
-              <div class="col-md-6"><label class="field-label">Notas</label>{{ form.notes }}</div>
+
+            <!-- Select hidden -->
+            <div class="d-none">{{ form.pay_method }}</div>
+            {% if form.pay_method.errors %}<p class="text-danger text-xxs mt-1">{{ form.pay_method.errors.0 }}</p>{% endif %}
+
+            <!-- Hint contextual -->
+            <div id="methodHint" class="text-xxs text-secondary bg-light rounded px-3 py-2 mt-2" style="display:none">
+              <i class="material-icons text-sm align-middle me-1">info</i>
+              <span id="methodHintText"></span>
             </div>
           </div>
         </div>
 
-        <!-- CARD 2: Líneas — comprobantes que se liquidan -->
+        <!-- CARD 2: Datos de la transacción -->
+        <div class="card mb-3">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#42424a,#191919);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">receipt</i>
+              </div>
+              <h6 class="mb-0">Paso 2 — Datos de la Transacción</h6>
+            </div>
+          </div>
+          <div class="card-body pt-3">
+            <div class="row g-3">
+
+              <!-- Referencia — requerida en cheque, opcional en otros -->
+              <div class="col-md-4" id="wrapReference">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">
+                    Referencia / Nro. operación
+                    <span id="starReference" class="text-danger" style="display:none"> *</span>
+                  </label>
+                  {{ form.reference }}
+                </div>
+                <span id="pillReference" class="field-pill"></span>
+                {% if form.reference.errors %}<p class="text-danger text-xxs mt-1">{{ form.reference.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha de pago *</label>
+                  {{ form.transaction_date }}
+                </div>
+                {% if form.transaction_date.errors %}<p class="text-danger text-xxs mt-1">{{ form.transaction_date.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Moneda *</label>
+                  {{ form.currency }}
+                </div>
+                {% if form.currency.errors %}<p class="text-danger text-xxs mt-1">{{ form.currency.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Tipo de cambio</label>
+                  {{ form.exchange_rate }}
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto total *</label>
+                  {{ form.amount }}
+                </div>
+                {% if form.amount.errors %}<p class="text-danger text-xxs mt-1">{{ form.amount.errors.0 }}</p>{% endif %}
+              </div>
+
+              <!-- Cuenta bancaria — requerida en TRANSFER, opcional en otros -->
+              <div class="col-md-4" id="wrapBankAccount">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">
+                    Cuenta bancaria
+                    <span id="starBankAccount" class="text-danger" style="display:none"> *</span>
+                  </label>
+                  {{ form.bank_account }}
+                </div>
+                <span id="pillBankAccount" class="field-pill"></span>
+                {% if form.bank_account.errors %}<p class="text-danger text-xxs mt-1">{{ form.bank_account.errors.0 }}</p>{% endif %}
+                <small class="text-xxs text-secondary mt-1 d-block">Centro de costo implícito por empresa de la cuenta</small>
+              </div>
+
+            </div>
+
+            <div class="section-divider">
+              <h6><i class="material-icons text-sm align-middle me-1">group</i>Partes Involucradas</h6>
+            </div>
+
+            <!--
+              Tabla de partes — análoga al documento:
+              ┌────────────────────┬────────────────────┐
+              │  Empresa Pagadora  │  Empresa Receptora │  ← TIN internos
+              ├────────────────────┼────────────────────┤
+              │  Cliente externo   │  Proveedor externo │  ← externos
+              └────────────────────┴────────────────────┘
+            -->
+            <div class="row g-3">
+
+              <div class="col-md-6" id="wrapPayer">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Empresa Pagadora (TIN)</label>
+                  {{ form.tin_payer }}
+                </div>
+                <span id="pillPayer" class="field-pill"></span>
+                {% if form.tin_payer.errors %}<p class="text-danger text-xxs mt-1">{{ form.tin_payer.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-6" id="wrapTxReceiver">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Empresa Receptora (TIN)</label>
+                  {{ form.tin_receiver }}
+                </div>
+                <span id="pillTxReceiver" class="field-pill"></span>
+                {% if form.tin_receiver.errors %}<p class="text-danger text-xxs mt-1">{{ form.tin_receiver.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-6" id="wrapTxClient">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Cliente externo</label>
+                  {{ form.client }}
+                </div>
+                <span id="pillTxClient" class="field-pill"></span>
+                {% if form.client.errors %}<p class="text-danger text-xxs mt-1">{{ form.client.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-6" id="wrapTxSupplier">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Proveedor externo</label>
+                  {{ form.supplier }}
+                </div>
+                <span id="pillTxSupplier" class="field-pill"></span>
+                {% if form.supplier.errors %}<p class="text-danger text-xxs mt-1">{{ form.supplier.errors.0 }}</p>{% endif %}
+              </div>
+
+            </div>
+
+            <div class="section-divider">
+              <h6><i class="material-icons text-sm align-middle me-1">sync_alt</i>Conciliación Bancaria y Clasificación</h6>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Movimiento bancario vinculado <span class="text-secondary font-weight-normal">(opcional)</span></label>
+                  {{ form.bank_movement }}
+                </div>
+                <small class="text-xxs text-secondary mt-1 d-block">Al confirmar la TX → se crea Conciliation automáticamente</small>
+                {% if form.bank_movement.errors %}<p class="text-danger text-xxs mt-1">{{ form.bank_movement.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Centro de costos <small class="text-secondary font-weight-normal">KS01 (opcional)</small></label>
+                  {{ form.cost_center }}
+                </div>
+                <small class="text-xxs text-secondary mt-1 d-block">Se hereda a las líneas y al asiento contable automático</small>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Voucher / Comprobante de pago</label>
+                  {{ form.voucher_file }}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Notas</label>
+                  {{ form.notes }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: Líneas de pago -->
         <div class="card mb-3">
           <div class="card-header pb-0 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
@@ -122,8 +292,8 @@
                 <i class="material-icons text-white" style="font-size:.9rem">link</i>
               </div>
               <div>
-                <h6 class="mb-0">Comprobantes que liquida esta transacción</h6>
-                <p class="text-xxs text-secondary mb-0">Una transacción puede pagar uno o varios comprobantes parcialmente</p>
+                <h6 class="mb-0">Paso 3 — Comprobantes que liquida</h6>
+                <p class="text-xxs text-secondary mb-0">Una transacción puede pagar uno o varios comprobantes (total o parcial)</p>
               </div>
             </div>
             <button type="button" class="btn btn-sm bg-gradient-info shadow mb-0" id="addLineBtn">
@@ -132,23 +302,47 @@
           </div>
           <div class="card-body pt-3">
             {{ line_formset.management_form }}
+
+            {% if line_formset.non_form_errors %}
+            <div class="alert alert-danger text-xs py-2 mb-3">
+              {% for e in line_formset.non_form_errors %}{{ e }}{% endfor %}
+            </div>
+            {% endif %}
+
             <div id="lineContainer">
               {% for lf in line_formset %}
-              <div class="formset-row" data-index="{{ forloop.counter0 }}">
+              <div class="fs-row {% if lf.errors %}fs-error{% endif %}" data-index="{{ forloop.counter0 }}">
                 {{ lf.id }}
-                <button type="button" class="btn btn-link text-danger formset-remove p-0 mb-0" style="font-size:.75rem">
+                <button type="button" class="btn btn-link text-danger fs-remove p-0 mb-0">
                   <i class="material-icons" style="font-size:1rem">cancel</i>
                 </button>
+
+                {% if lf.errors %}
+                <div class="alert alert-danger text-xxs py-1 px-2 mb-2">
+                  {% for field, errs in lf.errors.items %}<strong>{{ field }}:</strong> {{ errs|join:", " }}<br>{% endfor %}
+                </div>
+                {% endif %}
+
                 <div class="row g-3">
                   <div class="col-md-7">
-                    <label class="field-label">Comprobante (pendiente o parcial)</label>{{ lf.document }}
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Comprobante (pendiente o parcial)</label>
+                      {{ lf.document }}
+                    </div>
                     {% if lf.document.errors %}<p class="text-danger text-xxs mt-1">{{ lf.document.errors.0 }}</p>{% endif %}
                   </div>
                   <div class="col-md-3">
-                    <label class="field-label">Monto aplicado</label>{{ lf.amount_applied }}
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Monto aplicado</label>
+                      {{ lf.amount_applied }}
+                    </div>
+                    {% if lf.amount_applied.errors %}<p class="text-danger text-xxs mt-1">{{ lf.amount_applied.errors.0 }}</p>{% endif %}
                   </div>
                   <div class="col-md-2">
-                    <label class="field-label">Nota</label>{{ lf.notes }}
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Nota</label>
+                      {{ lf.notes }}
+                    </div>
                   </div>
                 </div>
                 {% if line_formset.can_delete %}<div class="d-none">{{ lf.DELETE }}</div>{% endif %}
@@ -158,6 +352,7 @@
           </div>
         </div>
 
+        <!-- BOTONES -->
         <div class="d-flex justify-content-end gap-2 mb-4">
           <a href="{% url 'finantial:transaction-list' %}" class="btn btn-outline-secondary mb-0">Cancelar</a>
           <button type="submit" class="btn bg-gradient-success shadow mb-0">
@@ -166,47 +361,147 @@
           </button>
         </div>
 
-      </div>
+      </div><!-- /col-lg-8 -->
 
-      <!-- ══ SIDEBAR ══ -->
+      <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
       <div class="col-lg-4">
         <div class="sticky-wrap d-flex flex-column gap-3">
 
-          <!-- Flujo de confirmación -->
+          <!-- Panel de reglas dinámico -->
+          <div class="card">
+            <div class="card-body p-3">
+              <div id="ruleDefault">
+                <p class="text-xs text-secondary mb-0"><i class="material-icons text-sm align-middle me-1">touch_app</i>Seleccione un método para ver las reglas</p>
+              </div>
+              <div id="ruleTRANSFER" class="d-none">
+                <p class="text-xs font-weight-bolder text-primary mb-2"><i class="material-icons text-sm align-middle me-1">account_balance</i>Reglas — Transferencia</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cuenta bancaria</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Referencia / Nro. op.</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Pagadora</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Receptora</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cliente externo</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Proveedor externo</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0">Llene Empresa Pagadora y la Cuenta bancaria de origen. El proveedor o cliente indica a quién se paga.</p>
+              </div>
+              <div id="ruleCHECK" class="d-none">
+                <p class="text-xs font-weight-bolder text-info mb-2"><i class="material-icons text-sm align-middle me-1">receipt_long</i>Reglas — Cheque</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Referencia / Nro. cheque</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cuenta bancaria</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Pagadora</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Proveedor / Cliente</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Empresa Receptora</span><span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0">Ingrese el número de cheque en Referencia. La Empresa Receptora no aplica en pagos con cheque a terceros.</p>
+              </div>
+              <div id="ruleCASH" class="d-none">
+                <p class="text-xs font-weight-bolder text-success mb-2"><i class="material-icons text-sm align-middle me-1">money</i>Reglas — Efectivo</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cuenta bancaria</span><span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Referencia</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Pagadora</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Proveedor / Cliente</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0">Pagos en efectivo o caja chica. La cuenta bancaria no aplica.</p>
+              </div>
+              <div id="ruleCARD" class="d-none">
+                <p class="text-xs font-weight-bolder text-warning mb-2"><i class="material-icons text-sm align-middle me-1">credit_card</i>Reglas — Tarjeta</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Referencia</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cuenta bancaria</span><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Empresa Pagadora</span><span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                </div>
+              </div>
+              <div id="ruleOTHER" class="d-none">
+                <p class="text-xs font-weight-bolder text-secondary mb-2"><i class="material-icons text-sm align-middle me-1">more_horiz</i>Reglas — Otro</p>
+                <p class="text-xxs text-secondary mb-0">Todos los campos externos son opcionales. Llene Empresa Pagadora y el monto.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flujo de 2 pasos -->
           <div class="card border-info" style="border-width:2px!important">
             <div class="card-body p-3">
               <p class="text-xs font-weight-bolder text-info mb-3"><i class="material-icons text-sm align-middle me-1">info</i>Flujo de 2 pasos</p>
               <div class="d-flex gap-2 mb-2">
                 <span class="step-badge bg-gradient-primary text-white">1</span>
-                <span class="text-xs text-secondary"><strong>Guardar borrador</strong> — Registra la TX sin afectar los comprobantes.</span>
+                <span class="text-xs text-secondary"><strong>Guardar borrador</strong> — Registra sin afectar los comprobantes.</span>
               </div>
               <div class="d-flex gap-2">
                 <span class="step-badge bg-gradient-success text-white">2</span>
-                <span class="text-xs text-secondary"><strong>Confirmar</strong> — Aplica el pago y actualiza el estado de cada comprobante.</span>
+                <span class="text-xs text-secondary"><strong>Confirmar</strong> — Aplica el pago y actualiza el estado de cada comprobante. Si hay movimiento vinculado → crea Conciliation automáticamente.</span>
               </div>
             </div>
           </div>
 
-          <!-- Comprobantes pendientes de referencia -->
+          <!-- Lista de comprobantes pendientes (clic para rellenar) -->
           {% if pending_docs %}
           <div class="card">
             <div class="card-header pb-0">
               <h6 class="mb-0 text-sm">Comprobantes pendientes</h6>
-              <p class="text-xxs text-secondary mb-0">Haga clic para copiar el monto pendiente</p>
+              <p class="text-xxs text-secondary mb-0">Haga clic para rellenar la primera línea vacía</p>
             </div>
-            <div class="card-body px-3 pt-2 pb-2" style="max-height:320px;overflow-y:auto">
+            <div class="card-body px-3 pt-2 pb-2" style="max-height:340px;overflow-y:auto">
               {% for doc in pending_docs %}
               <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %} pending-doc-row"
                    data-doc-id="{{ doc.id }}"
                    data-doc-pending="{{ doc.pending_amount }}"
-                   data-bs-toggle="tooltip" title="Clic para agregar línea con monto: {{ doc.pending_amount }}">
+                   data-bs-toggle="tooltip"
+                   title="Clic: rellena línea con {{ doc.currency }} {{ doc.pending_amount|floatformat:2 }}">
                 <div>
                   <p class="text-xs font-weight-bold mb-0">{{ doc.get_doc_type_display }} {{ doc.doc_number|default:"—" }}</p>
-                  <p class="text-xxs text-secondary mb-0">{{ doc.issue_date|date:"d/m/Y"|default:"—" }}</p>
+                  <p class="text-xxs text-secondary mb-0">
+                    {{ doc.issue_date|date:"d/m/Y"|default:"—" }}
+                    {% if doc.tin_issuer %} · {{ doc.tin_issuer.tinName|truncatechars:12 }}{% endif %}
+                  </p>
                 </div>
                 <div class="text-end">
-                  {% if doc.status == 'PARTIAL' %}<span class="badge badge-sm bg-gradient-warning mb-1 d-block">Parcial</span>
-                  {% else %}<span class="badge badge-sm bg-gradient-danger mb-1 d-block">Pendiente</span>{% endif %}
+                  {% if doc.status == 'PARTIAL' %}
+                    <span class="badge badge-sm bg-gradient-warning mb-1 d-block">Parcial</span>
+                  {% else %}
+                    <span class="badge badge-sm bg-gradient-danger mb-1 d-block">Pendiente</span>
+                  {% endif %}
                   <p class="text-xs font-weight-bold text-danger mb-0">{{ doc.currency }} {{ doc.pending_amount|floatformat:2 }}</p>
                 </div>
               </div>
@@ -215,64 +510,254 @@
           </div>
           {% endif %}
 
+          <!-- Tips -->
+          <div class="tip-card">
+            <p class="text-xs font-weight-bolder text-dark mb-2"><i class="material-icons text-sm align-middle me-1 text-info">info</i>Tips</p>
+            <div class="tip-item"><i class="material-icons tip-icon">touch_app</i>Haga clic en un comprobante para rellenar la línea automáticamente</div>
+            <div class="tip-item"><i class="material-icons tip-icon">sync_alt</i>Vincule un Movimiento Bancario para conciliación automática al confirmar</div>
+            <div class="tip-item mb-0"><i class="material-icons tip-icon">call_split</i>Una TX puede pagar varios comprobantes con montos distintos</div>
+          </div>
+
         </div>
       </div>
-    </div>
+
+    </div><!-- /row -->
   </form>
 </div>
 {% endblock %}
 
 {% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
-// Formset dinámico
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN DE MÉTODOS DE PAGO
+// Estado de cada campo: 'required' | 'optional' | 'off'
+// ══════════════════════════════════════════════════════════════════════════════
+const METHODS = {
+  TRANSFER: {
+    btnClass:    'sel-transfer',
+    border:      '#5e72e4',
+    hint:        'Transferencia bancaria: la Cuenta bancaria y Empresa Pagadora son requeridas.',
+    reference:   'optional',
+    bankAccount: 'required',
+    payer:       'required',
+    txReceiver:  'optional',
+    txClient:    'optional',
+    txSupplier:  'optional',
+  },
+  CHECK: {
+    btnClass:    'sel-check',
+    border:      '#11cdef',
+    hint:        'Cheque: el número de cheque (Referencia) y la Empresa Pagadora son requeridos.',
+    reference:   'required',
+    bankAccount: 'optional',
+    payer:       'required',
+    txReceiver:  'off',
+    txClient:    'optional',
+    txSupplier:  'optional',
+  },
+  CASH: {
+    btnClass:    'sel-cash',
+    border:      '#2dce89',
+    hint:        'Efectivo / Caja chica: no requiere cuenta bancaria.',
+    reference:   'optional',
+    bankAccount: 'off',
+    payer:       'required',
+    txReceiver:  'off',
+    txClient:    'optional',
+    txSupplier:  'optional',
+  },
+  CARD: {
+    btnClass:    'sel-card',
+    border:      '#fb6340',
+    hint:        'Tarjeta: todos los campos externos son opcionales excepto la Empresa Pagadora.',
+    reference:   'optional',
+    bankAccount: 'optional',
+    payer:       'required',
+    txReceiver:  'optional',
+    txClient:    'optional',
+    txSupplier:  'optional',
+  },
+  OTHER: {
+    btnClass:    'sel-other',
+    border:      '#8898aa',
+    hint:        'Método libre: llene Empresa Pagadora y el monto.',
+    reference:   'optional',
+    bankAccount: 'optional',
+    payer:       'required',
+    txReceiver:  'optional',
+    txClient:    'optional',
+    txSupplier:  'optional',
+  },
+};
+
+const PILLS = {
+  required: { cls: 'pill-required', text: '★ Requerido' },
+  optional: { cls: 'pill-optional', text: '◎ Opcional'  },
+  off:      { cls: 'pill-disabled', text: '✕ No aplica' },
+};
+
+const methodSel = document.querySelector('[name="pay_method"]');
+
+function setWrap(wrapId, pillId, starId, state) {
+  const wrap = document.getElementById(wrapId);
+  const pill = document.getElementById(pillId);
+  if (!wrap) return;
+  const sel = wrap.querySelector('select,input');
+  if (state === 'off') {
+    wrap.classList.add('field-off');
+    if (sel) { sel.disabled = true; if (sel.tagName === 'SELECT') sel.value = ''; else sel.value = ''; }
+  } else {
+    wrap.classList.remove('field-off');
+    if (sel) sel.disabled = false;
+  }
+  if (pill) {
+    const cfg = PILLS[state];
+    pill.className = `field-pill show ${cfg.cls}`;
+    pill.textContent = cfg.text;
+  }
+  if (starId) {
+    const star = document.getElementById(starId);
+    if (star) star.style.display = state === 'required' ? 'inline' : 'none';
+  }
+}
+
+function applyMethod(method) {
+  const cfg = METHODS[method];
+  if (!cfg) return;
+
+  if (methodSel) methodSel.value = method;
+
+  // Botones
+  document.querySelectorAll('.method-btn').forEach(b => {
+    b.classList.remove('sel-transfer','sel-check','sel-cash','sel-card','sel-other');
+    if (b.dataset.method === method) b.classList.add(cfg.btnClass);
+  });
+
+  // Border card
+  const cardMethod = document.getElementById('cardMethod');
+  if (cardMethod) cardMethod.style.borderColor = cfg.border;
+
+  // Hint
+  const hint = document.getElementById('methodHint');
+  const hintText = document.getElementById('methodHintText');
+  if (hint && hintText) { hintText.textContent = cfg.hint; hint.style.display = 'block'; }
+
+  // Campos
+  setWrap('wrapReference',   'pillReference',   'starReference',   cfg.reference);
+  setWrap('wrapBankAccount', 'pillBankAccount', 'starBankAccount', cfg.bankAccount);
+  setWrap('wrapPayer',       'pillPayer',        null,             cfg.payer);
+  setWrap('wrapTxReceiver',  'pillTxReceiver',   null,             cfg.txReceiver);
+  setWrap('wrapTxClient',    'pillTxClient',     null,             cfg.txClient);
+  setWrap('wrapTxSupplier',  'pillTxSupplier',   null,             cfg.txSupplier);
+
+  // Panel de reglas
+  document.getElementById('ruleDefault')?.classList.add('d-none');
+  ['TRANSFER','CHECK','CASH','CARD','OTHER'].forEach(m => document.getElementById(`rule${m}`)?.classList.add('d-none'));
+  document.getElementById(`rule${method}`)?.classList.remove('d-none');
+}
+
+document.querySelectorAll('.method-btn').forEach(b => {
+  b.addEventListener('click', () => applyMethod(b.dataset.method));
+});
+
+// Inicializar con valor actual del select (útil en edición)
+const initMethod = methodSel?.value;
+if (initMethod && METHODS[initMethod]) applyMethod(initMethod);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FORMSET DINÁMICO — líneas de comprobantes
+// ══════════════════════════════════════════════════════════════════════════════
 const lineContainer = document.getElementById('lineContainer');
-const totalForms = document.querySelector('[name$="TOTAL_FORMS"]');
+const totalForms    = document.querySelector('[name$="TOTAL_FORMS"]');
 
 document.getElementById('addLineBtn')?.addEventListener('click', () => {
-  const idx = parseInt(totalForms.value);
-  const first = lineContainer.querySelector('.formset-row');
+  const idx   = parseInt(totalForms.value);
+  const first = lineContainer.querySelector('.fs-row');
   if (!first) return;
   const clone = first.cloneNode(true);
   clone.dataset.index = idx;
+  clone.classList.remove('fs-error');
+  clone.querySelectorAll('.alert').forEach(el => el.remove());
   clone.querySelectorAll('[name],[id],[for]').forEach(el => {
     ['name','id','for'].forEach(a => {
       const v = el.getAttribute(a);
       if (v) el.setAttribute(a, v.replace(/-\d+-/, `-${idx}-`));
     });
-    if (['INPUT','SELECT'].includes(el.tagName)) { el.value = ''; if (el.type === 'checkbox') el.checked = false; }
+    if (['INPUT','SELECT'].includes(el.tagName)) {
+      el.value = '';
+      if (el.type === 'checkbox') el.checked = false;
+    }
   });
   lineContainer.appendChild(clone);
+  initOutline(clone);
   totalForms.value = idx + 1;
 });
 
 lineContainer.addEventListener('click', e => {
-  const btn = e.target.closest('.formset-remove');
+  const btn = e.target.closest('.fs-remove');
   if (!btn) return;
-  const row = btn.closest('.formset-row');
+  const row = btn.closest('.fs-row');
   const del = row?.querySelector('input[name$="-DELETE"]');
   if (del) { del.checked = true; row.style.display = 'none'; } else row?.remove();
 });
 
-// Clic en comprobante pendiente → llena la primera línea vacía
-document.querySelectorAll('.pending-doc-row').forEach(row => {
-  row.addEventListener('click', () => {
-    const docId = row.dataset.docId;
-    const pending = row.dataset.docPending;
-    // Buscar primera línea sin documento seleccionado
-    const rows = lineContainer.querySelectorAll('.formset-row:not([style*="none"])');
+// ══════════════════════════════════════════════════════════════════════════════
+// CLIC EN COMPROBANTE PENDIENTE → rellena primera línea vacía
+// ══════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.pending-doc-row').forEach(pendingRow => {
+  pendingRow.addEventListener('click', () => {
+    const docId   = pendingRow.dataset.docId;
+    const pending = pendingRow.dataset.docPending;
+
+    const rows = lineContainer.querySelectorAll('.fs-row:not([style*="none"])');
     for (const r of rows) {
       const sel = r.querySelector('select[name$="-document"]');
       const amt = r.querySelector('input[name$="-amount_applied"]');
       if (sel && !sel.value) {
         sel.value = docId;
         if (amt) amt.value = parseFloat(pending).toFixed(2);
-        // Pequeña animación visual
+        // Feedback visual
         r.style.borderColor = '#2dce89';
-        setTimeout(() => r.style.borderColor = '#e9ecef', 1500);
+        r.style.borderWidth = '2px';
+        setTimeout(() => { r.style.borderColor = '#e9ecef'; r.style.borderWidth = '1px'; }, 1800);
         return;
       }
     }
+    // Si no hay línea vacía, agregar una nueva
+    document.getElementById('addLineBtn')?.click();
+    setTimeout(() => {
+      const rows2 = lineContainer.querySelectorAll('.fs-row:not([style*="none"])');
+      const last  = rows2[rows2.length - 1];
+      if (last) {
+        const sel = last.querySelector('select[name$="-document"]');
+        const amt = last.querySelector('input[name$="-amount_applied"]');
+        if (sel) sel.value = docId;
+        if (amt) amt.value = parseFloat(pending).toFixed(2);
+        last.style.borderColor = '#2dce89';
+        setTimeout(() => last.style.borderColor = '#e9ecef', 1800);
+      }
+    }, 50);
   });
 });
+
+function initOutline(root) {
+  root.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+}
+initOutline(document);
 </script>
 {% endblock %}

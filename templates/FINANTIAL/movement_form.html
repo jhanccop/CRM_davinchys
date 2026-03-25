@@ -6,14 +6,7 @@
 {% block navbar_appName %}Banco{% endblock %}
 {% block navbar_Type %}{% if action == 'create' %}Nuevo{% else %}Editar{% endif %}{% endblock %}
 
-{% block extra_css %}
-<style>
-  .field-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; display: block; margin-bottom: .35rem; }
-  .section-divider { border-top: 2px dashed #e9ecef; margin: 1.5rem 0 1rem; padding-top: 1rem; }
-  .sticky-wrap { position: sticky; top: 1.5rem; }
-  .tip-item { display: flex; gap: .5rem; margin-bottom: .6rem; font-size: .72rem; color: #67748e; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
@@ -46,7 +39,7 @@
       <div class="col-lg-8">
 
         <!-- Datos del movimiento -->
-        <div class="card mb-3">
+        <div class="card shadow-sm mb-3">
           <div class="card-header pb-0">
             <div class="d-flex align-items-center gap-2">
               <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#11cdef,#1171ef);display:flex;align-items:center;justify-content:center">
@@ -55,58 +48,123 @@
               <h6 class="mb-0">Datos del Movimiento</h6>
             </div>
           </div>
-          <div class="card-body pt-3">
-            <div class="row g-3">
+          <div class="card-body">
+            <div class="row g-2">
+
               <div class="col-md-6">
-                <label class="field-label">Cuenta bancaria *</label>{{ form.idAccount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Cuenta bancaria <span class="req-star">*</span></label>
+                  {{ form.idAccount }}
+                </div>
                 {% if form.idAccount.errors %}<p class="text-danger text-xxs mt-1">{{ form.idAccount.errors.0 }}</p>{% endif %}
               </div>
+
               <div class="col-md-6">
-                <label class="field-label">Tipo de movimiento *</label>{{ form.movementType }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Tipo de movimiento <span class="req-star">*</span></label>
+                  {{ form.movementType }}
+                </div>
+                {% if form.movementType.errors %}<p class="text-danger text-xxs mt-1">{{ form.movementType.errors.0 }}</p>{% endif %}
               </div>
+
               <div class="col-md-3">
-                <label class="field-label">Fecha *</label>{{ form.date }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha <span class="req-star">*</span></label>
+                  {{ form.date }}
+                </div>
+                {% if form.date.errors %}<p class="text-danger text-xxs mt-1">{{ form.date.errors.0 }}</p>{% endif %}
               </div>
+
               <div class="col-md-5">
-                <label class="field-label">Descripción</label>{{ form.description }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Descripción</label>
+                  {{ form.description }}
+                </div>
               </div>
+
               <div class="col-md-4">
-                <label class="field-label">Nro. operación</label>{{ form.opNumber }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Nro. operación</label>
+                  {{ form.opNumber }}
+                </div>
               </div>
+
               <div class="col-md-4">
-                <label class="field-label">Monto *</label>{{ form.amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto <span class="req-star">*</span></label>
+                  {{ form.amount }}
+                </div>
+                {% if form.amount.errors %}<p class="text-danger text-xxs mt-1">{{ form.amount.errors.0 }}</p>{% endif %}
               </div>
+
               <div class="col-md-4">
-                <label class="field-label">Monto equivalente</label>{{ form.equivalentAmount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto equivalente</label>
+                  {{ form.equivalentAmount }}
+                </div>
               </div>
+
               <div class="col-md-4">
-                <label class="field-label">Origen / Destino</label>{{ form.originDestination }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Origen / Destino</label>
+                  {{ form.originDestination }}
+                </div>
               </div>
+
             </div>
 
-            <div class="section-divider"><h6><i class="material-icons text-sm align-middle me-1">category</i>Clasificación</h6></div>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="field-label">Subcategoría de gasto</label>{{ form.expenseSubCategory }}
+            <div class="section-divider">
+              <h6 class="text-sm"><i class="material-icons text-sm align-middle me-1">category</i>Clasificación SAP</h6>
+            </div>
+            <div class="row g-2">
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Centro de costos <small class="text-secondary font-weight-normal">KS01</small></label>
+                  {{ form.cost_center }}
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="field-label">Subcategoría de ingreso</label>{{ form.incomeSubCategory }}
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Subcategoría de gasto</label>
+                  {{ form.expenseSubCategory }}
+                </div>
               </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Subcategoría de ingreso</label>
+                  {{ form.incomeSubCategory }}
+                </div>
+              </div>
+
               <div class="col-12">
-                <label class="field-label">Justificación</label>{{ form.justification }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Justificación</label>
+                  {{ form.justification }}
+                </div>
               </div>
+
             </div>
 
-            <div class="section-divider"><h6><i class="material-icons text-sm align-middle me-1">link</i>Integración con pagos</h6></div>
-            <div class="row g-3">
+            <div class="section-divider">
+              <h6 class="text-sm"><i class="material-icons text-sm align-middle me-1">link</i>Integración con pagos</h6>
+            </div>
+            <div class="row g-2">
+
               <div class="col-md-8">
-                <label class="field-label">Transacción de pago vinculada (opcional)</label>
-                {{ form.payment_transaction }}
-                <small class="text-xxs text-secondary mt-1 d-block">Vincula con una PaymentTransaction confirmada para trazabilidad completa</small>
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Transacción de pago vinculada (opcional)</label>
+                  {{ form.payment_transaction }}
+                </div>
+                <small class="text-xxs text-secondary mt-1 d-block ms-1">Vincula con una PaymentTransaction confirmada para trazabilidad completa</small>
               </div>
+
               <div class="col-md-4">
-                <label class="field-label">PDF / Voucher</label>{{ form.pdf_file }}
+                {% include "FINANTIAL/_file_field.html" with field=form.pdf_file label="PDF / Voucher" icon="picture_as_pdf" accent="#fb6340" %}
               </div>
+
             </div>
           </div>
         </div>
@@ -126,15 +184,19 @@
         <div class="sticky-wrap">
           <div class="card mb-3 border border-info" style="border-width:2px!important">
             <div class="card-body p-3">
-              <p class="text-xs font-weight-bolder text-info mb-2"><i class="material-icons text-sm align-middle me-1">info</i>Flujo de conciliación</p>
+              <p class="text-xs font-weight-bolder text-info mb-2">
+                <i class="material-icons text-sm align-middle me-1">info</i>Flujo de conciliación
+              </p>
               <div class="tip-item"><i class="material-icons" style="font-size:.9rem;color:#fb6340">looks_one</i>Registra el movimiento bancario aquí</div>
               <div class="tip-item"><i class="material-icons" style="font-size:.9rem;color:#fb6340">looks_two</i>Crea o vincula una PaymentTransaction</div>
               <div class="tip-item"><i class="material-icons" style="font-size:.9rem;color:#fb6340">looks_3</i>Al confirmar la TX → Conciliation se crea automáticamente</div>
             </div>
           </div>
-          <div class="card">
+          <div class="card shadow-sm">
             <div class="card-body p-3">
-              <p class="text-xs font-weight-bolder text-secondary mb-2"><i class="material-icons text-sm align-middle me-1 text-warning">lightbulb</i>Tips</p>
+              <p class="text-xs font-weight-bolder text-secondary mb-2">
+                <i class="material-icons text-sm align-middle me-1 text-warning">lightbulb</i>Tips
+              </p>
               <p class="text-xxs text-secondary mb-1">El <strong>Tin</strong> se asigna automáticamente desde la cuenta bancaria seleccionada.</p>
               <p class="text-xxs text-secondary mb-1">El <strong>cliente/proveedor</strong> se puede auto-detectar si el número de cuenta está en el catálogo de clientes.</p>
               <p class="text-xxs text-secondary mb-0">El <strong>monto equivalente</strong> solo es necesario en operaciones entre cuentas de diferente moneda.</p>
@@ -146,4 +208,25 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+</script>
+<script>
+  document.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+</script>
 {% endblock %}

@@ -13,12 +13,12 @@
   <div class="row mb-3">
     <div class="col-lg-8 col-12">
       <h5 class="font-weight-bolder mb-1">
-        Editar Cotizaci&oacute;n Interna INT-{{ int_quote.id }}
+        Editar Cotizaci&oacute;n Interna {{ int_quote.poNumber|default:int_quote.id }}
       </h5>
       <p class="text-sm text-secondary mb-0">
-        {% if quote_master %}QUO-{{ quote_master.id }}{% endif %}
+        {% if quote_master %}{{ quote_master.poNumber|default:quote_master.id }}{% endif %}
         {% if quote_master %} &rarr; {% endif %}
-        INT-{{ int_quote.id }} &rarr; Editar
+        {{ int_quote.poNumber|default:int_quote.id }} &rarr; Editar
       </p>
     </div>
     <div class="col-lg-4 col-12 d-flex ms-auto justify-content-end align-items-start mt-2 mt-lg-0">
@@ -220,12 +220,12 @@
         <div class="card-body pt-3">
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">ID</p>
-            <p class="text-sm font-weight-bold text-dark mb-0">INT-{{ int_quote.id }}</p>
+            <p class="text-sm font-weight-bold text-dark mb-0">{{ int_quote.poNumber|default:int_quote.id }}</p>
           </div>
           {% if quote_master %}
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Quote Master</p>
-            <p class="text-sm font-weight-bold text-info mb-0">QUO-{{ quote_master.id }}</p>
+            <p class="text-sm font-weight-bold text-info mb-0">{{ quote_master.poNumber|default:quote_master.id }}</p>
           </div>
           {% endif %}
           <div class="mb-3">

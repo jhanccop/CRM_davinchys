@@ -32,20 +32,19 @@ def is_submenu_active(request, menu_items):
     Verifica si algún item del submenú está activo para mantener el menú expandido
     """
     for item in menu_items:
+        if item.get('is_separator'):
+            continue
         try:
             if item['url_name']:
                 url = reverse(item['url_name'])
                 current_path = request.path
-                
                 if url == '/':
                     if current_path == url:
                         return 'show'
                 elif current_path.startswith(url):
                     return 'show'
-        
         except NoReverseMatch:
             continue
-    
     return ''
 
 

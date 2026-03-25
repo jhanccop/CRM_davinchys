@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Códigos de Impuesto{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}SAP FTXP{% endblock %}
+{% block navbar_Type %}Impuestos{% endblock %}
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0"><i class="material-icons align-middle me-2 text-danger">percent</i>Códigos de Impuesto <small class="text-secondary text-xs fw-normal">SAP FTXP</small></h5>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:taxcode-create' %}" class="btn btn-sm bg-gradient-danger shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">add</i> Nuevo
+      </a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table id="datatable-main" class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">Código</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nombre</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tipo</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Tasa %</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Cuenta contable</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Aplica a</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tc in codes %}
+            <tr>
+              <td class="ps-3"><span class="text-xs font-weight-bold text-danger">{{ tc.code }}</span></td>
+              <td><span class="text-xs">{{ tc.name }}</span></td>
+              <td>
+                {% if tc.tax_type == 'IGV' %}<span class="badge badge-sm bg-gradient-info" style="font-size:.58rem">IGV</span>
+                {% elif tc.tax_type == 'DETRACTION' %}<span class="badge badge-sm bg-gradient-warning" style="font-size:.58rem">Detracción</span>
+                {% elif tc.tax_type == 'RETENTION' %}<span class="badge badge-sm bg-gradient-danger" style="font-size:.58rem">Retención</span>
+                {% else %}<span class="badge badge-sm bg-gradient-secondary" style="font-size:.58rem">{{ tc.get_tax_type_display }}</span>{% endif %}
+              </td>
+              <td class="text-end pe-4"><span class="text-sm font-weight-bolder text-danger">{{ tc.rate }}%</span></td>
+              <td><span class="text-xs text-secondary">{{ tc.accounting_account|default:"—" }}</span></td>
+              <td><span class="text-xxs text-secondary">{{ tc.applies_to_doc_types|default:"Todos" }}</span></td>
+              <td>
+                {% if tc.active %}<span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Activo</span>
+                {% else %}<span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">Inactivo</span>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center py-5">
+              <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">percent</i>
+              <p class="text-sm text-secondary mb-2">Sin códigos de impuesto</p>
+              <a href="{% url 'finantial:taxcode-create' %}" class="btn btn-sm bg-gradient-danger">Crear código de impuesto</a>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+</script>
+{% endblock %}

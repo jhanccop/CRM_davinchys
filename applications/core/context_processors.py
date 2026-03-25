@@ -95,36 +95,33 @@ def menu_navigation(request):
             'name': 'FINANZAS',
             'icon': 'fas fa-hand-holding-usd',
             'items': [
-                {
-                    'name': 'Dashboard',
-                    'url_name': 'finanzas_reports_app:reporte-de-cuentas',
-                    'mini_icon': 'DA',
-                    'permission': 'finanzas.view_dashboard'
-                },
-                {
-                    'name': 'Mov. Bancarios',
-                    'url_name': 'movimientosBancarios_app:lista-movimientos',
-                    'mini_icon': 'MB',
-                    'permission': 'finanzas.view_conciliacion'
-                },
-                {
-                    'name': 'Doc. Financieros',
-                    'url_name': 'documentos_app:documento-financiero-lista',
-                    'mini_icon': 'DF',
-                    'permission': 'finanzas.view_conciliacion'
-                },
-                {
-                    'name': 'Doc. Genericos',
-                    'url_name': 'documentos_app:documento-generico-lista',
-                    'mini_icon': 'DG',
-                    'permission': 'finanzas.view_conciliacion'
-                },
-                {
-                    'name': 'Cuentas bancarias',
-                    'url_name': 'cuentas_app:cuentas-lista',
-                    'mini_icon': 'CB',
-                    'permission': 'finanzas.view_cuentabancaria'
-                }
+                # ── General ───────────────────────────────────────────────────
+                {'name': 'Dashboard',         'url_name': 'finantial:dashboard',         'mini_icon': '📊', 'permission': None},
+                {'name': 'Seg. por Ítem',     'url_name': 'finantial:item-tracking',     'mini_icon': '🔍', 'permission': None},
+                # ── Operativa ─────────────────────────────────────────────────
+                {'name': 'Operativa',         'url_name': '', 'mini_icon': '', 'is_separator': True, 'permission': None},
+                {'name': 'Comprobantes',      'url_name': 'finantial:document-list',     'mini_icon': 'CP', 'permission': None},
+                {'name': 'Transacciones',     'url_name': 'finantial:transaction-list',  'mini_icon': 'TX', 'permission': None},
+                {'name': 'Mov. Bancarios',    'url_name': 'finantial:movement-list',     'mini_icon': 'MB', 'permission': None},
+                {'name': 'Importar Extracto', 'url_name': 'finantial:import-statement',  'mini_icon': 'IM', 'permission': None},
+                # ── Tesorería ─────────────────────────────────────────────────
+                {'name': 'Tesorería',         'url_name': '', 'mini_icon': '', 'is_separator': True, 'permission': None},
+                {'name': 'Antigüedad Cartera','url_name': 'finantial:ar-aging',          'mini_icon': 'AC', 'permission': None},
+                {'name': 'Flujo de Caja',     'url_name': 'finantial:cashflow',          'mini_icon': 'FC', 'permission': None},
+                {'name': 'Cierres Mensuales', 'url_name': 'finantial:closure-list',      'mini_icon': 'CM', 'permission': None},
+                # ── Contabilidad ──────────────────────────────────────────────
+                {'name': 'Contabilidad',      'url_name': '', 'mini_icon': '', 'is_separator': True, 'permission': None},
+                {'name': 'Asientos',          'url_name': 'finantial:journal-list',      'mini_icon': 'AS', 'permission': None},
+                {'name': 'Estado Resultados', 'url_name': 'finantial:profit-loss',       'mini_icon': 'ER', 'permission': None},
+                # ── Tributario ────────────────────────────────────────────────
+                {'name': 'Tributario',        'url_name': '', 'mini_icon': '', 'is_separator': True, 'permission': None},
+                {'name': 'PLE SUNAT',         'url_name': 'finantial:ple-export',        'mini_icon': 'PL', 'permission': None},
+                # ── Configuración ─────────────────────────────────────────────
+                {'name': 'Configuración',     'url_name': '', 'mini_icon': '', 'is_separator': True, 'permission': None},
+                {'name': 'Plan de Cuentas',   'url_name': 'finantial:chart-of-accounts', 'mini_icon': 'PC', 'permission': None},
+                {'name': 'Centros de Costo',  'url_name': 'finantial:costcenter-list',   'mini_icon': 'CC', 'permission': None},
+                {'name': 'Tipos de Cambio',   'url_name': 'finantial:exchangerate-list', 'mini_icon': 'TC', 'permission': None},
+                {'name': 'Cód. Impuesto',     'url_name': 'finantial:taxcode-list',      'mini_icon': 'CI', 'permission': None},
             ]
         },
         'rrhh': {
@@ -246,9 +243,27 @@ def filter_menu_by_permissions(user, menu_structure):
         filtered_items = []
         
         for item in menu_data['items']:
+            # Los separadores siempre pasan (se limpian al final si quedan vacíos)
+            if item.get('is_separator'):
+                filtered_items.append(item)
+                continue
             # Si no hay restricción de permiso o el usuario tiene el permiso
             if not item['permission'] or (user.is_authenticated and user.has_perm(item['permission'])):
                 filtered_items.append(item)
+
+        # Eliminar separadores al inicio, al final, o consecutivos
+        cleaned = []
+        for item in filtered_items:
+            if item.get('is_separator'):
+                # No agregar si la lista está vacía o el último ya es separador
+                if cleaned and not cleaned[-1].get('is_separator'):
+                    cleaned.append(item)
+            else:
+                cleaned.append(item)
+        # Quitar separador final si quedó
+        if cleaned and cleaned[-1].get('is_separator'):
+            cleaned.pop()
+        filtered_items = cleaned
         
         # Solo incluir el menú si tiene items visibles
         if filtered_items:

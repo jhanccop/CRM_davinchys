@@ -6,16 +6,7 @@
 {% block navbar_appName %}Comprobantes{% endblock %}
 {% block navbar_Type %}Detalle{% endblock %}
 
-{% block extra_css %}
-<style>
-  .info-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .2rem; }
-  .info-value { font-size: .82rem; font-weight: 600; color: #344767; margin-bottom: 0; }
-  .sticky-side { position: sticky; top: 1.5rem; }
-  .progress-bar-pay { height: 10px; border-radius: 5px; }
-  .badge-order { font-size: .6rem; padding: 3px 8px; border-radius: 20px; }
-  .tbl-sm td, .tbl-sm th { font-size: .75rem; padding: .5rem .75rem; vertical-align: middle; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
@@ -59,6 +50,17 @@
     </div>
   </div>
 
+  {% if overpaid %}
+  <div class="alert alert-danger d-flex align-items-center gap-3 py-2 mb-3">
+    <i class="material-icons" style="font-size:1.4rem">warning</i>
+    <div>
+      <strong>¡Sobre-pago detectado!</strong> El monto pagado ({{ document.paid_amount|floatformat:2 }})
+      supera el neto del comprobante ({{ document.net_amount|floatformat:2 }}).
+      Revise y corrija las transacciones vinculadas.
+    </div>
+  </div>
+  {% endif %}
+
   <div class="row g-3">
     <!-- ══ COLUMNA PRINCIPAL ══ -->
     <div class="col-lg-8">
@@ -90,9 +92,9 @@
           <hr class="horizontal dark my-3">
           <p class="info-label mb-2"><i class="material-icons text-sm align-middle me-1">link</i>Pedidos vinculados (inferidos desde ítems)</p>
           <div class="d-flex flex-wrap gap-1">
-            {% for q in rq %}<span class="badge bg-gradient-primary badge-order">QUO-{{ q.id }}</span>{% endfor %}
-            {% for iq in riq %}<span class="badge bg-gradient-info badge-order">INT-{{ iq.id }}</span>{% endfor %}
-            {% for wo in rwo %}<span class="badge bg-gradient-dark badge-order">WO-{{ wo.id }}</span>{% endfor %}
+            {% for q in rq %}<span class="badge bg-gradient-primary badge-order">{{ q.poNumber|default:q.id }}</span>{% endfor %}
+            {% for iq in riq %}<span class="badge bg-gradient-info badge-order">{{ iq.poNumber|default:iq.id }}</span>{% endfor %}
+            {% for wo in rwo %}<span class="badge bg-gradient-dark badge-order">{{ wo.woNumber|default:wo.id }}</span>{% endfor %}
           </div>
           {% endif %}
           {% endwith %}
@@ -187,7 +189,7 @@
                   <td>
                     {% with kind=alloc.order_context.0 order=alloc.order_context.1 %}
                     {% if kind %}
-                      <span class="badge badge-sm {% if kind == 'QUO' %}bg-gradient-primary{% elif kind == 'INT' %}bg-gradient-info{% else %}bg-gradient-dark{% endif %}">{{ kind }}-{{ order.id }}</span>
+                      <span class="badge badge-sm {% if kind == 'QUO' %}bg-gradient-primary{% elif kind == 'INT' %}bg-gradient-info{% else %}bg-gradient-dark{% endif %}">{% if kind == 'WO' %}{{ order.woNumber|default:order.id }}{% else %}{{ order.poNumber|default:order.id }}{% endif %}</span>
                     {% else %}—{% endif %}
                     {% endwith %}
                   </td>
@@ -298,23 +300,62 @@
         </div>
         {% endif %}
 
-        <!-- Contabilidad -->
-        {% if document.account_category or document.cost_center or document.declare_month %}
+        <!-- Contabilidad SAP -->
+        {% if document.account_category or document.cost_center or document.tax_code or document.declare_month %}
         <div class="card">
-          <div class="card-header pb-0"><h6 class="mb-0 text-sm">Clasificación Contable</h6></div>
+          <div class="card-header pb-0">
+            <h6 class="mb-0 text-sm"><i class="material-icons text-xs align-middle me-1">account_tree</i>Clasificación SAP</h6>
+          </div>
           <div class="card-body pt-2">
             {% if document.account_category %}
             <div class="mb-2"><p class="info-label">Categoría</p><p class="info-value">{{ document.get_account_category_display }}</p></div>
             {% endif %}
             {% if document.cost_center %}
-            <div class="mb-2"><p class="info-label">Centro de costo</p><p class="info-value">{{ document.cost_center }}</p></div>
+            <div class="mb-2">
+              <p class="info-label">Centro de costos <small class="text-secondary font-weight-normal">KS01</small></p>
+              <p class="info-value">{{ document.cost_center.code }} — {{ document.cost_center.name }}</p>
+            </div>
+            {% endif %}
+            {% if document.tax_code %}
+            <div class="mb-2">
+              <p class="info-label">Código impuesto <small class="text-secondary font-weight-normal">FTXP</small></p>
+              <p class="info-value">{{ document.tax_code.code }} — {{ document.tax_code.name }} ({{ document.tax_code.rate }}%)</p>
+            </div>
             {% endif %}
             {% if document.declare_month %}
-            <div><p class="info-label">Período</p><p class="info-value">{{ document.declare_month }}/{{ document.declare_year|default:"—" }}</p></div>
+            <div><p class="info-label">Período declaración</p><p class="info-value">{{ document.declare_month|stringformat:"02d" }}/{{ document.declare_year|default:"—" }}</p></div>
             {% endif %}
           </div>
         </div>
         {% endif %}
+
+        <!-- Asiento contable automático -->
+        {% for line in tx_lines %}
+          {% if forloop.first %}
+          <div class="card">
+            <div class="card-header pb-0">
+              <h6 class="mb-0 text-sm"><i class="material-icons text-xs align-middle me-1 text-primary">receipt_long</i>Asientos contables</h6>
+            </div>
+            <div class="card-body pt-2">
+              {% for line in tx_lines %}
+              {% if line.transaction.journal_entry %}
+              <div class="d-flex justify-content-between align-items-center {% if not forloop.last %}mb-1{% endif %}">
+                <a href="{% url 'finantial:journal-detail' line.transaction.journal_entry.pk %}" class="text-xs text-primary">
+                  AST-{{ line.transaction.journal_entry.id }}
+                </a>
+                <span class="text-xxs text-secondary">TX-{{ line.transaction.id }}</span>
+                {% if line.transaction.journal_entry.is_posted %}
+                  <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Contabilizado</span>
+                {% else %}
+                  <span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">Borrador</span>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
 
         <!-- Auditoría -->
         <div class="card">

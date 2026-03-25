@@ -6,29 +6,16 @@
 {% block navbar_appName %}Comprobantes{% endblock %}
 {% block navbar_Type %}{% if action == 'create' %}Nuevo{% else %}Editar{% endif %}{% endblock %}
 
-{% block extra_css %}
-<style>
-  .field-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; display: block; margin-bottom: .35rem; }
-  .section-divider { border-top: 2px dashed #e9ecef; margin: 1.5rem 0 1rem; padding-top: 1rem; }
-  .section-divider h6 { color: #344767; margin-bottom: 0; }
-  .formset-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem 1rem .5rem; position: relative; margin-bottom: .75rem; }
-  .formset-row:hover { border-color: #dee2e6; }
-  .formset-remove { position: absolute; top: .6rem; right: .75rem; }
-  .sidebar-tip { background: linear-gradient(135deg, #f8f9fa, #fff); border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem; margin-bottom: 1rem; }
-  .tip-item { display: flex; gap: .5rem; margin-bottom: .5rem; font-size: .72rem; color: #67748e; }
-  .tip-icon { color: #fb6340; flex-shrink: 0; font-size: .85rem; margin-top: .05rem; }
-  .sticky-wrap { position: sticky; top: 1.5rem; }
-  .pending-badge { display: none; background: #e8f5e9; color: #2dce89; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: .35rem; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
 
+  <!-- ── HEADER ── -->
   <div class="row align-items-center mb-3">
     <div class="col">
       <h5 class="font-weight-bolder mb-0">{{ title }}</h5>
-      <p class="text-secondary text-sm mb-0">Complete los datos del comprobante y asigne los ítems cubiertos</p>
+      <p class="text-secondary text-sm mb-0">Complete los datos y asigne los ítems cubiertos por este comprobante</p>
     </div>
     <div class="col-auto">
       <a href="{% url 'finantial:document-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
@@ -37,100 +24,259 @@
     </div>
   </div>
 
+  <!-- ── BANNER: llegando desde seguimiento de ítem ── -->
+  {% if prefill_item_obj %}
+  <div class="alert d-flex align-items-start gap-3 py-3 mb-3"
+       style="background:#e3f2fd;border:1px solid #90caf9;border-radius:.75rem;">
+    <i class="material-icons text-info mt-1" style="font-size:1.3rem">info</i>
+    <div>
+      <p class="text-xs font-weight-bolder mb-1">
+        Comprobante pre-cargado desde seguimiento de ítem
+        {% if prefill_cost_level == 'QUO' %}<span class="badge ms-1" style="background:#e8f5e9;color:#2e7d32">QUO — Cliente → Holding</span>
+        {% elif prefill_cost_level == 'INT' %}<span class="badge ms-1" style="background:#e3f2fd;color:#1565c0">INT — Subsidiaria ↔ Holding</span>
+        {% elif prefill_cost_level == 'WO'  %}<span class="badge ms-1" style="background:#fff3e0;color:#e65100">WO — Holding → Proveedor</span>
+        {% endif %}
+      </p>
+      <p class="text-xxs text-secondary mb-0">
+        <strong>Ítem #{{ prefill_item_obj.id }}</strong>
+        {% if prefill_item_obj.seq %} · {{ prefill_item_obj.seq }}{% endif %}
+        {% if prefill_item_obj.idTrafo %} · {{ prefill_item_obj.idTrafo }}{% endif %}
+        {% if prefill_item_obj.idTrafoQuote %} · {{ prefill_item_obj.idTrafoQuote.poNumber|default:prefill_item_obj.idTrafoQuote_id }}{% endif %}
+        {% if prefill_item_obj.idTrafoIntQuote %} · {{ prefill_item_obj.idTrafoIntQuote.poNumber|default:prefill_item_obj.idTrafoIntQuote_id }}{% endif %}
+        {% if prefill_item_obj.idWorkOrder %} · {{ prefill_item_obj.idWorkOrder.woNumber|default:prefill_item_obj.idWorkOrder_id }}{% endif %}
+        &nbsp;·&nbsp;
+        {% if prefill_cost_level == 'QUO' %}Costo: <strong>{{ prefill_item_obj.unitCost|floatformat:2 }}</strong>
+        {% elif prefill_cost_level == 'INT' %}Costo interno: <strong>{{ prefill_item_obj.unitCostInt|floatformat:2 }}</strong>
+        {% elif prefill_cost_level == 'WO'  %}Costo WO: <strong>{{ prefill_item_obj.unitCostWO|floatformat:2 }}</strong>
+        {% endif %}
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── MENSAJES ── -->
   {% for msg in messages %}
   <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3" role="alert">
-    <i class="material-icons text-sm align-middle me-1">{% if 'error' in msg.tags %}error{% else %}info{% endif %}</i>
-    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <i class="material-icons text-sm align-middle me-1">
+      {% if 'error' in msg.tags %}error{% elif 'warning' in msg.tags %}warning{% else %}info{% endif %}
+    </i>
+    {{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
   {% endfor %}
 
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger text-xs py-2 mb-3">
+    <i class="material-icons text-sm align-middle me-1">error</i>
+    {% for e in form.non_field_errors %}{{ e }}{% if not forloop.last %} · {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+
   <form method="POST" enctype="multipart/form-data" id="docForm" novalidate>
     {% csrf_token %}
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
-    {% endif %}
-
     <div class="row g-3">
-      <!-- ══ COLUMNA PRINCIPAL ══ -->
+
+      <!-- ══ COLUMNA PRINCIPAL ══════════════════════════════════════ -->
       <div class="col-lg-8">
 
-        <!-- CARD 1: Identificación -->
+        <!-- ── CARD 1: Tipo de operación ── -->
+        <div class="card mb-3" id="cardDir" style="border:2px solid #e9ecef">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#42424a,#191919);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">swap_horiz</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Paso 1 — Tipo de operación</h6>
+                <p class="text-xxs text-secondary mb-0">Los campos disponibles se ajustan automáticamente según el flujo seleccionado</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-3">
+
+            <!-- Botones visuales -->
+            <div class="row g-2 mb-2">
+              <div class="col-md-4">
+                <button type="button" class="flow-btn" data-flow="IN">
+                  <div class="flow-icon bg-gradient-success"><i class="material-icons text-white" style="font-size:.85rem">south</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-success mb-0">Ingreso (IN)</p>
+                    <p class="text-xxs text-secondary mb-0">Cliente → DAV LLC</p>
+                  </div>
+                </button>
+              </div>
+              <div class="col-md-4">
+                <button type="button" class="flow-btn" data-flow="OUT">
+                  <div class="flow-icon bg-gradient-danger"><i class="material-icons text-white" style="font-size:.85rem">north</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-danger mb-0">Egreso (OUT)</p>
+                    <p class="text-xxs text-secondary mb-0">Subsidiaria → Proveedor</p>
+                  </div>
+                </button>
+              </div>
+              <div class="col-md-4">
+                <button type="button" class="flow-btn" data-flow="INT">
+                  <div class="flow-icon bg-gradient-info"><i class="material-icons text-white" style="font-size:.85rem">swap_horiz</i></div>
+                  <div>
+                    <p class="text-xs font-weight-bolder text-info mb-0">Interno (INT)</p>
+                    <p class="text-xxs text-secondary mb-0">Holding ↔ Subsidiaria</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Select hidden — el valor real que se envía -->
+            <div class="d-none">{{ form.direction }}</div>
+            {% if form.direction.errors %}<p class="text-danger text-xxs mt-1">{{ form.direction.errors.0 }}</p>{% endif %}
+
+            <!-- Hint contextual -->
+            <div id="dirHint" class="text-xxs text-secondary bg-light rounded px-3 py-2 mt-2" style="display:none">
+              <i class="material-icons text-sm align-middle me-1">info</i>
+              <span id="dirHintText"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CARD 2: Identificación y partes ── -->
         <div class="card mb-3">
           <div class="card-header pb-0">
             <div class="d-flex align-items-center gap-2">
               <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#42424a,#191919);display:flex;align-items:center;justify-content:center">
                 <i class="material-icons text-white" style="font-size:.9rem">description</i>
               </div>
-              <h6 class="mb-0">Identificación del Comprobante</h6>
+              <h6 class="mb-0">Paso 2 — Identificación y Partes</h6>
             </div>
           </div>
           <div class="card-body pt-3">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="field-label">Tipo de documento *</label>
-                {{ form.doc_type }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Tipo de documento *</label>
+                  {{ form.doc_type }}
+                </div>
                 {% if form.doc_type.errors %}<p class="text-danger text-xxs mt-1">{{ form.doc_type.errors.0 }}</p>{% endif %}
               </div>
               <div class="col-md-4">
-                <label class="field-label">Número</label>
-                {{ form.doc_number }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Número</label>
+                  {{ form.doc_number }}
+                </div>
                 {% if form.doc_number.errors %}<p class="text-danger text-xxs mt-1">{{ form.doc_number.errors.0 }}</p>{% endif %}
               </div>
               <div class="col-md-4">
-                <label class="field-label">Dirección del flujo *</label>
-                {{ form.direction }}
-                <small class="text-xxs text-info mt-1 d-block" id="dir-hint"></small>
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Anotación</label>
+                  {{ form.annotation }}
+                </div>
               </div>
             </div>
+
             <div class="section-divider">
               <h6><i class="material-icons text-sm align-middle me-1">group</i>Partes Involucradas</h6>
             </div>
+
+            <!--
+              Tabla 2×2 de partes:
+              ┌─────────────────────┬─────────────────────┐
+              │  Empresa Emisora    │  Empresa Receptora  │  ← TIN internos
+              ├─────────────────────┼─────────────────────┤
+              │  Cliente externo    │  Proveedor externo  │  ← externos
+              └─────────────────────┴─────────────────────┘
+              Cada celda tiene su pill de estado (Requerido / Opcional / No aplica)
+            -->
             <div class="row g-3">
-              <div class="col-md-6">
-                <label class="field-label">Empresa Emisora (TIN)</label>{{ form.tin_issuer }}
+
+              <!-- Empresa Emisora -->
+              <div class="col-md-6" id="wrapIssuer">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" id="lblIssuer">Empresa Emisora (TIN)</label>
+                  {{ form.tin_issuer }}
+                </div>
+                <span id="pillIssuer" class="field-pill"></span>
+                {% if form.tin_issuer.errors %}<p class="text-danger text-xxs mt-1">{{ form.tin_issuer.errors.0 }}</p>{% endif %}
               </div>
-              <div class="col-md-6">
-                <label class="field-label">Empresa Receptora (TIN)</label>{{ form.tin_receiver }}
+
+              <!-- Empresa Receptora -->
+              <div class="col-md-6" id="wrapReceiver">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label" id="lblReceiver">Empresa Receptora (TIN)</label>
+                  {{ form.tin_receiver }}
+                </div>
+                <span id="pillReceiver" class="field-pill"></span>
+                {% if form.tin_receiver.errors %}<p class="text-danger text-xxs mt-1">{{ form.tin_receiver.errors.0 }}</p>{% endif %}
               </div>
-              <div class="col-md-6">
-                <label class="field-label">Cliente externo</label>{{ form.client }}
+
+              <!-- Cliente externo -->
+              <div class="col-md-6" id="wrapClient">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Cliente externo</label>
+                  {{ form.client }}
+                </div>
+                <span id="pillClient" class="field-pill"></span>
+                {% if form.client.errors %}<p class="text-danger text-xxs mt-1">{{ form.client.errors.0 }}</p>{% endif %}
               </div>
-              <div class="col-md-6">
-                <label class="field-label">Proveedor externo</label>{{ form.supplier }}
+
+              <!-- Proveedor externo -->
+              <div class="col-md-6" id="wrapSupplier">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Proveedor externo</label>
+                  {{ form.supplier }}
+                </div>
+                <span id="pillSupplier" class="field-pill"></span>
+                {% if form.supplier.errors %}<p class="text-danger text-xxs mt-1">{{ form.supplier.errors.0 }}</p>{% endif %}
               </div>
+
             </div>
           </div>
         </div>
 
-        <!-- CARD 2: Montos -->
+        <!-- ── CARD 3: Montos ── -->
         <div class="card mb-3">
           <div class="card-header pb-0">
             <div class="d-flex align-items-center gap-2">
               <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#2dce89,#2dcecc);display:flex;align-items:center;justify-content:center">
                 <i class="material-icons text-white" style="font-size:.9rem">attach_money</i>
               </div>
-              <h6 class="mb-0">Montos e Impuestos</h6>
+              <h6 class="mb-0">Paso 3 — Montos e Impuestos</h6>
             </div>
           </div>
           <div class="card-body pt-3">
             <div class="row g-3">
               <div class="col-md-3">
-                <label class="field-label">Moneda *</label>{{ form.currency }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Moneda *</label>
+                  {{ form.currency }}
+                </div>
+                {% if form.currency.errors %}<p class="text-danger text-xxs mt-1">{{ form.currency.errors.0 }}</p>{% endif %}
               </div>
               <div class="col-md-3">
-                <label class="field-label">Tipo de cambio</label>{{ form.exchange_rate }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Tipo de cambio</label>
+                  {{ form.exchange_rate }}
+                </div>
               </div>
               <div class="col-md-2">
-                <label class="field-label">Monto bruto *</label>{{ form.gross_amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto bruto *</label>
+                  {{ form.gross_amount }}
+                </div>
+                {% if form.gross_amount.errors %}<p class="text-danger text-xxs mt-1">{{ form.gross_amount.errors.0 }}</p>{% endif %}
               </div>
               <div class="col-md-2">
-                <label class="field-label">IGV / IVA</label>{{ form.tax_amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">IGV / IVA</label>
+                  {{ form.tax_amount }}
+                </div>
               </div>
               <div class="col-md-2">
-                <label class="field-label">Neto</label>{{ form.net_amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Neto</label>
+                  {{ form.net_amount }}
+                </div>
                 <small class="text-xxs text-secondary">Auto-calculado</small>
               </div>
             </div>
+
             <div class="section-divider">
               <h6><i class="material-icons text-sm align-middle me-1">percent</i>Retenciones y Detracciones</h6>
             </div>
@@ -142,7 +288,11 @@
                 </div>
               </div>
               <div class="col-md-3" id="colDetraction">
-                <label class="field-label">Monto detracción</label>{{ form.detraction_amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto detracción</label>
+                  {{ form.detraction_amount }}
+                </div>
+                {% if form.detraction_amount.errors %}<p class="text-danger text-xxs mt-1">{{ form.detraction_amount.errors.0 }}</p>{% endif %}
               </div>
               <div class="col-auto">
                 <div class="form-check form-switch">
@@ -151,67 +301,94 @@
                 </div>
               </div>
               <div class="col-md-3" id="colRetention">
-                <label class="field-label">Monto retención</label>{{ form.retention_amount }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto retención</label>
+                  {{ form.retention_amount }}
+                </div>
+                {% if form.retention_amount.errors %}<p class="text-danger text-xxs mt-1">{{ form.retention_amount.errors.0 }}</p>{% endif %}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- CARD 3: Fechas y Contabilidad -->
+        <!-- ── CARD 4: Fechas y clasificación ── -->
         <div class="card mb-3">
           <div class="card-header pb-0">
             <div class="d-flex align-items-center gap-2">
               <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#1171ef,#11cdef);display:flex;align-items:center;justify-content:center">
                 <i class="material-icons text-white" style="font-size:.9rem">event_note</i>
               </div>
-              <h6 class="mb-0">Fechas y Clasificación Contable</h6>
+              <h6 class="mb-0">Paso 4 — Fechas y Clasificación</h6>
             </div>
           </div>
           <div class="card-body pt-3">
             <div class="row g-3">
               <div class="col-md-3">
-                <label class="field-label">Fecha emisión</label>{{ form.issue_date }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha emisión</label>
+                  {{ form.issue_date }}
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="field-label">Fecha vencimiento</label>{{ form.due_date }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha vencimiento</label>
+                  {{ form.due_date }}
+                </div>
               </div>
               <div class="col-md-2">
-                <label class="field-label">Mes declaración</label>{{ form.declare_month }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Mes declaración</label>
+                  {{ form.declare_month }}
+                </div>
               </div>
               <div class="col-md-2">
-                <label class="field-label">Año declaración</label>{{ form.declare_year }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Año declaración</label>
+                  {{ form.declare_year }}
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="field-label">Categoría contable</label>{{ form.account_category }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Categoría contable</label>
+                  {{ form.account_category }}
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="field-label">Centro de costo</label>{{ form.cost_center }}
-              </div>
-              <div class="col-md-3">
-                <label class="field-label">Anotación</label>{{ form.annotation }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Centro de costo</label>
+                  {{ form.cost_center }}
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="field-label">Descripción corta</label>{{ form.short_description }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Descripción corta</label>
+                  {{ form.short_description }}
+                </div>
               </div>
               <div class="col-12">
-                <label class="field-label">Descripción detallada</label>{{ form.description }}
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Descripción detallada</label>
+                  {{ form.description }}
+                </div>
               </div>
             </div>
             <div class="section-divider">
               <h6><i class="material-icons text-sm align-middle me-1">attach_file</i>Archivos Adjuntos</h6>
             </div>
             <div class="row g-3">
+              <!-- PDF -->
               <div class="col-md-6">
-                <label class="field-label">PDF del comprobante</label>{{ form.pdf_file }}
+                {% include "FINANTIAL/_file_field.html" with field=form.pdf_file label="PDF del comprobante" icon="picture_as_pdf" accent="#f5365c" %}
               </div>
+              <!-- XML -->
               <div class="col-md-6">
-                <label class="field-label">XML (SUNAT / SAT)</label>{{ form.xml_file }}
+                {% include "FINANTIAL/_file_field.html" with field=form.xml_file label="XML (SUNAT / SAT)" icon="code" accent="#2dce89" %}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- CARD 4: Items / Allocations -->
+        <!-- ── CARD 5: Ítems ── -->
         <div class="card mb-3">
           <div class="card-header pb-0 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
@@ -219,7 +396,7 @@
                 <i class="material-icons text-white" style="font-size:.9rem">layers</i>
               </div>
               <div>
-                <h6 class="mb-0">Ítems cubiertos</h6>
+                <h6 class="mb-0">Paso 5 — Ítems cubiertos <span class="text-secondary text-xxs font-weight-normal">(opcional)</span></h6>
                 <p class="text-xxs text-secondary mb-0">Un comprobante puede cubrir uno o varios transformadores</p>
               </div>
             </div>
@@ -229,27 +406,53 @@
           </div>
           <div class="card-body pt-3">
             {{ allocation_formset.management_form }}
+            {% if allocation_formset.non_form_errors %}
+            <div class="alert alert-danger text-xs py-2 mb-3">
+              {% for e in allocation_formset.non_form_errors %}{{ e }}{% endfor %}
+            </div>
+            {% endif %}
             <div id="allocationContainer">
               {% for af in allocation_formset %}
-              <div class="formset-row" data-index="{{ forloop.counter0 }}">
+              <div class="fs-row {% if af.errors %}fs-error{% endif %}" data-index="{{ forloop.counter0 }}">
                 {{ af.id }}
-                <button type="button" class="btn btn-link text-danger formset-remove p-0 mb-0" style="font-size:.75rem">
-                  <i class="material-icons" style="font-size:1rem">cancel</i>
-                </button>
-                <div class="row g-3">
-                  <div class="col-md-5">
-                    <label class="field-label">Ítem (serial / transformador)</label>
-                    {{ af.item }}
-                    <span class="pending-badge" id="pb_{{ forloop.counter0 }}"></span>
-                    {% if af.item.errors %}<p class="text-danger text-xxs mt-1">{{ af.item.errors.0 }}</p>{% endif %}
+                {% if af.errors %}
+                <div class="alert alert-danger text-xxs py-1 px-2 mb-2">
+                  {% for field, errs in af.errors.items %}<strong>{{ field }}:</strong> {{ errs|join:", " }}<br>{% endfor %}
+                </div>
+                {% endif %}
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Ítem (serial / transformador)</label>
+                      {{ af.item }}
+                    </div>
                   </div>
                   <div class="col-md-3">
-                    <label class="field-label">Monto asignado</label>{{ af.allocated_amount }}
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Nivel de costo</label>
+                      {{ af.cost_level }}
+                    </div>
+                    {% if af.cost_level.errors %}<p class="text-danger text-xxs mt-1">{{ af.cost_level.errors.0 }}</p>{% endif %}
                   </div>
-                  <div class="col-md-4">
-                    <label class="field-label">Nota</label>{{ af.notes }}
+                  <div class="col-md-2">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Monto asignado</label>
+                      {{ af.allocated_amount }}
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Nota</label>
+                      {{ af.notes }}
+                    </div>
+                  </div>
+                  <div class="col-auto pb-1">
+                    <button type="button" class="btn btn-link text-danger fs-remove p-0 mb-0" title="Eliminar">
+                      <i class="material-icons" style="font-size:1.2rem">cancel</i>
+                    </button>
                   </div>
                 </div>
+                <span class="pending-badge mt-1" id="pb_{{ forloop.counter0 }}"></span>
                 {% if allocation_formset.can_delete %}<div class="d-none">{{ af.DELETE }}</div>{% endif %}
               </div>
               {% endfor %}
@@ -257,7 +460,7 @@
           </div>
         </div>
 
-        <!-- SAVE BUTTONS -->
+        <!-- BOTONES GUARDAR -->
         <div class="d-flex justify-content-end gap-2 mb-4">
           <a href="{% url 'finantial:document-list' %}" class="btn btn-outline-secondary mb-0">Cancelar</a>
           <button type="submit" class="btn bg-gradient-primary shadow mb-0">
@@ -266,154 +469,398 @@
           </button>
         </div>
 
-      </div>
+      </div><!-- /col-lg-8 -->
 
-      <!-- ══ SIDEBAR ══ -->
+      <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
       <div class="col-lg-4">
         <div class="sticky-wrap">
 
+          <!-- Estado actual solo en edición -->
           {% if action == 'update' and form.instance.pk %}
           <div class="card mb-3">
             <div class="card-body p-3">
-              <p class="text-xxs font-weight-bolder text-secondary text-uppercase mb-2">Estado actual · #{{ form.instance.id }}</p>
+              <p class="text-xxs font-weight-bolder text-secondary text-uppercase mb-2">Estado · #{{ form.instance.id }}</p>
               {% with s=form.instance.status %}
               {% if s == 'PAID' %}<span class="badge bg-gradient-success mb-2">Pagado</span>
               {% elif s == 'PARTIAL' %}<span class="badge bg-gradient-warning mb-2">Pago parcial</span>
               {% elif s == 'PENDING' %}<span class="badge bg-gradient-danger mb-2">Pendiente</span>
               {% else %}<span class="badge bg-gradient-secondary mb-2">{{ form.instance.get_status_display }}</span>{% endif %}
               {% endwith %}
-              <div class="row text-center g-0">
-                <div class="col-4 p-2 border-end">
-                  <p class="text-xxs text-secondary mb-0">Neto</p>
-                  <p class="text-xs font-weight-bold mb-0">{{ form.instance.net_amount|floatformat:2 }}</p>
-                </div>
-                <div class="col-4 p-2 border-end">
-                  <p class="text-xxs text-secondary mb-0">Pagado</p>
-                  <p class="text-xs font-weight-bold text-success mb-0">{{ form.instance.paid_amount|floatformat:2 }}</p>
-                </div>
-                <div class="col-4 p-2">
-                  <p class="text-xxs text-secondary mb-0">Pendiente</p>
-                  <p class="text-xs font-weight-bold text-danger mb-0">{{ form.instance.pending_amount|floatformat:2 }}</p>
-                </div>
+              <div class="row text-center g-0 mt-1">
+                <div class="col-4 p-2 border-end"><p class="text-xxs text-secondary mb-0">Neto</p><p class="text-xs font-weight-bold mb-0">{{ form.instance.net_amount|floatformat:2 }}</p></div>
+                <div class="col-4 p-2 border-end"><p class="text-xxs text-secondary mb-0">Pagado</p><p class="text-xs font-weight-bold text-success mb-0">{{ form.instance.paid_amount|floatformat:2 }}</p></div>
+                <div class="col-4 p-2"><p class="text-xxs text-secondary mb-0">Pendiente</p><p class="text-xs font-weight-bold text-danger mb-0">{{ form.instance.pending_amount|floatformat:2 }}</p></div>
               </div>
               {% if form.instance.net_amount > 0 %}
               {% widthratio form.instance.paid_amount form.instance.net_amount 100 as pp %}
-              <div class="progress mt-2" style="height:5px;border-radius:3px">
-                <div class="progress-bar bg-gradient-success" style="width:{{ pp }}%"></div>
-              </div>
+              <div class="progress mt-2" style="height:5px;border-radius:3px"><div class="progress-bar bg-gradient-success" style="width:{{ pp }}%"></div></div>
               {% endif %}
             </div>
           </div>
           {% endif %}
 
-          <div class="sidebar-tip">
-            <p class="text-xs font-weight-bolder text-dark mb-2"><i class="material-icons text-sm align-middle me-1 text-warning">lightbulb</i>Guía de flujos</p>
-            <div class="d-flex flex-column gap-2">
-              <div class="d-flex gap-2 align-items-start">
-                <span class="badge bg-gradient-success mt-1" style="font-size:.55rem;min-width:28px">IN</span>
-                <span class="text-xxs text-secondary"><strong>Cliente → DAV LLC</strong><br>Factura por cotización master</span>
+          <!-- Panel dinámico de reglas por flujo -->
+          <div class="card mb-3" id="rulePanel">
+            <div class="card-body p-3">
+              <!-- Estado inicial: sin flujo seleccionado -->
+              <div id="ruleDefault">
+                <p class="text-xs text-secondary mb-0"><i class="material-icons text-sm align-middle me-1">touch_app</i>Seleccione un flujo para ver qué campos son requeridos</p>
               </div>
-              <div class="d-flex gap-2 align-items-start">
-                <span class="badge bg-gradient-danger mt-1" style="font-size:.55rem;min-width:28px">OUT</span>
-                <span class="text-xxs text-secondary"><strong>Subsidiaria → Proveedor</strong><br>Factura por Work Order</span>
+              <!-- IN -->
+              <div id="ruleIN" class="d-none">
+                <p class="text-xs font-weight-bolder text-success mb-2"><i class="material-icons text-sm align-middle me-1">south</i>Reglas — INGRESO (IN)</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Emisora</span>
+                    <span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Receptora</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cliente externo</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerido</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Proveedor externo</span>
+                    <span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0"><strong>Receptora</strong> = DAV LLC (holding que cobra). <strong>Cliente</strong> = quien paga la factura.</p>
               </div>
-              <div class="d-flex gap-2 align-items-start">
-                <span class="badge bg-gradient-info mt-1" style="font-size:.55rem;min-width:28px">INT</span>
-                <span class="text-xxs text-secondary"><strong>Holding ↔ Subsidiaria</strong><br>Transferencia interna</span>
+              <!-- OUT -->
+              <div id="ruleOUT" class="d-none">
+                <p class="text-xs font-weight-bolder text-danger mb-2"><i class="material-icons text-sm align-middle me-1">north</i>Reglas — EGRESO (OUT)</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Emisora</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Receptora</span>
+                    <span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">Opcional</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cliente externo</span>
+                    <span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Proveedor externo</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerido</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0"><strong>Emisora</strong> = subsidiaria que paga. <strong>Proveedor</strong> = quien recibe el pago.</p>
+              </div>
+              <!-- INT -->
+              <div id="ruleINT" class="d-none">
+                <p class="text-xs font-weight-bolder text-info mb-2"><i class="material-icons text-sm align-middle me-1">swap_horiz</i>Reglas — INTERNO (INT)</p>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Emisora</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Empresa Receptora</span>
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.55rem">Requerida</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-1">
+                    <span class="text-xxs">Cliente externo</span>
+                    <span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-xxs">Proveedor externo</span>
+                    <span class="badge badge-sm bg-gradient-secondary" style="font-size:.55rem">No aplica</span>
+                  </div>
+                </div>
+                <hr class="horizontal dark my-2">
+                <p class="text-xxs text-secondary mb-0">Solo empresas TIN. <strong>Emisora</strong> = holding u origen, <strong>Receptora</strong> = subsidiaria destino.</p>
               </div>
             </div>
           </div>
 
-          <div class="sidebar-tip">
+          <!-- Tips estáticos -->
+          <div class="tip-card">
             <p class="text-xs font-weight-bolder text-dark mb-2"><i class="material-icons text-sm align-middle me-1 text-info">info</i>Cómo funciona</p>
-            <div class="tip-item"><i class="material-icons tip-icon">calculate</i>El monto neto se calcula automáticamente como Bruto − IGV</div>
-            <div class="tip-item"><i class="material-icons tip-icon">link</i>El vínculo con QUO/INT/WO se infiere desde el ítem seleccionado</div>
-            <div class="tip-item"><i class="material-icons tip-icon">split_screen</i>Puede cubrir varios ítems (pago split o cuotas)</div>
+            <div class="tip-item"><i class="material-icons tip-icon">calculate</i>Neto = Bruto − IGV (auto-calculado)</div>
+            <div class="tip-item"><i class="material-icons tip-icon">link</i>El vínculo QUO/INT/WO se infiere desde el ítem</div>
+            <div class="tip-item"><i class="material-icons tip-icon">split_screen</i>Un comprobante puede cubrir varios ítems</div>
             <div class="tip-item mb-0"><i class="material-icons tip-icon">refresh</i>El estado se actualiza al confirmar una transacción</div>
           </div>
 
         </div>
       </div>
-    </div>
+
+    </div><!-- /row -->
   </form>
 </div>
 {% endblock %}
 
 {% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
-// Auto-calcular neto
-function recalcNet() {
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN DE FLUJOS
+// Cada flujo define qué campo es requerido, opcional o desactivado.
+// issuer / receiver / client / supplier: 'required' | 'optional' | 'off'
+// ══════════════════════════════════════════════════════════════════════════════
+const FLOWS = {
+  IN: {
+    border:   '#2dce89',
+    btnClass: 'sel-in',
+    hint:     'Cobro: el cliente paga a DAV LLC. Llene Cliente y Empresa Receptora.',
+    issuer:   'optional',   // La empresa del cliente (puede ser TIN interno o no)
+    receiver: 'required',   // DAV LLC — quien cobra
+    client:   'required',   // el cliente externo que paga
+    supplier: 'off',
+  },
+  OUT: {
+    border:   '#f5365c',
+    btnClass: 'sel-out',
+    hint:     'Pago: la subsidiaria paga a un proveedor. Llene Empresa Emisora y Proveedor.',
+    issuer:   'required',   // La subsidiaria que paga
+    receiver: 'optional',   // Puede dejarse vacío si se usa Proveedor externo
+    client:   'off',
+    supplier: 'required',   // el proveedor externo que cobra
+  },
+  INT: {
+    border:   '#11cdef',
+    btnClass: 'sel-int',
+    hint:     'Transferencia interna. Llene Empresa Emisora y Receptora (ambas TIN).',
+    issuer:   'required',
+    receiver: 'required',
+    client:   'off',
+    supplier: 'off',
+  },
+};
+
+// Pills de estado
+const PILL_CFG = {
+  required: { cls: 'pill-required', text: '★ Requerido' },
+  optional: { cls: 'pill-optional', text: '◎ Opcional'  },
+  off:      { cls: 'pill-disabled', text: '✕ No aplica' },
+};
+
+const dirSel = document.querySelector('[name="direction"]');
+
+function setWrap(wrapId, pillId, state) {
+  const wrap = document.getElementById(wrapId);
+  const pill = document.getElementById(pillId);
+  if (!wrap) return;
+
+  const sel = wrap.querySelector('select');
+
+  if (state === 'off') {
+    wrap.classList.add('field-off');
+    if (sel) { sel.disabled = true; sel.value = ''; }
+  } else {
+    wrap.classList.remove('field-off');
+    if (sel) sel.disabled = false;
+  }
+
+  if (pill) {
+    const cfg = PILL_CFG[state];
+    pill.className = `field-pill show ${cfg.cls}`;
+    pill.textContent = cfg.text;
+  }
+}
+
+function applyFlow(flow) {
+  const cfg = FLOWS[flow];
+  if (!cfg) return;
+
+  // Actualizar select hidden
+  if (dirSel) dirSel.value = flow;
+
+  // Botones
+  document.querySelectorAll('.flow-btn').forEach(b => {
+    b.classList.remove('sel-in','sel-out','sel-int');
+    if (b.dataset.flow === flow) b.classList.add(cfg.btnClass);
+  });
+
+  // Border de la card
+  const cardDir = document.getElementById('cardDir');
+  if (cardDir) cardDir.style.borderColor = cfg.border;
+
+  // Hint
+  const hint = document.getElementById('dirHint');
+  const hintText = document.getElementById('dirHintText');
+  if (hint && hintText) { hintText.textContent = cfg.hint; hint.style.display = 'block'; }
+
+  // Aplicar estados a cada campo
+  setWrap('wrapIssuer',  'pillIssuer',   cfg.issuer);
+  setWrap('wrapReceiver','pillReceiver', cfg.receiver);
+  setWrap('wrapClient',  'pillClient',   cfg.client);
+  setWrap('wrapSupplier','pillSupplier', cfg.supplier);
+
+  // Panel de reglas
+  document.getElementById('ruleDefault')?.classList.add('d-none');
+  ['IN','OUT','INT'].forEach(f => document.getElementById(`rule${f}`)?.classList.add('d-none'));
+  document.getElementById(`rule${flow}`)?.classList.remove('d-none');
+}
+
+// Botones de flujo
+document.querySelectorAll('.flow-btn').forEach(b => {
+  b.addEventListener('click', () => applyFlow(b.dataset.flow));
+});
+
+// Inicializar con valor actual del select (útil en edición)
+const initFlow = dirSel?.value;
+if (initFlow && FLOWS[initFlow]) applyFlow(initFlow);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTO-CALCULAR NETO
+// ══════════════════════════════════════════════════════════════════════════════
+const recalcNet = () => {
   const g = parseFloat(document.querySelector('[name="gross_amount"]')?.value) || 0;
-  const t = parseFloat(document.querySelector('[name="tax_amount"]')?.value) || 0;
+  const t = parseFloat(document.querySelector('[name="tax_amount"]')?.value)   || 0;
   const n = document.querySelector('[name="net_amount"]');
   if (n) n.value = (g - t).toFixed(2);
-}
+};
 document.querySelector('[name="gross_amount"]')?.addEventListener('input', recalcNet);
 document.querySelector('[name="tax_amount"]')?.addEventListener('input', recalcNet);
 
-// Hint de dirección
-const hints = { IN:'Cobro: Cliente → DAV LLC', OUT:'Pago: Subsidiaria → Proveedor', INT:'Transferencia interna Holding ↔ Subsidiaria' };
-const dirSel = document.querySelector('[name="direction"]');
-const hint = document.getElementById('dir-hint');
-dirSel?.addEventListener('change', () => { if (hint) hint.textContent = hints[dirSel.value] || ''; });
-if (dirSel && hint) hint.textContent = hints[dirSel.value] || '';
-
-// Toggle detracción / retención
+// ══════════════════════════════════════════════════════════════════════════════
+// TOGGLE DETRACCIÓN / RETENCIÓN
+// Los inputs NO se envían disabled (problema original) — se controla solo visualmente.
+// La validación real está en el clean() del form.
+// ══════════════════════════════════════════════════════════════════════════════
 function toggleAmt(cbName, colId) {
-  const cb = document.querySelector(`[name="${cbName}"]`);
+  const cb  = document.querySelector(`[name="${cbName}"]`);
   const col = document.getElementById(colId);
   if (!cb || !col) return;
-  const upd = () => { col.style.opacity = cb.checked ? '1' : '.4'; col.querySelector('input').disabled = !cb.checked; };
-  cb.addEventListener('change', upd); upd();
+  const upd = () => { col.style.opacity = cb.checked ? '1' : '.4'; };
+  cb.addEventListener('change', upd);
+  upd();
 }
 toggleAmt('has_detraction', 'colDetraction');
-toggleAmt('has_retention', 'colRetention');
+toggleAmt('has_retention',  'colRetention');
 
-// Formset dinámico
-const container = document.getElementById('allocationContainer');
+// ══════════════════════════════════════════════════════════════════════════════
+// FORMSET DINÁMICO
+// ══════════════════════════════════════════════════════════════════════════════
+const container  = document.getElementById('allocationContainer');
 const totalForms = document.querySelector('[name="allocations-TOTAL_FORMS"]');
 
 document.getElementById('addItemBtn')?.addEventListener('click', () => {
-  const idx = parseInt(totalForms.value);
-  const first = container.querySelector('.formset-row');
+  const idx   = parseInt(totalForms.value);
+  const first = container.querySelector('.fs-row');
   if (!first) return;
   const clone = first.cloneNode(true);
   clone.dataset.index = idx;
+  clone.classList.remove('fs-error');
+  clone.querySelectorAll('.alert').forEach(el => el.remove());
   clone.querySelectorAll('[name],[id],[for]').forEach(el => {
     ['name','id','for'].forEach(a => {
       const v = el.getAttribute(a);
       if (v) el.setAttribute(a, v.replace(/-\d+-/, `-${idx}-`));
     });
-    if (['INPUT','SELECT'].includes(el.tagName)) { el.value = ''; if (el.type === 'checkbox') el.checked = false; }
+    if (['INPUT','SELECT'].includes(el.tagName)) {
+      el.value = '';
+      if (el.type === 'checkbox') el.checked = false;
+    }
   });
-  clone.querySelectorAll('.pending-badge').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+  clone.querySelectorAll('.pending-badge').forEach(el => { el.style.display='none'; el.textContent=''; });
   container.appendChild(clone);
+  initOutline(clone);
   totalForms.value = idx + 1;
   bindItem(clone);
 });
 
 container.addEventListener('click', e => {
-  const btn = e.target.closest('.formset-remove');
+  const btn = e.target.closest('.fs-remove');
   if (!btn) return;
-  const row = btn.closest('.formset-row');
+  const row = btn.closest('.fs-row');
   const del = row?.querySelector('input[name$="-DELETE"]');
-  if (del) { del.checked = true; row.style.display = 'none'; } else row?.remove();
+  if (del) { del.checked = true; row.style.opacity='.3'; row.style.pointerEvents='none'; }
+  else row?.remove();
 });
 
+function _levelDataFromResponse(d, level) {
+  const costMap = { QUO: d.unit_cost_quo, INT: d.unit_cost_int, WO: d.unit_cost_wo };
+  const dataMap = { QUO: d.quo_data,      INT: d.int_data,      WO: d.wo_data };
+  const unitCost  = costMap[level] ?? 0;
+  const levelData = dataMap[level] ?? {};
+  return {
+    unitCost,
+    allocated: levelData.allocated ?? 0,
+    pending:   levelData.pending   ?? 0,
+  };
+}
+
 function bindItem(row) {
-  const sel = row.querySelector('select[name$="-item"]');
-  if (!sel) return;
-  sel.addEventListener('change', function () {
-    const pb = row.querySelector('.pending-badge');
-    const amt = row.querySelector('input[name$="-allocated_amount"]');
-    if (!this.value) return;
-    fetch(`{% url 'finantial:api-item-pending' 0 %}`.replace('/0/', `/${this.value}/`))
-      .then(r => r.json()).then(d => {
-        if (amt) amt.value = d.pending.toFixed(2);
-        if (pb) { pb.textContent = `Costo: ${d.unit_cost.toFixed(2)} | Pend.: ${d.pending.toFixed(2)}`; pb.style.display = 'inline-block'; }
-      });
+  const itemSel  = row.querySelector('select[name$="-item"]');
+  if (!itemSel) return;
+
+  const refresh = () => {
+    const pb        = row.querySelector('.pending-badge');
+    const amt       = row.querySelector('input[name$="-allocated_amount"]');
+    const levelSel  = row.querySelector('select[name$="-cost_level"]');
+    const level     = levelSel?.value || 'QUO';
+    if (!itemSel.value) return;
+    fetch(`{% url 'finantial:api-item-pending' 0 %}`.replace('/0/', `/${itemSel.value}/`))
+      .then(r => r.json())
+      .then(d => {
+        const { unitCost, allocated, pending } = _levelDataFromResponse(d, level);
+        if (amt) amt.value = pending.toFixed(2);
+        if (pb) {
+          pb.textContent = `Costo [${level}]: ${unitCost.toFixed(2)} | Asignado: ${allocated.toFixed(2)} | Pend.: ${pending.toFixed(2)}`;
+          pb.style.display = 'inline-block';
+        }
+      }).catch(() => {});
+  };
+
+  itemSel.addEventListener('change', refresh);
+  const levelSel = row.querySelector('select[name$="-cost_level"]');
+  if (levelSel) levelSel.addEventListener('change', () => { if (itemSel.value) refresh(); });
+}
+container.querySelectorAll('.fs-row').forEach(bindItem);
+
+// ── Auto-load pending amount when arriving pre-filled from item tracking ──────
+{% if prefill_item_pk %}
+(function() {
+  const firstRow = container.querySelector('.fs-row');
+  if (!firstRow) return;
+  const itemSel = firstRow.querySelector('select[name$="-item"]');
+  if (!itemSel || !itemSel.value) return;
+  const pb  = firstRow.querySelector('.pending-badge');
+  const amt = firstRow.querySelector('input[name$="-allocated_amount"]');
+  const costLevel = '{{ prefill_cost_level }}';
+  fetch(`{% url 'finantial:api-item-pending' 0 %}`.replace('/0/', `/${itemSel.value}/`))
+    .then(r => r.json())
+    .then(d => {
+      const { unitCost, allocated, pending } = _levelDataFromResponse(d, costLevel);
+      if (amt && !amt.value) amt.value = pending.toFixed(2);
+      if (pb) {
+        pb.textContent = `Costo [${costLevel}]: ${unitCost.toFixed(2)} | Asignado: ${allocated.toFixed(2)} | Pend.: ${pending.toFixed(2)}`;
+        pb.style.display = 'inline-block';
+      }
+    }).catch(() => {});
+})();
+{% endif %}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MATERIAL OUTLINE — is-filled / focused state management
+// ══════════════════════════════════════════════════════════════════════════════
+function initOutline(root) {
+  root.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
   });
 }
-container.querySelectorAll('.formset-row').forEach(bindItem);
+initOutline(document);
 </script>
 {% endblock %}

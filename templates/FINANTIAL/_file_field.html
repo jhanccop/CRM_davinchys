@@ -1,0 +1,54 @@
+{# Partial: file upload field with current-file display + clear button #}
+{# Usage: {% include "FINANTIAL/_file_field.html" with field=form.pdf_file label="PDF" icon="picture_as_pdf" accent="#f00" %} #}
+{% with val=field.value %}
+<div class="file-field-wrap" style="border:1px solid #e9ecef;border-radius:.75rem;padding:.75rem 1rem;">
+
+  <p class="text-xxs font-weight-bolder text-uppercase mb-2" style="color:#8392ab;letter-spacing:.05em;">
+    <i class="material-icons align-middle me-1" style="font-size:.85rem;color:{{ accent|default:'#fb6340' }}">{{ icon|default:"attach_file" }}</i>
+    {{ label }}
+  </p>
+
+  {% if val %}
+  {# ── Archivo existente ── #}
+  <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:#f8f9fa;border:1px solid #e9ecef;">
+    <i class="material-icons text-sm" style="color:{{ accent|default:'#fb6340' }}">insert_drive_file</i>
+    <a href="{{ val.url }}" target="_blank" rel="noopener"
+       class="text-xs font-weight-bold text-dark text-decoration-none flex-grow-1 text-truncate"
+       style="max-width:200px;" title="{{ val.name }}">
+      {{ val.name|slice:"40:" }}{% if val.name|length > 40 %}…{% endif %}
+    </a>
+    <a href="{{ val.url }}" target="_blank" rel="noopener"
+       class="btn btn-icon btn-sm btn-outline-secondary mb-0 p-1" title="Abrir archivo">
+      <i class="material-icons" style="font-size:.85rem">open_in_new</i>
+    </a>
+  </div>
+
+  {# Checkbox de borrado #}
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <div class="form-check form-switch mb-0">
+      {{ field.field.widget.clear_checkbox_name|default:"" }}
+      <input class="form-check-input" type="checkbox"
+             name="{{ field.html_name }}-clear"
+             id="id_{{ field.html_name }}_clear">
+      <label class="form-check-label text-xs text-danger" for="id_{{ field.html_name }}_clear">
+        Eliminar archivo actual
+      </label>
+    </div>
+  </div>
+
+  <p class="text-xxs text-secondary mb-1">Reemplazar con nuevo archivo (opcional):</p>
+  {% else %}
+  <p class="text-xxs text-secondary mb-1">Seleccionar archivo:</p>
+  {% endif %}
+
+  {# Input de archivo siempre visible #}
+  <input type="file" name="{{ field.html_name }}"
+         id="{{ field.id_for_label }}"
+         class="form-control form-control-sm"
+         {% if field.field.accept %}accept="{{ field.field.accept }}"{% endif %}>
+
+  {% if field.errors %}
+  <p class="text-danger text-xxs mt-1">{{ field.errors.0 }}</p>
+  {% endif %}
+</div>
+{% endwith %}

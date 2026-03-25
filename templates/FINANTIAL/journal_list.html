@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Asientos Contables{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Contabilidad{% endblock %}
+{% block navbar_Type %}SAP FB50{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0"><i class="material-icons align-middle me-2 text-primary">receipt_long</i>Asientos Contables <small class="text-secondary text-xs fw-normal">SAP FB50</small></h5>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:journal-create' %}" class="btn btn-sm bg-gradient-primary shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">add</i> Nuevo asiento
+      </a>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <form method="GET">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Estado</p>
+            <select name="posted" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="0" {% if request.GET.posted == '0' %}selected{% endif %}>Borrador</option>
+              <option value="1" {% if request.GET.posted == '1' %}selected{% endif %}>Contabilizado</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Desde</p>
+            <input type="text" name="date_from" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_from }}" placeholder="Desde">
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Hasta</p>
+            <input type="text" name="date_to" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_to }}" placeholder="Hasta">
+          </div>
+          <div class="col-auto d-flex gap-2 align-items-end">
+            <button type="submit" class="btn btn-sm bg-gradient-dark mb-0"><i class="material-icons text-sm">search</i></button>
+            <a href="{% url 'finantial:journal-list' %}" class="btn btn-sm btn-outline-secondary mb-0"><i class="material-icons text-sm">clear</i></a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table id="datatable-main" class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">ID</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Referencia</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Fecha</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Período</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Empresa</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Moneda</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Debe</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Haber</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Balance</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Origen</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+              <th class="text-secondary text-xxs text-center">Acc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in entries %}
+            <tr>
+              <td class="ps-3"><span class="text-xxs text-secondary">AST-{{ e.id }}</span></td>
+              <td><span class="text-xs font-weight-bold">{{ e.reference }}</span></td>
+              <td><span class="text-xs">{{ e.entry_date|date:"d/m/Y" }}</span></td>
+              <td><span class="text-xs">{{ e.period_month|stringformat:"02d" }}/{{ e.period_year }}</span></td>
+              <td><span class="text-xs">{{ e.tin.tinName|default:"—" }}</span></td>
+              <td><span class="text-xs">{{ e.currency }}</span></td>
+              <td class="text-end pe-2"><span class="text-xs" style="color:#5e72e4">{{ e.total_debit|floatformat:2 }}</span></td>
+              <td class="text-end pe-2"><span class="text-xs text-success">{{ e.total_credit|floatformat:2 }}</span></td>
+              <td>
+                {% if e.is_balanced %}
+                  <span class="badge badge-sm bg-gradient-success tbl-badge">✓</span>
+                {% else %}
+                  <span class="badge badge-sm bg-gradient-danger tbl-badge">✗</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if e.source == 'PAYMENT' %}<span class="badge badge-sm bg-gradient-primary tbl-badge">Pago</span>
+                {% elif e.source == 'MANUAL' %}<span class="badge badge-sm bg-gradient-secondary tbl-badge">Manual</span>
+                {% else %}<span class="badge badge-sm bg-gradient-info tbl-badge">{{ e.get_source_display }}</span>{% endif %}
+              </td>
+              <td>
+                {% if e.is_posted %}
+                  <span class="badge badge-sm bg-gradient-success tbl-badge">Contabilizado</span>
+                {% else %}
+                  <span class="badge badge-sm bg-gradient-secondary tbl-badge">Borrador</span>
+                {% endif %}
+              </td>
+              <td class="text-center pe-3">
+                <a href="{% url 'finantial:journal-detail' e.pk %}" class="text-secondary" data-bs-toggle="tooltip" title="Ver">
+                  <i class="material-icons text-sm">visibility</i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="12" class="text-center py-5">
+              <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">receipt_long</i>
+              <p class="text-sm text-secondary mb-2">Sin asientos contables registrados</p>
+              <a href="{% url 'finantial:journal-create' %}" class="btn btn-sm bg-gradient-primary">Crear asiento manual</a>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+</script>
+{% endblock %}

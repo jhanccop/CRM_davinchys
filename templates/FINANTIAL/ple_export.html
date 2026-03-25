@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PLE SUNAT{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Tributario{% endblock %}
+{% block navbar_Type %}Exportar PLE SUNAT{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Exportación PLE SUNAT</h5>
+      <p class="text-secondary text-sm mb-0">
+        {% if is_holding %}<span class="badge bg-gradient-primary" style="font-size:.58rem">HOLDING</span>
+        {% else %}<span class="badge bg-gradient-dark" style="font-size:.58rem">{{ user_tin.tinName }}</span>{% endif %}
+        &nbsp;·&nbsp; Registro de Ventas (PLE 14) y Registro de Compras (PLE 8)
+      </p>
+    </div>
+  </div>
+
+  <!-- Selector de periodo -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header p-3">
+      <h6 class="mb-0"><i class="material-icons text-sm align-middle">date_range</i> Período de declaración</h6>
+    </div>
+    <div class="card-body p-3">
+      <form id="ple-form" method="get">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="input-group input-group-outline is-focused">
+              <label class="form-label">Año</label>
+              <select name="anio" class="form-control form-select">
+                {% for y in years %}
+                <option value="{{ y }}" {% if y == cur_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="input-group input-group-outline is-focused">
+              <label class="form-label">Mes</label>
+              <select name="mes" class="form-control form-select">
+                {% for num, name in months %}
+                <option value="{{ num }}" {% if num == cur_month %}selected{% endif %}>{{ num }} — {{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Botones de descarga -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm ple-card" onclick="downloadPLE('14')">
+        <div class="card-body p-4 text-center">
+          <div class="icon-box bg-gradient-success mx-auto mb-3" style="width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+            <i class="material-icons text-white" style="font-size:1.8rem">receipt_long</i>
+          </div>
+          <h6 class="font-weight-bold mb-1">Registro de Ventas</h6>
+          <p class="text-secondary text-sm mb-3">PLE Libro 14 — Comprobantes de ingreso (IN)</p>
+          <button type="button" onclick="downloadPLE('14')" class="btn bg-gradient-success btn-sm">
+            <i class="material-icons text-sm align-middle">download</i> Descargar PLE 14
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm ple-card" onclick="downloadPLE('8')">
+        <div class="card-body p-4 text-center">
+          <div class="icon-box bg-gradient-primary mx-auto mb-3" style="width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+            <i class="material-icons text-white" style="font-size:1.8rem">shopping_cart</i>
+          </div>
+          <h6 class="font-weight-bold mb-1">Registro de Compras</h6>
+          <p class="text-secondary text-sm mb-3">PLE Libro 8 — Comprobantes de egreso (OUT)</p>
+          <button type="button" onclick="downloadPLE('8')" class="btn bg-gradient-primary btn-sm">
+            <i class="material-icons text-sm align-middle">download</i> Descargar PLE 8
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-light border mt-4 text-xs">
+    <strong>Nota:</strong> El archivo generado sigue el formato PLE SUNAT con separador pipe (|) y encoding UTF-8.
+    Los campos opcionales (ISC, ICBPER, Otros tributos) se exportan en cero. Revisa el archivo antes de cargarlo al PLE Viewer.
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+function downloadPLE(tipo) {
+  const form = document.getElementById('ple-form');
+  const anio = form.querySelector('[name=anio]').value;
+  const mes  = form.querySelector('[name=mes]').value;
+  window.location.href = `?tipo=${tipo}&anio=${anio}&mes=${mes}`;
+}
+
+document.querySelectorAll('.input-group-outline').forEach(wrap => {
+  const el = wrap.querySelector('input,select,textarea');
+  if (el && el.value) wrap.classList.add('is-filled');
+  if (el) {
+    el.addEventListener('focus',  () => wrap.classList.add('focused'));
+    el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+    el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+    el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+  }
+});
+</script>
+{% endblock %}

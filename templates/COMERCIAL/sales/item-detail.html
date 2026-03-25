@@ -245,7 +245,7 @@
                                 <p class="fw-bold">
                                     <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}" 
                                     class="text-decoration-none">
-                                        QUO-{{ item.idTrafoQuote.id }}
+                                        {{ item.idTrafoQuote.poNumber|default:item.idTrafoQuote.id }}
                                     </a>
                                 </p>
                             </div>

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Importar Extracto{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Movimientos{% endblock %}
+{% block navbar_Type %}Importar Extracto CSV{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Importar Extracto Bancario</h5>
+      <p class="text-secondary text-sm mb-0">Carga masiva desde CSV / TXT de banco</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:movement-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle me-1">arrow_back</i> Movimientos
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- FORMULARIO -->
+    <div class="col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header p-3">
+          <h6 class="mb-0">
+            <i class="material-icons text-sm align-middle me-1">upload_file</i>
+            Configuración de importación
+          </h6>
+        </div>
+        <div class="card-body pt-2">
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <!-- Cuenta bancaria -->
+            <div class="input-group input-group-outline my-3 is-focused">
+              <label class="form-label">Cuenta bancaria <span class="req-star">*</span></label>
+              {{ form.account }}
+            </div>
+            {% if form.account.errors %}<p class="text-danger text-xxs mt-1">{{ form.account.errors.0 }}</p>{% endif %}
+
+            <!-- Archivo -->
+            <div class="input-group input-group-outline my-3 is-focused">
+              <label class="form-label">Archivo CSV / TXT <span class="req-star">*</span></label>
+              {{ form.csv_file }}
+            </div>
+            {% if form.csv_file.errors %}<p class="text-danger text-xxs mt-1">{{ form.csv_file.errors.0 }}</p>{% endif %}
+
+            <!-- Separador + Formato fecha -->
+            <div class="row g-2">
+              <div class="col-md-6">
+                <div class="input-group input-group-outline my-3 is-focused">
+                  <label class="form-label">Separador</label>
+                  {{ form.delimiter }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group input-group-outline my-3 is-focused">
+                  <label class="form-label">Formato fecha</label>
+                  {{ form.date_format }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Filas a omitir -->
+            <div class="input-group input-group-outline my-3 is-focused">
+              <label class="form-label">Filas a omitir (cabecera)</label>
+              {{ form.skip_rows }}
+            </div>
+
+            <!-- Columnas -->
+            <p class="text-xxs font-weight-bold text-secondary mt-3 mb-1">
+              <i class="material-icons text-xs align-middle">table_chart</i> Columnas (0-indexadas)
+            </p>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha</label>{{ form.date_col }}
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Descripción</label>{{ form.desc_col }}
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Monto</label>{{ form.amount_col }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Cargo (opcional)</label>{{ form.debit_col }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Abono (opcional)</label>{{ form.credit_col }}
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-light border text-xxs p-2 mt-2">
+              <strong>Tip:</strong> El monto puede ser negativo (egreso) o usa columnas separadas de cargo/abono.
+              Columnas numeradas desde 0.
+            </div>
+
+            <button type="submit" class="btn bg-gradient-primary w-100 mt-1">
+              <i class="material-icons text-sm align-middle me-1">cloud_upload</i> Importar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="col-md-7">
+      {% if created is not None %}
+      <div class="card shadow-sm mb-3">
+        <div class="card-header p-2 bg-gradient-success">
+          <span class="text-white font-weight-bold text-sm">
+            <i class="material-icons text-sm align-middle">check_circle</i>
+            {{ created|length }} movimiento{{ created|length|pluralize }} importado{{ created|length|pluralize }}
+          </span>
+        </div>
+        {% if created %}
+        <div class="table-responsive">
+          <table class="table tbl-sm mb-0">
+            <thead>
+              <tr class="text-uppercase text-secondary">
+                <th>Fecha</th><th>Descripción</th><th>Tipo</th><th class="text-end">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in created %}
+              <tr class="result-row-ok">
+                <td>{{ r.date }}</td>
+                <td>{{ r.desc|truncatechars:50 }}</td>
+                <td>
+                  {% if r.type == 'E' %}
+                  <span class="badge bg-gradient-danger" style="font-size:.6rem">Egreso</span>
+                  {% else %}
+                  <span class="badge bg-gradient-success" style="font-size:.6rem">Ingreso</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">{{ r.amount|floatformat:2 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if errors %}
+      <div class="card shadow-sm">
+        <div class="card-header p-2 bg-gradient-warning">
+          <span class="text-white font-weight-bold text-sm">
+            <i class="material-icons text-sm align-middle">warning</i>
+            {{ errors|length }} fila{{ errors|length|pluralize }} con error
+          </span>
+        </div>
+        <div class="card-body p-2">
+          {% for err in errors %}
+          <div class="alert alert-warning text-xxs p-1 mb-1 py-2">{{ err }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if created is None %}
+      <div class="card shadow-sm" style="border:2px dashed #dee2e6">
+        <div class="card-body text-center text-secondary py-5">
+          <i class="material-icons" style="font-size:2.5rem;opacity:.4">table_chart</i>
+          <p class="mt-2 text-sm mb-0">Los resultados de la importación aparecerán aquí</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+  document.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+</script>
+{% endblock %}

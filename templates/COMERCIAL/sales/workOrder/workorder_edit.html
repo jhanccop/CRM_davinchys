@@ -16,11 +16,11 @@
         Editar Orden de Trabajo {{ work_order }} 
       </h5>
       <p class="text-sm text-secondary mb-0">
-        {% if quote_master %}QUO-{{ quote_master.id }}{% endif %}
+        {% if quote_master %}{{ quote_master.poNumber|default:quote_master.id }}{% endif %}
         {% if quote_master and int_quote_ref %} &rarr; {% endif %}
-        {% if int_quote_ref %}INT-{{ int_quote_ref.id }}{% endif %}
+        {% if int_quote_ref %}{{ int_quote_ref.poNumber|default:int_quote_ref.id }}{% endif %}
         {% if quote_master or int_quote_ref %} &rarr; {% endif %}
-        WO-{{ work_order.id }} &rarr; Editar
+        {{ work_order.woNumber|default:work_order.id }} &rarr; Editar
       </p>
     </div>
     <div class="col-lg-4 col-12 d-flex ms-auto justify-content-end align-items-start mt-2 mt-lg-0">
@@ -231,13 +231,13 @@
           {% if int_quote_ref %}
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Cotizacion Interna</p>
-            <p class="text-sm font-weight-bold text-info mb-0">INT-{{ int_quote_ref.id }}</p>
+            <p class="text-sm font-weight-bold text-info mb-0">{{ int_quote_ref.poNumber|default:int_quote_ref.id }}</p>
           </div>
           {% endif %}
           {% if quote_master %}
           <div class="mb-3">
             <p class="text-xs text-secondary mb-1 text-uppercase font-weight-bolder">Quote Master</p>
-            <p class="text-sm font-weight-bold text-info mb-0">QUO-{{ quote_master.id }}</p>
+            <p class="text-sm font-weight-bold text-info mb-0">{{ quote_master.poNumber|default:quote_master.id }}</p>
           </div>
           {% endif %}
           <div class="mb-3">

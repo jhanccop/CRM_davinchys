@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Antigüedad de Cartera{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Tesorería{% endblock %}
+{% block navbar_Type %}Antigüedad de Cartera{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Antigüedad de Cartera</h5>
+      <p class="text-secondary text-sm mb-0">
+        {% if is_holding %}<span class="badge bg-gradient-primary" style="font-size:.58rem">HOLDING</span>
+        {% else %}<span class="badge bg-gradient-dark" style="font-size:.58rem">{{ user_tin.tinName }}</span>{% endif %}
+        &nbsp;·&nbsp; Al {{ today }}
+      </p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:document-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle">arrow_back</i> Volver
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI RESUMEN -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm">
+        <div class="aging-header bg-gradient-success">Por vencer</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total text-success">{{ total_not_due|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">{{ not_due|length }} comp.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm">
+        <div class="aging-header bg-gradient-warning">1 – 30 días</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total text-warning">{{ total_0_30|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">{{ b0_30|length }} comp.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm">
+        <div class="aging-header" style="background:#fb6340;">31 – 60 días</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total" style="color:#fb6340;">{{ total_31_60|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">{{ b31_60|length }} comp.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm">
+        <div class="aging-header bg-gradient-danger">61 – 90 días</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total text-danger">{{ total_61_90|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">{{ b61_90|length }} comp.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm">
+        <div class="aging-header" style="background:#f5365c;">+ 90 días</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total" style="color:#f5365c;">{{ total_90plus|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">{{ b90plus|length }} comp.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card aging-card shadow-sm border border-secondary">
+        <div class="aging-header bg-gradient-dark">TOTAL</div>
+        <div class="card-body p-2 text-center">
+          <div class="aging-total text-dark">{{ grand_total|floatformat:2 }}</div>
+          <div class="text-secondary text-xs">cartera pendiente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección: Por vencer -->
+  {% if not_due %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 d-flex justify-content-between align-items-center bg-gradient-success" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#sect-pv">
+      <span class="text-white font-weight-bold text-sm">Por vencer</span>
+      <span class="badge bg-white text-success">{{ not_due|length }} · {{ total_not_due|floatformat:2 }}</span>
+    </div>
+    <div class="collapse show" id="sect-pv">
+      <div class="table-responsive">
+        <table class="table tbl-sm mb-0">
+          <thead><tr class="text-uppercase text-secondary">
+            <th>Comprobante</th><th>Tipo</th><th>Contraparte</th>
+            <th>Emisión</th><th>Venc.</th><th class="text-end">Pendiente</th>
+          </tr></thead>
+          <tbody>
+            {% for doc in not_due %}
+            <tr>
+              <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+              <td>{{ doc.get_doc_type_display }}</td>
+              <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+              <td>{{ doc.issue_date|default:"—" }}</td>
+              <td>{{ doc.due_date|default:"—" }}</td>
+              <td class="text-end text-success font-weight-bold">{{ doc.pending_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Sección: 1-30 días -->
+  {% if b0_30 %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 d-flex justify-content-between align-items-center bg-gradient-warning" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#sect-30">
+      <span class="text-white font-weight-bold text-sm">1 – 30 días vencido</span>
+      <span class="badge bg-white text-warning">{{ b0_30|length }} · {{ total_0_30|floatformat:2 }}</span>
+    </div>
+    <div class="collapse show" id="sect-30">
+      <div class="table-responsive">
+        <table class="table tbl-sm mb-0">
+          <thead><tr class="text-uppercase text-secondary"><th>Comprobante</th><th>Tipo</th><th>Contraparte</th><th>Emisión</th><th>Venc.</th><th>Días</th><th class="text-end">Pendiente</th></tr></thead>
+          <tbody>
+            {% for doc in b0_30 %}
+            <tr>
+              <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+              <td>{{ doc.get_doc_type_display }}</td>
+              <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+              <td>{{ doc.issue_date|default:"—" }}</td>
+              <td class="text-warning">{{ doc.due_date|default:"—" }}</td>
+              <td class="text-warning font-weight-bold">{{ today|timeuntil:doc.due_date }}</td>
+              <td class="text-end text-warning font-weight-bold">{{ doc.pending_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Sección: 31-60 días -->
+  {% if b31_60 %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 d-flex justify-content-between align-items-center" style="background:#fb6340;cursor:pointer" data-bs-toggle="collapse" data-bs-target="#sect-60">
+      <span class="text-white font-weight-bold text-sm">31 – 60 días vencido</span>
+      <span class="badge bg-white" style="color:#fb6340;">{{ b31_60|length }} · {{ total_31_60|floatformat:2 }}</span>
+    </div>
+    <div class="collapse" id="sect-60">
+      <div class="table-responsive">
+        <table class="table tbl-sm mb-0">
+          <thead><tr class="text-uppercase text-secondary"><th>Comprobante</th><th>Tipo</th><th>Contraparte</th><th>Emisión</th><th>Venc.</th><th class="text-end">Pendiente</th></tr></thead>
+          <tbody>
+            {% for doc in b31_60 %}
+            <tr>
+              <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+              <td>{{ doc.get_doc_type_display }}</td>
+              <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+              <td>{{ doc.issue_date|default:"—" }}</td>
+              <td style="color:#fb6340;" class="font-weight-bold">{{ doc.due_date }}</td>
+              <td class="text-end font-weight-bold" style="color:#fb6340;">{{ doc.pending_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Sección: 61-90 días -->
+  {% if b61_90 %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 d-flex justify-content-between align-items-center bg-gradient-danger" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#sect-90">
+      <span class="text-white font-weight-bold text-sm">61 – 90 días vencido</span>
+      <span class="badge bg-white text-danger">{{ b61_90|length }} · {{ total_61_90|floatformat:2 }}</span>
+    </div>
+    <div class="collapse" id="sect-90">
+      <div class="table-responsive">
+        <table class="table tbl-sm mb-0">
+          <thead><tr class="text-uppercase text-secondary"><th>Comprobante</th><th>Tipo</th><th>Contraparte</th><th>Emisión</th><th>Venc.</th><th class="text-end">Pendiente</th></tr></thead>
+          <tbody>
+            {% for doc in b61_90 %}
+            <tr>
+              <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+              <td>{{ doc.get_doc_type_display }}</td>
+              <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+              <td>{{ doc.issue_date|default:"—" }}</td>
+              <td class="text-danger font-weight-bold">{{ doc.due_date }}</td>
+              <td class="text-end text-danger font-weight-bold">{{ doc.pending_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Sección: +90 días -->
+  {% if b90plus %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 d-flex justify-content-between align-items-center" style="background:#f5365c;cursor:pointer" data-bs-toggle="collapse" data-bs-target="#sect-90plus">
+      <span class="text-white font-weight-bold text-sm">Más de 90 días vencido — CRÍTICO</span>
+      <span class="badge bg-white text-danger">{{ b90plus|length }} · {{ total_90plus|floatformat:2 }}</span>
+    </div>
+    <div class="collapse show" id="sect-90plus">
+      <div class="table-responsive">
+        <table class="table tbl-sm mb-0">
+          <thead><tr class="text-uppercase text-secondary"><th>Comprobante</th><th>Tipo</th><th>Contraparte</th><th>Emisión</th><th>Venc.</th><th class="text-end">Pendiente</th></tr></thead>
+          <tbody>
+            {% for doc in b90plus %}
+            <tr class="table-danger">
+              <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+              <td>{{ doc.get_doc_type_display }}</td>
+              <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+              <td>{{ doc.issue_date|default:"—" }}</td>
+              <td class="text-danger font-weight-bold">{{ doc.due_date }}</td>
+              <td class="text-end text-danger font-weight-bold">{{ doc.pending_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if no_date %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header p-2 bg-gradient-secondary">
+      <span class="text-white font-weight-bold text-sm">Sin fecha de vencimiento</span>
+      <span class="badge bg-white text-secondary ms-2">{{ no_date|length }} · {{ total_no_date|floatformat:2 }}</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table tbl-sm mb-0">
+        <thead><tr class="text-uppercase text-secondary"><th>Comprobante</th><th>Tipo</th><th>Contraparte</th><th>Emisión</th><th class="text-end">Pendiente</th></tr></thead>
+        <tbody>
+          {% for doc in no_date %}
+          <tr>
+            <td><a class="doc-link" href="{% url 'finantial:document-detail' doc.pk %}">{{ doc.doc_number|default:"—" }}</a></td>
+            <td>{{ doc.get_doc_type_display }}</td>
+            <td>{{ doc.client|default:doc.supplier|default:doc.tin_issuer|default:"—" }}</td>
+            <td>{{ doc.issue_date|default:"—" }}</td>
+            <td class="text-end">{{ doc.pending_amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not not_due and not b0_30 and not b31_60 and not b61_90 and not b90plus and not no_date %}
+  <div class="card shadow-sm"><div class="card-body text-center text-success py-5">
+    <i class="material-icons" style="font-size:3rem">check_circle</i>
+    <h6 class="mt-2">Cartera al día — no hay comprobantes pendientes</h6>
+  </div></div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -8,16 +8,16 @@ No importar directamente desde models.py.
 """
 
 import re
-from decimal import Decimal
 
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 
+from applications.COMERCIAL.stakeholders.models import bankAccountsClient
+
 from .models import (
     BankMovements,
     Conciliation,
-    FinancialDocuments,
-    bankAccountsClient,
+    PaymentTransactionLine,
 )
 
 
@@ -76,10 +76,11 @@ def update_after_conciliation(sender, instance, **kwargs):
     if instance.status:
         return
 
-    if instance.type == Conciliation.DOC and instance.idDoc_id:
-        doc     = FinancialDocuments.objects.filter(id=instance.idDoc_id)
-        new_amt = Conciliation.objects.SumaMontosConciliadosPorDocumentos(instance.idDoc_id)
-        doc.update(amountReconcilied=new_amt.get('sum') or 0)
+    if instance.type == Conciliation.DOC and instance.payment_document_id:
+        try:
+            instance.payment_document.recalculate_paid()
+        except Exception:
+            pass
 
     elif instance.type == Conciliation.MOV and instance.idMovArrival_id:
         # Recalcular movimiento destino
@@ -120,11 +121,9 @@ def update_after_delete_conciliation(sender, instance, **kwargs):
     except Exception:
         pass
 
-    if instance.type == Conciliation.DOC and instance.idDoc_id:
+    if instance.type == Conciliation.DOC and instance.payment_document_id:
         try:
-            doc     = FinancialDocuments.objects.filter(id=instance.idDoc_id)
-            new_amt = Conciliation.objects.SumaMontosConciliadosPorDocumentos(instance.idDoc_id)
-            doc.update(amountReconcilied=new_amt.get('sum') or Decimal('0'))
+            instance.payment_document.recalculate_paid()
         except Exception:
             pass
 
@@ -133,3 +132,23 @@ def update_after_delete_conciliation(sender, instance, **kwargs):
             instance.idMovArrival.recalculate_reconciled()
         except Exception:
             pass
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PaymentTransactionLine — post_save / post_delete
+# Garantiza que pending_amount del comprobante siempre esté sincronizado.
+# ─────────────────────────────────────────────────────────────────────────────
+@receiver(post_save, sender=PaymentTransactionLine)
+def sync_document_on_line_save(sender, instance, **kwargs):
+    try:
+        instance.document.recalculate_paid()
+    except Exception:
+        pass
+
+
+@receiver(post_delete, sender=PaymentTransactionLine)
+def sync_document_on_line_delete(sender, instance, **kwargs):
+    try:
+        instance.document.recalculate_paid()
+    except Exception:
+        pass

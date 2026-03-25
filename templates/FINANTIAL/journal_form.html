@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Contabilidad{% endblock %}
+{% block navbar_Type %}Nuevo Asiento{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">
+        <i class="material-icons align-middle me-2 text-primary">receipt_long</i>{{ title }}
+      </h5>
+      <p class="text-secondary text-sm mb-0">Asiento manual — cada asiento debe tener Debe = Haber</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'finantial:journal-list' %}" class="btn btn-sm btn-outline-secondary mb-0">
+        <i class="material-icons text-sm align-middle me-1">arrow_back</i> Volver
+      </a>
+    </div>
+  </div>
+
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show text-sm py-2 mb-3">
+    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger text-xs py-2 mb-3">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row g-3">
+      <div class="col-lg-8">
+
+        <!-- Cabecera del asiento -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-header pb-0">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#5e72e4,#825ee4);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">receipt_long</i>
+              </div>
+              <h6 class="mb-0">Cabecera del Asiento</h6>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-2">
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Referencia <span class="req-star">*</span></label>
+                  {{ form.reference }}
+                </div>
+                {% if form.reference.errors %}<p class="text-danger text-xxs mt-1">{{ form.reference.errors.0 }}</p>{% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Fecha del asiento <span class="req-star">*</span></label>
+                  {{ form.entry_date }}
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Moneda <span class="req-star">*</span></label>
+                  {{ form.currency }}
+                </div>
+              </div>
+
+              <div class="col-md-2">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Año <span class="req-star">*</span></label>
+                  {{ form.period_year }}
+                </div>
+              </div>
+
+              <div class="col-md-2">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Mes <span class="req-star">*</span></label>
+                  {{ form.period_month }}
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Empresa <span class="req-star">*</span></label>
+                  {{ form.tin }}
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Centro de costos</label>
+                  {{ form.cost_center }}
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="input-group input-group-outline is-focused">
+                  <label class="form-label">Descripción</label>
+                  {{ form.description }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Partidas (líneas) -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(195deg,#1171ef,#11cdef);display:flex;align-items:center;justify-content:center">
+                <i class="material-icons text-white" style="font-size:.9rem">table_rows</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Partidas <small class="text-secondary text-xxs font-weight-normal">Debe = Haber</small></h6>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm bg-gradient-info shadow mb-0" id="addLineBtn">
+              <i class="material-icons text-sm align-middle me-1">add</i> Agregar línea
+            </button>
+          </div>
+          <div class="card-body">
+            {{ line_formset.management_form }}
+            <div id="lineContainer">
+              {% for lf in line_formset %}
+              <div class="fs-row" data-index="{{ forloop.counter0 }}">
+                {{ lf.id }}
+                <button type="button" class="btn btn-link text-danger fs-remove p-0 mb-0">
+                  <i class="material-icons" style="font-size:1rem">cancel</i>
+                </button>
+                <div class="row g-2">
+
+                  <div class="col-md-4">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Cuenta contable</label>
+                      {{ lf.account }}
+                    </div>
+                    {% if lf.account.errors %}<p class="text-danger text-xxs mt-1">{{ lf.account.errors.0 }}</p>{% endif %}
+                  </div>
+
+                  <div class="col-md-3 debit-col">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label" style="color:#5e72e4">Debe</label>
+                      {{ lf.debit }}
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 credit-col">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label" style="color:#2dce89">Haber</label>
+                      {{ lf.credit }}
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">C. Costos</label>
+                      {{ lf.cost_center }}
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Descripción</label>
+                      {{ lf.description }}
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="input-group input-group-outline is-focused">
+                      <label class="form-label">Impuesto</label>
+                      {{ lf.tax_code }}
+                    </div>
+                  </div>
+
+                </div>
+                {% if line_formset.can_delete %}<div class="d-none">{{ lf.DELETE }}</div>{% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mb-4">
+          <a href="{% url 'finantial:journal-list' %}" class="btn btn-outline-secondary mb-0">Cancelar</a>
+          <button type="submit" class="btn bg-gradient-primary shadow mb-0">
+            <i class="material-icons text-sm align-middle me-1">save</i> Guardar asiento
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Sidebar balance -->
+      <div class="col-lg-4">
+        <div class="sticky-wrap">
+          <div class="card shadow-sm mb-3">
+            <div class="card-body p-3">
+              <p class="text-xs font-weight-bolder mb-2">
+                <i class="material-icons text-sm align-middle me-1 text-primary">balance</i>Balance en tiempo real
+              </p>
+              <div class="d-flex justify-content-between mb-1">
+                <span class="text-xxs text-secondary">Total Debe</span>
+                <span class="text-xs font-weight-bold" id="totalDebit" style="color:#5e72e4">0.00</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-xxs text-secondary">Total Haber</span>
+                <span class="text-xs font-weight-bold text-success" id="totalCredit">0.00</span>
+              </div>
+              <div class="balance-bar">
+                <div class="balance-fill bg-gradient-success" id="balanceFill" style="width:0%"></div>
+              </div>
+              <p class="text-xxs mt-2 mb-0" id="balanceMsg" style="color:#8392ab">Agregue partidas para calcular</p>
+            </div>
+          </div>
+          <div class="card" style="border:1px solid #e9ecef;border-radius:.75rem">
+            <div class="card-body p-3">
+              <p class="text-xs font-weight-bolder mb-2">
+                <i class="material-icons text-sm align-middle me-1 text-info">info</i>Reglas SAP
+              </p>
+              <p class="text-xxs text-secondary mb-1">Cada línea tiene <strong>solo Debe o solo Haber</strong> — nunca ambos.</p>
+              <p class="text-xxs text-secondary mb-1">La suma de Debe debe igualar la suma de Haber.</p>
+              <p class="text-xxs text-secondary mb-0">Al contabilizar el asiento queda <strong>inmutable</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+</script>
+<script>
+/* ── is-filled al cargar ─────────────────────────────────────────── */
+function initOutline(root) {
+  root.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+}
+initOutline(document);
+
+/* ── Balance en tiempo real ──────────────────────────────────────── */
+const container = document.getElementById('lineContainer');
+const totalForms = document.querySelector('[name$="TOTAL_FORMS"]');
+
+function recalc() {
+  let debit = 0, credit = 0;
+  container.querySelectorAll('.fs-row:not([style*="none"])').forEach(row => {
+    debit  += parseFloat(row.querySelector('[name$="-debit"]')?.value)  || 0;
+    credit += parseFloat(row.querySelector('[name$="-credit"]')?.value) || 0;
+  });
+  document.getElementById('totalDebit').textContent  = debit.toFixed(2);
+  document.getElementById('totalCredit').textContent = credit.toFixed(2);
+  const msg  = document.getElementById('balanceMsg');
+  const fill = document.getElementById('balanceFill');
+  if (debit === 0 && credit === 0) {
+    msg.textContent = 'Agregue partidas'; fill.style.width = '0%';
+    fill.className = 'balance-fill bg-gradient-secondary'; return;
+  }
+  const max = Math.max(debit, credit);
+  if (Math.abs(debit - credit) < 0.005) {
+    msg.textContent = '✓ Balanceado'; msg.style.color = '#2dce89';
+    fill.style.width = '100%'; fill.className = 'balance-fill bg-gradient-success';
+  } else {
+    msg.textContent = `Diferencia: ${(debit - credit).toFixed(2)}`; msg.style.color = '#f5365c';
+    fill.style.width = (Math.min(debit, credit) / max * 100).toFixed(1) + '%';
+    fill.className = 'balance-fill bg-gradient-danger';
+  }
+}
+
+container.addEventListener('input', recalc);
+
+document.getElementById('addLineBtn')?.addEventListener('click', () => {
+  const idx   = parseInt(totalForms.value);
+  const first = container.querySelector('.fs-row');
+  if (!first) return;
+  const clone = first.cloneNode(true);
+  clone.dataset.index = idx;
+  clone.querySelectorAll('[name],[id],[for]').forEach(el => {
+    ['name','id','for'].forEach(a => {
+      const v = el.getAttribute(a);
+      if (v) el.setAttribute(a, v.replace(/-\d+-/, `-${idx}-`));
+    });
+    if (['INPUT','SELECT'].includes(el.tagName)) { el.value=''; if (el.type==='checkbox') el.checked=false; }
+  });
+  container.appendChild(clone);
+  totalForms.value = idx + 1;
+  initOutline(clone);
+  recalc();
+});
+
+container.addEventListener('click', e => {
+  const btn = e.target.closest('.fs-remove');
+  if (!btn) return;
+  const row = btn.closest('.fs-row');
+  const del = row?.querySelector('input[name$="-DELETE"]');
+  if (del) { del.checked = true; row.style.display = 'none'; } else row?.remove();
+  recalc();
+});
+
+recalc();
+</script>
+{% endblock %}

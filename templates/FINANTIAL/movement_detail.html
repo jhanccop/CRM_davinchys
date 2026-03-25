@@ -4,15 +4,7 @@
 {% block navbar_main %}Finanzas{% endblock %}
 {% block navbar_appName %}Banco{% endblock %}
 {% block navbar_Type %}Movimiento{% endblock %}
-{% block extra_css %}
-<style>
-  .info-label { font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8392ab;margin-bottom:.2rem; }
-  .info-value { font-size:.82rem;font-weight:600;color:#344767;margin-bottom:0; }
-  .sticky-side { position:sticky;top:1.5rem; }
-  .conc-row { border-bottom:1px solid #f1f2f4;padding:.5rem .75rem; }
-  .conc-row:last-child { border-bottom:none; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 {% block panel-content %}
 <div class="container-fluid py-4">
   <div class="row align-items-center mb-3">
@@ -52,6 +44,12 @@
             <div class="col-sm-4"><p class="info-label">Tipo</p><p class="info-value">{{ movement.movementType|default:"—" }}</p></div>
             <div class="col-sm-4"><p class="info-label">Nro. Operación</p><p class="info-value">{{ movement.opNumber|default:"—" }}</p></div>
             <div class="col-sm-4"><p class="info-label">Origen / Destino</p><p class="info-value">{{ movement.originDestination|default:"—" }}</p></div>
+            {% if movement.cost_center %}
+            <div class="col-sm-4">
+              <p class="info-label">Centro de costos <small class="text-secondary font-weight-normal">KS01</small></p>
+              <p class="info-value">{{ movement.cost_center.code }} — {{ movement.cost_center.name }}</p>
+            </div>
+            {% endif %}
             {% if movement.justification %}
             <div class="col-12"><p class="info-label">Justificación</p><p class="info-value text-secondary">{{ movement.justification }}</p></div>
             {% endif %}

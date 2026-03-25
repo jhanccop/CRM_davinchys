@@ -1,4 +1,5 @@
 from django.db import models
+from model_utils.models import TimeStampedModel
 
 class supplierContact(models.Model):
     """
@@ -230,11 +231,11 @@ class client(models.Model):
     def __str__(self):
         return f"{self.numberIdClient} - {self.tradeName}"
 
-class bankAccountsClient(models.Model):
-    """
-        Contacto de compañia cliente
-    """
-     # Bancos
+class bankAccountsClient(TimeStampedModel):
+    idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True,blank=True, related_name='bank_accounts')
+    account  = models.CharField('Número de cuenta', max_length=30)
+    accountCCI = models.CharField('Nro CCI',blank = True, null=True)
+
     BCP = '0'
     BBVA = '1'
     INTERBANK = '2'
@@ -271,7 +272,6 @@ class bankAccountsClient(models.Model):
         blank=True
     )
 
-    # MONEDA
     SOLES = '0'
     DOLARES = '1'
     EUROS = '2'
@@ -289,43 +289,11 @@ class bankAccountsClient(models.Model):
         null=True,
         blank=True
     )
-
-    # TIPO DE CUENTA
-    AHORROS = '0'
-    CORRIENTE = '1'
-    SUELDO = '2'
-    AHORROSJSAT = '3'
-    AHORROSDAV = '4'
-
-    TYPE_ACCOUNT_CHOISES = [
-        (AHORROS, "Ahorros"),
-        (CORRIENTE, "Corriente"),
-        (SUELDO, "Sueldo"),
-        (AHORROSJSAT, "Ahorros JSAT"),
-        (AHORROSDAV, "Ahorros DAVINCHY"),
-    ]
-
-    typeAccount = models.CharField(
-        'Tipo de cuenta',
-        max_length=1, 
-        choices = TYPE_ACCOUNT_CHOISES,
-        null=True,
-        blank=True
-    )
-
-    idClient = models.ForeignKey(client, on_delete=models.CASCADE, null=True, blank=True, related_name="CuentaBancariaCliente")
     
-    account = models.CharField('Nro Cuenta',blank = True, null=True)
-    accountCCI = models.CharField('Nro CCI',blank = True, null=True)
-
-    def get_short_name(self):
-        return self.bankName
-    
-    def get_full_name(self):
-        return self.account
-    
-    def __str__(self):
-        return f"[{self.idClient}] {self.get_bankName_display()} {self.get_typeCurrency_display()} {self.account}"
+    class Meta:
+        verbose_name        = 'Cuenta bancaria de cliente'
+        verbose_name_plural = 'Cuentas bancarias de clientes'
+    def __str__(self): return f"{self.idClient} | {self.account}"
 
 class bankAccountsSupplier(models.Model):
     """
@@ -410,7 +378,7 @@ class bankAccountsSupplier(models.Model):
         blank=True
     )
 
-    idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True, related_name="CuentaBancariaCliente")
+    idSupplier = models.ForeignKey(supplier, on_delete=models.CASCADE, null=True, blank=True, related_name="CuentaBancariaProveedor")
     
     account = models.CharField('Nro Cuenta',blank = True, null=True)
     accountCCI = models.CharField('Nro CCI',blank = True, null=True)

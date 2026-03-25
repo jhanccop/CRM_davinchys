@@ -636,7 +636,7 @@ class Items(TimeStampedModel):
     )
 
     unitCostWO = models.DecimalField(
-        'Costo unitario interno', 
+        'Costo unitario WO', 
         max_digits=10, 
         decimal_places=2,
         blank=True,

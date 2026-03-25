@@ -592,6 +592,8 @@ class TrafoQuoteListView(ComercialFinanzasMixin, ListView):
                 start = date.today() - timedelta(days=90)
                 end = date.today()
 
+        q = self.request.GET.get('q', '').strip()
+
         # Base queryset
         qs = quotes.objects.select_related(
             'idClient', 'idTinReceiving'
@@ -607,6 +609,13 @@ class TrafoQuoteListView(ComercialFinanzasMixin, ListView):
         ).filter(
             dateOrder__range=[start, end]
         ).order_by('-dateOrder', '-id')
+
+        if q:
+            qs = qs.filter(
+                Q(idClient__tradeName__icontains=q) |
+                Q(poNumber__icontains=q) |
+                Q(id__icontains=q)
+            )
 
         # Filtrar por tipo de compania
         if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
@@ -653,6 +662,7 @@ class TrafoQuoteListView(ComercialFinanzasMixin, ListView):
             'is_holding': is_holding,
             'company_tin': company_tin,
             'total_quotes': qs.count() if hasattr(qs, 'count') else len(qs),
+            'q': self.request.GET.get('q', ''),
         })
         return context
 
@@ -895,6 +905,8 @@ class IntQuoteListView(ComercialFinanzasMixin, ListView):
                 start = date.today() - timedelta(days=90)
                 end = date.today()
 
+        q = self.request.GET.get('q', '').strip()
+
         qs = IntQuotes.objects.select_related(
             'idClient', 'idTinReceiving'
         ).prefetch_related(
@@ -907,6 +919,13 @@ class IntQuoteListView(ComercialFinanzasMixin, ListView):
         ).filter(
             dateOrder__range=[start, end]
         ).order_by('-dateOrder', '-id')
+
+        if q:
+            qs = qs.filter(
+                Q(idClient__tradeName__icontains=q) |
+                Q(poNumber__icontains=q) |
+                Q(id__icontains=q)
+            )
 
         if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
             qs = qs.filter(idTinReceiving=company_tin)
@@ -942,6 +961,7 @@ class IntQuoteListView(ComercialFinanzasMixin, ListView):
             'intervalDate': interval_date,
             'is_holding': is_holding,
             'company_tin': company_tin,
+            'q': self.request.GET.get('q', ''),
         })
         return context
 
@@ -1318,6 +1338,8 @@ class WorkOrderListView(ComercialFinanzasMixin, ListView):
                 start = date.today() - timedelta(days=90)
                 end = date.today()
 
+        q = self.request.GET.get('q', '').strip()
+
         qs = WorkOrder.objects.select_related(
             'idSupplier', 'idTinReceiving'
         ).prefetch_related(
@@ -1330,6 +1352,13 @@ class WorkOrderListView(ComercialFinanzasMixin, ListView):
         ).filter(
             dateOrder__range=[start, end]
         ).order_by('-dateOrder', '-id')
+
+        if q:
+            qs = qs.filter(
+                Q(idSupplier__tradeName__icontains=q) |
+                Q(woNumber__icontains=q) |
+                Q(id__icontains=q)
+            )
 
         if company_tin and company_tin.company_type == Tin.SUBSIDIARY:
             qs = qs.filter(idTinReceiving=company_tin)
@@ -1360,9 +1389,10 @@ class WorkOrderListView(ComercialFinanzasMixin, ListView):
             'intervalDate': interval_date,
             'is_holding': is_holding,
             'company_tin': company_tin,
+            'q': self.request.GET.get('q', ''),
         })
         return context
-    
+
 class IntQuoteWOView(ComercialFinanzasMixin,DetailView):
     """
     Vista Kanban para gestionar la asignación de items de una IntQuote

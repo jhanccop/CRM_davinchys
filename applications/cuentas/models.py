@@ -40,126 +40,38 @@ class Tin(TimeStampedModel):
     def __str__(self):
         return f"{self.tin} / {self.tinName}"
 
-class Account0(TimeStampedModel):
-    """
-        Cuentas Bancarias
-    """
-
-    CURRENCY_CHOISES = [
-            ("0", "PEN"),
-            ("1", "USD")
-        ]
-    
-    accountName = models.CharField(
-        'Nombre de cuenta',
-        max_length=50,
-    )
-
-    nickName = models.CharField(
-        'Nombre corto',
-        max_length=10,
-        blank=True,
-        null=True
-    )
-    
-    accountNumber = models.CharField(
-        'Numero de cuenta',
-        max_length=30,
-        unique=True
-    )
-
-    bankName = models.CharField(
-        'Nombre de banco',
-        max_length=50,
-    )
-
-    idTin = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True)
-
-    initialAccount = models.DecimalField(
-        'Monto inicial',
-        max_digits=10, 
-        decimal_places=2,
-        blank=True,
-        null=True
-    )
-
-    initalDate = models.DateTimeField(
-        'Fecha inicial',
-    )
-
-    currency = models.CharField(
-        'Tipo de moneda',
-        max_length=1, 
-        choices=CURRENCY_CHOISES, 
-        blank=True
-    )
-
-    description = models.TextField(
-        'Descripcion',
-        blank=True,
-    )
-
-    state = models.BooleanField(
-        'Estado',
-        default=True
-    )
-
-    cajaChica = models.BooleanField(
-        'Caja Chica',
-        default=False,
-        blank=True,
-        null=True
-    )
-
-    objects = AccountManager()
-
-    class Meta:
-        verbose_name = 'Cuenta'
-        verbose_name_plural = 'Cuentas bancarias'
-
-    def __str__(self):
-        return f"[{self.nickName}] {self.accountNumber}"
-    
-
 class Account(TimeStampedModel):
-    """Cuenta bancaria ligada a un Tin (empresa)."""
 
     CURRENCY_CHOICES = [
             ("0", "PEN"),
-            ("1", "USD")
+            ("1", "USD"),
+            ("2", "EUR")
         ]
-
+    
     accountName   = models.CharField('Nombre de cuenta', max_length=50)
     nickName      = models.CharField('Nombre corto', max_length=10, blank=True, null=True)
     accountNumber = models.CharField('Número de cuenta', max_length=30, unique=True)
     bankName      = models.CharField('Banco', max_length=50)
-    idTin         = models.ForeignKey(
-        Tin, on_delete=models.CASCADE,
-        null=True, blank=True,
-        related_name='accounts',
-        verbose_name='Empresa'
-    )
-    initialAccount = models.DecimalField('Saldo inicial', max_digits=14, decimal_places=2, blank=True, null=True)
-    initalDate     = models.DateTimeField('Fecha inicial')
-    currency       = models.CharField('Moneda', max_length=1, choices=CURRENCY_CHOICES, blank=True)
-    description    = models.TextField('Descripción', blank=True)
-    state          = models.BooleanField('Activo', default=True)
-    cajaChica      = models.BooleanField('Caja chica', default=False, blank=True, null=True)
-
+    idTin         = models.ForeignKey(Tin, on_delete=models.CASCADE, null=True, blank=True, related_name='accounts', verbose_name='Empresa')
+    initialAccount= models.DecimalField('Saldo inicial', max_digits=14, decimal_places=2, blank=True, null=True)
+    initalDate    = models.DateTimeField('Fecha inicial')
+    currency      = models.CharField('Moneda', max_length=1, choices=CURRENCY_CHOICES, blank=True)
+    description   = models.TextField('Descripción', blank=True)
+    state         = models.BooleanField('Activo', default=True)
+    cajaChica     = models.BooleanField('Caja chica', default=False, blank=True, null=True)
     objects = AccountManager()
-
+ 
     class Meta:
         verbose_name        = 'Cuenta bancaria'
         verbose_name_plural = 'Cuentas bancarias'
         ordering            = ['idTin__tinName', 'accountName']
-
+ 
     def __str__(self):
         return f"[{self.nickName}] {self.accountNumber}"
-
+ 
     @property
     def currency_label(self):
         return dict(CURRENCY_CHOICES).get(self.currency, self.currency)
-
 
     
 class ManualAccount(TimeStampedModel):

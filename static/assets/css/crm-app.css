@@ -1,0 +1,534 @@
+/* ==========================================================================
+   CRM Davinchys — Estilos personalizados de aplicación
+   Consolidado desde templates FINANTIAL, COMERCIAL y demás módulos.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TIPOGRAFÍA / ETIQUETAS
+   -------------------------------------------------------------------------- */
+.filter-label,
+.info-label,
+.field-label {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #8392ab;
+  margin-bottom: .3rem;
+}
+
+.info-value {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #344767;
+  margin-bottom: 0;
+}
+
+.filter-label .material-icons {
+  font-size: .85rem;
+  vertical-align: middle;
+}
+
+.req-star {
+  color: #e91e63;
+  font-size: .7rem;
+  margin-left: 2px;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. TABLAS
+   -------------------------------------------------------------------------- */
+.tbl-sm td,
+.tbl-sm th {
+  font-size: .74rem;
+  padding: .45rem .75rem;
+  vertical-align: middle;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: rgba(0, 0, 0, .025);
+}
+
+.table-actions a {
+  color: #8392ab;
+  transition: color .15s;
+}
+
+.table-actions a:hover {
+  color: #344767;
+}
+
+.tbl-badge {
+  font-size: .58rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+
+.badge-order {
+  font-size: .6rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.doc-link {
+  color: #344767;
+  text-decoration: none;
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. INDICADORES / BADGES DE ESTADO
+   -------------------------------------------------------------------------- */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.type-pill,
+.status-pill {
+  font-size: .6rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+/* Niveles de costo — seguimiento de ítems */
+.lvl-quo { background: #e8f5e9; color: #2e7d32; border-radius: 5px; padding: 2px 8px; font-size: .6rem; font-weight: 700; }
+.lvl-int { background: #e3f2fd; color: #1565c0; border-radius: 5px; padding: 2px 8px; font-size: .6rem; font-weight: 700; }
+.lvl-wo  { background: #fff3e0; color: #e65100; border-radius: 5px; padding: 2px 8px; font-size: .6rem; font-weight: 700; }
+.lvl-none{ background: #f5f5f5; color: #9e9e9e; border-radius: 5px; padding: 2px 8px; font-size: .6rem; font-weight: 700; }
+
+/* Badges de flujo — cadena QUO/INT/WO */
+.badge-quo { background: #e8f5e9; color: #2e7d32; }
+.badge-int { background: #e3f2fd; color: #1565c0; }
+.badge-wo  { background: #fff3e0; color: #e65100; }
+.badge-na  { background: #f5f5f5; color: #9e9e9e; }
+
+/* Empresas */
+.company-badge {
+  display: inline-block;
+  padding: .15rem .5rem;
+  border-radius: .4rem;
+  font-size: .68rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #344767;
+  border: 1px solid #e9ecef;
+}
+.company-badge.holding    { border-color: #e91e63; color: #e91e63; }
+.company-badge.subsidiary { border-color: #1565c0; color: #1565c0; }
+
+
+/* --------------------------------------------------------------------------
+   4. FLUJO DE DINERO (IN / OUT / INT)
+   -------------------------------------------------------------------------- */
+.flow-in  { color: #2dce89; font-weight: 700; }
+.flow-out { color: #f5365c; font-weight: 700; }
+
+.flow-stripe { border-left: 4px solid; border-radius: .75rem; }
+
+.flow-chain { display: flex; align-items: center; gap: .2rem; flex-wrap: wrap; margin-bottom: .2rem; }
+.flow-chain .flow-item {
+  font-size: .68rem;
+  padding: .15rem .45rem;
+  border-radius: .4rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.flow-chain .flow-item:hover { opacity: .8; }
+.flow-arrow { color: #d2d6da; font-size: .55rem; }
+
+/* Botones de selección de flujo (document_form) */
+.flow-btn {
+  border: 2px solid #e9ecef;
+  border-radius: .75rem;
+  padding: .65rem .9rem;
+  cursor: pointer;
+  transition: all .2s;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  text-align: left;
+}
+.flow-btn:hover     { border-color: #adb5bd; }
+.flow-btn.sel-in    { border-color: #2dce89; background: #f0fdf4; }
+.flow-btn.sel-out   { border-color: #f5365c; background: #fff5f5; }
+.flow-btn.sel-int   { border-color: #11cdef; background: #f0faff; }
+.flow-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+
+/* --------------------------------------------------------------------------
+   5. BARRAS DE PROGRESO
+   -------------------------------------------------------------------------- */
+.progress-xs    { height: 4px;  border-radius: 2px; }
+.progress-mini  { height: 4px;  border-radius: 2px; background: #f0f2f5; overflow: hidden; min-width: 60px; }
+.progress-mini .bar { height: 100%; border-radius: 2px; transition: width .3s; }
+.progress-item  { height: 7px;  border-radius: 4px; }
+.flow-bar       { height: 8px;  border-radius: 4px; }
+.progress-bar-pay { height: 10px; border-radius: 5px; }
+.balance-bar    { height: 6px;  border-radius: 3px; background: #e9ecef; overflow: hidden; margin-top: .5rem; }
+.balance-fill   { height: 100%; transition: width .3s; }
+
+
+/* --------------------------------------------------------------------------
+   6. LAYOUT / POSICIONAMIENTO
+   -------------------------------------------------------------------------- */
+.sticky-wrap,
+.sticky-side { position: sticky; top: 1.5rem; }
+
+.section-divider {
+  border-top: 2px dashed #e9ecef;
+  margin: 1.5rem 0 .75rem;
+  padding-top: .75rem;
+}
+.section-divider h6 { color: #344767; margin-bottom: 0; }
+
+
+/* --------------------------------------------------------------------------
+   7. TARJETAS / KPI
+   -------------------------------------------------------------------------- */
+.mini-stat-card { transition: box-shadow .2s, transform .2s; }
+.mini-stat-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,.14) !important; }
+
+.icon-box {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-sm {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.method-icon {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-box { border-radius: 12px; padding: 1.2rem; }
+.kpi-val { font-size: 1.3rem; font-weight: 800; }
+.flow-kpi { border-radius: 12px; padding: 1rem; }
+
+.period-card { transition: box-shadow .15s; }
+.period-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.12) !important; }
+
+.tip-card { border: 1px solid #e9ecef; border-radius: .75rem; padding: 1rem; margin-bottom: 1rem; }
+.tip-item { display: flex; gap: .5rem; margin-bottom: .5rem; font-size: .72rem; color: #67748e; }
+.tip-icon { color: #fb6340; flex-shrink: 0; font-size: .85rem; }
+
+
+/* --------------------------------------------------------------------------
+   8. FORMSETS DE ASIGNACIÓN (PaymentAllocation / JournalEntryLine)
+   -------------------------------------------------------------------------- */
+.fs-row {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: .75rem;
+  padding: 1rem 1rem .5rem;
+  margin-bottom: .75rem;
+}
+.fs-row.fs-error { border-color: #f5365c !important; background: #fff5f5; }
+.fs-remove { line-height: 1; }
+
+.pending-badge {
+  display: none;
+  background: #e8f5e9;
+  color: #2dce89;
+  font-size: .64rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: .3rem;
+}
+
+/* Campo desactivado por regla de flujo */
+.field-off { opacity: .3; pointer-events: none; }
+.field-off select,
+.field-off input { background: #f1f2f4 !important; }
+
+/* Pill de estado de campo */
+.field-pill { font-size: .62rem; border-radius: 20px; padding: 2px 8px; margin-top: .35rem; display: none; }
+.field-pill.show { display: inline-block; }
+.pill-required { background: #d4edda; color: #155724; }
+.pill-optional  { background: #fff3cd; color: #856404; }
+.pill-disabled  { background: #f1f2f4; color: #8392ab; }
+
+
+/* --------------------------------------------------------------------------
+   9. BOTONES DE MÉTODO DE PAGO (transaction_form)
+   -------------------------------------------------------------------------- */
+.method-btn {
+  border: 2px solid #e9ecef;
+  border-radius: .75rem;
+  padding: .6rem .8rem;
+  cursor: pointer;
+  transition: all .2s;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: 100%;
+  text-align: left;
+}
+.method-btn:hover         { border-color: #adb5bd; }
+.method-btn.sel-transfer  { border-color: #5e72e4; background: #f0f2ff; }
+.method-btn.sel-check     { border-color: #11cdef; background: #f0faff; }
+.method-btn.sel-cash      { border-color: #2dce89; background: #f0fdf4; }
+.method-btn.sel-card      { border-color: #fb6340; background: #fff8f5; }
+.method-btn.sel-other     { border-color: #8898aa; background: #f8f9fa; }
+
+.step-badge {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pending-doc-row { cursor: pointer; transition: background .12s; }
+.pending-doc-row:hover { background: rgba(17, 205, 239, .06); }
+
+
+/* --------------------------------------------------------------------------
+   10. CONTABILIDAD (journal / debit / credit)
+   -------------------------------------------------------------------------- */
+.debit-col  { color: #5e72e4; font-weight: 700; }
+.credit-col { color: #2dce89; font-weight: 700; }
+.debit-col  .form-control { color: #5e72e4; }
+.credit-col .form-control { color: #2dce89; }
+.total-row  { background: #f8f9fa; font-weight: 700; }
+
+
+/* --------------------------------------------------------------------------
+   11. SEGUIMIENTO DE ÍTEMS — item-row headers
+   -------------------------------------------------------------------------- */
+.item-row-header { background: #f8f9fa; }
+.item-row-header td { border-top: 2px solid #dee2e6 !important; font-weight: 700; }
+.level-row td { border-top: 0 !important; background: #fff; }
+.level-row:hover td { background: rgba(0,0,0,.018) !important; }
+
+
+/* --------------------------------------------------------------------------
+   12. INFORMES FINANCIEROS (profit_loss, ar_aging, cashflow)
+   -------------------------------------------------------------------------- */
+/* Profit & Loss */
+.pl-section-header {
+  font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: #8392ab; padding: .5rem 1rem; border-bottom: 1px solid #e9ecef;
+}
+.pl-account-row td { font-size: .75rem; padding: .4rem .8rem; }
+.pl-total-row td   { font-size: .8rem;  padding: .5rem .8rem; font-weight: 800; border-top: 2px solid #344767; }
+.pl-net-row td     { font-size: 1rem;   padding: .6rem .8rem; font-weight: 900; }
+
+/* Aging */
+.aging-card   { border-radius: 12px; overflow: hidden; }
+.aging-header { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: .5rem 1rem; color: #fff; }
+.aging-total  { font-size: 1.1rem; font-weight: 800; }
+
+/* Import de extractos */
+.result-row-ok  { background: #f0fff4; }
+.result-row-err { background: #fff5f5; }
+
+/* Conciliación */
+.conc-row { border-bottom: 1px solid #f1f2f4; padding: .5rem .75rem; }
+.conc-row:last-child { border-bottom: none; }
+
+
+/* --------------------------------------------------------------------------
+   13. EXPORTACIÓN PLE
+   -------------------------------------------------------------------------- */
+.ple-card { border-radius: 14px; transition: box-shadow .15s; cursor: pointer; }
+.ple-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.15) !important; }
+
+
+/* --------------------------------------------------------------------------
+   14. NAVEGACIÓN POR PESTAÑAS CUSTOM
+   -------------------------------------------------------------------------- */
+.nav-tabs-custom .nav-link {
+  border: none;
+  padding: .6rem 1.2rem;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #67748e;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+}
+.nav-tabs-custom .nav-link.active { color: #344767; background: transparent; }
+.nav-tabs-custom .nav-link:hover  { color: #344767; }
+.nav-tabs-custom .tab-badge {
+  display: inline-block;
+  background: #f0f2f5;
+  padding: .1rem .45rem;
+  border-radius: .5rem;
+  font-size: .65rem;
+  font-weight: 700;
+  margin-left: .3rem;
+  color: #67748e;
+}
+.nav-tabs-custom .nav-link.active .tab-badge { color: #fff; }
+
+
+/* --------------------------------------------------------------------------
+   15. KANBAN (asignar_po_intermedio)
+   -------------------------------------------------------------------------- */
+.kanban-wrapper {
+  display: flex;
+  gap: 1rem;
+  min-height: 70vh;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+.kanban-column {
+  min-width: 320px;
+  max-width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.kanban-column .card { flex: 1; display: flex; flex-direction: column; }
+.kanban-column .card-body { flex: 1; overflow-y: auto; max-height: 60vh; padding: .75rem; }
+
+.kanban-item {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: .5rem;
+  padding: .75rem;
+  margin-bottom: .5rem;
+  cursor: grab;
+  transition: all .2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.kanban-item:hover  { box-shadow: 0 4px 12px rgba(0,0,0,.12); transform: translateY(-1px); }
+.kanban-item:active { cursor: grabbing; opacity: .9; }
+.kanban-item.dragging { opacity: .4; transform: rotate(2deg); }
+.kanban-item .item-seq   { font-size: .7rem;  font-weight: 700; color: #344767; letter-spacing: .5px; }
+.kanban-item .item-trafo { font-size: .75rem; color: #67748e; margin: .25rem 0; }
+.kanban-item .item-cost  { font-size: .8rem;  font-weight: 600; color: #2dce89; }
+.kanban-item .cost-input {
+  width: 100px; font-size: .75rem; padding: .2rem .4rem;
+  border: 1px solid #d2d6da; border-radius: .375rem; text-align: right;
+}
+.kanban-item .cost-input:focus { border-color: #e91e63; outline: none; box-shadow: 0 0 0 2px rgba(233,30,99,.15); }
+
+.kanban-dropzone { min-height: 80px; border: 2px dashed transparent; border-radius: .5rem; transition: all .2s ease; padding: .25rem; }
+.kanban-dropzone.drag-over { border-color: #e91e63; background: rgba(233,30,99,.04); }
+.kanban-dropzone.drag-over .drop-placeholder { display: block; }
+.drop-placeholder { display: none; text-align: center; padding: 1rem; color: #e91e63; font-size: .8rem; font-weight: 500; }
+
+.column-header { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1rem; border-bottom: 1px solid #f0f2f5; }
+.column-header .badge-count { background: #e91e63; color: #fff; font-size: .65rem; padding: .15rem .5rem; border-radius: 10px; font-weight: 700; }
+.column-header .badge-count.secondary { background: #7b809a; }
+.column-footer { padding: .5rem 1rem; border-top: 1px solid #f0f2f5; background: #fafafa; border-radius: 0 0 .75rem .75rem; }
+
+.add-column-card {
+  min-width: 320px; max-width: 360px;
+  flex-shrink: 0;
+  border: 2px dashed #d2d6da;
+  border-radius: .75rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s; min-height: 200px;
+}
+.add-column-card:hover { border-color: #e91e63; background: rgba(233,30,99,.02); }
+
+.summary-bar .stat-card  { padding: 1rem; text-align: center; }
+.summary-bar .stat-value { font-size: 1.5rem; font-weight: 700; color: #344767; }
+.summary-bar .stat-label { font-size: .75rem; color: #67748e; text-transform: uppercase; letter-spacing: .5px; }
+
+.loading-overlay {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,.7);
+  z-index: 9999;
+  align-items: center; justify-content: center;
+}
+.loading-overlay.active { display: flex; }
+
+.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 10000; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .kanban-column,
+  .add-column-card { min-width: 280px; }
+}
+
+
+/* --------------------------------------------------------------------------
+   16. ARCHIVO / FILE FIELD
+   -------------------------------------------------------------------------- */
+.file-field-wrap {
+  border: 1px solid #e9ecef;
+  border-radius: .75rem;
+  padding: .75rem 1rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   17. DETALLE INTQUOTE — breadcrumbs y estadísticas
+   -------------------------------------------------------------------------- */
+.breadcrumb-info { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.breadcrumb-info .breadcrumb-chip {
+  background: #f0f2f5;
+  padding: .25rem .75rem;
+  border-radius: 1rem;
+  font-size: .75rem;
+  color: #344767;
+  font-weight: 600;
+}
+.breadcrumb-info .breadcrumb-arrow { color: #d2d6da; font-size: .7rem; }
+
+.stat-mini { text-align: center; padding: 1rem .5rem; }
+.stat-mini .stat-value { font-size: 1.6rem; font-weight: 700; color: #344767; line-height: 1; }
+.stat-mini .stat-label { font-size: .7rem; color: #67748e; text-transform: uppercase; letter-spacing: .5px; margin-top: .25rem; }
+
+.wo-card { border-left: 3px solid #fb6340; transition: all .2s; }
+.wo-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+
+/* --------------------------------------------------------------------------
+   18. ÍTEMS DE SEGUIMIENTO — fila de encabezado en tabla
+   -------------------------------------------------------------------------- */
+.badge-wo-sm {
+  background: #fff3e0;
+  color: #e65100;
+  font-size: .68rem;
+  padding: .15rem .45rem;
+  border-radius: .4rem;
+  font-weight: 600;
+  text-decoration: none;
+}

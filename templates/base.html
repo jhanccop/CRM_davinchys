@@ -29,7 +29,8 @@
     
     <!-- CSS Files -->
     <link id="pagestyle" href="{% static 'assets/css/material-dashboard.css' %}" rel="stylesheet" />
-    
+    <link href="{% static 'assets/css/crm-app.css' %}" rel="stylesheet" />
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -63,13 +64,19 @@
                     <div class="collapse {% is_submenu_active request menu_data.items %}" id="{{ menu_key }}">
                         <ul class="nav nav-sm flex-column">
                             {% for item in menu_data.items %}
+                            {% if item.is_separator %}
+                            <li class="nav-item px-3 pt-2 pb-1">
+                                <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);display:block;border-top:1px solid rgba(255,255,255,.15);padding-top:.4rem;">{{ item.name }}</span>
+                            </li>
+                            {% else %}
                             <li class="nav-item">
-                                <a class="nav-link text-white {% is_menu_active request item.url_name %}" 
+                                <a class="nav-link text-white {% is_menu_active request item.url_name %}"
                                    href="{% if item.url_name %}{% url item.url_name %}{% else %}#{% endif %}">
                                     <span class="sidenav-mini-icon">{{ item.mini_icon }}</span>
                                     <span class="sidenav-normal ms-2 ps-1">{{ item.name }}</span>
                                 </a>
                             </li>
+                            {% endif %}
                             {% endfor %}
                         </ul>
                     </div>

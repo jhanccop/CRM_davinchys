@@ -6,15 +6,7 @@
 {% block navbar_appName %}Transacciones{% endblock %}
 {% block navbar_Type %}Listado{% endblock %}
 
-{% block extra_css %}
-<style>
-  .tbl-badge { font-size: .58rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; }
-  .table-actions a { color: #8392ab; transition: color .15s; }
-  .table-actions a:hover { color: #344767; }
-  .table tbody tr:hover { background: rgba(0,0,0,.025); }
-  .method-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
@@ -42,10 +34,28 @@
     <div class="card-body py-3">
       <form method="GET">
         <div class="row g-2 align-items-end">
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Estado</p>
+            <select name="status" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="DRAFT"     {% if status == 'DRAFT' %}selected{% endif %}>Borrador</option>
+              <option value="CONFIRMED" {% if status == 'CONFIRMED' %}selected{% endif %}>Confirmado</option>
+              <option value="CANCELLED" {% if status == 'CANCELLED' %}selected{% endif %}>Anulado</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Desde</p>
+            <input type="text" name="date_from" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_from }}" placeholder="Desde">
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Hasta</p>
+            <input type="text" name="date_to" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_to }}" placeholder="Hasta">
+          </div>
           <div class="col-md-4">
+            <p class="filter-label mb-1">Buscar</p>
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-transparent border-end-0"><i class="material-icons text-sm">search</i></span>
-              <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Buscar por referencia o notas…" value="{{ request.GET.q|default:'' }}">
+              <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Buscar por referencia o notas…" value="{{ q }}">
               <button type="submit" class="btn bg-gradient-dark mb-0">Buscar</button>
               <a href="{% url 'finantial:transaction-list' %}" class="btn btn-outline-secondary mb-0"><i class="material-icons text-sm">clear</i></a>
             </div>
@@ -58,7 +68,7 @@
   <div class="card">
     <div class="card-body px-0 pb-2">
       <div class="table-responsive">
-        <table class="table align-items-center mb-0">
+        <table id="datatable-main" class="table align-items-center mb-0">
           <thead>
             <tr>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">TX</th>
@@ -67,8 +77,10 @@
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Referencia</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Pagador</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Receptor</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">C.Costo</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Monto</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Conciliado</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Asiento</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
               <th class="text-secondary text-xxs text-center">Acc.</th>
             </tr>
@@ -95,6 +107,11 @@
               <td><span class="text-xs text-secondary">{{ tx.reference|default:"—"|truncatechars:20 }}</span></td>
               <td><span class="text-xs">{{ tx.tin_payer.tinName|default:tx.client|default:"—"|truncatechars:16 }}</span></td>
               <td><span class="text-xs">{{ tx.tin_receiver.tinName|default:tx.supplier|default:"—"|truncatechars:16 }}</span></td>
+              <td>
+                {% if tx.cost_center %}
+                <span class="badge badge-sm bg-gradient-secondary" style="font-size:.56rem" data-bs-toggle="tooltip" title="{{ tx.cost_center.name }}">{{ tx.cost_center.code }}</span>
+                {% else %}<span class="text-xxs text-secondary">—</span>{% endif %}
+              </td>
               <td class="text-end pe-3">
                 <p class="text-xs font-weight-bold mb-0">{{ tx.currency }} {{ tx.amount|floatformat:2 }}</p>
               </td>
@@ -102,6 +119,18 @@
                 <span class="text-xs {% if tx.reconciled_amount >= tx.amount %}text-success{% else %}text-warning{% endif %}">
                   {{ tx.currency }} {{ tx.reconciled_amount|floatformat:2 }}
                 </span>
+              </td>
+              <td>
+                {% if tx.journal_entry_id %}
+                  <a href="{% url 'finantial:journal-detail' tx.journal_entry_id %}"
+                     class="badge badge-sm text-decoration-none bg-gradient-primary"
+                     style="font-size:.56rem"
+                     data-bs-toggle="tooltip" title="Ver asiento contable">
+                    AST-{{ tx.journal_entry_id }}
+                  </a>
+                {% else %}
+                  <span class="text-xxs text-secondary">—</span>
+                {% endif %}
               </td>
               <td>
                 {% if tx.status == 'CONFIRMED' %}<span class="badge badge-sm bg-gradient-success tbl-badge">Confirmado</span>
@@ -118,7 +147,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="10" class="text-center py-5">
+              <td colspan="11" class="text-center py-5">
                 <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">payments</i>
                 <p class="text-sm text-secondary mb-2">Sin transacciones registradas</p>
                 <a href="{% url 'finantial:transaction-create' %}" class="btn btn-sm bg-gradient-success"><i class="material-icons text-sm align-middle me-1">add</i>Registrar pago</a>
@@ -130,26 +159,17 @@
       </div>
     </div>
 
-    {% if is_paginated %}
-    <div class="card-footer py-3 d-flex justify-content-between align-items-center">
-      <span class="text-xs text-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      <nav>
-        <ul class="pagination pagination-sm mb-0 gap-1">
-          {% if page_obj.has_previous %}
-          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_left</i></a></li>
-          {% endif %}
-          {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}<li class="page-item active"><span class="page-link rounded bg-gradient-primary border-0">{{ num }}</span></li>
-            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}<li class="page-item"><a class="page-link border-0 rounded" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a></li>
-            {% endif %}
-          {% endfor %}
-          {% if page_obj.has_next %}
-          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_right</i></a></li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
-    {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+</script>
 {% endblock %}

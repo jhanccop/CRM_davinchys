@@ -6,17 +6,7 @@
 {% block navbar_appName %}Banco{% endblock %}
 {% block navbar_Type %}Movimientos{% endblock %}
 
-{% block extra_css %}
-<style>
-  .flow-in  { color: #2dce89; font-weight: 700; }
-  .flow-out { color: #f5365c; font-weight: 700; }
-  .tbl-badge { font-size: .58rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; }
-  .table-actions a { color: #8392ab; transition: color .15s; }
-  .table-actions a:hover { color: #344767; }
-  .table tbody tr:hover { background: rgba(0,0,0,.025); }
-  .filter-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; margin-bottom: .3rem; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
@@ -73,6 +63,14 @@
               <option value="1" {% if sel_conciliated == '1' %}selected{% endif %}>Conciliado</option>
             </select>
           </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Desde</p>
+            <input type="text" name="date_from" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_from }}" placeholder="Desde">
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1"><i class="material-icons" style="font-size:.85rem;vertical-align:middle">event</i> Hasta</p>
+            <input type="text" name="date_to" class="form-control form-control-sm datetimepicker text-center text-dark flatpickr-input" value="{{ date_to }}" placeholder="Hasta">
+          </div>
           <div class="col-md-3">
             <p class="filter-label mb-1">Buscar</p>
             <div class="input-group input-group-sm">
@@ -90,7 +88,7 @@
   <div class="card">
     <div class="card-body px-0 pb-2">
       <div class="table-responsive">
-        <table class="table align-items-center mb-0">
+        <table id="datatable-main" class="table align-items-center mb-0">
           <thead>
             <tr>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">#</th>
@@ -100,6 +98,7 @@
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tipo</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Descripción</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Nro. Op.</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">C.Costo</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Monto</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Conciliado</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Pendiente</th>
@@ -130,6 +129,13 @@
               </td>
               <td><span class="text-xs">{{ mov.description|default:"—"|truncatechars:30 }}</span></td>
               <td><span class="text-xs text-secondary">{{ mov.opNumber|default:"—" }}</span></td>
+              <td>
+                {% if mov.cost_center %}
+                <span class="badge badge-sm bg-gradient-secondary" style="font-size:.56rem" data-bs-toggle="tooltip" title="{{ mov.cost_center.name }}">{{ mov.cost_center.code }}</span>
+                {% else %}
+                <span class="text-xxs text-secondary">—</span>
+                {% endif %}
+              </td>
               <td class="text-end pe-3">
                 {% if mov.movementType and mov.movementType.is_ingreso %}
                   <span class="text-xs flow-in">+ {{ mov.idAccount.currency_label }} {{ mov.amount|floatformat:2 }}</span>
@@ -177,27 +183,17 @@
       </div>
     </div>
 
-    {% if is_paginated %}
-    <div class="card-footer py-3 d-flex justify-content-between align-items-center">
-      <span class="text-xs text-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      <nav>
-        <ul class="pagination pagination-sm mb-0 gap-1">
-          {% if page_obj.has_previous %}
-          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_left</i></a></li>
-          {% endif %}
-          {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}<li class="page-item active"><span class="page-link rounded bg-gradient-primary border-0">{{ num }}</span></li>
-            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-            <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ num }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}">{{ num }}</a></li>
-            {% endif %}
-          {% endfor %}
-          {% if page_obj.has_next %}
-          <li class="page-item"><a class="page-link border-0 rounded" href="?page={{ page_obj.next_page_number }}&q={{ q }}&account={{ sel_account }}&conciliated={{ sel_conciliated }}&flow={{ sel_flow }}"><i class="material-icons" style="font-size:.75rem;line-height:1.5">chevron_right</i></a></li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
-    {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true });
+  }
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+</script>
 {% endblock %}

@@ -7,29 +7,6 @@
 
 {% block panel-content %}
 
-<style>
-  .nav-tabs-custom .nav-link {
-    border: none; padding: 0.6rem 1.2rem; font-size: 0.8rem;
-    font-weight: 600; color: #67748e; border-bottom: 2px solid transparent; transition: all 0.2s;
-  }
-  .nav-tabs-custom .nav-link.active { color: #344767; border-bottom: 2px solid #1565c0; background: transparent; }
-  .nav-tabs-custom .nav-link:hover { color: #344767; }
-  .nav-tabs-custom .tab-badge {
-    display: inline-block; background: #f0f2f5; padding: 0.1rem 0.45rem;
-    border-radius: 0.5rem; font-size: 0.65rem; font-weight: 700; margin-left: 0.3rem; color: #67748e;
-  }
-  .nav-tabs-custom .nav-link.active .tab-badge { background: #1565c0; color: #fff; }
-  .progress-mini { height: 4px; border-radius: 2px; background: #f0f2f5; overflow: hidden; min-width: 60px; }
-  .progress-mini .bar { height: 100%; border-radius: 2px; transition: width 0.3s; }
-  .company-badge {
-    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.4rem;
-    font-size: 0.68rem; font-weight: 600; background: #f8f9fa; color: #344767; border: 1px solid #e9ecef;
-  }
-  .company-badge.holding { border-color: #e91e63; color: #e91e63; }
-  .company-badge.subsidiary { border-color: #1565c0; color: #1565c0; }
-  .badge-wo { background: #fff3e0; color: #e65100; font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 0.4rem; font-weight: 600; text-decoration: none; }
-</style>
-
 <div class="container-fluid">
 
   <div class="row mb-3">
@@ -44,12 +21,18 @@
       </p>
     </div>
     <div class="col-lg-8 col-12 d-flex justify-content-end align-items-start gap-2 mt-2 mt-lg-0">
-      <form method="GET" class="d-flex align-items-center gap-2">
+      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
         <div class="input-group input-group-outline" style="max-width: 260px;">
           <input class="form-control datetimepicker text-center text-dark text-sm"
                  value="{{ intervalDate }}" placeholder="Rango de fechas" id="dateKword" name="dateKword">
         </div>
+        <div class="input-group input-group-outline" style="max-width: 220px;">
+          <input type="text" name="q" class="form-control text-sm" placeholder="Cliente, PO, #ID…" value="{{ q }}">
+        </div>
         <button class="btn bg-gradient-dark btn-sm mb-0" type="submit"><i class="fas fa-search me-1"></i> Buscar</button>
+        {% if q %}
+        <a href="{% url 'ventas_app:intquote-lista' %}?dateKword={{ intervalDate }}" class="btn btn-outline-secondary btn-sm mb-0"><i class="fas fa-times"></i></a>
+        {% endif %}
       </form>
       <a class="export btn btn-icon btn-outline-secondary btn-sm mb-0" data-type="csv"><i class="fas fa-download me-1"></i> CSV</a>
     </div>
@@ -99,7 +82,7 @@
                   <td class="ps-3">
                     <div class="d-flex flex-column">
                       <a href="{% url 'ventas_app:intquote-detail' iq.id %}" class="text-sm font-weight-bold text-dark mb-0">{{ iq.poNumber|default:"-" }}</a>
-                      <a href="{% url 'ventas_app:intquote-detail' iq.id %}" class="text-xs font-weight-bold" style="color: #1565c0;">INT-{{ iq.id }}</a>
+                      <a href="{% url 'ventas_app:intquote-detail' iq.id %}" class="text-xs font-weight-bold" style="color: #1565c0;">{{ iq.poNumber|default:iq.id }}</a>
                       <span class="text-xs text-secondary">{{ iq.dateOrder|date:'d-m-Y' }}</span>
                     </div>
                   </td>

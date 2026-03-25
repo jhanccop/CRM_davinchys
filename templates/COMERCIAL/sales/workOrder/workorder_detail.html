@@ -113,7 +113,7 @@
                 {% if int_quote_ref %}
                 <a href="{% url 'ventas_app:intquote-detail' pk=int_quote_ref.id %}"
                    class="text-info font-weight-bold">
-                  INT-{{ int_quote_ref.id }}
+                  {{ int_quote_ref.poNumber|default:int_quote_ref.id }}
                 </a>
                 {% else %}
                 <span class="text-muted">&mdash;</span>
@@ -205,7 +205,7 @@
           {% for iq in int_quotes %}
           <a href="{% url 'ventas_app:intquote-detail' pk=iq.id %}"
              class="badge bg-gradient-info me-1 mb-1 text-decoration-none">
-            INT-{{ iq.id }} &middot; {{ iq.idTinReceiving|default:"" }}
+            {{ iq.poNumber|default:iq.id }} &middot; {{ iq.idTinReceiving|default:"" }}
           </a>
           {% empty %}
           <span class="text-sm text-muted">&mdash;</span>
@@ -337,7 +337,7 @@
                       <h6 class="text-sm font-weight-bold mb-0">
                         <a href="{% url 'ventas_app:intquote-detail' pk=group.int_quote.id %}"
                            class="text-info text-decoration-none">
-                          INT-{{ group.int_quote.id }}
+                          {{ group.int_quote.poNumber|default:group.int_quote.id }}
                         </a>
                         &middot; {{ group.int_quote.idTinReceiving|default:"" }}
                       </h6>

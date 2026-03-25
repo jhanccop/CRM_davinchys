@@ -92,7 +92,7 @@
                                 <td class="text-sm">
                                     <div class="d-flex flex-column justify-content-center">
                                         <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                                            <h6 class="mb-0 text-sm">QUO-{{t.idQuote.id}} </h6>
+                                            <h6 class="mb-0 text-sm">{{t.idQuote.poNumber|default:t.idQuote.id}} </h6>
                                         </a>
                                     </div>
                                 </td>

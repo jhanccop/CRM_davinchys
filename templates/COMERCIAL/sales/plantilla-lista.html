@@ -100,7 +100,7 @@
                       <div class="d-flex flex-column mb-1">
                         <a href="">
                           <span class="text-xs font-weight-bold text-dark">
-                            QUO-{{ item.idTrafoQuote.id }}
+                            {{ item.idTrafoQuote.poNumber|default:item.idTrafoQuote.id }}
                           </span>
                         </a>
                         <span class="text-xs text-secondary">

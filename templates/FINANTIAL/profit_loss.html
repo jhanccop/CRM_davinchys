@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Estado de Resultados{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Contabilidad{% endblock %}
+{% block navbar_Type %}Estado de Resultados{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-4">
+
+  <!-- CABECERA + FILTROS -->
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0">Estado de Resultados</h5>
+      <p class="text-secondary text-sm mb-0">
+        {% if is_holding %}<span class="badge bg-gradient-primary" style="font-size:.58rem">HOLDING</span>
+        {% else %}<span class="badge bg-gradient-dark" style="font-size:.58rem">{{ user_tin.tinName }}</span>{% endif %}
+        &nbsp;·&nbsp; Año {{ year }}{% if month %} · Mes {{ month }}{% else %} · Todo el año{% endif %}
+        &nbsp;·&nbsp; <span class="text-xs text-muted">Solo asientos contabilizados</span>
+      </p>
+    </div>
+    <div class="col-auto">
+      <form method="get" class="d-flex gap-2 align-items-center">
+        <select name="anio" class="form-select form-select-sm" style="width:90px">
+          {% for y in years %}
+          <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+        <select name="mes" class="form-select form-select-sm" style="width:110px">
+          <option value="0" {% if not month %}selected{% endif %}>Todo el año</option>
+          {% for num, name in months %}
+          <option value="{{ num }}" {% if num == month %}selected{% endif %}>{{ num }} — {{ name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm bg-gradient-primary mb-0">Filtrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- KPI RESUMEN -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="kpi-box bg-gradient-default border shadow-sm text-center">
+        <div class="text-xs text-secondary">Ingresos Totales</div>
+        <div class="kpi-val text-success">{{ total_income|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="kpi-box bg-gradient-default border shadow-sm text-center">
+        <div class="text-xs text-secondary">Egresos / Gastos</div>
+        <div class="kpi-val text-danger">{{ total_expense|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="kpi-box {% if net_profit >= 0 %}bg-gradient-success{% else %}bg-gradient-danger{% endif %} shadow-sm text-center">
+        <div class="text-xs text-white">Resultado Neto</div>
+        <div class="kpi-val text-white">{{ net_profit|floatformat:2 }}</div>
+        <div class="text-xs text-white">{% if net_profit >= 0 %}UTILIDAD{% else %}PÉRDIDA{% endif %}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO DE RESULTADOS FORMAL -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+
+      <!-- INGRESOS -->
+      <div class="pl-section-header">
+        <i class="material-icons text-sm align-middle">trending_up</i> Ingresos
+      </div>
+      <table class="table mb-0">
+        <tbody>
+          {% for row in income_by_account %}
+          <tr class="pl-account-row">
+            <td class="ps-4">{{ row.account__code }}</td>
+            <td>{{ row.account__name }}</td>
+            <td class="text-end text-success pe-4">{{ row.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-secondary text-xs py-3">Sin movimientos de ingreso en el período</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="pl-total-row">
+            <td colspan="2" class="ps-4">Total Ingresos</td>
+            <td class="text-end text-success pe-4">{{ total_income|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- EGRESOS -->
+      <div class="pl-section-header mt-2">
+        <i class="material-icons text-sm align-middle">trending_down</i> Egresos / Costos y Gastos
+      </div>
+      <table class="table mb-0">
+        <tbody>
+          {% for row in expense_by_account %}
+          <tr class="pl-account-row">
+            <td class="ps-4">{{ row.account__code }}</td>
+            <td>{{ row.account__name }}</td>
+            <td class="text-end text-danger pe-4">{{ row.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-secondary text-xs py-3">Sin movimientos de egreso en el período</td></tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="pl-total-row">
+            <td colspan="2" class="ps-4">Total Egresos</td>
+            <td class="text-end text-danger pe-4">{{ total_expense|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- RESULTADO NETO -->
+      <table class="table mb-0">
+        <tfoot>
+          <tr class="pl-net-row {% if net_profit >= 0 %}table-success{% else %}table-danger{% endif %}">
+            <td class="ps-4">
+              {% if net_profit >= 0 %}
+              <i class="material-icons text-sm align-middle text-success">arrow_upward</i> UTILIDAD DEL PERÍODO
+              {% else %}
+              <i class="material-icons text-sm align-middle text-danger">arrow_downward</i> PÉRDIDA DEL PERÍODO
+              {% endif %}
+            </td>
+            <td class="text-end pe-4 {% if net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+              {{ net_profit|floatformat:2 }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+    </div>
+  </div>
+
+  {% if not income_by_account and not expense_by_account %}
+  <div class="alert alert-warning mt-3 text-sm">
+    <i class="material-icons text-sm align-middle">info</i>
+    No hay asientos contabilizados para el período seleccionado.
+    Los asientos en estado <strong>Borrador</strong> no se incluyen en el estado de resultados.
+    <a href="{% url 'finantial:journal-list' %}">Ver asientos →</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script>
+  document.querySelectorAll('.input-group-outline').forEach(wrap => {
+    const el = wrap.querySelector('input,select,textarea');
+    if (el && el.value) wrap.classList.add('is-filled');
+    if (el) {
+      el.addEventListener('focus',  () => wrap.classList.add('focused'));
+      el.addEventListener('blur',   () => wrap.classList.remove('focused'));
+      el.addEventListener('input',  () => wrap.classList.toggle('is-filled', !!el.value));
+      el.addEventListener('change', () => wrap.classList.toggle('is-filled', !!el.value));
+    }
+  });
+  /* Mark filter selects as filled on load */
+  document.querySelectorAll('select[name="anio"], select[name="mes"]').forEach(sel => {
+    if (sel.value) sel.closest('.input-group-outline')?.classList.add('is-filled');
+  });
+</script>
+{% endblock %}

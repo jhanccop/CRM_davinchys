@@ -62,17 +62,7 @@
 {% block navbar_appName %}Pagos{% endblock %}
 {% block navbar_Type %}Dashboard{% endblock %}
 
-{% block extra_css %}
-<style>
-  .mini-stat-card { transition: box-shadow .2s, transform .2s; }
-  .mini-stat-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,.14) !important; }
-  .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .flow-stripe { border-left: 4px solid; border-radius: .75rem; }
-  .table td, .table th { vertical-align: middle; }
-  .progress-xs { height: 4px; border-radius: 2px; }
-  .avatar-sm { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block panel-content %}
 <div class="container-fluid py-4">
@@ -484,6 +474,123 @@
 
     </div>
   </div>
+
+  <!-- ══ MÓDULOS SAP ═══════════════════════════════════════════════════════ -->
+  <div class="row g-3 mt-1">
+    <div class="col-12">
+      <h6 class="text-secondary text-uppercase text-xs font-weight-bolder mb-2 ms-1">
+        <i class="material-icons text-sm align-middle me-1">layers</i>Módulos SAP
+      </h6>
+    </div>
+
+    <!-- Tipo de cambio del día -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100" style="border-left:4px solid #11cdef">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-xxs text-secondary text-uppercase mb-1 font-weight-bolder">Tipo de Cambio HOY</p>
+              {% if today_rate %}
+              <h4 class="font-weight-bolder mb-0" style="color:#11cdef">{{ today_rate.rate }}</h4>
+              <p class="text-xxs text-secondary mb-0">{{ today_rate.from_currency }} → {{ today_rate.to_currency }} · {{ today_rate.rate_date|date:"d/m/Y" }}</p>
+              <p class="text-xxs text-secondary mb-0">Fuente: {{ today_rate.source }}</p>
+              {% else %}
+              <h6 class="text-secondary mb-0">Sin registro</h6>
+              <p class="text-xxs text-secondary mb-0">No hay tipo de cambio para hoy</p>
+              {% endif %}
+            </div>
+            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(195deg,#11cdef,#1171ef);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="material-icons text-white" style="font-size:1.1rem">currency_exchange</i>
+            </div>
+          </div>
+          <a href="{% url 'finantial:exchangerate-list' %}" class="btn btn-sm btn-outline-info w-100 mb-0 mt-2" style="font-size:.65rem">
+            Ver tipos de cambio <i class="material-icons text-xs align-middle">arrow_forward</i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertas de cierre -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100" style="border-left:4px solid {% if open_closures %}#fb6340{% else %}#2dce89{% endif %}">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-xxs text-secondary text-uppercase mb-1 font-weight-bolder">Cierres Mensuales</p>
+              {% if open_closures %}
+              <h4 class="font-weight-bolder mb-0 text-warning">{{ open_closures|length }}</h4>
+              <p class="text-xxs text-secondary mb-1">período{{ open_closures|length|pluralize }} abierto{{ open_closures|length|pluralize }} este mes</p>
+              {% for c in open_closures %}
+              <p class="text-xxs mb-0"><span class="badge badge-sm bg-gradient-warning" style="font-size:.55rem">{{ c.account.nickName }}</span></p>
+              {% endfor %}
+              {% else %}
+              <h6 class="text-success mb-0">✓ Al día</h6>
+              <p class="text-xxs text-secondary mb-0">Sin períodos pendientes</p>
+              {% endif %}
+            </div>
+            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(195deg,#fb6340,#fba940);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="material-icons text-white" style="font-size:1.1rem">lock_clock</i>
+            </div>
+          </div>
+          <a href="{% url 'finantial:closure-list' %}" class="btn btn-sm btn-outline-warning w-100 mb-0 mt-2" style="font-size:.65rem">
+            Ver cierres <i class="material-icons text-xs align-middle">arrow_forward</i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asientos contables -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100" style="border-left:4px solid #5e72e4">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-xxs text-secondary text-uppercase mb-1 font-weight-bolder">Asientos (SAP FB50)</p>
+              <h6 class="mb-0">Plan de cuentas</h6>
+              <p class="text-xxs text-secondary mb-0">Registro de asientos contables automáticos y manuales</p>
+            </div>
+            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(195deg,#5e72e4,#825ee4);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="material-icons text-white" style="font-size:1.1rem">receipt_long</i>
+            </div>
+          </div>
+          <div class="d-flex gap-1 mt-2">
+            <a href="{% url 'finantial:journal-list' %}" class="btn btn-sm btn-outline-primary mb-0 flex-fill" style="font-size:.6rem">Asientos</a>
+            <a href="{% url 'finantial:chart-of-accounts' %}" class="btn btn-sm btn-outline-primary mb-0 flex-fill" style="font-size:.6rem">Plan cuentas</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Catálogos SAP -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100" style="border-left:4px solid #2dce89">
+        <div class="card-body p-3">
+          <p class="text-xxs text-secondary text-uppercase mb-2 font-weight-bolder">Catálogos SAP</p>
+          <div class="d-flex flex-column gap-2">
+            <a href="{% url 'finantial:costcenter-list' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+              <span style="width:24px;height:24px;border-radius:6px;background:linear-gradient(195deg,#fb6340,#fba940);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i class="material-icons text-white" style="font-size:.7rem">hub</i>
+              </span>
+              <span class="text-xs text-dark">Centros de costos <small class="text-secondary">KS01</small></span>
+            </a>
+            <a href="{% url 'finantial:taxcode-list' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+              <span style="width:24px;height:24px;border-radius:6px;background:linear-gradient(195deg,#f5365c,#f56036);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i class="material-icons text-white" style="font-size:.7rem">percent</i>
+              </span>
+              <span class="text-xs text-dark">Códigos impuesto <small class="text-secondary">FTXP</small></span>
+            </a>
+            <a href="{% url 'finantial:exchangerate-list' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+              <span style="width:24px;height:24px;border-radius:6px;background:linear-gradient(195deg,#11cdef,#1171ef);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i class="material-icons text-white" style="font-size:.7rem">currency_exchange</i>
+              </span>
+              <span class="text-xs text-dark">Tipos de cambio <small class="text-secondary">OB08</small></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /SAP modules row -->
 
 </div>
 {% endblock %}

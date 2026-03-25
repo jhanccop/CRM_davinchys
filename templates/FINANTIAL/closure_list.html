@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Cierres Mensuales{% endblock %}
+{% block navbar_main %}Finanzas{% endblock %}
+{% block navbar_appName %}Cierres{% endblock %}
+{% block navbar_Type %}SAP F.16{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block panel-content %}
+<div class="container-fluid py-4">
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h5 class="font-weight-bolder mb-0"><i class="material-icons align-middle me-2 text-info">lock_clock</i>Cierres Mensuales <small class="text-secondary text-xs fw-normal">SAP F.16</small></h5>
+      <p class="text-secondary text-sm mb-0">Gestión de períodos contables por cuenta bancaria</p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+      <a href="{% url 'finantial:closure-create' %}" class="btn btn-sm bg-gradient-primary shadow mb-0">
+        <i class="material-icons text-sm align-middle me-1">add</i> Nuevo período
+      </a>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <form method="GET">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-2"><p class="filter-label mb-1">Año</p><input type="number" name="year" class="form-control form-control-sm" placeholder="2024" value="{{ sel_year }}"></div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Mes</p>
+            <select name="month" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              {% for i in "123456789101112"|make_list %}{% endfor %}
+              {% for m in meses %}{% endfor %}
+              <option value="1" {% if sel_month == "1" %}selected{% endif %}>Enero</option>
+              <option value="2" {% if sel_month == "2" %}selected{% endif %}>Febrero</option>
+              <option value="3" {% if sel_month == "3" %}selected{% endif %}>Marzo</option>
+              <option value="4" {% if sel_month == "4" %}selected{% endif %}>Abril</option>
+              <option value="5" {% if sel_month == "5" %}selected{% endif %}>Mayo</option>
+              <option value="6" {% if sel_month == "6" %}selected{% endif %}>Junio</option>
+              <option value="7" {% if sel_month == "7" %}selected{% endif %}>Julio</option>
+              <option value="8" {% if sel_month == "8" %}selected{% endif %}>Agosto</option>
+              <option value="9" {% if sel_month == "9" %}selected{% endif %}>Septiembre</option>
+              <option value="10" {% if sel_month == "10" %}selected{% endif %}>Octubre</option>
+              <option value="11" {% if sel_month == "11" %}selected{% endif %}>Noviembre</option>
+              <option value="12" {% if sel_month == "12" %}selected{% endif %}>Diciembre</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <p class="filter-label mb-1">Estado</p>
+            <select name="status" class="form-select form-select-sm">
+              <option value="">Todos</option>
+              <option value="OPEN" {% if sel_status == "OPEN" %}selected{% endif %}>Abierto</option>
+              <option value="CLOSED" {% if sel_status == "CLOSED" %}selected{% endif %}>Cerrado</option>
+              <option value="APPROVED" {% if sel_status == "APPROVED" %}selected{% endif %}>Aprobado</option>
+              <option value="REOPENED" {% if sel_status == "REOPENED" %}selected{% endif %}>Reabierto</option>
+            </select>
+          </div>
+          <div class="col-auto d-flex gap-2">
+            <button type="submit" class="btn btn-sm bg-gradient-dark mb-0"><i class="material-icons text-sm">search</i></button>
+            <a href="{% url 'finantial:closure-list' %}" class="btn btn-sm btn-outline-secondary mb-0"><i class="material-icons text-sm">clear</i></a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body px-0 pb-2">
+      <div class="table-responsive">
+        <table id="datatable-main" class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-3">Cuenta</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Empresa</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Período</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Saldo inicial</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Ingresos</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Egresos</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Saldo final</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Movs.</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Sin conciliar</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Estado</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Acc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in closures %}
+            <tr>
+              <td class="ps-3">
+                <p class="text-xs font-weight-bold mb-0">{{ c.account.nickName }}</p>
+                <p class="text-xxs text-secondary mb-0">{{ c.account.bankName }}</p>
+              </td>
+              <td><span class="text-xs">{{ c.tin.tinName }}</span></td>
+              <td><span class="text-xs font-weight-bold">{{ c.period_label }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs">{{ c.opening_balance|floatformat:2 }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs text-success">{{ c.total_ingresos|floatformat:2 }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs text-danger">{{ c.total_egresos|floatformat:2 }}</span></td>
+              <td class="text-end pe-3"><span class="text-xs font-weight-bold">{{ c.closing_balance|floatformat:2 }}</span></td>
+              <td class="text-center"><span class="text-xs">{{ c.movements_count }}</span></td>
+              <td class="text-center">
+                {% if c.unreconciled_count > 0 %}
+                  <span class="badge badge-sm bg-gradient-warning">⚠ {{ c.unreconciled_count }}</span>
+                {% else %}
+                  <span class="badge badge-sm bg-gradient-success">✓ 0</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.status == 'OPEN' %}<span class="badge badge-sm bg-gradient-info status-pill">Abierto</span>
+                {% elif c.status == 'CLOSED' %}<span class="badge badge-sm bg-gradient-warning status-pill">Cerrado</span>
+                {% elif c.status == 'APPROVED' %}<span class="badge badge-sm bg-gradient-success status-pill">Aprobado</span>
+                {% else %}<span class="badge badge-sm bg-gradient-danger status-pill">Reabierto</span>{% endif %}
+                {% if c.is_locked %}<i class="material-icons text-xs text-secondary ms-1" data-bs-toggle="tooltip" title="Período bloqueado">lock</i>{% endif %}
+              </td>
+              <td class="text-center pe-3">
+                <a href="{% url 'finantial:closure-detail' c.pk %}" class="text-secondary" data-bs-toggle="tooltip" title="Ver detalle">
+                  <i class="material-icons text-sm">visibility</i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="11" class="text-center py-5">
+              <i class="material-icons d-block mb-2 text-secondary" style="font-size:2.5rem;opacity:.3">lock_clock</i>
+              <p class="text-sm text-secondary mb-2">Sin períodos registrados</p>
+              <a href="{% url 'finantial:closure-create' %}" class="btn btn-sm bg-gradient-primary">Crear primer período</a>
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+  const dataTable = new simpleDatatables.DataTable("#datatable-main", { searchable: true, fixedHeight: false, perPage: 15 });
+</script>
+{% endblock %}
