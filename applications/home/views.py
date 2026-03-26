@@ -95,7 +95,7 @@ class PanelHomeView(LoginRequiredMixin,ListView):
 
     def get_queryset(self):
         userId = self.request.user
-        userArea = userId.position
+        userArea = userId.area
         dateSelected = self.request.GET.get("Kword", '')
         
         date_range = pd.date_range(userId.startDate, pd.Timestamp.now().date(), freq='MS')

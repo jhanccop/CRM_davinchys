@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Compras{% endblock %}
+{% block navbar_Type %}Kanban Transformadores{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout ───────────────────────────────────────── */
+.kanban-wrapper {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    min-height: 480px;
+    align-items: flex-start;
+}
+.kanban-col {
+    min-width: 260px;
+    max-width: 290px;
+    flex-shrink: 0;
+    background: #f8f9fa;
+    border-radius: .75rem;
+    border: 1px solid #e9ecef;
+}
+.kanban-col.col-unassigned { border-color: #ffc107; background: #fffbf0; }
+.kanban-col.col-approved   { border-color: #28a745; background: #f0fff4; }
+.col-header {
+    padding: .65rem .85rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: .75rem .75rem 0 0;
+}
+.col-header h6 { margin: 0; font-size: .82rem; font-weight: 700; }
+.badge-count {
+    font-size: .68rem;
+    font-weight: 700;
+    padding: .2em .55em;
+    border-radius: .9rem;
+    background: #e9ecef;
+    color: #344767;
+}
+/* ── Dropzone ─────────────────────────────────────── */
+.kanban-dropzone {
+    min-height: 200px;
+    padding: .6rem;
+    transition: background .2s;
+}
+.kanban-dropzone.drag-over {
+    background: rgba(23,193,232,.08);
+    border: 2px dashed #17c1e8 !important;
+    border-radius: .5rem;
+}
+.drop-placeholder {
+    text-align: center;
+    color: #adb5bd;
+    font-size: .78rem;
+    padding: 1.5rem 0;
+    display: none;
+}
+.kanban-dropzone:empty .drop-placeholder,
+.kanban-dropzone .drop-placeholder { display: block; }
+/* ── Item card ────────────────────────────────────── */
+.kanban-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: .55rem;
+    padding: .55rem .7rem;
+    margin-bottom: .45rem;
+    cursor: grab;
+    transition: box-shadow .15s, transform .1s;
+    user-select: none;
+}
+.kanban-item:hover  { box-shadow: 0 4px 12px rgba(0,0,0,.1); transform: translateY(-1px); }
+.kanban-item.dragging { opacity: .45; transform: rotate(1.5deg); }
+.kanban-item .item-title { font-size: .82rem; font-weight: 700; color: #344767; margin-bottom: .15rem; }
+.kanban-item .item-meta  { font-size: .72rem; color: #8392ab; }
+.kanban-item .item-price { font-size: .78rem; font-weight: 700; color: #17c1e8; }
+/* ── Add column button ────────────────────────────── */
+.add-col-btn {
+    min-width: 200px;
+    background: rgba(255,255,255,.6);
+    border: 2px dashed #ced4da;
+    border-radius: .75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: 1.5rem;
+    cursor: pointer;
+    color: #8392ab;
+    transition: background .2s, border-color .2s, color .2s;
+    font-size: .85rem;
+    font-weight: 600;
+}
+.add-col-btn:hover { background: #fff; border-color: #17c1e8; color: #17c1e8; }
+/* ── Stats bar ────────────────────────────────────── */
+.stat-card { text-align: center; padding: .75rem 1rem; }
+.stat-value { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.stat-label { font-size: .72rem; color: #8392ab; text-transform: uppercase; letter-spacing: .05em; margin-top: .25rem; }
+/* ── IntQuote chip ────────────────────────────────── */
+.intq-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22em .7em;
+    background: #e3f2fd;
+    border-radius: .5rem;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #1565c0;
+    margin: .15rem;
+}
+/* ── Spinner overlay ──────────────────────────────── */
+.loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.loading-overlay.active { display: flex; }
+/* ── Toast ────────────────────────────────────────── */
+.toast-container { position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 9998; }
+</style>
+{% endblock %}
+
+{% block panel-content %}
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-border text-info" role="status"></div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container-fluid py-2">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a href="{% url 'compras_app:detail_requirement' req.id %}"
+                   class="btn btn-sm btn-outline-secondary mb-0">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <span class="badge badge-sm bg-gradient-dark">REQ-{{ req.id }}</span>
+                {% if req.isPurchaseOrder %}
+                <span class="badge badge-sm bg-gradient-success">Orden de Compra</span>
+                {% endif %}
+            </div>
+            <h5 class="font-weight-bolder mb-1">Cotizaciones a Proveedores — Transformadores</h5>
+            <p class="text-sm text-secondary mb-0">
+                {{ req.idPetitioner }} &nbsp;·&nbsp;
+                {{ req.get_currency_display }} {{ req.totalPrice|floatformat:2 }}
+                {% if req.description %}&nbsp;·&nbsp; {{ req.description }}{% endif %}
+            </p>
+        </div>
+        <div class="col-lg-4 d-flex justify-content-end gap-2 align-items-start mt-2 mt-lg-0">
+            <a href="{% url 'compras_app:crear_log_requirement' req.id %}"
+               class="btn btn-sm bg-gradient-secondary mb-0">
+                <i class="fas fa-plus me-1"></i>Evento
+            </a>
+        </div>
+    </div>
+
+    <!-- ── Cotizaciones internas vinculadas ───────────────── -->
+    {% if linked_intquotes %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-header pb-0">
+            <h6 class="mb-0 text-sm">
+                <i class="fas fa-project-diagram me-2 text-info"></i>
+                Cotizaciones Internas Vinculadas
+                <span class="text-muted fw-normal">(proyectos que requieren estos transformadores)</span>
+            </h6>
+        </div>
+        <div class="card-body py-2">
+            {% for iq in linked_intquotes %}
+            <a href="{% url 'ventas_app:intquote-detail' iq.id %}" class="intq-chip">
+                <i class="fas fa-file-import"></i>
+                {{ iq.poNumber|default:iq.id }}
+                {% if iq.idClient %} — {{ iq.idClient }}{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Stats bar ──────────────────────────────────────── -->
+    <div class="row g-2 mb-3">
+        <div class="col-6 col-sm-3">
+            <div class="card shadow-sm stat-card">
+                <div class="stat-value" id="statTotal">{{ total_items }}</div>
+                <div class="stat-label">Transformadores</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3">
+            <div class="card shadow-sm stat-card">
+                <div class="stat-value text-warning" id="statUnassigned">{{ unassigned_count }}</div>
+                <div class="stat-label">Sin cotizar</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3">
+            <div class="card shadow-sm stat-card">
+                <div class="stat-value text-info" id="statAssigned">{{ total_items|add:"-"|add:unassigned_count }}</div>
+                <div class="stat-label">Cotizados</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-3">
+            <div class="card shadow-sm stat-card">
+                <div class="stat-value" style="color:#fb6340;" id="statCols">{{ kanban_columns|length }}</div>
+                <div class="stat-label">Proveedores</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Kanban ──────────────────────────────────────────── -->
+    <div class="kanban-wrapper" id="kanbanBoard">
+
+        <!-- Columna: sin cotización (izquierda) -->
+        <div class="kanban-col col-unassigned">
+            <div class="col-header">
+                <h6><i class="fas fa-inbox me-1 text-warning"></i>Sin cotización</h6>
+                <span class="badge-count" id="countUnassigned">{{ unassigned_items|length }}</span>
+            </div>
+            <div class="kanban-dropzone"
+                 id="dropzone-unassigned"
+                 data-quote-id=""
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event)">
+                <div class="drop-placeholder"><i class="fas fa-arrow-down"></i> Soltar para desasignar</div>
+                {% for item in unassigned_items %}
+                <div class="kanban-item"
+                     id="item-{{ item.id }}"
+                     draggable="true"
+                     data-item-id="{{ item.id }}"
+                     ondragstart="handleDragStart(event)">
+                    <div class="item-title">{{ item.idTrafo|default:item.product|default:"—" }}</div>
+                    <div class="item-meta">
+                        Cant: {{ item.quantity|default:1 }}
+                        {% if item.idItem %}· <span class="text-info">Vinculado</span>{% endif %}
+                    </div>
+                    {% if item.price %}
+                    <div class="item-price">{{ item.price|floatformat:2 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Columnas de cotizaciones por proveedor -->
+        {% for col in kanban_columns %}
+        <div class="kanban-col {% if col.quote.is_approved %}col-approved{% endif %}"
+             id="col-{{ col.quote.id }}">
+            <div class="col-header">
+                <div>
+                    <h6>
+                        <i class="fas fa-truck me-1 {% if col.quote.is_approved %}text-success{% else %}text-secondary{% endif %}"></i>
+                        {{ col.quote.idSupplier|truncatechars:20 }}
+                    </h6>
+                    <div class="text-xs text-muted">{{ col.quote.shortDescription|default:""|truncatechars:30 }}</div>
+                </div>
+                <div class="d-flex flex-column align-items-end gap-1">
+                    <span class="badge-count">{{ col.items|length }}</span>
+                    {% if col.quote.is_approved %}
+                    <span class="badge badge-sm bg-gradient-success" style="font-size:.6rem;">OC</span>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Acciones de columna -->
+            <div class="px-2 pt-2 pb-1 d-flex gap-1 flex-wrap">
+                {% if not col.quote.is_approved %}
+                <button class="btn btn-xs btn-outline-success mb-0"
+                        onclick="approveQuote({{ col.quote.id }})"
+                        title="Aprobar esta cotización → Orden de Compra">
+                    <i class="fas fa-check me-1"></i>Aprobar
+                </button>
+                {% endif %}
+                <a href="{% url 'compras_app:send-supplier-quote-email' quote_pk=col.quote.id %}"
+                   class="btn btn-xs btn-outline-info mb-0"
+                   title="Enviar por email al proveedor">
+                    <i class="fas fa-envelope me-1"></i>Email
+                </a>
+            </div>
+            {% if col.total %}
+            <div class="px-3 pb-1 text-xs text-muted fw-bold">
+                Total: <span class="text-dark">{{ col.quote.get_typeCurrency_display }} {{ col.total|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            <div class="kanban-dropzone"
+                 id="dropzone-{{ col.quote.id }}"
+                 data-quote-id="{{ col.quote.id }}"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event)">
+                <div class="drop-placeholder"><i class="fas fa-arrow-down"></i> Soltar aquí</div>
+                {% for item in col.items %}
+                <div class="kanban-item"
+                     id="item-{{ item.id }}"
+                     draggable="true"
+                     data-item-id="{{ item.id }}"
+                     ondragstart="handleDragStart(event)">
+                    <div class="item-title">{{ item.idTrafo|default:item.product|default:"—" }}</div>
+                    <div class="item-meta">
+                        Cant: {{ item.quantity|default:1 }}
+                        {% if item.idItem %}· <span class="text-info">Vinculado</span>{% endif %}
+                    </div>
+                    {% if item.price %}
+                    <div class="item-price">{{ item.price|floatformat:2 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Botón: nueva columna de cotización -->
+        <div class="add-col-btn" id="btnAddCol" onclick="showNewColModal()">
+            <i class="fas fa-plus-circle fa-lg"></i>
+            <span>Nueva cotización<br><small>de proveedor</small></span>
+        </div>
+
+    </div><!-- /kanban-wrapper -->
+
+</div>
+
+<!-- ── Modal: nueva cotización de proveedor ──────────── -->
+<div class="modal fade" id="newColModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header border-0">
+                <h6 class="modal-title fw-bold">Nueva cotización de proveedor</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Proveedor *</label>
+                    <select class="form-control" id="newColSupplier">
+                        <option value="">— Seleccionar —</option>
+                        {% for s in suppliers %}
+                        <option value="{{ s.id }}">{{ s.tradeName|default:s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Descripción</label>
+                    <input type="text" class="form-control" id="newColDesc"
+                           placeholder="Ej: Cotización inicial transformadores...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Moneda</label>
+                    <select class="form-control" id="newColCurrency">
+                        <option value="0">PEN</option>
+                        <option value="1">USD</option>
+                        <option value="2">EUR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-sm bg-gradient-dark" id="btnCreateCol" onclick="createNewColumn()">
+                    <i class="fas fa-plus me-1"></i>Crear columna
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script>
+const CSRF = '{{ csrf_token }}';
+const REQ_PK = {{ req.id }};
+const CREATE_URL  = '{% url "compras_app:create-supplier-quote-col" req_pk=req.id %}';
+const ASSIGN_URL  = '{% url "compras_app:assign-transformer-item" %}';
+const APPROVE_URL_BASE = '/comercial/requerimientos/cotizacion-proveedor/';  // + <pk>/aprobar/
+
+let draggedItemId = null;
+let newColModal = null;
+
+/* ── Drag & Drop ──────────────────────────────────── */
+function handleDragStart(e) {
+    draggedItemId = e.currentTarget.dataset.itemId;
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+document.addEventListener('dragend', function(e) {
+    document.querySelectorAll('.kanban-item.dragging').forEach(el => el.classList.remove('dragging'));
+});
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.closest('.kanban-dropzone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+function handleDrop(e) {
+    e.preventDefault();
+    const zone = e.currentTarget.closest('.kanban-dropzone');
+    zone.classList.remove('drag-over');
+    const quoteId = zone.dataset.quoteId || null;
+    if (!draggedItemId) return;
+    assignItem(draggedItemId, quoteId, zone);
+    draggedItemId = null;
+}
+
+/* ── API calls ────────────────────────────────────── */
+function showLoading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('active', show);
+}
+function toast(msg, type='success') {
+    const t = document.createElement('div');
+    t.className = `alert alert-${type === 'error' ? 'danger' : 'success'} shadow-sm py-2 px-3 mb-1`;
+    t.style.cssText = 'font-size:.83rem;border-radius:.6rem;min-width:220px;';
+    t.textContent = msg;
+    document.getElementById('toastContainer').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function assignItem(itemId, quoteId, targetZone) {
+    showLoading(true);
+    fetch(ASSIGN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ item_ids: [parseInt(itemId)], quote_id: quoteId || null })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const card = document.getElementById('item-' + itemId);
+            if (card && targetZone) {
+                // Remove drop-placeholder logic
+                const placeholder = targetZone.querySelector('.drop-placeholder');
+                targetZone.insertBefore(card, placeholder);
+                updateCounts();
+                toast('Item movido correctamente');
+            } else {
+                location.reload();
+            }
+        } else {
+            toast(data.error || 'Error al mover item', 'error');
+        }
+    })
+    .catch(() => toast('Error de conexión', 'error'))
+    .finally(() => showLoading(false));
+}
+
+function updateCounts() {
+    const unassigned = document.querySelectorAll('#dropzone-unassigned .kanban-item').length;
+    document.getElementById('countUnassigned').textContent = unassigned;
+    document.getElementById('statUnassigned').textContent = unassigned;
+    const total = parseInt(document.getElementById('statTotal').textContent);
+    document.getElementById('statAssigned').textContent = total - unassigned;
+}
+
+/* ── Nueva columna ────────────────────────────────── */
+function showNewColModal() {
+    if (!newColModal) newColModal = new bootstrap.Modal(document.getElementById('newColModal'));
+    newColModal.show();
+}
+function createNewColumn() {
+    const supplierId = document.getElementById('newColSupplier').value;
+    if (!supplierId) { toast('Selecciona un proveedor', 'error'); return; }
+    const desc     = document.getElementById('newColDesc').value;
+    const currency = document.getElementById('newColCurrency').value;
+
+    showLoading(true);
+    const fd = new FormData();
+    fd.append('supplier_id', supplierId);
+    fd.append('description', desc);
+    fd.append('currency', currency);
+    fd.append('csrfmiddlewaretoken', CSRF);
+
+    fetch(CREATE_URL, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            newColModal.hide();
+            toast('Columna creada');
+            location.reload();
+        } else {
+            toast(data.error || 'Error al crear columna', 'error');
+        }
+    })
+    .catch(() => toast('Error de conexión', 'error'))
+    .finally(() => showLoading(false));
+}
+
+/* ── Aprobar cotización ───────────────────────────── */
+function approveQuote(quoteId) {
+    if (!confirm('¿Aprobar esta cotización como Orden de Compra?')) return;
+    showLoading(true);
+    fetch(APPROVE_URL_BASE + quoteId + '/aprobar/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+        body: '{}'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            toast(`Cotización aprobada — ${data.supplier}`);
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            toast(data.error || 'Error al aprobar', 'error');
+        }
+    })
+    .catch(() => toast('Error de conexión', 'error'))
+    .finally(() => showLoading(false));
+}
+</script>
+{% endblock JSscripts %}

@@ -1,296 +1,573 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block navbar_main %}Comercial{% endblock %}
-{% block navbar_appName %}Cotizaciones de Clientes{% endblock %}
-{% block navbar_Type %}detalle transformador{% endblock %}
+{% block navbar_appName %}Cotizaciones{% endblock %}
+{% block navbar_Type %}Detalle Transformador{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Gallery ─────────────────────────────────── */
+.main-img-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: .75rem;
+    background: #f8f9fa;
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.main-img-wrap img {
+    width: 100%;
+    max-height: 340px;
+    object-fit: contain;
+    border-radius: .75rem;
+    transition: opacity .2s;
+}
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(52,71,103,.65);
+    color: #fff;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: .85rem;
+    z-index: 5;
+    transition: background .2s;
+}
+.nav-arrow:hover { background: rgba(52,71,103,.9); }
+.nav-arrow.prev { left: .6rem; }
+.nav-arrow.next { right: .6rem; }
+.img-counter {
+    position: absolute;
+    bottom: .5rem;
+    right: .7rem;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .2rem .55rem;
+    border-radius: .9rem;
+}
+.no-img-placeholder { color: #adb5bd; font-size: 3rem; }
+/* ── Thumb strip ─────────────────────────────── */
+.thumb-strip {
+    display: flex;
+    gap: .45rem;
+    margin-top: .65rem;
+    flex-wrap: wrap;
+}
+.thumb-item {
+    flex: 0 0 58px;
+    height: 58px;
+    border-radius: .5rem;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    position: relative;
+}
+.thumb-item:hover { transform: scale(1.05); border-color: #8392ab; }
+.thumb-item.active { border-color: #344767; }
+.thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+.thumb-del {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(229,62,62,.85);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: .6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s;
+    line-height: 1;
+    padding: 0;
+}
+.thumb-item:hover .thumb-del { opacity: 1; }
+/* ── Doc buttons ─────────────────────────────── */
+.doc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .75rem;
+    border-radius: .5rem;
+    font-size: .78rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin: .2rem;
+    transition: filter .2s;
+}
+.doc-btn:hover { filter: brightness(.9); }
+.doc-btn-fat    { background: #d1fae5; color: #065f46; }
+.doc-btn-draw   { background: #dbeafe; color: #1e40af; }
+.doc-btn-plate  { background: #fef9c3; color: #854d0e; }
+.doc-btn-plateb { background: #ede9fe; color: #5b21b6; }
+/* ── Cost rows ───────────────────────────────── */
+.cost-row { display: flex; align-items: baseline; gap: .4rem; margin-bottom: .45rem; }
+.cost-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; min-width: 82px; }
+.cost-value { font-size: 1rem; font-weight: 700; }
+.cost-quo  { color: #344767; }
+.cost-int  { color: #17c1e8; }
+.cost-wo   { color: #e91e63; }
+/* ── Spec rows ───────────────────────────────── */
+.spec-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .32rem 0;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: .84rem;
+}
+.spec-row:last-child { border-bottom: none; }
+.spec-key { color: #8392ab; font-weight: 500; }
+.spec-val { font-weight: 700; color: #344767; text-align: right; }
+/* ── Link cards ──────────────────────────────── */
+.link-card {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .75rem;
+    background: #f8f9fa;
+    border-radius: .6rem;
+    text-decoration: none;
+    margin-bottom: .4rem;
+    transition: background .2s;
+    color: #344767;
+    font-weight: 600;
+    font-size: .84rem;
+}
+.link-card:hover { background: #e9ecef; color: #344767; }
+.badge-lvl { font-size: .68rem; padding: .22em .5em; border-radius: .4rem; }
+/* ── Timeline ────────────────────────────────── */
+.tl-item { display: flex; gap: .65rem; margin-bottom: .9rem; }
+.tl-dot {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .72rem;
+    margin-top: .1rem;
+}
+.tl-dot-ok   { background: #d1fae5; color: #065f46; }
+.tl-dot-prog { background: #dbeafe; color: #1e40af; }
+.tl-dot-warn { background: #fef3c7; color: #92400e; }
+.tl-date { font-size: .7rem; color: #adb5bd; }
+/* ── Misc ────────────────────────────────────── */
+.section-header {
+    font-size: .69rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #8392ab;
+    margin: .8rem 0 .4rem;
+}
+
+/* ── Delete modal confirm ────────────────────── */
+#delModal .modal-footer .btn-danger { min-width: 90px; }
+</style>
+{% endblock %}
 
 {% block panel-content %}
-
 <div class="container-fluid py-2">
-    <div class="row">
-        <div class="col-12">
-            
 
-            <div class="card">
-                <div class="card-body">
-
-                    <div class="d-block d-md-flex align-items-center mt-0">
-                        <div class="me-auto align-items-center">
-                            <h5 class="mb-0">Detalle de transformador</h5>
-                        </div>
-                        <span class="badge badge-lg badge-dot me-4 d-inline-block text-start">
-                            <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}"
-                                class="btn btn-outline-secondary me-2 text-dark mb-0 mt-lg-auto w-100">
-                                Volver
-                            </a>
-                        </span>
-                        <span class="badge badge-lg badge-dot me-4 d-inline-block text-start">
-                            <a href="{% url 'ventas_app:editar-item' item.id %}" class="btn btn-primary mb-0 mt-lg-auto w-100">
-                            Más Documentos
-                            </a>
-                        </span>
-                        <span class="badge badge-lg badge-dot me-4 d-inline-block text-start">
-                            <a class="btn bg-gradient-dark mb-0 mt-lg-auto w-100" href="{% url 'ventas_app:item_add_images' item.id %} ">Nueva imagen</a>
-                        </span>
-                        <span class="badge badge-lg badge-dot me-4 d-inline-block text-start">
-                            <a class="btn bg-gradient-warning mb-0 mt-lg-auto w-100" href="{% url 'ventas_app:actualizar-estado-item' item.id %} ">NuevO EVENTO</a>
-                        </span>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-xl-5 col-lg-6 text-center">
-                            <div class="item-image">
-                                {% if item.images.first %}
-                                <img class="w-100 border-radius-lg shadow-lg mx-auto"
-                                    src="{{ item.images.first.image.url }}" alt="{{ item.seq }}">
-                                <span class="image-badge">
-                                    {{ item.image_count }} / 5
-                                </span>
-                                {% else %}
-                                <div class="no-image"> - </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="d-flex mt-4 pt-2 align-items-center" itemscope=""
-                                itemtype="http://schema.org/ImageGallery" data-pswp-uid="1">
-
-                                {% for img in item.images.all %}
-                                <figure itemprop="associatedMedia" itemscope=""
-                                    itemtype="{{ img.image.url }}">
-                                    <a href="{{ img.image.url }}" itemprop="contentUrl" data-size="500x600">
-                                        <img class="w-100 min-height-100 max-height-100 border-radius-lg shadow"
-                                            src="{{ img.image.url }}" alt="Image description">
-                                    </a>
-                                </figure>
-                                {% empty %}
-                                <div class="h-100 text-center">
-                                    <span class="badge badge-primary">NO IMAGES</span>
-                                </div>
-                                
-                                {% endfor %}
-
-                            </div>
-
-                        </div>
-                        <div class="col-lg-3 mx-auto">
-                            
-                            <div class="info-item mb-3">
-                                <div class="info-item mb-3">
-                                        <small class="text-muted">Tipo</small>
-                                        <h5 class="fw-bold text-primary"> {{item.idTrafo}}</h5>
-                                    </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Número de Serie</small>
-                                        <h5 class="fw-bold text-primary">{{ item.seq|default:"N/A" }}</h5>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="info-item mb-3">
-                                        <small class="text-muted">Costo Unitario</small>
-                                        <p class="fw-bold fs-5 text-info">{{ item.idTrafoQuote.get_currency_display }} {{ item.unitCost|floatformat:2|default:"0.00" }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h5>Documentos:</h5>
-                            <div class="info-item mb-0">
-                                <div class="info-item mb-2">
-                                    {% if item.fat_file %}
-                                    <a href="{{ item.fat_file.url }}" data-bs-toggle="tooltip" title="Download file">
-                                        <span class="badge bg-gradient-success text-md">VIEW FAT FILE</span>
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="info-item mb-0">
-                                <div class="info-item mb-2">
-                                    {% if item.idTrafo.drawing_file %}
-                                    <a href="{{ item.idTrafo.drawing_file.url }}" data-bs-toggle="tooltip" title="Download file">
-                                        <span class="badge bg-gradient-success text-md">VIEW DRAWING FILE</span>
-                                    </a>
-                                    {% endif %}
-                            
-                                </div>
-                            </div>
-                            <div class="info-item mb-0">
-                                <div class="info-item mb-2">
-                                    {% if item.plate_file %}
-                                    <a href="{{ item.plate_file.url }}" data-bs-toggle="tooltip" title="Download file">
-                                        <span class="badge bg-gradient-success text-md">VIEW PLATE FILE</span>
-                                    </a>
-                                    {% endif %}
-                            
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 mx-auto">
-                            <div class="card-body p-3">
-                                <div class="timeline timeline-one-side">
-                                    {% for i in item.itemTracking.all %}
-                                    <div class="timeline-block mb-3">
-                                        <span class="timeline-step">
-                                            <i class="fas fa-calendar-plus text-dark"></i>
-                                        </span>
-                                        <div class="timeline-content">
-                                            <h6 class="text-dark text-sm font-weight-bold mb-0">
-                                                
-                                                {% if i.statusItem == "4"%}
-                                                <span class="badge bg-gradient-success"><i class="fas fa-cogs me-2"></i>{{i.get_statusItem_display|default:"-"}}</span>
-                                                {% else %}
-                                                <span class="badge bg-gradient-info"><i class="fas fa-cogs me-2"></i>{{i.get_statusItem_display|default:"-"}}</span>
-                                                {% endif %}
-
-                                                {% if i.statusPlate == "4"%}
-                                                <span class="badge bg-gradient-success"><i class="fas fa-cogs me-2"></i>{{i.get_statusPlate_display|default:"-"}}</span>
-                                                {% else %}
-                                                <span class="badge bg-gradient-dark"><i class="fas fa-cogs me-2"></i>{{i.get_statusPlate_display|default:"-"}}</span>
-                                                {% endif %}
-                                                
-                                            </h6>
-                                            <p class="text-secondary font-weight-normal text-xs mt-1 mb-0">{{i.created}}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+    <!-- ── Action bar ─────────────────────────────── -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}"
+           class="btn btn-sm btn-outline-secondary mb-0">
+            <i class="fas fa-arrow-left me-1"></i>Volver
+        </a>
+        <a href="{% url 'ventas_app:editar-item' item.id %}"
+           class="btn btn-sm btn-primary mb-0">
+            <i class="fas fa-edit me-1"></i>Documentos
+        </a>
+        <a href="{% url 'ventas_app:item_add_images' item.id %}"
+           class="btn btn-sm bg-gradient-dark mb-0">
+            <i class="fas fa-camera me-1"></i>Nueva Imagen
+        </a>
+        <a href="{% url 'ventas_app:actualizar-estado-item' item.id %}"
+           class="btn btn-sm bg-gradient-warning mb-0">
+            <i class="fas fa-plus-circle me-1"></i>Nuevo Evento
+        </a>
+        <div class="ms-auto text-sm text-muted">
+            Serie: <strong class="text-dark">{{ item.seq|default:"—" }}</strong>
         </div>
     </div>
 
-    <div class="row mt-4">
+    <!-- ── Main row ───────────────────────────────── -->
+    <div class="row g-3">
 
-        <!-- Especificaciones Técnicas -->
-        <div class="col-lg-6 col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-gradient-secondary p-3">
-                    <h5 class="card-title mb-0 text-white">
-                        <i class="fas fa-cogs me-2"></i>Especificaciones Técnicas
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="info-item mb-3">
-                                <small class="text-muted">Capacidad kVA</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_KVA_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">HV</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_HV_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">LV</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_LV_display|default:"N/A" }}</p>
-                            </div>
-                            
+        <!-- ── Image gallery ──────────────────────── -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-3">
+
+                    <!-- Main image + arrows -->
+                    <div class="main-img-wrap" id="mainImgWrap">
+                        {% if item.images.first %}
+                        <button class="nav-arrow prev" id="prevBtn" data-dir="-1" title="Anterior">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <img src="{{ item.images.first.image.url }}" id="mainImg" alt="{{ item.seq }}">
+                        <button class="nav-arrow next" id="nextBtn" data-dir="1" title="Siguiente">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="img-counter" id="imgCounter">1 / {{ item.images.count }}</span>
+                        {% else %}
+                        <div class="no-img-placeholder text-center py-4">
+                            <i class="fas fa-image d-block mb-2"></i>
+                            <span class="text-muted fs-6">Sin imágenes</span>
                         </div>
-                        <div class="col-md-4">
-                            <div class="info-item mb-3">
-                                <small class="text-muted">HZ</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_HZ_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">WINDING</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_WINDING_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">CONNECTION</small>
-                                <p class="fw-bold text-dark">{{ item.idTrafo.get_CONNECTION_display|default:"N/A" }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            
-                            <div class="info-item mb-3">
-                                <small class="text-muted">STANDARD</small>
-                                <p class="fw-bold">{{ item.idTrafo.get_STANDARD_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">Montaje</small>
-                                <p class="fw-bold">{{ item.idTrafo.get_MOUNTING_display|default:"N/A" }}</p>
-                            </div>
-                            <div class="info-item mb-3">
-                                <small class="text-muted">Enfriamiento</small>
-                                <p class="fw-bold">{{ item.idTrafo.get_COOLING_display|default:"N/A" }}</p>
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
+
+                    <!-- Thumbnail strip with delete overlays -->
+                    {% if item.images.count > 0 %}
+                    <div class="thumb-strip" id="thumbStrip">
+                        {% for img in item.images.all %}
+                        <div class="thumb-item {% if forloop.first %}active{% endif %}"
+                             id="thumb-{{ forloop.counter0 }}"
+                             data-idx="{{ forloop.counter0 }}">
+                            <img src="{{ img.image.url }}" alt="{{ img.description|default:'' }}">
+                            <button class="thumb-del"
+                                    data-del-url="{% url 'ventas_app:image_delete' item_pk=item.id pk=img.id %}"
+                                    title="Eliminar">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-2 d-flex align-items-center gap-2">
+                        <span class="badge badge-sm bg-gradient-secondary">
+                            {{ item.images.count }} / 15
+                        </span>
+                        {% if item.images.count < 15 %}
+                        <a href="{% url 'ventas_app:item_add_images' item.id %}"
+                           class="text-xs text-info fw-bold text-decoration-none">
+                            <i class="fas fa-plus-circle me-1"></i>Agregar más
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
                 </div>
             </div>
         </div>
 
-        <!-- Información de la Cotización -->
-        <div class="col-lg-6 col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-gradient-secondary p-3">
-                    <h5 class="card-title mb-0 text-white">
-                        <i class="fas fa-file-invoice-dollar me-2"></i>Información de Cotización
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="info-item mb-3">
-                                <small class="text-muted">Cotización Asociada</small>
-                                <p class="fw-bold">
-                                    <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}" 
-                                    class="text-decoration-none">
-                                        {{ item.idTrafoQuote.poNumber|default:item.idTrafoQuote.id }}
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="info-item">
-                                <small class="text-muted">PO</small>
-                                <p class="fw-bold">{{ item.idTrafoQuote.poNumber|default:"" }}</p>
-                            </div>
-                        </div>
+        <!-- ── Item info + docs ────────────────────── -->
+        <div class="col-xl-4 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-3">
+
+                    <div class="mb-3">
+                        <div class="section-header">Tipo de Transformador</div>
+                        <h5 class="fw-bold text-primary mb-0">{{ item.idTrafo }}</h5>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="info-item">
-                                <small class="text-muted">Fecha de Creación</small>
-                                <p class="fw-bold">{{ item.created|date:"d/m/Y H:i" }}</p>
-                            </div>
+                    <div class="section-header">Costos</div>
+                    <div class="mb-3">
+                        <div class="cost-row">
+                            <span class="cost-label">Cotización</span>
+                            <span class="cost-value cost-quo">
+                                {{ item.idTrafoQuote.get_currency_display }}
+                                {{ item.unitCost|floatformat:2|default:"—" }}
+                            </span>
                         </div>
+                        {% if item.unitCostInt %}
+                        <div class="cost-row">
+                            <span class="cost-label">IntQuote</span>
+                            <span class="cost-value cost-int">
+                                {{ item.idTrafoQuote.get_currency_display }}
+                                {{ item.unitCostInt|floatformat:2 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if item.unitCostWO %}
+                        <div class="cost-row">
+                            <span class="cost-label">Work Order</span>
+                            <span class="cost-value cost-wo">
+                                {{ item.idTrafoQuote.get_currency_display }}
+                                {{ item.unitCostWO|floatformat:2 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
 
-                        <div class="col-md-6">
-                            <div class="info-item mb-3">
-                                <small class="text-muted">Cliente</small>
-                                {% if item.idTrafoQuote.idClient %}
-                                <a href="{% url 'stakeholders_app:cliente-detalle' item.idTrafoQuote.idClient.id %}">
-                                    <p class="fw-bold">{{ item.idTrafoQuote.idClient|default:"" }}</p>
-                                </a>
+                    <div class="section-header">Documentos</div>
+                    <div class="mb-3">
+                        {% if item.fat_file %}
+                        <a href="{{ item.fat_file.url }}" target="_blank" class="doc-btn doc-btn-fat">
+                            <i class="fas fa-file-alt"></i> FAT File
+                        </a>
+                        {% endif %}
+                        {% if item.idTrafo.drawing_file %}
+                        <a href="{{ item.idTrafo.drawing_file.url }}" target="_blank" class="doc-btn doc-btn-draw">
+                            <i class="fas fa-drafting-compass"></i> Drawing
+                        </a>
+                        {% endif %}
+                        {% if item.plate_file %}
+                        <a href="{{ item.plate_file.url }}" target="_blank" class="doc-btn doc-btn-plate">
+                            <i class="fas fa-id-card"></i> Placa A
+                        </a>
+                        {% endif %}
+                        {% if item.plateB_file %}
+                        <a href="{{ item.plateB_file.url }}" target="_blank" class="doc-btn doc-btn-plateb">
+                            <i class="fas fa-id-card"></i> Placa B
+                        </a>
+                        {% endif %}
+                        {% if not item.fat_file and not item.idTrafo.drawing_file and not item.plate_file and not item.plateB_file %}
+                        <span class="text-muted text-sm">Sin documentos adjuntos</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="section-header">Vínculos</div>
+                    {% if item.idTrafoQuote %}
+                    <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}" class="link-card">
+                        <i class="fas fa-file-invoice text-info"></i>
+                        <span class="flex-fill">{{ item.idTrafoQuote.poNumber|default:item.idTrafoQuote.id }}</span>
+                        <span class="badge-lvl badge bg-gradient-info">QUO</span>
+                    </a>
+                    {% endif %}
+                    {% if item.idTrafoIntQuote %}
+                    <a href="{% url 'ventas_app:intquote-detail' item.idTrafoIntQuote.id %}" class="link-card">
+                        <i class="fas fa-file-import text-warning"></i>
+                        <span class="flex-fill">{{ item.idTrafoIntQuote }}</span>
+                        <span class="badge-lvl badge bg-gradient-warning">INT</span>
+                    </a>
+                    {% endif %}
+                    {% if item.idWorkOrder %}
+                    <a href="{% url 'ventas_app:workorder-detail' item.idWorkOrder.id %}" class="link-card">
+                        <i class="fas fa-tools text-danger"></i>
+                        <span class="flex-fill">{{ item.idWorkOrder }}</span>
+                        <span class="badge-lvl badge bg-gradient-danger">WO</span>
+                    </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Timeline ───────────────────────────── -->
+        <div class="col-xl-4 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-gradient-dark p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-history me-2"></i>Seguimiento
+                    </h6>
+                </div>
+                <div class="card-body p-3 overflow-auto" style="max-height:380px;">
+                    {% for ev in item.itemTracking.all %}
+                    <div class="tl-item">
+                        <div class="tl-dot {% if ev.statusItem == '4' %}tl-dot-ok{% elif ev.statusItem == '0' %}tl-dot-warn{% else %}tl-dot-prog{% endif %}">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="flex-fill">
+                            <div class="d-flex gap-1 flex-wrap mb-1">
+                                {% if ev.statusItem %}
+                                <span class="badge badge-sm {% if ev.statusItem == '4' %}bg-gradient-success{% else %}bg-gradient-info{% endif %}">
+                                    {{ ev.get_statusItem_display }}
+                                </span>
+                                {% endif %}
+                                {% if ev.statusPlate %}
+                                <span class="badge badge-sm {% if ev.statusPlate == '4' %}bg-gradient-success{% else %}bg-gradient-secondary{% endif %}">
+                                    {{ ev.get_statusPlate_display }}
+                                </span>
                                 {% endif %}
                             </div>
+                            <div class="tl-date">{{ ev.created|date:"d/m/Y H:i" }}</div>
                         </div>
                     </div>
-
-                    <div class="info-item mb-3">
-                        <small class="text-muted">Descripción</small>
-                        <p class="fw-bold">{{ item.idTrafoQuote.shortDescription|default:"Sin descripción" }}</p>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox d-block mb-2 fs-4"></i>
+                        Sin eventos
                     </div>
-                    
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
+    </div><!-- /main row -->
+
+    <!-- ── Bottom row ─────────────────────────────── -->
+    <div class="row g-3 mt-1">
+
+        <!-- Especificaciones técnicas -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-secondary p-3">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-microchip me-2"></i>Especificaciones Técnicas
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-0">
+                        <div class="col-md-4 pe-3">
+                            <div class="spec-row"><span class="spec-key">kVA</span><span class="spec-val">{{ item.idTrafo.get_KVA_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">HV</span><span class="spec-val">{{ item.idTrafo.get_HV_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">LV</span><span class="spec-val">{{ item.idTrafo.get_LV_display|default:"—" }}</span></div>
+                        </div>
+                        <div class="col-md-4 pe-3">
+                            <div class="spec-row"><span class="spec-key">Hz</span><span class="spec-val">{{ item.idTrafo.get_HZ_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Winding</span><span class="spec-val">{{ item.idTrafo.get_WINDING_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Connection</span><span class="spec-val">{{ item.idTrafo.get_CONNECTION_display|default:"—" }}</span></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="spec-row"><span class="spec-key">Standard</span><span class="spec-val">{{ item.idTrafo.get_STANDARD_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Montaje</span><span class="spec-val">{{ item.idTrafo.get_MOUNTING_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Enfriam.</span><span class="spec-val">{{ item.idTrafo.get_COOLING_display|default:"—" }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de cotización -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-secondary p-3">
+                    <h6 class="card-title mb-0 text-white">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Información de Cotización
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="spec-row"><span class="spec-key">Cotización</span>
+                                <a href="{% url 'ventas_app:cotizacion-detalle' item.idTrafoQuote.id %}" class="spec-val text-info text-decoration-none">
+                                    {{ item.idTrafoQuote.poNumber|default:item.idTrafoQuote.id }}
+                                </a>
+                            </div>
+                            <div class="spec-row"><span class="spec-key">PO</span><span class="spec-val">{{ item.idTrafoQuote.poNumber|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Creado</span><span class="spec-val">{{ item.created|date:"d/m/Y" }}</span></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="spec-row"><span class="spec-key">Cliente</span>
+                                {% if item.idTrafoQuote.idClient %}
+                                <a href="{% url 'stakeholders_app:cliente-detalle' item.idTrafoQuote.idClient.id %}" class="spec-val text-info text-decoration-none">
+                                    {{ item.idTrafoQuote.idClient }}
+                                </a>
+                                {% else %}<span class="spec-val">—</span>{% endif %}
+                            </div>
+                            <div class="spec-row"><span class="spec-key">Moneda</span><span class="spec-val">{{ item.idTrafoQuote.get_currency_display|default:"—" }}</span></div>
+                            <div class="spec-row"><span class="spec-key">Serie</span><span class="spec-val">{{ item.seq|default:"—" }}</span></div>
+                        </div>
+                    </div>
+                    {% if item.idTrafoQuote.shortDescription %}
+                    <div class="mt-2 p-2 bg-gray-100 border-radius-md">
+                        <small class="text-muted d-block mb-1">Descripción</small>
+                        <span class="text-sm fw-bold">{{ item.idTrafoQuote.shortDescription }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /bottom row -->
+
+</div>
+
+<!-- ── Delete confirm modal ────────────────────── -->
+<div class="modal fade" id="delModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold">Eliminar imagen</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-sm py-2">
+                ¿Confirmas que deseas eliminar esta imagen? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="delForm" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+
 {% endblock panel-content %}
 
 {% block JSscripts %}
+<script type="application/json" id="imgData">
+[{% for img in item.images.all %}{"url":"{{ img.image.url }}","id":"{{ img.id }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+<script>
+(function () {
+    const IMGS = JSON.parse(document.getElementById('imgData').textContent);
+    let current = 0;
 
+    function updateMain() {
+        if (!IMGS.length) return;
+        const mi      = document.getElementById('mainImg');
+        const counter = document.getElementById('imgCounter');
+        if (mi)      mi.src = IMGS[current].url;
+        if (counter) counter.textContent = (current + 1) + ' / ' + IMGS.length;
+        document.querySelectorAll('.thumb-item').forEach(function (t, i) {
+            t.classList.toggle('active', i === current);
+        });
+        const prev = document.getElementById('prevBtn');
+        const next = document.getElementById('nextBtn');
+        if (prev) prev.style.display = IMGS.length <= 1 ? 'none' : '';
+        if (next) next.style.display = IMGS.length <= 1 ? 'none' : '';
+    }
+
+    function shiftImg(dir) {
+        if (!IMGS.length) return;
+        current = (current + dir + IMGS.length) % IMGS.length;
+        updateMain();
+    }
+
+    // Arrow buttons (data-dir)
+    document.addEventListener('click', function (e) {
+        var arrow = e.target.closest('[data-dir]');
+        if (arrow) {
+            shiftImg(parseInt(arrow.dataset.dir, 10));
+            return;
+        }
+        // Thumbnail click
+        var thumb = e.target.closest('.thumb-item');
+        if (thumb && !e.target.closest('.thumb-del')) {
+            current = parseInt(thumb.dataset.idx, 10);
+            updateMain();
+            return;
+        }
+        // Delete button
+        var delBtn = e.target.closest('.thumb-del');
+        if (delBtn) {
+            e.stopPropagation();
+            document.getElementById('delForm').action = delBtn.dataset.delUrl;
+            new bootstrap.Modal(document.getElementById('delModal')).show();
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft')  shiftImg(-1);
+        if (e.key === 'ArrowRight') shiftImg(1);
+    });
+
+    updateMain();
+}());
+</script>
 {% endblock JSscripts %}

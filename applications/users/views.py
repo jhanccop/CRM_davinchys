@@ -50,7 +50,6 @@ class UserRegisterView(RHPermisoMixin,FormView):
             form.cleaned_data['password1'],
             full_name=form.cleaned_data['full_name'],
             last_name=form.cleaned_data['last_name'],
-            position=form.cleaned_data['position'],
             #is_active=form.cleaned_data['is_active'],
         )
         # enviar el codigo al email del user

@@ -302,7 +302,7 @@
                 </ul>
             </div>
             <div class="ms-auto text-start">
-                Bienvenio {{user}}, has ingresado con el perfil de  <strong>{{user.get_position_display}}</strong>
+                Bienvenio {{user}}, has ingresado con el perfil de  <strong>{{user.area_display}}</strong>
             </div>
 
             <div class="ms-auto text-center bg-white text-dark text-lg"style="width: 30%; border: 1px solid #000; border-radius: 10px; padding: 10px;">
@@ -496,7 +496,7 @@
                                             <span class="badge badge-secondary">PERMISO</span>
                                         </td>
                                         <td>
-                                            {% if user.position == "9" %}
+                                            {% if user.area == "9" %}
                                             {% if i.tag1 == "1" %}
                                             <span class="badge badge-success ms-auto">{{ i.get_tag1_display }}</span>
                                             {% else %}
@@ -506,10 +506,10 @@
                                             
                                         </td>
                                         <td>
-                                            {% if user.position == "9" %}
+                                            {% if user.area == "9" %}
                                             <a href="#" onclick="openApproveModal({{i.id}}, 'RRHH')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
                                             <a href="#" onclick="openDenyModal({{i.id}}, 'RRHH')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
-                                            {% elif user.position == "0" %}
+                                            {% elif user.area == "0" %}
                                             <a href="#" onclick="openApproveModal({{i.id}}, 'GERENCIA')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
                                             <a href="#" onclick="openDenyModal({{i.id}}, 'GERENCIA')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
                                             {% endif %}
@@ -565,7 +565,7 @@
                                             <span class="badge badge-secondary">PERMISO</span>
                                         </td>
                                         <td>
-                                            {% if user.position == "9" %}
+                                            {% if user.area == "9" %}
                                             {% if i.tag1 == "1" %}
                                             <span class="badge badge-success ms-auto">{{ i.get_tag1_display }}</span>
                                             {% else %}
@@ -575,10 +575,10 @@
                                             
                                         </td>
                                         <td>
-                                            {% if user.position == "9" %}
+                                            {% if user.area == "9" %}
                                             <a href="#" onclick="openApproveModal({{i.id}}, 'RRHH')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
                                             <a href="#" onclick="openDenyModal({{i.id}}, 'RRHH')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
-                                            {% elif user.position == "0" %}
+                                            {% elif user.area == "0" %}
                                             <a href="#" onclick="openApproveModal({{i.id}}, 'GERENCIA')"><span class="badge badge-success"><i class="fas fa-check text-md"></i></span></a>
                                             <a href="#" onclick="openDenyModal({{i.id}}, 'GERENCIA')"><span class="badge badge-primary"><i class="fas fa-times text-md"></i></span></a>
                                             {% endif %}

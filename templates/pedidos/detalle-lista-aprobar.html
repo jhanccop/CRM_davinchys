@@ -60,7 +60,7 @@
                                 </td>
                                 <td class="text-sm font-weight-bold mb-0 text-start text-dark"> {{ lista.paymentType }} </td>
                                 <td class="text-md font-weight-normal">
-                                    {% if user.position == "5" %} <!-- ADQUISICIONES -->
+                                    {% if user.area == "5" %} <!-- ADQUISICIONES -->
                                         {% if lista.tag1 == "0" %}
                                         <span class="badge bg-gradient-primary">{{lista.get_tag1_display}}</span>
                                         {% elif lista.tag1 == "1" %}
@@ -74,7 +74,7 @@
                                         {% endif %}
                                     {% endif %}
 
-                                    {% if user.position == "1" %} <!-- CONTABILIDAD -->
+                                    {% if user.area == "1" %} <!-- CONTABILIDAD -->
                                         {% if lista.tag2 == "0" %}
                                         <span class="badge bg-gradient-primary">{{lista.get_tag2_display}}</span>
                                         {% elif lista.tag2 == "1" %}
@@ -88,7 +88,7 @@
                                         {% endif %}
                                     {% endif %}
 
-                                    {% if user.position == "6" %} <!-- FINANZAS -->
+                                    {% if user.area == "6" %} <!-- FINANZAS -->
                                         {% if lista.tag3 == "0" %}
                                         <span class="badge bg-gradient-primary">{{lista.get_tag3_display}}</span>
                                         {% elif lista.tag3 == "1" %}
@@ -102,7 +102,7 @@
                                         {% endif %}
                                     {% endif %}
 
-                                    {% if user.position == "0" %} <!-- ADQUISICIONES -->
+                                    {% if user.area == "0" %} <!-- ADQUISICIONES -->
                                         {% if lista.tag4 == "0" %}
                                         <span class="badge bg-gradient-primary">{{lista.get_tag4_display}}</span>
                                         {% elif lista.tag4 == "1" %}

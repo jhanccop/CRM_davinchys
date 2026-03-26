@@ -13,7 +13,7 @@
 <div class="row">
   <div class="col-lg-6 col-12 d-flex ms-auto ">
 
-    {% if user.position == "0" or user.position == "5" or user.position == "6" or user.position == "7" or user.position == "1" %}
+    {% if user.area == "0" or user.area == "5" or user.area == "6" or user.area == "7" or user.area == "1" %}
     <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-de-solicitudes-por-aprobar' %}">
       <span>Pendientes por autorizar</span>
       <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{data.nRequest.count}}</span> </span>

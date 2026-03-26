@@ -1,0 +1,28 @@
+{% comment %}
+  Partial: _req_badge.html
+  Vars: status (lastStatus), area (lastArea)
+  Renders area + status badge for a requirement tracking entry.
+{% endcomment %}
+{% if area == "1" %}<span class="badge badge-sm bg-gradient-info me-1">Comercial</span>
+{% elif area == "2" %}<span class="badge badge-sm bg-gradient-primary me-1">Finanzas</span>
+{% elif area == "3" %}<span class="badge badge-sm bg-gradient-warning me-1">Producción</span>
+{% elif area == "4" %}<span class="badge badge-sm bg-gradient-dark me-1">Gerencia</span>
+{% elif area == "5" %}<span class="badge badge-sm bg-gradient-secondary me-1">Logística</span>
+{% elif area == "6" %}<span class="badge badge-sm bg-gradient-secondary me-1">RRHH</span>
+{% endif %}
+{% if status == "0" %}<span class="badge badge-sm badge-secondary">Creado</span>
+{% elif status == "1" %}<span class="badge badge-sm bg-gradient-info">Recibido</span>
+{% elif status == "2" %}<span class="badge badge-sm bg-gradient-success">Aprobado</span>
+{% elif status == "3" %}<span class="badge badge-sm bg-gradient-danger">Rechazado</span>
+{% elif status == "4" %}<span class="badge badge-sm bg-gradient-warning">Observado</span>
+{% elif status == "5" %}<span class="badge badge-sm bg-gradient-primary">Solicitado</span>
+{% elif status == "6" %}<span class="badge badge-sm bg-gradient-secondary">Enviado a prov.</span>
+{% elif status == "7" %}<span class="badge badge-sm bg-gradient-info">Cotizado</span>
+{% elif status == "8" %}<span class="badge badge-sm bg-gradient-warning">Recep. parcial</span>
+{% elif status == "9" %}<span class="badge badge-sm bg-gradient-success">Recep. total</span>
+{% elif status == "10" %}<span class="badge badge-sm bg-gradient-dark">Facturado</span>
+{% elif status == "11" %}<span class="badge badge-sm bg-gradient-warning">Pago parcial</span>
+{% elif status == "12" %}<span class="badge badge-sm bg-gradient-success">Pago total</span>
+{% elif status == "13" %}<span class="badge badge-sm bg-gradient-success">Completado</span>
+{% else %}<span class="badge badge-sm badge-secondary">—</span>
+{% endif %}

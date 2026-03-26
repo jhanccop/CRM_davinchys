@@ -1,463 +1,515 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block navbar_main %}Comercial{% endblock %}
 {% block navbar_appName %}Dashboard{% endblock %}
-{% block navbar_Type %}Principal{% endblock %}
+{% block navbar_Type %}Panel Principal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/flatpickr.min.css' %}">
+<style>
+.kpi-card { border-radius: .75rem; overflow: hidden; }
+.kpi-card .card-header { padding: .85rem 1rem; }
+.kpi-icon { width: 44px; height: 44px; border-radius: .6rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.kpi-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #8392ab; }
+.kpi-value { font-size: 1.45rem; font-weight: 800; line-height: 1.1; color: #344767; }
+.kpi-sub   { font-size: .75rem; color: #8392ab; margin-top: .15rem; }
+.kpi-foot  { font-size: .75rem; padding: .45rem 1rem; border-top: 1px solid rgba(0,0,0,.06); }
+.kpi-foot a { color: #344767; text-decoration: none; font-weight: 600; }
+.kpi-foot a:hover { color: #17c1e8; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: .35rem; flex-shrink: 0; }
+.dot-ok    { background: #82d616; }
+.dot-warn  { background: #fbcf33; }
+.dot-info  { background: #17c1e8; }
+.dot-muted { background: #8392ab; }
+.dot-danger{ background: #ea0606; }
+
+.tbl-row-link td { cursor: pointer; }
+.tbl-row-link:hover td { background: #f8f9fa; }
+
+.badge-status { font-size: .7rem; padding: .25em .6em; border-radius: .4rem; font-weight: 700; }
+
+.section-title {
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #8392ab;
+    margin-bottom: .6rem;
+}
+</style>
+{% endblock %}
 
 {% block panel-content %}
+<div class="container-fluid py-2">
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-4 col-md-2 mb-2 d-flex flex-column justify-content-center">
-      <h2 class="text-2xl font-semibold mb-1">Panel Comercial</h2>
-      <p class="text-sm text-gray-500 mb-0">Visión general de compras</p>
-      <p class="text-sm text-gray-500 mb-0">ventas, pagos y cobranzas</p>
-    </div>
+    <!-- ── Header + filter ───────────────────────────────── -->
+    <div class="row g-3 mb-3 align-items-stretch">
 
-    <div class="col-lg-4 col-md-5 mb-4">
-      <div class="card mb-0">
-        <div class="card-body p-3 mb-0">
-          <h6 class="mb-0">Acciones Urgentes</h6>
-          <div class="align-items-center mb-0 mt-2">
-
-            <a type="button" class="btn btn-primary w-100" href="{% url 'compras_app:list_requirement' %}">
-              <span>Cotizaciones por aprobar</span>
-              <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
-            </a>
-            <a type="button" class="btn btn-primary w-100 mb-0" href="{% url 'compras_app:list_requirement' %}">
-              <span>Adquisiones por aprobar</span>
-              <span class="badge badge-sm badge-circle badge-danger border border-white border-2">0</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4 col-md-5 mb-4">
-      <div class="card mb-0 h-100">
-        <div class="card-body p-3 mb-0">
-          <h6 class="mb-0 ">Filtro por fecha</h6>
-          <form method="GET" class="">{% csrf_token %}
-            <div class="input-group input-group-outline mb-2">
-              <input class="form-control datetimepicker text-center text-dark" value="{{documentos.intervalDate}}"
-                placeholder="today" id="dateKword" name="dateKword">
+        <div class="col-lg-5 col-md-6 d-flex flex-column justify-content-center">
+            <h4 class="fw-bold mb-1">Panel Comercial</h4>
+            <p class="text-sm text-muted mb-2">Resumen de cotizaciones, POs, órdenes de compra e ítems</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'ventas_app:cotizaciones-lista' %}" class="btn btn-sm btn-outline-info mb-0">
+                    <i class="fas fa-file-invoice me-1"></i>Cotizaciones
+                </a>
+                <a href="{% url 'ventas_app:po-lista' %}" class="btn btn-sm btn-outline-primary mb-0">
+                    <i class="fas fa-file-contract me-1"></i>POs
+                </a>
+                <a href="{% url 'ventas_app:workorder-lista' %}" class="btn btn-sm btn-outline-warning mb-0">
+                    <i class="fas fa-tools me-1"></i>Work Orders
+                </a>
+                <a href="{% url 'compras_app:list_requirement' %}" class="btn btn-sm btn-outline-secondary mb-0">
+                    <i class="fas fa-shopping-cart me-1"></i>Compras
+                </a>
             </div>
-            <button class="btn bg-gradient-primary mb-0 w-100" type="submit"> Filtrar </button>
-          </form>
         </div>
-      </div>
-    </div>
 
-  </div>
-
-  <div class="row">
-
-      <div class="col-lg-3 col-md-6 col-sm-6">
-          <div class="card  mb-2">
-              <div class="card-header p-2 ps-3">
-                  <div class="d-flex justify-content-between">
-                      <div>
-                          <p class="text-sm mb-0 text-capitalize text-dark"> total por pagar</p>
-                          <h6 class="mb-0 text-primary">PEN 0.00</h6>
-                          <h6 class="mb-0 text-primary">USD 0.00</h6>
-                      </div>
-                      <div class="icon icon-md icon-shape bg-gradient-primary shadow-dark shadow text-center border-radius-lg">
-                          <i class="fas fa-arrow-down  opacity-10"></i>
-                      </div>
-                  </div>
-              </div>
-              <hr class="dark horizontal my-0">
-              <div class="card-footer p-2 ps-3">
-                <a href="">
-                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-                </a>
-              </div>
-          </div>
-      </div>
-
-
-      <div class="col-lg-3 col-md-6 col-sm-6">
-          <div class="card  mb-2">
-              <div class="card-header p-2 ps-3">
-                  <div class="d-flex justify-content-between">
-                      <div>
-                          <p class="text-sm mb-0 text-capitalize text-dark">total por cobrar</p>
-                          <h6 class="mb-0 text-success">PEN 0.00</h6>
-                          <h6 class="mb-0 text-success">USD 0.00</h6>
-                      </div>
-                      <div
-                          class="icon icon-md icon-shape bg-gradient-success shadow-dark shadow text-center border-radius-lg">
-                          <i class="fas fa-arrow-up  opacity-10"></i>
-                      </div>
-                  </div>
-              </div>
-              <hr class="dark horizontal my-0">
-              <div class="card-footer p-2 ps-3">
-                <a href="">
-                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-                </a>
-              </div>
-          </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6 col-sm-6">
-          <div class="card  mb-2">
-              <div class="card-header p-2 ps-3">
-                  <div class="d-flex justify-content-between">
-                      <div>
-                          <p class="text-sm mb-0 text-capitalize">Pedidos</p>
-                          <h6 class="mb-0">PEND: 0</h6>
-                          <h6 class="mb-0">COMP: 0</h6>
-                      </div>
-                      <div
-                          class="icon icon-md icon-shape bg-gradient-secondary shadow-dark shadow text-center border-radius-lg">
-                          <i class="fas fa-trailer opacity-10"></i>
-                      </div>
-                  </div>
-              </div>
-              <hr class="dark horizontal my-0">
-              <div class="card-footer p-2 ps-3">
-                <a href="">
-                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-                </a>
-              </div>
-          </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6 col-sm-6">
-          <div class="card  mb-2">
-              <div class="card-header p-2 ps-3">
-                  <div class="d-flex justify-content-between">
-                      <div>
-                          <p class="text-sm mb-0 text-capitalize">Ordenes de compra</p>
-                          <h6 class="mb-0">PEND: 0</h6>
-                          <h6 class="mb-0">COMP: 0</h6>
-                      </div>
-                      <div
-                          class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
-                          <i class="fas fa-cart-plus opacity-10"></i>
-                      </div>
-                  </div>
-              </div>
-              <hr class="dark horizontal my-0">
-              <div class="card-footer p-2 ps-3">
-                <a href="{% url 'compras_app:lista_ordenescompra' %}">
-                  <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">Más </span>información</p>
-                </a>
-              </div>
-          </div>
-      </div>
-
-  </div>
-
-  <div class="row pt-3">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header pb-0 ">
-          <div class="row align-middle align-items-center">
-            <div class="col-lg-6 col-md-3">
-              <h5 class="mb-0">Ordenes de compra</h5>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-3">
+                    <p class="section-title mb-2">Filtro de período</p>
+                    <form method="GET">
+                        <div class="input-group input-group-outline mb-2">
+                            <input class="form-control datetimepicker text-center text-dark"
+                                   value="{{ documentos.intervalDate }}"
+                                   placeholder="Seleccionar rango"
+                                   id="dateKword" name="dateKword">
+                        </div>
+                        <button class="btn bg-gradient-primary mb-0 w-100 btn-sm" type="submit">
+                            <i class="fas fa-filter me-1"></i>Aplicar filtro
+                        </button>
+                    </form>
+                </div>
             </div>
-          </div>
         </div>
-        <div class="card-body pt-0 px-0 pb-2">
-          <div class="table-responsive p-0">
-            <table class="table table-flush mb-0 align-items-center" id="datatable-move">
-              <thead class="thead-light">
-                <tr>
-                  <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
-                  </th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Código</th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Solicitado por</th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total </th>
-                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Estado </th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in documentos.requerimientos %}
-                <tr>
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
-                    </div>
-                  </td>
 
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                        <h6 class="mb-0 text-sm">REQ-{{t.id}} </h6>
-                      </a>
-                    </div>
-                  </td>
-
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{ t.idPetitioner.get_position_display }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-start">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-end">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-end">
-                    {% if t.lastStatus == "5" %}
-                    <span class="badge badge-primary">{{ t.lastStatusDisplay }}</span>
-                    {% elif t.lastStatus == "12" %}
-                    <span class="badge badge-success">{{ t.lastStatusDisplay }}</span>
-                    {% else %}
-                    <span class="badge badge-secondary">{{ t.lastStatusDisplay }}</span>
-                    {% endif %}
-
-                  </td>
-
-                  <td>
-                    <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
-                      data-bs-placement="left" aria-expanded="false">
-                      <i class="fas fa-bars text-lg text-dark"></i>
+        <div class="col-lg-3 col-md-12">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body p-3">
+                    <p class="section-title mb-2">Acceso rápido</p>
+                    <a href="{% url 'ventas_app:cotizacion-nuevo' %}" class="btn btn-sm bg-gradient-success w-100 mb-2">
+                        <i class="fas fa-plus me-1"></i>Nueva Cotización
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
-                      aria-labelledby="dropdownMarketingCard" style="">
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:edit_requirement' t.id %}"> Cotizar con proveedores </a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:nueva_cotizacion_id' t.id %}"> Registrar cotización </a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Adjuntar Factura / Boleta / RHE </a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher de pago</a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Registrar producto o servicio </a></li>
-                    </ul>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row pt-3">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header pb-0 ">
-          <div class="row align-middle align-items-center">
-            <div class="col-lg-6 col-md-3">
-              <h5 class="mb-0">Lista de POs</h5>
-            </div>
-          </div>
-        </div>
-        <div class="card-body pt-0 px-0 pb-2">
-          <div class="table-responsive p-0">
-            <table class="table table-flush mb-0 align-items-center" id="datatable-pedidos">
-              <thead class="thead-light">
-                <tr>
-                  <th class="text-uppercase text-secondary text-xs text-start font-weight-bolder opacity-7 ps-2">Fecha
-                  </th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Contenedor</th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">PO</th>
-                  <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-2">Descripcion</th>
-                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Monto total
-                  </th>
-                  <th class="text-uppercase text-secondary text-xs text-end font-weight-bolder opacity-7 ps-2">Seguimiento
-                  </th>
-                  <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in documentos.pedidos %}
-                <tr>
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-sm">{{ t.created|date:'d-M-Y' }}</h6>
-                    </div>
-                  </td>
-
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <a href="{% url 'compras_app:detail_requirement' t.id %}">
-                        <h6 class="mb-0 text-sm">PO-{{t.id}} </h6>
-                      </a>
-                    </div>
-                  </td>
-
-                  <td class="text-sm">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.idPetitioner }} - {{t.idPetitioner.get_position_display }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-start">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{ t.description }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-end">
-                    <div class="d-flex flex-column justify-content-center">
-                      <p class="text-sm font-weight-normal text-secondary mb-0">{{t.get_currency_display}} {{ t.totalPrice }}</p>
-                    </div>
-                  </td>
-
-                  <td class="text-sm text-end">
-                    {% if t.lastArea == "10" %}
-                    {%if t.lastStatus == "2" %}
-                    <span class="badge badge-success">Jefe de área - aprobado</span>
-                    {% elif t.lastStatus == "3" %}
-                    <span class="badge badge-primary">Jefe de área - rechazado</span>
-                    {% else %}
-                    <span class="badge badge-secondary">Jefe de área - espera</span>
-                    {% endif %}
-
-                    {% elif t.lastArea == "4" %}
-                    {%if t.lastStatus == "2" %}
-                    <span class="badge badge-success">Gerencia</span>
-                    {% elif t.lastStatus == "3" %}
-                    <span class="badge badge-primary">Gerencia</span>
-                    {% else %}
-                    <span class="badge badge-secondary">Gerencia</span>
-                    {% endif %}
-
-                    {% elif t.lastArea == "1" %}
-                    {%if t.lastStatus == "2" %}
-                    <span class="badge badge-success">Compras</span>
-                    {% elif t.lastStatus == "3" %}
-                    <span class="badge badge-primary">Compras</span>
-                    {% else %}
-                    <span class="badge badge-secondary">Compras</span>
-                    {% endif %}
-
-                    {% elif t.lastArea == "3" %}
-                    <span class="badge badge-secondary">Compras</span>
-                    {% elif t.lastArea == "4" %}
-                    <span class="badge badge-secondary">Contabilidad</span>
-                    {% elif t.lastArea == "5" %}
-                    <span class="badge badge-secondary">Finanzas</span>
-                    {% endif %}
-
-                    {%if t.lastStatus == "1" %}
-                    <span class="badge badge-secondary">Recibido</span>
-                    {% elif t.lastStatus == "2" %}
-                    <span class="badge badge-success">Aprobado</span>
-                    {% elif t.lastStatus == "3" %}
-                    <span class="badge badge-secondary">Rechazado</span>
-                    {% elif t.lastStatus == "4" %}
-                    <span class="badge badge-warning">Observado</span>
-                    {% elif t.lastStatus == "5" %}
-                    <span class="badge badge-success">Completado</span>
-                    {% endif %}
-
-                  </td>
-
-                  <td>
-                    <a href="javascript:;" class="text-secondary" id="dropdownMarketingCard" data-bs-toggle="dropdown"
-                      data-bs-placement="left" aria-expanded="false">
-                      <i class="fas fa-bars text-lg text-dark"></i>
+                    <a href="{% url 'compras_app:create_requirement' %}" class="btn btn-sm bg-gradient-dark w-100 mb-0">
+                        <i class="fas fa-plus me-1"></i>Nueva Orden de Compra
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-lg-start bg-gradient-light"
-                      aria-labelledby="dropdownMarketingCard" style="">
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Cotizacion </a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:crear_compra_id' t.id %}"> Agregar Factura / Boleta / RHE </a></li>
-                      <li><a class="dropdown-item border-radius-md font-weight-bold text-dark"
-                          href="{% url 'compras_app:edit_requirement' t.id %}"> Agregar Voucher </a></li>
-                    </ul>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+                </div>
+            </div>
         </div>
-      </div>
+
     </div>
-  </div>
+
+    <!-- ── KPI row 1: Ventas ──────────────────────────────── -->
+    <p class="section-title">Ventas — período seleccionado</p>
+    <div class="row g-3 mb-3">
+
+        <!-- Cotizaciones -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e3f2fd;">
+                        <i class="fas fa-file-invoice text-info"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Cotizaciones</div>
+                        <div class="kpi-value">{{ documentos.total_quotes }}</div>
+                        <div class="kpi-sub">sin PO en el período</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'ventas_app:cotizaciones-lista' %}">
+                        Ver todas <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- POs -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e8f5e9;">
+                        <i class="fas fa-file-contract text-success"></i>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="kpi-label">POs</div>
+                        <div class="d-flex align-items-baseline gap-3">
+                            <div>
+                                <div class="kpi-value">{{ documentos.pos_total }}</div>
+                                <div class="kpi-sub">total</div>
+                            </div>
+                            <div>
+                                <span class="badge bg-gradient-info" style="font-size:.68rem;">
+                                    {{ documentos.pos_activas }} activas
+                                </span>
+                                <span class="badge bg-gradient-success" style="font-size:.68rem;">
+                                    {{ documentos.pos_completadas }} compl.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-foot d-flex gap-3">
+                    <span class="text-muted">PEN <strong>{{ documentos.pos_pen|floatformat:0 }}</strong></span>
+                    <span class="text-muted">USD <strong>{{ documentos.pos_usd|floatformat:0 }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- IntQuotes -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#fff8e1;">
+                        <i class="fas fa-file-import text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">IntQuotes</div>
+                        <div class="kpi-value">{{ documentos.total_intquotes }}</div>
+                        <div class="kpi-sub">cotizaciones internas</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'ventas_app:intquote-lista' %}">
+                        Ver todas <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#fce4ec;">
+                        <i class="fas fa-tools text-danger"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Work Orders</div>
+                        <div class="kpi-value">{{ documentos.total_wo }}</div>
+                        <div class="kpi-sub">órdenes de trabajo</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'ventas_app:workorder-lista' %}">
+                        Ver todas <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── KPI row 2: Operaciones ─────────────────────────── -->
+    <p class="section-title">Operaciones — ítems y compras</p>
+    <div class="row g-3 mb-4">
+
+        <!-- Items en proceso -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e8eaf6;">
+                        <i class="fas fa-cogs" style="color:#5c6bc0;"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Ítems en proceso</div>
+                        <div class="kpi-value">{{ documentos.items_en_proceso }}</div>
+                        <div class="kpi-sub">fabricando / en ruta</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'ventas_app:transformer-search' %}">
+                        Seguimiento <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items entregados -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e8f5e9;">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Ítems entregados</div>
+                        <div class="kpi-value">{{ documentos.items_entregados }}</div>
+                        <div class="kpi-sub">estado: entregado</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'ventas_app:transformer-search' %}">
+                        Ver historial <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compras pendientes -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm">
+                <div class="card-header d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#fff3e0;">
+                        <i class="fas fa-shopping-cart" style="color:#fb8c00;"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Órd. de compra</div>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <div class="kpi-value">{{ documentos.req_total }}</div>
+                            <span class="badge bg-gradient-warning" style="font-size:.68rem;">
+                                {{ documentos.req_pendientes }} pend.
+                            </span>
+                        </div>
+                        <div class="kpi-sub">{{ documentos.req_completados }} completadas</div>
+                    </div>
+                </div>
+                <div class="kpi-foot">
+                    <a href="{% url 'compras_app:list_requirement' %}">
+                        Ver todas <i class="fas fa-arrow-right ms-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Búsqueda rápida por serie -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card kpi-card shadow-sm h-100">
+                <div class="card-body p-3 d-flex flex-column justify-content-center">
+                    <p class="section-title mb-2">Buscar transformador</p>
+                    <form method="GET" action="{% url 'ventas_app:detail-serial-number' %}">
+                        <div class="input-group input-group-outline mb-2">
+                            <input class="form-control text-dark" name="kword" placeholder="Número de serie…">
+                        </div>
+                        <button class="btn btn-sm bg-gradient-secondary w-100 mb-0" type="submit">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Tabla POs ──────────────────────────────────────── -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header pb-0 d-flex align-items-center">
+                    <h5 class="mb-0 me-auto">
+                        <i class="fas fa-file-contract text-success me-2"></i>
+                        Purchase Orders
+                        <span class="badge bg-gradient-success ms-2" style="font-size:.75rem;">{{ documentos.pos_total }}</span>
+                    </h5>
+                    <a href="{% url 'ventas_app:po-lista' %}" class="btn btn-sm btn-outline-secondary mb-0">
+                        Ver todas
+                    </a>
+                </div>
+                <div class="card-body pt-2 px-0 pb-0">
+                    <div class="table-responsive">
+                        <table class="table table-flush mb-0 align-middle tbl-sm" id="tbl-pos">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-3">Fecha</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">PO / Ref.</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Cliente</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Monto</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-center">Estado</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-1"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in documentos.pedidos %}
+                                <tr class="tbl-row-link" onclick="location.href='{% url 'ventas_app:cotizacion-detalle' t.id %}'">
+                                    <td class="ps-3 text-sm text-secondary">{{ t.created|date:'d/m/Y' }}</td>
+                                    <td>
+                                        <span class="fw-bold text-dark text-sm">
+                                            {{ t.poNumber|default:"—" }}
+                                        </span>
+                                        {% if t.poNumber %}
+                                        <div class="text-xs text-muted">#{{ t.id }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-sm text-secondary">{{ t.idClient|default:"—" }}</td>
+                                    <td class="text-sm text-secondary" style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        {{ t.shortDescription|default:"—" }}
+                                    </td>
+                                    <td class="text-sm text-end fw-bold">
+                                        {{ t.get_currency_display }}
+                                        {{ t.amount|floatformat:2|default:"0.00" }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if t.lastStatus == '12' %}
+                                        <span class="badge badge-status bg-gradient-success">Completado</span>
+                                        {% elif t.lastStatus == '10' or t.lastStatus == '11' %}
+                                        <span class="badge badge-status bg-gradient-info">{{ t.lastStatusDisplay }}</span>
+                                        {% elif t.lastStatus == '5' or t.lastStatus == '6' %}
+                                        <span class="badge badge-status bg-gradient-warning">{{ t.lastStatusDisplay }}</span>
+                                        {% elif t.lastStatus == '2' %}
+                                        <span class="badge badge-status bg-gradient-primary">Aprobado</span>
+                                        {% elif t.lastStatus == '3' %}
+                                        <span class="badge badge-status bg-gradient-danger">Rechazado</span>
+                                        {% elif t.lastStatus %}
+                                        <span class="badge badge-status bg-gradient-secondary">{{ t.lastStatusDisplay }}</span>
+                                        {% else %}
+                                        <span class="badge badge-status bg-gradient-secondary">Creado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td onclick="event.stopPropagation();">
+                                        <a href="{% url 'ventas_app:cotizacion-detalle' t.id %}" class="btn btn-link btn-sm p-0 mb-0 text-secondary" title="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox d-block mb-1 fs-5"></i>
+                                        Sin POs en el período seleccionado
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tabla Órdenes de Compra ────────────────────────── -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header pb-0 d-flex align-items-center">
+                    <h5 class="mb-0 me-auto">
+                        <i class="fas fa-shopping-cart text-warning me-2"></i>
+                        Órdenes de Compra
+                        <span class="badge bg-gradient-warning ms-2" style="font-size:.75rem;">{{ documentos.req_total }}</span>
+                    </h5>
+                    <a href="{% url 'compras_app:list_requirement' %}" class="btn btn-sm btn-outline-secondary mb-0">
+                        Ver todas
+                    </a>
+                </div>
+                <div class="card-body pt-2 px-0 pb-0">
+                    <div class="table-responsive">
+                        <table class="table table-flush mb-0 align-middle tbl-sm" id="tbl-reqs">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-3">Fecha</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Código</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Solicitante</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Monto</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-center">Estado</th>
+                                    <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-1"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in documentos.requerimientos %}
+                                <tr class="tbl-row-link" onclick="location.href='{% url 'compras_app:detail_requirement' t.id %}'">
+                                    <td class="ps-3 text-sm text-secondary">{{ t.created|date:'d/m/Y' }}</td>
+                                    <td>
+                                        <span class="fw-bold text-dark text-sm">REQ-{{ t.id }}</span>
+                                    </td>
+                                    <td class="text-sm text-secondary">
+                                        {{ t.idPetitioner }}
+                                        {% if t.idPetitioner.area_display %}
+                                        <div class="text-xs text-muted">{{ t.idPetitioner.area_display }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-sm text-secondary" style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        {{ t.description|default:"—" }}
+                                    </td>
+                                    <td class="text-sm text-end fw-bold">
+                                        {{ t.get_currency_display }}
+                                        {{ t.totalPrice|floatformat:2|default:"0.00" }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if t.lastStatus == '12' %}
+                                        <span class="badge badge-status bg-gradient-success">Completado</span>
+                                        {% elif t.lastStatus == '5' %}
+                                        <span class="badge badge-status bg-gradient-primary">{{ t.lastStatusDisplay }}</span>
+                                        {% elif t.lastStatus == '2' %}
+                                        <span class="badge badge-status bg-gradient-info">Aprobado</span>
+                                        {% elif t.lastStatus == '3' %}
+                                        <span class="badge badge-status bg-gradient-danger">Rechazado</span>
+                                        {% elif t.lastStatus == '4' %}
+                                        <span class="badge badge-status bg-gradient-warning">Observado</span>
+                                        {% elif t.lastStatus %}
+                                        <span class="badge badge-status bg-gradient-secondary">{{ t.lastStatusDisplay }}</span>
+                                        {% else %}
+                                        <span class="badge badge-status bg-gradient-secondary">Creado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td onclick="event.stopPropagation();">
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-link btn-sm p-0 mb-0 text-secondary"
+                                               data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-end bg-gradient-light shadow">
+                                                <li>
+                                                    <a class="dropdown-item text-sm fw-bold text-dark"
+                                                       href="{% url 'compras_app:detail_requirement' t.id %}">
+                                                        <i class="fas fa-eye me-2 text-info"></i>Ver detalle
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-sm fw-bold text-dark"
+                                                       href="{% url 'compras_app:edit_requirement' t.id %}">
+                                                        <i class="fas fa-edit me-2 text-warning"></i>Editar / Cotizar
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-sm fw-bold text-dark"
+                                                       href="{% url 'compras_app:nueva_cotizacion_id' t.id %}">
+                                                        <i class="fas fa-file-alt me-2 text-primary"></i>Registrar cotización
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-sm fw-bold text-dark"
+                                                       href="{% url 'compras_app:crear_compra_id' t.id %}">
+                                                        <i class="fas fa-receipt me-2 text-success"></i>Adjuntar factura / RHE
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox d-block mb-1 fs-5"></i>
+                                        Sin órdenes de compra en el período seleccionado
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
-
 {% endblock panel-content %}
 
 {% block JSscripts %}
-
 <script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
 <script>
-  /* PROYECTOS */
-  const dataTableclientes= new simpleDatatables.DataTable("#datatable-move", {
-    searchable: true,
-    fixedHeight: false,
-    perPage: 5
-  });
-
-  document.querySelectorAll(".export").forEach(function (el) {
-    el.addEventListener("click", function (e) {
-      var type = el.dataset.type;
-
-      var data = {
-        type: type,
-        filename: "documentos",
-      };
-
-      if (type === "csv") {
-        data.columnDelimiter = ",";
-      }
-
-      dataTableclientes.export(data);
-    });
-  });
-
-</script>
-
-<script>
-  /* PROYECTOS */
-  const dataTablePedidos = new simpleDatatables.DataTable("#datatable-pedidos", {
-    searchable: true,
-    fixedHeight: false,
-    perPage: 5
-  });
-
-  document.querySelectorAll(".export").forEach(function (el) {
-    el.addEventListener("click", function (e) {
-      var type = el.dataset.type;
-
-      var data = {
-        type: type,
-        filename: "pedidos",
-      };
-
-      if (type === "csv") {
-        data.columnDelimiter = ",";
-      }
-
-      dataTablePedidos.export(data);
-    });
-  });
-
+new simpleDatatables.DataTable("#tbl-pos",  { searchable: true, fixedHeight: false, perPage: 8 });
+new simpleDatatables.DataTable("#tbl-reqs", { searchable: true, fixedHeight: false, perPage: 8 });
 </script>
 
 <script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
 <script>
-    if (document.querySelector('.datetimepicker')) {
-        flatpickr('.datetimepicker', {
-            allowInput: true,
-            mode: "range"
-        }); // flatpickr
-    }
+if (document.querySelector('.datetimepicker')) {
+    flatpickr('.datetimepicker', { allowInput: true, mode: "range" });
+}
 </script>
-
 {% endblock JSscripts %}

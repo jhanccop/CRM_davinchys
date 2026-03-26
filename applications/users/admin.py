@@ -18,10 +18,9 @@ class UserAdmin(ImportExportModelAdmin):
         'full_name',
         'last_name',
         'last_login',
-        'position',
         'condition'
     )
-    list_filter = ('position',)
+    list_filter = ('condition',)
 
 ## ==================== user =====================
 class DocumentationsResource(resources.ModelResource):

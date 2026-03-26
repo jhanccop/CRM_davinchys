@@ -10,32 +10,6 @@ from .managers import UserManager, DocsManager
 from applications.cuentas.models import Tin
 
 class User(AbstractBaseUser, PermissionsMixin):
-    # TIPO DE USUARIOS
-    ADMINISTRADOR = '0'
-    COMERCIAL = '1'
-    FINANZAS = '2'
-    PRODUCCION = '3'
-    GERENCIA = '4'
-    LOGISTICA = '5'
-    RECURSOSHUMANOS = '6'
-    CONSULTOREXTERNO = '7'
-    CEOGLOBAL = '8'
-    TI = '9'
-    
-    #
-    ROLES_CHOICES = [
-        (ADMINISTRADOR, 'Administrador'),
-        (COMERCIAL, 'Comercial'),
-        (FINANZAS, 'Finanzas'),
-        (PRODUCCION, 'Producción'),
-        (GERENCIA, 'Gerencia'),
-        (LOGISTICA, 'Logística'),
-        (RECURSOSHUMANOS, 'Recursos humanos'),
-        (CONSULTOREXTERNO, 'Consultor externo'),
-        (CEOGLOBAL, 'CEO general'),
-        (TI, 'TI'),
-    ]
-
     # GENEROS
     VARON = 'M'
     MUJER = 'F'
@@ -69,13 +43,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     address = models.CharField('Direccion',blank = True, null=True)
     startDate = models.DateField('Fecha de inicio',blank = True, null=True)
 
-    position = models.CharField(
-        'Area',
-        max_length=1, 
-        choices=ROLES_CHOICES, 
-        blank=True
-    )
-
     gender = models.CharField(
         'Género',
         max_length=1, 
@@ -107,12 +74,55 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    # ── Área desde Departamento (reemplaza el campo position eliminado) ─────────
+    _NOMBRE_TO_AREA = {
+        'admin': '0', 'comercial': '1', 'ventas': '1',
+        'finanz': '2', 'contab': '2', 'producc': '3',
+        'almac': '3', 'gerenc': '4', 'logist': '5',
+        'compras': '5', 'recursos': '6', 'rrhh': '6',
+        'ceo': '8', 'ti': '9', 'tecno': '9',
+    }
+
+    @property
+    def area(self):
+        """
+        Código de área efectivo del usuario (mismo formato que Departamento.idArea).
+        Prioridad: idArea → nombre del departamento.
+        Reemplaza el campo `position` eliminado.
+        """
+        try:
+            depto = self.empleado.departamento
+            if depto:
+                if depto.idArea:
+                    return depto.idArea
+                nombre = (depto.nombre or '').lower()
+                for kw, code in self._NOMBRE_TO_AREA.items():
+                    if kw in nombre:
+                        return code
+        except AttributeError:
+            pass
+        return ''
+
+    @property
+    def area_display(self):
+        """
+        Nombre legible del área (nombre del Departamento).
+        Reemplaza `get_position_display`.
+        """
+        try:
+            depto = self.empleado.departamento
+            if depto and depto.nombre:
+                return depto.nombre
+        except AttributeError:
+            pass
+        return ''
+
     def get_short_name(self):
         return self.email
-    
+
     def get_full_name(self):
         return self.full_name
-    
+
     def __str__(self):
         return str(self.full_name)
 

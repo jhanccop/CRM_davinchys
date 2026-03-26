@@ -120,10 +120,10 @@
                                     </div>
                                     
                                     <div class="ms-auto">
-                                        {% if user.position == "9" %}
+                                        {% if user.area == "9" %}
                                         <a class="btn btn-sm bg-gradient-success" href="#" onclick="openApproveModal({{i.id}}, 'RRHH')">APROBAR</a>
                                         <a class="btn btn-sm bg-gradient-primary" href="#" onclick="openDenyModal({{i.id}}, 'RRHH')">RECHAZAR</a>
-                                        {% elif user.position == "0" %}
+                                        {% elif user.area == "0" %}
                                         <a class="btn btn-sm bg-gradient-success" href="#" onclick="openApproveModal({{i.id}}, 'GERENCIA')">APROBAR</a>
                                         <a class="btn btn-sm bg-gradient-primary" href="#" onclick="openDenyModal({{i.id}}, 'GERENCIA')">RECHAZAR</a>
                                         {% endif %}

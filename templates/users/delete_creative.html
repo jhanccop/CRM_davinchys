@@ -21,7 +21,7 @@
         <h6 class="mb-3">¿Esta seguro de eliminar usuario?</h6>
         <ul>
           <li>Nombre: <span class="font-weight-bold">{{object.full_name}} {{object.last_name}}</span></li>
-          <li>Cargo:  <span class="font-weight-bold">{{object.get_position_display}}</li>
+          <li>Cargo:  <span class="font-weight-bold">{{object.area_display}}</li>
         </ul>
         <div class="d-flex">
           <a href="{% url 'users_app:user-lista' %}" class="btn bg-gradient-dark mb-0 js-btn-next"> <i

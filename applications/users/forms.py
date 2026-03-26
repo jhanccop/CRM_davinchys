@@ -38,7 +38,6 @@ class UserRegisterForm(forms.ModelForm):
             'ruc',
             'dni',
 
-            'position',
             'address',
             'gender',
 
@@ -46,8 +45,6 @@ class UserRegisterForm(forms.ModelForm):
             'EC_relationship',
             'EC_phone',
             'EC_email',
-        #    'gender',
-        #    'date_birth',
         )
         widgets = {
             'full_name': forms.TextInput(
@@ -88,12 +85,6 @@ class UserRegisterForm(forms.ModelForm):
                 }
             ),
 
-            'position': forms.Select(
-                attrs={
-                    'placeholder': 'Permisos',
-                    'class': 'form-control',
-                }
-            ),
             'address': forms.TextInput(
                 attrs={
                     'placeholder': '',
@@ -183,7 +174,6 @@ class UserUpdateForm(forms.ModelForm):
             'ruc',
             'dni',
 
-            'position',
             'address',
             'gender',
 
@@ -231,12 +221,6 @@ class UserUpdateForm(forms.ModelForm):
                 }
             ),
 
-            'position': forms.Select(
-                attrs={
-                    'placeholder': 'Permisos',
-                    'class': 'form-control',
-                }
-            ),
             'address': forms.TextInput(
                 attrs={
                     'placeholder': '',

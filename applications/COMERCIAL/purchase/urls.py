@@ -5,12 +5,22 @@ app_name = "compras_app"
 
 urlpatterns = [
     
-    # ============== REQUERIMIENTOS ==============
+    # ============== REQUERIMIENTOS (COMERCIAL - GESTIÓN) ==============
     path('comercial/requerimientos/', views.RequirementListView.as_view(), name='list_requirement'),
     path('comercial/requerimientos/nuevo/', views.RequirementCreateView.as_view(), name='create_requirement'),
     path('comercial/requerimientos/detalle/<pk>/', views.RequirementDetailView.as_view(), name='detail_requirement'),
     path('comercial/requerimientos/editar/<pk>/', views.RequirementEditView.as_view(), name='edit_requirement'),
     path('comercial/requirement/delete/<pk>/', views.RequirementDeleteView.as_view(), name='delete_requirement'),
+
+    # ============== REQUERIMIENTOS (MI ESPACIO - PERSONAL) ==============
+    path('mis-requerimientos/', views.MyRequirementListView.as_view(), name='mis-requerimientos'),
+
+    # ============== TRANSFORMER KANBAN ==============
+    path('comercial/requerimientos/<int:pk>/transformadores/', views.RequirementTransformerKanbanView.as_view(), name='req-transformer-kanban'),
+    path('comercial/requerimientos/<int:req_pk>/cotizacion-proveedor/crear/', views.CreateSupplierQuoteColumnAPI.as_view(), name='create-supplier-quote-col'),
+    path('comercial/requerimientos/cotizacion-proveedor/asignar-items/', views.AssignTransformerItemAPI.as_view(), name='assign-transformer-item'),
+    path('comercial/requerimientos/cotizacion-proveedor/<int:quote_pk>/aprobar/', views.ApproveSupplierQuoteAPI.as_view(), name='approve-supplier-quote'),
+    path('comercial/requerimientos/cotizacion-proveedor/<int:quote_pk>/email/', views.SendSupplierQuoteEmailView.as_view(), name='send-supplier-quote-email'),
 
     # ============== REQUERIMIENTOS LOGISTICOS =================
     path('logistica/requerimiento-logisticos/',views.LogisticRequirementListView.as_view(), name='logistic-lista-requerimiento'),

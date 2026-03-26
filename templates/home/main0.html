@@ -14,11 +14,11 @@
 
           <div class="card mt-4">
             <div class="card-header pb-0">
-              <h6 class="mb-0">Bienvenido {{user.full_name}} - [ {{user.get_position_display}} ]</h6>
+              <h6 class="mb-0">Bienvenido {{user.full_name}} - [ {{user.area_display}} ]</h6>
             </div>
             <hr class="horizontal dark my-3">
             <div class="card-body p-3 text-end">
-              {% if user.position == "1" or user.position == "5" or user.position == "6" or user.position == "0" %}
+              {% if user.area == "1" or user.area == "5" or user.area == "6" or user.area == "0" %}
               <a class="btn bg-gradient-info" href="{% url 'pedidos_app:lista-de-solicitudes-por-aprobar' %}">
                 <span>Solicitudes por autorizar</span>
                 <span class="badge badge-sm badge-circle badge-white"> <span class="text-lg text-dark">{{data.nRequest.count}}</span> </span>

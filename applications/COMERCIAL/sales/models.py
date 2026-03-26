@@ -212,7 +212,7 @@ class IntQuotes(TimeStampedModel):
 
     def delete(self, *args, **kwargs):
         self.pdf_file.delete()
-        super(quotes, self).delete(*args, **kwargs)
+        super(IntQuotes, self).delete(*args, **kwargs)
 
     #objects = quotesManager()
 
@@ -591,8 +591,8 @@ class Trafo(TimeStampedModel):
         # Eliminar drawing_file
         if self.drawing_file:
             self.drawing_file.delete(save=False)
-        
-        super(Items, self).delete(*args, **kwargs)
+
+        super(Trafo, self).delete(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Plantilla trafo'
@@ -757,8 +757,8 @@ class ItemImage(TimeStampedModel):
         # Validar que no haya más de 5 imágenes por item
         if not self.pk:
             existing_count = ItemImage.objects.filter(item=self.item).count()
-            if existing_count >= 5:
-                raise ValidationError('No se pueden agregar más de 5 imágenes por producto')
+            if existing_count >= 15:
+                raise ValidationError('No se pueden agregar más de 15 imágenes por producto')
         
         # Si esta imagen es principal, quitar el flag de las demás
         if self.is_main:

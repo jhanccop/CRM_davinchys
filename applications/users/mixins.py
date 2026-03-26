@@ -29,34 +29,39 @@ _NOMBRE_TO_AREA = {
 }
 
 
-def _resolve_area(departamento):
+def _resolve_area(user):
     """
-    Devuelve el idArea efectivo del departamento.
-    Si idArea está vacío (blank), lo infiere por el nombre del departamento.
+    Devuelve el área efectiva del usuario, buscando en tres fuentes en orden:
+
+    1. Empleado.departamento.idArea  — fuente preferida cuando está configurada
+    2. Departamento.nombre           — fallback cuando idArea está vacío
     """
-    area = (departamento.idArea or '').strip()
-    if area:
-        return area
-    nombre = (departamento.nombre or '').lower()
-    for keyword, mapped_area in _NOMBRE_TO_AREA.items():
-        if keyword in nombre:
-            return mapped_area
+    # ── 1. idArea desde el departamento del empleado ──────────────────────────
+    try:
+        depto = user.empleado.departamento
+        if depto is not None:
+            area = (depto.idArea or '').strip()
+            if area:
+                return area
+            # ── 2. nombre del departamento ─────────────────────────────────────
+            nombre = (depto.nombre or '').lower()
+            for keyword, mapped_area in _NOMBRE_TO_AREA.items():
+                if keyword in nombre:
+                    return mapped_area
+    except AttributeError:
+        pass
+
     return ''
 
 
 def _has_area_access(user, *areas):
     """
-    Returns True if the user's department area is in `areas`,
+    Returns True if the user's effective area is in `areas`,
     or if the user is ADMINISTRADOR or CEOGLOBAL (always allowed).
-    Falls back to nombre-based inference when idArea is blank.
     """
-    try:
-        departamento = user.empleado.departamento
-    except AttributeError:
+    user_area = _resolve_area(user)
+    if not user_area:
         return False
-    if departamento is None:
-        return False
-    user_area = _resolve_area(departamento)
     if user_area in (Departamento.ADMINISTRADOR, Departamento.CEOGLOBAL):
         return True
     return user_area in areas

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Mi Espacio{% endblock %}
+{% block navbar_appName %}Mis Requerimientos{% endblock %}
+{% block navbar_Type %}Lista{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-2">
+
+    <!-- ── Header + filtro ─────────────────────────────────── -->
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+        <div>
+            <h5 class="mb-0 fw-bold">Mis Requerimientos</h5>
+            <p class="text-sm text-muted mb-0">Solicitudes de compra que has registrado</p>
+        </div>
+
+        <form method="GET" class="d-flex align-items-center gap-2 ms-auto">
+            <div class="input-group input-group-outline" style="max-width:260px;">
+                <input class="form-control datetimepicker text-center text-dark"
+                       value="{{ documentos.intervalDate }}"
+                       placeholder="Rango de fechas"
+                       id="dateKword" name="dateKword">
+            </div>
+            <button class="btn bg-gradient-primary mb-0" type="submit">
+                <i class="fas fa-search me-1"></i>Buscar
+            </button>
+        </form>
+
+        <a href="{% url 'compras_app:create_requirement' %}" class="btn bg-gradient-dark mb-0">
+            <i class="fas fa-plus me-1"></i>Nuevo requerimiento
+        </a>
+    </div>
+
+    <!-- ── Tabla personal ───────────────────────────────────── -->
+    <div class="card shadow-sm">
+        <div class="card-header pb-0 d-flex align-items-center justify-content-between">
+            <h6 class="mb-0"><i class="fas fa-file-alt me-2 text-secondary"></i>Historial</h6>
+            <a class="export btn btn-sm btn-outline-secondary mb-0" data-type="csv">
+                <i class="fas fa-file-csv me-1"></i>CSV
+            </a>
+        </div>
+        <div class="card-body pt-0 px-0 pb-2">
+            <div class="table-responsive">
+                <table class="table table-sm table-flush align-middle mb-0" id="datatable-mis-req">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 ps-3">Fecha</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Código</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Descripción</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-end">Monto</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Estado</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7 text-center">Tipo</th>
+                            <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-7">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in documentos.documentation %}
+                        <tr>
+                            <td class="text-xs ps-3 text-secondary">{{ t.created|date:'d/m/Y' }}</td>
+                            <td>
+                                <a href="{% url 'compras_app:detail_requirement' t.id %}" class="fw-bold text-sm text-dark">
+                                    REQ-{{ t.id }}
+                                </a>
+                            </td>
+                            <td class="text-xs text-secondary">{{ t.description|default:"—"|truncatechars:50 }}</td>
+                            <td class="text-xs text-end fw-bold text-info">
+                                {{ t.get_currency_display }} {{ t.totalPrice|floatformat:2 }}
+                            </td>
+                            <td>{% include "COMERCIAL/purchase/_req_badge.html" with status=t.lastStatus area=t.lastArea %}</td>
+                            <td class="text-center">
+                                {% if t.isPurchaseOrder %}
+                                <span class="badge badge-sm bg-gradient-success">OC</span>
+                                {% else %}
+                                <span class="badge badge-sm bg-gradient-secondary">REQ</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="javascript:;" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v text-secondary"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-1">
+                                    <li>
+                                        <a class="dropdown-item text-sm" href="{% url 'compras_app:detail_requirement' t.id %}">
+                                            <i class="fas fa-eye me-2 text-info"></i>Ver detalle
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-sm" href="{% url 'compras_app:edit_requirement' t.id %}">
+                                            <i class="fas fa-edit me-2 text-warning"></i>Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <a class="dropdown-item text-sm text-danger" href="{% url 'compras_app:delete_requirement' t.id %}">
+                                            <i class="fas fa-trash me-2"></i>Eliminar
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox d-block mb-2 fs-3 text-secondary"></i>
+                                No tienes requerimientos en este período.<br>
+                                <a href="{% url 'compras_app:create_requirement' %}" class="btn btn-sm bg-gradient-dark mt-3">
+                                    <i class="fas fa-plus me-1"></i>Crear el primero
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock panel-content %}
+
+{% block JSscripts %}
+<script src="{% static 'assets/js/plugins/flatpickr.min.js' %}"></script>
+<script>
+    flatpickr('.datetimepicker', { allowInput: true, mode: 'range' });
+</script>
+<script src="{% static 'assets/js/plugins/datatables.js' %}"></script>
+<script>
+    const dtMis = new simpleDatatables.DataTable("#datatable-mis-req", {
+        searchable: true, fixedHeight: false, perPage: 15
+    });
+    document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function() {
+            dtMis.export({ type: el.dataset.type, filename: "mis-requerimientos", columnDelimiter: "," });
+        });
+    });
+</script>
+{% endblock JSscripts %}

@@ -30,6 +30,7 @@ class Tin(TimeStampedModel):
     ]
 
     company_type = models.CharField(max_length=1, choices=COMPANY_TYPE_CHOICES, null=True, blank=True)
+    email = models.EmailField('Correo corporativo', blank=True, null=True)
 
     #objects = TinManager()
 

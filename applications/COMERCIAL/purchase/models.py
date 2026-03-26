@@ -101,9 +101,9 @@ class RequestTracking(TimeStampedModel):
     BIENPARCIALRECIBIDO = '8'
     BIENTOTALRECIBIDO = '9'
     FACTURADA = '10'        # DERIVADA PARA SER PAGADA, ENTRA A LA LISTA DE CUENTAS POR PAGAR
-    PAGOPARCIAL = '10'      # DERIVADA PARA SER PAGADA, ENTRA A LA LISTA DE CUENTAS POR PAGAR
-    PAGOTOTAL = '11'        # DERIVADA PARA SER PAGADA, ENTRA A LA LISTA DE CUENTAS POR PAGAR
-    COMPLETADO = '12'
+    PAGOPARCIAL = '11'      # PAGO PARCIAL REALIZADO
+    PAGOTOTAL = '12'        # PAGO TOTAL REALIZADO
+    COMPLETADO = '13'
     
     STATE_CHOICES = [
         (CREADO, 'Creado'),
@@ -119,7 +119,7 @@ class RequestTracking(TimeStampedModel):
         (BIENTOTALRECIBIDO, 'Recepción total'),
         (FACTURADA, 'Facturado'),
         (PAGOPARCIAL, 'Pago parcial'),
-        (PAGOTOTAL, 'Pagol total'),
+        (PAGOTOTAL, 'Pago total'),
 
         (COMPLETADO, 'Completado'),
     ]
@@ -174,8 +174,10 @@ class requirementItems(TimeStampedModel):
         blank = True
     )
 
-    from applications.COMERCIAL.sales.models import Trafo
+    from applications.COMERCIAL.sales.models import Trafo, Items
     idTrafo = models.ForeignKey(Trafo, on_delete=models.CASCADE, null=True, blank=True, related_name="trafo_requirement")
+    idItem = models.ForeignKey(Items, on_delete=models.SET_NULL, null=True, blank=True, related_name="purchase_items", verbose_name='Item de cotización vinculado')
+    idSupplierQuote = models.ForeignKey('requirementsQuotes', on_delete=models.SET_NULL, null=True, blank=True, related_name='quoted_items', verbose_name='Cotización proveedor asignada')
     idRequirement = models.ForeignKey(requirements, on_delete=models.CASCADE, null=True, blank=True, related_name="requirementItems_requirement")
     
     quantity = models.PositiveIntegerField('Cantidad', null=True, blank=True)
@@ -394,7 +396,8 @@ class requirementsQuotes(TimeStampedModel):
         default = 0
     )
 
-    pdf_file = models.FileField(upload_to='requirementsQuotes_pdfs/',null=True,blank=True)
+    pdf_file = models.FileField(upload_to='requirementsQuotes_pdfs/', null=True, blank=True)
+    is_approved = models.BooleanField('Aprobada', default=False)
 
     def delete(self, *args, **kwargs):
         self.pdf_file.delete()
@@ -457,7 +460,7 @@ class PurchaseOrderVouchers(TimeStampedModel):
 
     def delete(self, *args, **kwargs):
         self.pdf_file.delete()
-        super(requirementsQuotes, self).delete(*args, **kwargs)
+        super(PurchaseOrderVouchers, self).delete(*args, **kwargs)
 
     class Meta:
         ordering = ['created']

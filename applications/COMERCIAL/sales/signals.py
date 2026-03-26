@@ -106,12 +106,19 @@ def delete_old_files_on_update(sender, instance, **kwargs):
 
 def update_quote_amount(quote):
     """Recalcula el amount de una cotización sumando unitCost de sus items."""
-    if quote:
+    if not quote:
+        return
+    try:
+        # Re-fetch to ensure the record still exists before updating
+        from .models import quotes as QuotesModel
+        QuotesModel.objects.get(pk=quote.pk)
         total = quote.item_Quote.aggregate(
             total=Sum('unitCost')
         )['total'] or 0
         quote.amount = total
         quote.save(update_fields=['amount'])
+    except QuotesModel.DoesNotExist:
+        pass
 
 
 @receiver(post_save, sender=Items)
@@ -121,4 +128,8 @@ def item_saved(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=Items)
 def item_deleted(sender, instance, **kwargs):
-    update_quote_amount(instance.idTrafoQuote)
+    try:
+        quote = instance.idTrafoQuote
+    except Exception:
+        return
+    update_quote_amount(quote)

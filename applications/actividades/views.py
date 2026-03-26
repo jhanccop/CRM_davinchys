@@ -417,7 +417,7 @@ class AprobarPermisoRRHHView(LoginRequiredMixin, View):
             permiso = RestDays.objects.get(id=permiso_id)
             
             # Verificar que el usuario sea de RRHH (position == "9")
-            if request.user.position != "9":
+            if request.user.area != "9":
                 return JsonResponse({
                     'status': 'error',
                     'message': 'No tienes permisos para esta acción'
@@ -460,7 +460,7 @@ class DenegarPermisoRRHHView(LoginRequiredMixin, View):
         try:
             permiso = RestDays.objects.get(id=permiso_id)
             
-            if request.user.position != "9":
+            if request.user.area != "9":
                 return JsonResponse({
                     'status': 'error',
                     'message': 'No tienes permisos para esta acción'
@@ -495,7 +495,7 @@ class AprobarPermisoGerenciaView(LoginRequiredMixin, View):
             permiso = RestDays.objects.get(id=permiso_id)
             
             # Verificar que el usuario sea de Gerencia (position == "0")
-            if request.user.position != "0":
+            if request.user.area != "0":
                 return JsonResponse({
                     'status': 'error',
                     'message': 'No tienes permisos para esta acción'
@@ -545,7 +545,7 @@ class DenegarPermisoGerenciaView(LoginRequiredMixin, View):
         try:
             permiso = RestDays.objects.get(id=permiso_id)
             
-            if request.user.position != "0":
+            if request.user.area != "0":
                 return JsonResponse({
                     'status': 'error',
                     'message': 'No tienes permisos para esta acción'

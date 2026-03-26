@@ -45,7 +45,7 @@ class RequirementsListView(LoginRequiredMixin,ListView):
             print(intervalDate)
 
         userId = self.request.user
-        userArea = userId.position
+        userArea = userId.area
         payload = {}
             
         payload["nRequest"] = RequestList.objects.ListasPendientes(area=userArea)
@@ -136,7 +136,7 @@ class ListRequirementAproved(LoginRequiredMixin,ListView):
         payload["TimeSelect"] = TimeSelect
         payload["user_selected"] = uselect
         payload["users"] = User.objects.usuarios_sistema_all()
-        payload["listas"] = RequestList.objects.ListaPorAreaUsuarioTiempo(area=self.request.user.position,user_selected=user_selected,TimeSelect = TimeSelect)
+        payload["listas"] = RequestList.objects.ListaPorAreaUsuarioTiempo(area=self.request.user.area,user_selected=user_selected,TimeSelect = TimeSelect)
         return payload
 
 class DetailRequirementAproved(LoginRequiredMixin,ListView):
@@ -145,7 +145,7 @@ class DetailRequirementAproved(LoginRequiredMixin,ListView):
     context_object_name = 'data'
 
     def get_queryset(self,**kwargs):
-        area=self.request.user.position
+        area=self.request.user.area
         pk = self.kwargs['pk']
         payload = {}
         payload["lista"] = RequestList.objects.ListaPorId(pk = pk)
@@ -161,7 +161,7 @@ class UpdateStateList(View):
         N = PaymentRequest.objects.RequerimientosContabilidadPorId(pk=pk)
         print(N)
 
-        pos = self.request.user.position
+        pos = self.request.user.area
         if pos == "5": # ADQUISIONES
             if N['n'] > 0:
                 list.tag2 = "0"
@@ -199,8 +199,8 @@ class RequirementsApproveListView(LoginRequiredMixin,ListView):
         payload["intervalDate"] = intervalDate
         payload["user_selected"] = uselect
         payload["users"] = User.objects.usuarios_sistema_all()
-        payload["ordenes"] = PaymentRequest.objects.ListarAprobarPorIntervalo(area=self.request.user.position,user_selected=user_selected,interval = intervalDate)
-        payload["historico"] = PaymentRequest.objects.ListarHistoricoPorIntervalo(area=self.request.user.position,user_selected=user_selected,interval = intervalDate)
+        payload["ordenes"] = PaymentRequest.objects.ListarAprobarPorIntervalo(area=self.request.user.area,user_selected=user_selected,interval = intervalDate)
+        payload["historico"] = PaymentRequest.objects.ListarHistoricoPorIntervalo(area=self.request.user.area,user_selected=user_selected,interval = intervalDate)
         return payload
 
 class ApproveRequestUpdateView1(LoginRequiredMixin,UpdateView):

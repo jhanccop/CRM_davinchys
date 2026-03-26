@@ -25,9 +25,9 @@ def menu_navigation(request):
                 },
                 {
                     'name': 'Mis Requerimientos',
-                    'url_name': '', 
+                    'url_name': 'compras_app:mis-requerimientos',
                     'mini_icon': 'RE',
-                    'permission': 'compras.view_requerimiento'
+                    'permission': None
                 },
                 {
                     'name': 'Mis Documentos',
@@ -202,7 +202,7 @@ def menu_navigation(request):
     filtered_menu = filter_menu_by_permissions(request.user, menu_structure)
     
     # Agregar menú de consolidado para CEO
-    if hasattr(request.user, 'position') and str(request.user.position) == "8":
+    if request.user.area == '8':
         filtered_menu['consolidado'] = {
             'name': 'CONSOLIDADO',
             'icon': 'fas fa-desktop',

@@ -10,8 +10,10 @@ from .models import (
     PettyCash,
     PettyCashItems,
     PurchaseOrderInvoice,
+    requirementsInvoice,
     requirementsQuotes
 )
+from applications.COMERCIAL.sales.models import Items
 
 from applications.users.models import User
 from applications.RRHH.models import Empleado, Departamento
@@ -64,6 +66,7 @@ class RequirementItemForm(forms.ModelForm):
             'type',
             'quantity',
             'price',
+            'idItem',
         ]
 
         widgets = {
@@ -98,6 +101,12 @@ class RequirementItemForm(forms.ModelForm):
                     'class': 'form-control',
                 }
             ),
+            'idItem': forms.Select(
+                attrs = {
+                    'placeholder': '',
+                    'class': 'form-control',
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -120,65 +129,41 @@ class RequirementItemForm(forms.ModelForm):
         
         if self.request and hasattr(self.request, 'user') and self.request.user.is_authenticated:
             user = self.request.user
-            
-            # Obtener el departamento del empleado a través de la relación
             try:
-                empleado = user.empleado
-                departamento = empleado.departamento
-                
+                departamento = user.empleado.departamento
                 if departamento:
-                    # Lógica basada en el idArea del departamento
                     if departamento.idArea == Departamento.LOGISTICA:
-                        print("Usuario es de LOGÍSTICA")
                         self.fields['type'].choices = [
                             (requirementItems.ARTICULO, 'Artículo'),
                             (requirementItems.CONTENEDOR, 'Contenedor'),
                             (requirementItems.ADUANA, 'Aduana'),
                         ]
                     elif departamento.idArea == Departamento.PRODUCCION:
-                        print("Usuario es de PRODUCCION")
                         self.fields['type'].choices = [
                             (requirementItems.ARTICULO, 'Artículo'),
                             (requirementItems.TRANSFORMADOR, 'Transformador'),
                         ]
                     elif departamento.idArea == Departamento.COMERCIAL:
-                        print("Usuario es de COMERCIAL")
                         self.fields['type'].choices = [
                             (requirementItems.ARTICULO, 'Artículo'),
                             (requirementItems.TRANSFORMADOR, 'Transformador'),
                             (requirementItems.CONTENEDOR, 'Contenedor'),
                         ]
                     elif departamento.idArea == Departamento.FINANZAS:
-                        print("Usuario es de FINANZAS")
                         self.fields['type'].choices = [
                             (requirementItems.ARTICULO, 'Artículo'),
                             (requirementItems.ADUANA, 'Aduana'),
                         ]
                     else:
-                        # Para otros departamentos, mostrar solo artículo
-                        print(f"Usuario es de {departamento.nombre}")
                         self.fields['type'].choices = [
                             (requirementItems.ARTICULO, 'Artículo'),
                         ]
                 else:
-                    # Si el empleado no tiene departamento asignado
-                    print("Usuario no tiene departamento asignado")
-                    self.fields['type'].choices = [
-                        (requirementItems.ARTICULO, 'Artículo'),
-                    ]
-                    
-            except Empleado.DoesNotExist:
-                # Si no existe el objeto Empleado relacionado
-                print("Usuario no tiene perfil de empleado")
-                self.fields['type'].choices = [
-                    (requirementItems.ARTICULO, 'Artículo'),
-                ]
-                
+                    self.fields['type'].choices = [(requirementItems.ARTICULO, 'Artículo')]
+            except (AttributeError, Empleado.DoesNotExist):
+                self.fields['type'].choices = [(requirementItems.ARTICULO, 'Artículo')]
         else:
-            print("Usuario no autenticado o request no disponible")
-            self.fields['type'].choices = [
-                (requirementItems.ARTICULO, 'Artículo'),
-            ]
+            self.fields['type'].choices = [(requirementItems.ARTICULO, 'Artículo')]
 
 # ============================ TRACKING REQUERIMENTOS ============================
 class RequestTrackingForm(forms.ModelForm):
@@ -603,7 +588,7 @@ class PurchaseOrderInvoiceForm(forms.ModelForm):
 
 class requirementsInvoiceForm(forms.ModelForm):
     class Meta:
-        model = PurchaseOrderInvoice
+        model = requirementsInvoice
         fields = [
             # oculto
             'user',

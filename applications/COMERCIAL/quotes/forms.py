@@ -105,7 +105,7 @@ class TrafoQuoteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TrafoQuoteForm, self).__init__(*args, **kwargs)
-        self.fields['idAttendant'].queryset = User.objects.filter(position = "2")
+        self.fields['idAttendant'].queryset = User.objects.filter(empleado__departamento__idArea='2')
 
 class TrafoForm(forms.ModelForm):
     class Meta:

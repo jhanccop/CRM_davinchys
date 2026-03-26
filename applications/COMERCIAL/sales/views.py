@@ -1839,7 +1839,7 @@ class ItemImageDeleteView(ComercialFinanzasMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
     
     def get_success_url(self):
-        return reverse('sales:item_detail', kwargs={'pk': self.kwargs['item_pk']})
+        return reverse('ventas_app:detail-item-all', kwargs={'item_pk': self.kwargs['item_pk']})
 
 class ItemMultipleImageUploadView(ComercialFinanzasMixin, FormView):
     """Subir múltiples imágenes a la vez"""
@@ -1864,11 +1864,11 @@ class ItemMultipleImageUploadView(ComercialFinanzasMixin, FormView):
         
         # Verificar límite total
         current_count = self.item.images.count()
-        remaining = 5 - current_count
-        
+        remaining = 15 - current_count
+
         if len(images) > remaining:
             messages.error(
-                self.request, 
+                self.request,
                 f'Solo puedes agregar {remaining} imagen(es) más. '
                 f'Actualmente tienes {current_count} imágenes.'
             )
@@ -1894,7 +1894,7 @@ class ItemMultipleImageUploadView(ComercialFinanzasMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['item'] = self.item
         context['current_count'] = self.item.images.count()
-        context['remaining'] = 5 - context['current_count']
+        context['remaining'] = 15 - context['current_count']
         return context
 
 # ================= ACTUALIZAR SEGUIMIENTO ITEMS ========================

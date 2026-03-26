@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar_main %}Comercial{% endblock %}
+{% block navbar_appName %}Compras{% endblock %}
+{% block navbar_Type %}Enviar Cotización{% endblock %}
+
+{% block panel-content %}
+<div class="container-fluid py-2">
+<div class="row justify-content-center">
+<div class="col-lg-7">
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient-dark p-3">
+            <h6 class="text-white mb-0">
+                <i class="fas fa-envelope me-2"></i>
+                Enviar cotización al proveedor
+            </h6>
+        </div>
+        <div class="card-body p-4">
+
+            <!-- Resumen de la cotización -->
+            <div class="p-3 mb-4 rounded" style="background:#f8f9fa;border-left:4px solid #17c1e8;">
+                <div class="text-xs text-muted fw-bold text-uppercase mb-1">Cotización</div>
+                <div class="fw-bold text-dark">REQ-{{ object.idRequirement_id }} — {{ object.idSupplier }}</div>
+                {% if object.shortDescription %}
+                <div class="text-xs text-muted mt-1">{{ object.shortDescription }}</div>
+                {% endif %}
+                <div class="mt-2 d-flex gap-3">
+                    <div>
+                        <div class="text-xs text-muted">Moneda</div>
+                        <div class="text-sm fw-bold">{{ object.get_typeCurrency_display }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-muted">Monto neto</div>
+                        <div class="text-sm fw-bold text-info">{{ object.netAmount|floatformat:2|default:"—" }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-muted">Estado</div>
+                        <div class="text-sm fw-bold">
+                            {% if object.is_approved %}
+                            <span class="badge badge-sm bg-gradient-success">Aprobada (OC)</span>
+                            {% else %}
+                            <span class="badge badge-sm bg-gradient-secondary">Borrador</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">De (remitente — empresa subsidiaria)</label>
+                    <input type="text" class="form-control" value="{{ from_email }}" readonly
+                           style="background:#f8f9fa;color:#6c757d;">
+                    {% if not from_email %}
+                    <div class="text-xs text-warning mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Configura el correo corporativo en la empresa subsidiaria
+                        (Ajustes → Empresa → Email).
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Para (proveedor) *</label>
+                    <input type="email" class="form-control" name="to_email"
+                           value="{{ to_email }}"
+                           placeholder="email@proveedor.com" required>
+                    {% if not to_email %}
+                    <div class="text-xs text-warning mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        El proveedor no tiene correo registrado.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Asunto *</label>
+                    <input type="text" class="form-control" name="subject"
+                           value="Cotización REQ-{{ object.idRequirement_id }} – {{ object.idSupplier }}"
+                           required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Mensaje</label>
+                    <textarea class="form-control" name="body" rows="6">Estimados señores {{ object.idSupplier }},
+
+Adjuntamos la solicitud de cotización N° REQ-{{ object.idRequirement_id }}.
+
+{% if object.shortDescription %}Descripción: {{ object.shortDescription }}{% endif %}
+
+Quedamos a su disposición para cualquier consulta.
+
+Saludos cordiales.</textarea>
+                </div>
+
+                {% if object.pdf_file %}
+                <div class="mb-3 p-3 rounded" style="background:#f0fff4;border:1px solid #c3e6cb;">
+                    <i class="fas fa-paperclip text-success me-2"></i>
+                    <span class="text-sm fw-bold">Adjunto: </span>
+                    <a href="{{ object.pdf_file.url }}" target="_blank" class="text-sm text-info">
+                        {{ object.pdf_file.name|cut:"requirementsQuotes_pdfs/" }}
+                    </a>
+                </div>
+                {% else %}
+                <div class="mb-3 text-xs text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Sin archivo PDF adjunto. Puedes editar la cotización para subir uno.
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'compras_app:req-transformer-kanban' pk=object.idRequirement_id %}"
+                       class="btn btn-sm btn-outline-secondary mb-0">
+                        <i class="fas fa-arrow-left me-1"></i>Volver
+                    </a>
+                    <button type="submit" class="btn btn-sm bg-gradient-info mb-0"
+                            {% if not from_email %}title="Configura el email corporativo primero"{% endif %}>
+                        <i class="fas fa-paper-plane me-1"></i>Enviar correo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+{% endblock panel-content %}

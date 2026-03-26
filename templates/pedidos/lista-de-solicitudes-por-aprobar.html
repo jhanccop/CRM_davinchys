@@ -90,13 +90,13 @@
                                     </a>
                                 </td>
                                 <td class="text-sm mb-0">
-                                    {% if user.position == "5" and lista.tag1 == "0" %}<!-- Adquicisiones -->
+                                    {% if user.area == "5" and lista.tag1 == "0" %}<!-- Adquicisiones -->
                                         <span class="badge bg-gradient-primary">{{lista.get_tag1_display}}</span>
-                                    {% elif user.position == "1" and lista.tag2 == "0" %} <!-- Contabilidad -->
+                                    {% elif user.area == "1" and lista.tag2 == "0" %} <!-- Contabilidad -->
                                         <span class="badge bg-gradient-primary">{{lista.get_tag2_display}}</span>
-                                    {% elif user.position == "6" and lista.tag3 == "0" %} <!-- Finanza -->
+                                    {% elif user.area == "6" and lista.tag3 == "0" %} <!-- Finanza -->
                                         <span class="badge bg-gradient-primary">{{lista.get_tag3_display}}</span>
-                                    {% elif user.position == "0" and lista.tag4 == "0" %} <!-- Administrador -->
+                                    {% elif user.area == "0" and lista.tag4 == "0" %} <!-- Administrador -->
                                         <span class="badge bg-gradient-primary">{{lista.get_tag4_display}}</span>
                                     {% else %}
                                         <span class="badge bg-gradient-secondary">Atendido</span>

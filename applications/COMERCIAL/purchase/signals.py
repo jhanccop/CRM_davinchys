@@ -93,7 +93,7 @@ def create_initial_tracking(sender, instance, created, **kwargs):
         RequestTracking.objects.create(
             idRequirement=instance,
             status=RequestTracking.RECIBIDO,  # Estado inicial 'Creado'
-            area = instance.idPetitioner.position  # Área inicial 'Usuario'
+            area = instance.idPetitioner.area  # Área inicial 'Usuario'
         )
 
 

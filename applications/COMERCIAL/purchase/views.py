@@ -9,6 +9,9 @@ from applications.users.mixins import (
   LoginRequiredMixin,
   ComercialMixin
 )
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings as django_settings
 
 from django.shortcuts import redirect
 from django.forms import formset_factory, BaseFormSet
@@ -26,6 +29,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
     FormView,
+    View
 )
 
 from .models import (
@@ -35,12 +39,14 @@ from .models import (
   PettyCash,
   PettyCashItems,
   requirementsInvoice,
-  requirementsQuotes
+  requirementsQuotes,
+  QuoteSuppliers,
 )
 
 from applications.COMERCIAL.sales.models import (
-  quotes,
+  quotes, IntQuotes,
 )
+from applications.COMERCIAL.stakeholders.models import supplier as Supplier
 
 from applications.cuentas.models import (
   Tin,
@@ -104,38 +110,42 @@ class NewVoucherRequirementCreateView(AdminClientsPermisoMixin,CreateView):
         return context
     
 
-# ==================== REQUERIMIENTOS ====================
-class RequirementListView(LoginRequiredMixin,ListView):
-  template_name = "COMERCIAL/purchase/requirement-lista.html"
-  context_object_name = 'documentos'
+# ==================== REQUERIMIENTOS (MI ESPACIO - PERSONAL) ====================
+class MyRequirementListView(LoginRequiredMixin, ListView):
+    """Vista personal: muestra solo los requerimientos del usuario logueado"""
+    template_name = "COMERCIAL/purchase/mis-requerimientos.html"
+    context_object_name = 'documentos'
 
-  def get_queryset(self,**kwargs):
-    #compania_id = self.request.session.get('compania_id')
-    user = self.request.user
+    def get_queryset(self, **kwargs):
+        user = self.request.user
+        intervalDate = self.request.GET.get("dateKword", '')
+        if not intervalDate or intervalDate == "today":
+            intervalDate = str(date.today() - timedelta(days=120)) + " to " + str(date.today())
 
-    intervalDate = self.request.GET.get("dateKword", '')
-    if intervalDate == "today" or intervalDate =="":
-      intervalDate = str(date.today() - timedelta(days = 120)) + " to " + str(date.today())
+        payload = {
+            "intervalDate": intervalDate,
+            "documentation": requirements.objects.ListaRequerimientosPorUsuario(
+                intervalo=intervalDate,
+                idPetitioner=user.id
+            ),
+        }
+        return payload
 
-    documentation = requirements.objects.ListaRequerimientosPorUsuario(
-      intervalo = intervalDate,
-      idPetitioner = user.id
-      )
-    
-    allDocumentation = []
+# ==================== REQUERIMIENTOS (COMERCIAL - GESTIÓN DE ÁREA) ====================
+class RequirementListView(ComercialMixin, ListView):
+    """Vista de área: gestión de todos los requerimientos de todos los colaboradores"""
+    template_name = "COMERCIAL/purchase/requirement-lista.html"
+    context_object_name = 'documentos'
 
-    isBoss = self.request.user.is_boss
-    if isBoss:
-        allDocumentation = requirements.objects.ListaRequerimientosForBoss(
-        intervalo = intervalDate,
-        )
+    def get_queryset(self, **kwargs):
+        intervalDate = self.request.GET.get("dateKword", '')
+        if not intervalDate or intervalDate == "today":
+            intervalDate = str(date.today() - timedelta(days=120)) + " to " + str(date.today())
 
-    payload = {}
-    payload["intervalDate"] = intervalDate
-    payload["documentation"] = documentation
-    payload["allDocumentation"] = allDocumentation
-    
-    return payload
+        return {
+            "intervalDate": intervalDate,
+            "documentation": requirements.objects.ListaRequerimientosForBoss(intervalo=intervalDate),
+        }
 
 class BaseRequirementItemFormSet(BaseFormSet):
     """Formset personalizado que pasa el request a cada formulario"""
@@ -230,6 +240,14 @@ class RequirementDetailView(LoginRequiredMixin, ListView):
         result["track"] = RequestTracking.objects.obtenerTrackingPorIdRequerimiento(pk)
 
         return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = self.object_list.get('items', [])
+        context['has_transformer_items'] = any(
+            item.type == requirementItems.TRANSFORMADOR for item in items
+        )
+        return context
 
 class RequirementEditView(LoginRequiredMixin, UpdateView):
     model = requirements
@@ -995,7 +1013,204 @@ class requirementsInvoiceDetailView(AdminClientsPermisoMixin,ListView):
     return payload
   
 class requirementsInvoiceDeleteView(AdminClientsPermisoMixin,DeleteView):
-  
+
   template_name = "COMERCIAL/purchase/compras-eliminar.html"
   model = requirementsInvoice
   success_url = reverse_lazy('compras_app:compras-lista')
+
+
+# ==================== TRANSFORMER KANBAN ====================
+
+class RequirementTransformerKanbanView(ComercialMixin, DetailView):
+    """
+    Kanban de cotizaciones a proveedores para requerimientos con
+    items de tipo TRANSFORMADOR.
+
+    Izquierda: transformadores sin cotización de proveedor asignada.
+    Derecha:   columnas de cotizaciones a proveedores (requirementsQuotes).
+    Panel superior: IntQuotes del sistema de ventas vinculados vía idItem.
+    """
+    model = requirements
+    template_name = 'COMERCIAL/purchase/transformer-kanban.html'
+    pk_url_kwarg = 'pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        req = self.object
+
+        transformer_items = requirementItems.objects.filter(
+            idRequirement=req,
+            type=requirementItems.TRANSFORMADOR,
+        ).select_related('idTrafo', 'idItem', 'idSupplierQuote')
+
+        unassigned = [i for i in transformer_items if i.idSupplierQuote_id is None]
+
+        supplier_quotes = requirementsQuotes.objects.filter(
+            idRequirement=req
+        ).select_related('idSupplier')
+
+        kanban_columns = []
+        for sq in supplier_quotes:
+            items = [i for i in transformer_items if i.idSupplierQuote_id == sq.pk]
+            total = sum((i.price or 0) * (i.quantity or 1) for i in items)
+            kanban_columns.append({
+                'quote': sq,
+                'items': items,
+                'total': total,
+            })
+
+        # IntQuotes vinculadas via idItem → idTrafoIntQuote
+        linked_intquotes = {}
+        for ri in transformer_items:
+            if ri.idItem and ri.idItem.idTrafoIntQuote_id:
+                iq = ri.idItem.idTrafoIntQuote
+                linked_intquotes[iq.pk] = iq
+
+        context.update({
+            'req': req,
+            'unassigned_items': unassigned,
+            'kanban_columns': kanban_columns,
+            'total_items': len(transformer_items),
+            'unassigned_count': len(unassigned),
+            'linked_intquotes': linked_intquotes.values(),
+            'suppliers': Supplier.objects.all(),
+        })
+        return context
+
+
+class CreateSupplierQuoteColumnAPI(ComercialMixin, CreateView):
+    """AJAX: crea una nueva columna de cotización de proveedor en el kanban"""
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        req_pk = kwargs.get('req_pk')
+        try:
+            req = requirements.objects.get(pk=req_pk)
+        except requirements.DoesNotExist:
+            return JsonResponse({'error': 'Requerimiento no encontrado'}, status=404)
+
+        supplier_id = request.POST.get('supplier_id')
+        description = request.POST.get('description', '')
+        currency = request.POST.get('currency', requirementsQuotes.SOLES)
+
+        if not supplier_id:
+            return JsonResponse({'error': 'Proveedor requerido'}, status=400)
+
+        sq = requirementsQuotes.objects.create(
+            idRequirement=req,
+            idSupplier_id=supplier_id,
+            shortDescription=description,
+            typeCurrency=currency,
+        )
+        return JsonResponse({
+            'success': True,
+            'quote_id': sq.pk,
+            'supplier_name': str(sq.idSupplier),
+            'description': sq.shortDescription or '',
+        })
+
+
+class AssignTransformerItemAPI(ComercialMixin, View):
+    """AJAX: asigna o desasigna un item transformador a una cotización de proveedor"""
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        import json
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+        item_ids = data.get('item_ids', [])
+        quote_id = data.get('quote_id')  # None or '' → unassign
+
+        try:
+            items = requirementItems.objects.filter(pk__in=item_ids)
+            if quote_id:
+                sq = requirementsQuotes.objects.get(pk=quote_id)
+                items.update(idSupplierQuote=sq)
+            else:
+                items.update(idSupplierQuote=None)
+        except requirementsQuotes.DoesNotExist:
+            return JsonResponse({'error': 'Cotización no encontrada'}, status=404)
+
+        return JsonResponse({'success': True, 'updated': len(item_ids)})
+
+
+class ApproveSupplierQuoteAPI(ComercialMixin, View):
+    """AJAX: aprueba una cotización de proveedor, crea tracking y marca como OC"""
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        quote_pk = kwargs.get('quote_pk')
+        try:
+            sq = requirementsQuotes.objects.select_related('idRequirement').get(pk=quote_pk)
+        except requirementsQuotes.DoesNotExist:
+            return JsonResponse({'error': 'Cotización no encontrada'}, status=404)
+
+        sq.is_approved = True
+        sq.save(update_fields=['is_approved'])
+
+        req = sq.idRequirement
+        if req:
+            req.isPurchaseOrder = True
+            req.save(update_fields=['isPurchaseOrder'])
+            RequestTracking.objects.create(
+                idRequirement=req,
+                status=RequestTracking.APROBADO,
+                area=request.user.area or RequestTracking.COMERCIAL,
+            )
+
+        return JsonResponse({
+            'success': True,
+            'quote_id': sq.pk,
+            'supplier': str(sq.idSupplier),
+        })
+
+
+class SendSupplierQuoteEmailView(ComercialMixin, DetailView):
+    """
+    Envía un correo al proveedor con la cotización aprobada.
+    El remitente es el email corporativo de la empresa subsidiaria del usuario.
+    """
+    model = requirementsQuotes
+    template_name = 'COMERCIAL/purchase/supplier-quote-email.html'
+    pk_url_kwarg = 'quote_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sq = self.object
+        # Email origen: email corporativo de la compañia del usuario
+        company = getattr(getattr(self.request.user, 'empleado', None), 'company', None)
+        context['from_email'] = (company.email if company and company.email else
+                                  getattr(django_settings, 'DEFAULT_FROM_EMAIL', ''))
+        context['to_email'] = sq.idSupplier.email if sq.idSupplier else ''
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        sq = self.object
+
+        to_email = request.POST.get('to_email', '').strip()
+        subject = request.POST.get('subject', f'Cotización REQ-{sq.idRequirement_id} – {sq.idSupplier}')
+        body = request.POST.get('body', '')
+
+        company = getattr(getattr(request.user, 'empleado', None), 'company', None)
+        from_email = (company.email if company and company.email else
+                      getattr(django_settings, 'DEFAULT_FROM_EMAIL', ''))
+
+        if not to_email:
+            messages.error(request, 'El proveedor no tiene correo registrado.')
+            return redirect(request.path)
+
+        try:
+            email = EmailMessage(subject=subject, body=body, from_email=from_email, to=[to_email])
+            if sq.pdf_file:
+                email.attach_file(sq.pdf_file.path)
+            email.send()
+            messages.success(request, f'Correo enviado a {to_email}')
+        except Exception as exc:
+            messages.error(request, f'Error al enviar correo: {exc}')
+
+        return redirect(reverse_lazy('compras_app:req-transformer-kanban',
+                                     kwargs={'pk': sq.idRequirement_id}))
