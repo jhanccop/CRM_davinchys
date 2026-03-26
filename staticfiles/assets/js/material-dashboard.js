@@ -15,7 +15,7 @@
 "use strict";
 (function() {
   var isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
-
+  
   if (isWindows) {
     // if we are on windows OS we activate the perfectScrollbar function
     if (document.getElementsByClassName('main-content')[0]) {
@@ -38,7 +38,10 @@
       var ps3 = new PerfectScrollbar(fixedplugin);
     };
   };
+  
 })();
+
+
 
 // Verify navbar blur on scroll
 if (document.getElementById('navbarBlur')) {
